@@ -1,98 +1,165 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Skeleton } from "@/components/Skeleton";
+import { StatusCard } from "@/components/StatusCard";
+import {
+  CheckCircle,
+  Clock,
+  DollarSign,
+  Lock,
+  MapPin,
+  User,
+} from "lucide-react-native";
+import React, { useState } from "react";
+import { SafeAreaView, ScrollView, Switch, Text, View } from "react-native";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+// Mock Data
+const MOCK_JOB = {
+  id: "#JOB-2024-88",
+  pickup: "123 Forest Avenue, Seattle, WA",
+  dropoff: "456 Ivory Lane, Redmond, WA",
+  price: "$45.00",
+  distance: "12.5 miles",
+  duration: "25 mins",
+  customer: "Alice Johnson",
+};
 
-export default function HomeScreen() {
+export default function MyTripScreen() {
+  const [isLocked, setIsLocked] = useState(true);
+
+  const toggleState = () => setIsLocked(!isLocked);
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
+    <SafeAreaView className="flex-1 bg-ivory">
+      <ScrollView contentContainerClassName="p-4 pb-20 gap-6">
+        {/* Header / Controls */}
+        <View className="flex-row justify-between items-center mb-4">
+          <Text className="text-2xl font-bold text-forest">My Trip</Text>
+          <View className="flex-row items-center gap-2">
+            <Text className="text-sm font-medium text-gray-600">
+              {isLocked ? "Locked" : "Unlocked"} Mode
+            </Text>
+            <Switch
+              value={!isLocked}
+              onValueChange={toggleState}
+              trackColor={{ false: "#D97706", true: "#0F3D26" }}
             />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+          </View>
+        </View>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        {/* Status Card */}
+        <StatusCard
+          variant={isLocked ? "locked" : "unlocked"}
+          title={isLocked ? "WAITING FOR FUNDS" : "RIDE CONFIRMED"}
+          icon={isLocked ? Clock : CheckCircle}
+        >
+          <View className="gap-6">
+            {/* Price Section */}
+            <View className="flex-row justify-between items-center border-b border-gray-200 pb-4">
+              <View className="flex-row items-center gap-2">
+                <DollarSign size={20} color="#0F3D26" />
+                <Text className="text-forest font-semibold text-lg">
+                  Earnings
+                </Text>
+              </View>
+              {isLocked ? (
+                <Skeleton width={80} height={28} className="rounded-md" />
+              ) : (
+                <Text className="text-2xl font-bold text-forest">
+                  {MOCK_JOB.price}
+                </Text>
+              )}
+            </View>
+
+            {/* Route Details */}
+            <View className="gap-4">
+              {/* Pickup */}
+              <View className="flex-row gap-3">
+                <View className="mt-1">
+                  <MapPin size={20} color="#D97706" />
+                </View>
+                <View className="flex-1 gap-1">
+                  <Text className="text-xs uppercase text-gray-500 font-bold tracking-wider">
+                    Pickup
+                  </Text>
+                  {isLocked ? (
+                    <View className="gap-2">
+                      <Skeleton width="80%" height={24} />
+                    </View>
+                  ) : (
+                    <Text className="text-lg text-gray-900 font-medium">
+                      {MOCK_JOB.pickup}
+                    </Text>
+                  )}
+                </View>
+              </View>
+
+              {/* Connector Line */}
+              <View className="ml-[9px] h-6 w-0.5 bg-gray-300" />
+
+              {/* Dropoff */}
+              <View className="flex-row gap-3">
+                <View className="mt-1">
+                  <MapPin size={20} color="#0F3D26" />
+                </View>
+                <View className="flex-1 gap-1">
+                  <Text className="text-xs uppercase text-gray-500 font-bold tracking-wider">
+                    Dropoff
+                  </Text>
+                  {isLocked ? (
+                    <View className="gap-2">
+                      <Skeleton width="60%" height={24} />
+                    </View>
+                  ) : (
+                    <Text className="text-lg text-gray-900 font-medium">
+                      {MOCK_JOB.dropoff}
+                    </Text>
+                  )}
+                </View>
+              </View>
+            </View>
+
+            {/* Additional Info */}
+            <View className="bg-white/50 p-3 rounded-lg flex-row gap-4 border border-gray-100">
+              <View className="flex-1 gap-1">
+                <View className="flex-row items-center gap-1">
+                  <Clock size={14} color="#666" />
+                  <Text className="text-xs text-gray-500">Duration</Text>
+                </View>
+                {isLocked ? (
+                  <Skeleton width={60} height={20} />
+                ) : (
+                  <Text className="font-semibold text-forest">
+                    {MOCK_JOB.duration}
+                  </Text>
+                )}
+              </View>
+
+              <View className="flex-1 gap-1">
+                <View className="flex-row items-center gap-1">
+                  <User size={14} color="#666" />
+                  <Text className="text-xs text-gray-500">Customer</Text>
+                </View>
+                {isLocked ? (
+                  <Skeleton width={80} height={20} />
+                ) : (
+                  <Text className="font-semibold text-forest">
+                    {MOCK_JOB.customer}
+                  </Text>
+                )}
+              </View>
+            </View>
+
+            {/* Footer Message */}
+            {isLocked && (
+              <View className="bg-amber/10 p-3 rounded-lg flex-row items-center gap-2 border border-amber/20">
+                <Lock size={16} color="#D97706" />
+                <Text className="text-amber-700 text-sm font-medium">
+                  Details hidden until payment is secured.
+                </Text>
+              </View>
+            )}
+          </View>
+        </StatusCard>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
