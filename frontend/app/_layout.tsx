@@ -1,3 +1,4 @@
+// use this layout file for fonts etc, as this is the root layout file
 import {
   DarkTheme,
   DefaultTheme,

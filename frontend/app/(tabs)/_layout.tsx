@@ -21,7 +21,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "My Trip",
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({ color }: { color: string }) => (
             <IconSymbol size={28} name="map.fill" color={color} />
           ),
         }}
@@ -30,7 +30,7 @@ export default function TabLayout() {
         name="explore"
         options={{
           title: "Explore",
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({ color }: { color: string }) => (
             <IconSymbol size={28} name="paperplane.fill" color={color} />
           ),
         }}
