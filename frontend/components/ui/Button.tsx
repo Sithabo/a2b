@@ -27,6 +27,8 @@ interface ButtonProps {
   isLoading?: boolean;
   disabled?: boolean;
   icon?: React.ReactNode;
+  iconRight?: boolean;
+  style?: any;
 }
 
 export const Button = ({
@@ -39,12 +41,14 @@ export const Button = ({
   isLoading = false,
   disabled = false,
   icon,
+  iconRight = false,
+  style,
 }: ButtonProps) => {
   const baseStyles =
     "flex-row items-center justify-center rounded-xl active:opacity-80";
 
   const variants = {
-    primary: "bg-forest border border-forest",
+    primary: "bg-[#C4E84A] border border-[#C4E84A]", // Lime Green
     secondary: "bg-amber border border-amber",
     outline: "bg-transparent border border-gray-300",
     ghost: "bg-transparent border-transparent",
@@ -59,7 +63,7 @@ export const Button = ({
   const textBaseStyles = "font-bold text-center";
 
   const textVariants = {
-    primary: "text-white",
+    primary: "text-gray-900", // Black text for Lime button
     secondary: "text-white",
     outline: "text-gray-900",
     ghost: "text-gray-600",
@@ -76,6 +80,7 @@ export const Button = ({
         disabled && "opacity-50",
         className
       )}
+      style={style}
     >
       {isLoading ? (
         <ActivityIndicator
@@ -85,12 +90,13 @@ export const Button = ({
         />
       ) : (
         <>
-          {icon && <View className="mr-2">{icon}</View>}
+          {icon && !iconRight && <View className="mr-2">{icon}</View>}
           <Text
             className={cn(textBaseStyles, textVariants[variant], textClassName)}
           >
             {title}
           </Text>
+          {icon && iconRight && <View className="ml-2">{icon}</View>}
         </>
       )}
     </TouchableOpacity>
