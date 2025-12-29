@@ -66,7 +66,7 @@ export default function VerifyOtpScreen() {
               placeholder="000000"
               placeholderTextColor={Colors.light.gray[400]}
               style={styles.otpInput}
-              keyboardType="number-pad"
+              keyboardType="numeric"
               value={otp}
               onChangeText={setOtp}
               maxLength={6}
