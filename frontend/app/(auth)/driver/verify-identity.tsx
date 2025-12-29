@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import { View, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { ArrowLeft, Shield } from "lucide-react-native";
 import { Button } from "@/components/ui/Button";
 import { FileUpload } from "@/components/ui/FileUpload";
+import { ThemedText } from "@/components/ThemedText";
+import { Colors } from "@/constants/theme";
 
 export default function VerifyIdentityScreen() {
   const router = useRouter();
@@ -40,29 +42,27 @@ export default function VerifyIdentityScreen() {
     vehicleStatus === "completed";
 
   return (
-    <SafeAreaView className="flex-1 bg-ivory">
-      <ScrollView contentContainerClassName="p-6 pb-12">
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         <TouchableOpacity
           onPress={() => router.back()}
-          className="w-10 h-10 rounded-full bg-white items-center justify-center border border-gray-200 mb-6"
+          style={styles.backButton}
         >
-          <ArrowLeft size={20} color="#333" />
+          <ArrowLeft size={20} color={Colors.light.gray[900]} />
         </TouchableOpacity>
 
-        <View className="gap-2 mb-8">
-          <Text className="text-3xl font-bold text-forest">
+        <View style={styles.headerContainer}>
+          <ThemedText type="title" style={styles.headerTitle}>
             Verify Your Identity
-          </Text>
-          <Text className="text-gray-500 text-lg">
+          </ThemedText>
+          <ThemedText style={styles.headerSubtitle}>
             Upload the following documents to get started.
-          </Text>
+          </ThemedText>
         </View>
 
-        <View className="gap-6 mb-10">
-          <View className="gap-3">
-            <Text className="font-bold text-forest uppercase text-xs tracking-wider">
-              Identity
-            </Text>
+        <View style={styles.formContainer}>
+          <View style={styles.section}>
+            <ThemedText style={styles.sectionTitle}>Identity</ThemedText>
             <FileUpload
               label="National ID"
               description="Front and Back"
@@ -77,10 +77,8 @@ export default function VerifyIdentityScreen() {
             />
           </View>
 
-          <View className="gap-3">
-            <Text className="font-bold text-forest uppercase text-xs tracking-wider">
-              Vehicle
-            </Text>
+          <View style={styles.section}>
+            <ThemedText style={styles.sectionTitle}>Vehicle</ThemedText>
             <FileUpload
               label="Vehicle Photo"
               description="Show license plate clearly"
@@ -90,16 +88,16 @@ export default function VerifyIdentityScreen() {
           </View>
         </View>
 
-        <View className="bg-forest/5 p-4 rounded-xl flex-row gap-3 mb-8 border border-forest/10">
-          <Shield size={24} color="#0F3D26" />
-          <View className="flex-1">
-            <Text className="font-bold text-forest text-sm">
+        <View style={styles.securityNote}>
+          <Shield size={24} color={Colors.light.primary} />
+          <View style={styles.securityTextContainer}>
+            <ThemedText style={styles.securityTitle}>
               Secure Verification
-            </Text>
-            <Text className="text-gray-500 text-xs">
+            </ThemedText>
+            <ThemedText type="caption" style={styles.securityDescription}>
               Your documents are encrypted and only used for verification
               purposes.
-            </Text>
+            </ThemedText>
           </View>
         </View>
 
@@ -109,8 +107,84 @@ export default function VerifyIdentityScreen() {
           onPress={handleSubmit}
           isLoading={isLoading}
           disabled={!isFormValid}
+          style={styles.submitButton}
         />
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: Colors.light.ivory,
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 52,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: Colors.light.gray[200],
+    marginBottom: 24,
+  },
+  headerContainer: {
+    gap: 8,
+    marginBottom: 32,
+  },
+  headerTitle: {
+    color: Colors.light.primary,
+    fontSize: 28,
+  },
+  headerSubtitle: {
+    fontSize: 18,
+    color: Colors.light.gray[500],
+  },
+  formContainer: {
+    gap: 40,
+    marginBottom: 40,
+  },
+  section: {
+    gap: 12,
+  },
+  sectionTitle: {
+    fontWeight: "bold",
+    color: Colors.light.primary,
+    fontSize: 12,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginLeft: 4,
+  },
+  securityNote: {
+    backgroundColor: "rgba(15, 61, 38, 0.05)", // Forest/5
+    padding: 16,
+    borderRadius: 12,
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 32,
+    borderWidth: 1,
+    borderColor: "rgba(15, 61, 38, 0.1)",
+    alignItems: "center",
+  },
+  securityTextContainer: {
+    flex: 1,
+  },
+  securityTitle: {
+    fontWeight: "bold",
+    color: Colors.light.primary,
+    fontSize: 14,
+    marginBottom: 2,
+  },
+  securityDescription: {
+    color: Colors.light.gray[500],
+  },
+  submitButton: {
+    width: "100%",
+  },
+});

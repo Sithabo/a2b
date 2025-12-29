@@ -30,7 +30,7 @@ export default function MyTripScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-ivory">
-      <ScrollView contentContainerClassName="p-4 pb-20 gap-6">
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 52 }}>
         {/* Header / Controls */}
         <View className="flex-row justify-between items-center mb-4">
           <Text className="text-2xl font-bold text-forest">My Trip</Text>

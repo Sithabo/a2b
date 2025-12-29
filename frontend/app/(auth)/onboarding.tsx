@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   View,
   TouchableOpacity,
@@ -64,7 +65,7 @@ export default function OnboardingScreen() {
     },
   });
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentIndex < SLIDES.length - 1) {
       const nextIndex = currentIndex + 1;
       if (scrollRef.current) {
@@ -76,12 +77,24 @@ export default function OnboardingScreen() {
         setCurrentIndex(nextIndex);
       }
     } else {
-      router.replace("/(auth)/welcome");
+      try {
+        await AsyncStorage.setItem("hasLaunched", "true");
+        router.replace("/(auth)/welcome");
+      } catch (error) {
+        console.error("Error saving onboarding status:", error);
+        router.replace("/(auth)/welcome");
+      }
     }
   };
 
-  const handleSkip = () => {
-    router.replace("/(auth)/welcome");
+  const handleSkip = async () => {
+    try {
+      await AsyncStorage.setItem("hasLaunched", "true");
+      router.replace("/(auth)/welcome");
+    } catch (error) {
+      console.error("Error saving onboarding status:", error);
+      router.replace("/(auth)/welcome");
+    }
   };
 
   const handleDotPress = (index: number) => {

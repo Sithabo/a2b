@@ -1,23 +1,15 @@
 import React from "react";
-import {
-  View,
-  Text as RNText,
-  TouchableOpacity,
-  type TextProps,
-} from "react-native";
-import { Upload, CheckCircle, FileText } from "lucide-react-native";
-import { cn } from "@/components/ui/Button"; // Reusing cn utility
-
-const Text = RNText as unknown as React.ComponentType<
-  TextProps & { className?: string }
->;
+import { View, TouchableOpacity, StyleSheet, ViewStyle } from "react-native";
+import { Upload, CheckCircle } from "lucide-react-native";
+import { Colors } from "@/constants/theme";
+import { ThemedText } from "@/components/ThemedText";
 
 interface FileUploadProps {
   label: string;
   description?: string;
   onPress: () => void;
   status?: "empty" | "uploading" | "completed";
-  className?: string;
+  style?: ViewStyle;
 }
 
 export const FileUpload = ({
@@ -25,45 +17,96 @@ export const FileUpload = ({
   description,
   onPress,
   status = "empty",
-  className,
+  style,
 }: FileUploadProps) => {
+  const isCompleted = status === "completed";
+
   return (
     <TouchableOpacity
       onPress={onPress}
-      className={cn(
-        "border-2 border-dashed bg-white p-4 rounded-xl flex-row items-center gap-4 transition-all",
-        status === "completed"
-          ? "border-forest bg-forest/5"
-          : "border-gray-300",
-        className
-      )}
+      style={[
+        styles.container,
+        isCompleted ? styles.completedContainer : styles.defaultContainer,
+        style,
+      ]}
+      activeOpacity={0.7}
     >
       <View
-        className={cn(
-          "w-10 h-10 rounded-full items-center justify-center",
-          status === "completed" ? "bg-forest" : "bg-gray-100"
-        )}
+        style={[
+          styles.iconContainer,
+          isCompleted
+            ? styles.completedIconContainer
+            : styles.defaultIconContainer,
+        ]}
       >
-        {status === "completed" ? (
-          <CheckCircle size={20} color="#fff" />
+        {isCompleted ? (
+          <CheckCircle size={20} color="#FFFFFF" />
         ) : (
-          <Upload size={20} color="#6B7280" />
+          <Upload size={20} color={Colors.light.gray[500]} />
         )}
       </View>
 
-      <View className="flex-1 gap-1">
-        <Text
-          className={cn(
-            "font-semibold",
-            status === "completed" ? "text-forest" : "text-gray-900"
-          )}
+      <View style={styles.textContainer}>
+        <ThemedText
+          style={[styles.label, isCompleted && styles.completedLabel]}
         >
           {label}
-        </Text>
+        </ThemedText>
         {description && (
-          <Text className="text-xs text-gray-400">{description}</Text>
+          <ThemedText type="caption" style={styles.description}>
+            {description}
+          </ThemedText>
         )}
       </View>
     </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    borderWidth: 2,
+    borderStyle: "dashed",
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
+  defaultContainer: {
+    backgroundColor: "#FFFFFF",
+    borderColor: Colors.light.gray[300],
+  },
+  completedContainer: {
+    backgroundColor: "rgba(15, 61, 38, 0.05)", // Forest with opacity
+    borderColor: Colors.light.primary,
+    borderStyle: "solid",
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  defaultIconContainer: {
+    backgroundColor: Colors.light.gray[100],
+  },
+  completedIconContainer: {
+    backgroundColor: Colors.light.primary,
+  },
+  textContainer: {
+    flex: 1,
+    gap: 4,
+  },
+  label: {
+    fontWeight: "600",
+    fontSize: 16,
+    color: Colors.light.gray[900],
+  },
+  completedLabel: {
+    color: Colors.light.primary,
+  },
+  description: {
+    color: Colors.light.gray[400],
+  },
+});
