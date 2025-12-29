@@ -1,34 +1,27 @@
 import React from "react";
 import {
   TouchableOpacity,
-  Text as RNText,
-  ActivityIndicator as RNActivityIndicator,
-  View as RNView,
+  Text,
+  ActivityIndicator,
+  View,
+  StyleSheet,
+  ViewStyle,
+  TextStyle,
+  Pressable,
 } from "react-native";
-
-// Fix for React 19 type mismatch
-const Text = RNText as any;
-const ActivityIndicator = RNActivityIndicator as any;
-const View = RNView as any;
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+import { Colors } from "@/constants/theme";
 
 interface ButtonProps {
   onPress: () => void;
   title: string;
   variant?: "primary" | "secondary" | "outline" | "ghost";
   size?: "default" | "lg" | "sm";
-  className?: string;
-  textClassName?: string;
+  style?: ViewStyle;
+  textStyle?: TextStyle;
   isLoading?: boolean;
   disabled?: boolean;
   icon?: React.ReactNode;
   iconRight?: boolean;
-  style?: any;
 }
 
 export const Button = ({
@@ -36,69 +29,152 @@ export const Button = ({
   title,
   variant = "primary",
   size = "default",
-  className,
-  textClassName,
   isLoading = false,
   disabled = false,
   icon,
   iconRight = false,
   style,
+  textStyle,
 }: ButtonProps) => {
-  const baseStyles =
-    "flex-row items-center justify-center rounded-xl active:opacity-80";
-
-  const variants = {
-    primary: "bg-[#C4E84A] border border-[#C4E84A]", // Lime Green
-    secondary: "bg-amber border border-amber",
-    outline: "bg-transparent border border-gray-300",
-    ghost: "bg-transparent border-transparent",
+  const getVariantStyle = (): ViewStyle => {
+    switch (variant) {
+      case "primary":
+        return styles.primaryButton;
+      case "secondary":
+        return styles.secondaryButton;
+      case "outline":
+        return styles.outlineButton;
+      case "ghost":
+        return styles.ghostButton;
+      default:
+        return styles.primaryButton;
+    }
   };
 
-  const sizes = {
-    default: "py-3.5 px-6",
-    lg: "py-4 px-8",
-    sm: "py-2 px-4",
+  const getSizeStyle = (): ViewStyle => {
+    switch (size) {
+      case "lg":
+        return styles.lgButton;
+      case "sm":
+        return styles.smButton;
+      default:
+        return styles.defaultButton;
+    }
   };
 
-  const textBaseStyles = "font-bold text-center";
-
-  const textVariants = {
-    primary: "text-gray-900", // Black text for Lime button
-    secondary: "text-white",
-    outline: "text-gray-900",
-    ghost: "text-gray-600",
+  const getTextVariantStyle = (): TextStyle => {
+    switch (variant) {
+      case "primary":
+        return styles.primaryText;
+      case "secondary":
+        return styles.secondaryText;
+      case "outline":
+        return styles.outlineText;
+      case "ghost":
+        return styles.ghostText;
+      default:
+        return styles.primaryText;
+    }
   };
 
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled || isLoading}
-      className={cn(
-        baseStyles,
-        variants[variant],
-        sizes[size],
-        disabled && "opacity-50",
-        className
-      )}
-      style={style}
+      style={[
+        styles.base,
+        getVariantStyle(),
+        getSizeStyle(),
+        disabled && styles.disabled,
+        style,
+      ]}
+      activeOpacity={0.8}
     >
       {isLoading ? (
         <ActivityIndicator
           color={
-            variant === "outline" || variant === "ghost" ? "#0F3D26" : "#fff"
+            variant === "outline" || variant === "ghost"
+              ? Colors.light.primary
+              : "#FFFFFF"
           }
         />
       ) : (
         <>
-          {icon && !iconRight && <View className="mr-2">{icon}</View>}
-          <Text
-            className={cn(textBaseStyles, textVariants[variant], textClassName)}
-          >
+          {icon && !iconRight && <View style={styles.iconLeft}>{icon}</View>}
+          <Text style={[styles.textBase, getTextVariantStyle(), textStyle]}>
             {title}
           </Text>
-          {icon && iconRight && <View className="ml-2">{icon}</View>}
+          {icon && iconRight && <View style={styles.iconRight}>{icon}</View>}
         </>
       )}
     </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  base: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 12,
+  },
+  disabled: {
+    opacity: 0.5,
+  },
+  // Variants
+  primaryButton: {
+    backgroundColor: Colors.light.lime, // #C4E84A
+    borderWidth: 1,
+    borderColor: Colors.light.lime,
+  },
+  secondaryButton: {
+    backgroundColor: Colors.light.amber,
+    borderWidth: 1,
+    borderColor: Colors.light.amber,
+  },
+  outlineButton: {
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "#D1D5DB", // gray-300
+  },
+  ghostButton: {
+    backgroundColor: "transparent",
+    borderWidth: 0,
+  },
+  // Sizes
+  defaultButton: {
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+  },
+  lgButton: {
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+  },
+  smButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  // Text Styles
+  textBase: {
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  primaryText: {
+    color: Colors.light.gray[900], // Black text for Lime button
+  },
+  secondaryText: {
+    color: "#FFFFFF",
+  },
+  outlineText: {
+    color: Colors.light.gray[900],
+  },
+  ghostText: {
+    color: Colors.light.gray[600],
+  },
+  iconLeft: {
+    marginRight: 8,
+  },
+  iconRight: {
+    marginLeft: 8,
+  },
+});

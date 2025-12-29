@@ -1,17 +1,20 @@
 import React, { useState } from "react";
 import {
   View,
-  Text,
   TextInput,
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StyleSheet,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
 import { Button } from "@/components/ui/Button";
+import { ThemedText } from "@/components/ThemedText";
+import { Colors } from "@/constants/theme";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -33,45 +36,46 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-ivory">
+    <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
+        style={styles.keyboardView}
       >
-        <ScrollView contentContainerClassName="flex-grow p-6">
+        <ScrollView contentContainerStyle={styles.scrollContent}>
           {/* Header */}
           <TouchableOpacity
             onPress={() => router.back()}
-            className="w-10 h-10 rounded-full bg-white items-center justify-center border border-gray-200 mb-8"
+            style={styles.backButton}
           >
-            <ArrowLeft size={20} color="#333" />
+            <ArrowLeft size={20} color={Colors.light.gray[900]} />
           </TouchableOpacity>
 
-          <View className="gap-2 mb-10">
-            <Text className="text-3xl font-bold text-forest py-2">
+          <View style={styles.headerContainer}>
+            <ThemedText type="title" style={styles.headerTitle}>
               Enter Your Phone
-            </Text>
-            <Text className="text-gray-500 text-lg">
+            </ThemedText>
+            <ThemedText style={styles.headerSubtitle}>
               Verify with MTN MoMo or SMS to continue as a{" "}
-              {params.role || "user"}.
-            </Text>
+              <ThemedText style={{ fontWeight: "bold", fontSize: 18 }}>
+                {params.role || "user"}
+              </ThemedText>
+              .
+            </ThemedText>
           </View>
 
           {/* Form */}
-          <View className="gap-6">
+          <View style={styles.formContainer}>
             {/* Phone Input */}
-            <View className="gap-2">
-              <Text className="font-semibold text-forest ml-1">
-                Phone Number
-              </Text>
-              <View className="flex-row items-center bg-white border border-gray-200 rounded-xl overflow-hidden h-14 focus-within:border-forest px-4">
-                <View className="bg-gray-100 h-full justify-center px-3 mr-2 -ml-4 border-r border-gray-200">
-                  <Text className="text-gray-600 font-bold">+256</Text>
+            <View style={styles.inputGroup}>
+              <ThemedText style={styles.inputLabel}>Phone Number</ThemedText>
+              <View style={styles.inputWrapper}>
+                <View style={styles.countryCode}>
+                  <ThemedText style={styles.countryCodeText}>+256</ThemedText>
                 </View>
                 <TextInput
                   placeholder="700 000 000"
-                  placeholderTextColor="#9CA3AF"
-                  className="flex-1 text-lg text-gray-900 font-medium"
+                  placeholderTextColor={Colors.light.gray[400]}
+                  style={styles.textInput}
                   keyboardType="phone-pad"
                   value={phoneNumber}
                   onChangeText={setPhoneNumber}
@@ -80,17 +84,15 @@ export default function LoginScreen() {
               </View>
             </View>
 
-            <View className="gap-4 mt-4">
-              {/* MTN MoMo Button - Using custom yellow color #FFCC00 (MTN Brand ish) or Amber */}
+            <View style={styles.buttonGroup}>
+              {/* MTN MoMo Button */}
               <Button
                 title="MTN MoMo"
                 size="lg"
                 onPress={() => handleLogin("momo")}
-                className="bg-[#FFCC00] border-[#FFCC00]"
-                textClassName="text-black font-bold"
                 isLoading={isLoading}
-                // Placeholder for MTN logo if we had one
-                // icon={<Image source={...} />}
+                style={styles.momoButton}
+                textStyle={styles.momoButtonText}
               />
 
               <Button
@@ -99,18 +101,131 @@ export default function LoginScreen() {
                 size="lg"
                 onPress={() => handleLogin("sms")}
                 isLoading={isLoading}
-                className="bg-gray-600 border-gray-600"
+                style={styles.smsButton}
+                textStyle={styles.smsButtonText}
               />
             </View>
           </View>
 
-          <View className="flex-1 justify-end items-center mt-10 pb-6 gap-2">
-            <Text className="text-center text-xs text-gray-400 px-10">
+          <View style={styles.footerContainer}>
+            <ThemedText type="caption" style={styles.footerText}>
               By continuing, you agree to our Terms of Service & Privacy Policy
-            </Text>
+            </ThemedText>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: Colors.light.ivory,
+  },
+  keyboardView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    padding: 24,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: Colors.light.gray[200],
+    marginBottom: 32,
+  },
+  headerContainer: {
+    gap: 8,
+    marginBottom: 40,
+  },
+  headerTitle: {
+    color: Colors.light.primary, // Forest
+    fontSize: 28,
+  },
+  headerSubtitle: {
+    fontSize: 18,
+    color: Colors.light.gray[500],
+  },
+  formContainer: {
+    gap: 24,
+  },
+  inputGroup: {
+    gap: 8,
+  },
+  inputLabel: {
+    fontWeight: "600",
+    color: Colors.light.primary,
+    marginLeft: 4,
+  },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: Colors.light.gray[200],
+    borderRadius: 12,
+    overflow: "hidden",
+    height: 56,
+    paddingHorizontal: 16,
+  },
+  countryCode: {
+    backgroundColor: Colors.light.gray[100],
+    height: "100%",
+    justifyContent: "center",
+    paddingHorizontal: 12,
+    marginRight: 8,
+    marginLeft: -16, // to touch the edge
+    borderRightWidth: 1,
+    borderRightColor: Colors.light.gray[200],
+  },
+  countryCodeText: {
+    color: Colors.light.gray[600],
+    fontWeight: "bold",
+  },
+  textInput: {
+    flex: 1,
+    fontSize: 18,
+    color: Colors.light.gray[900],
+    fontWeight: "500",
+  },
+  buttonGroup: {
+    gap: 16,
+    marginTop: 16,
+  },
+  momoButton: {
+    backgroundColor: "#FFCC00", // MTN Yellow
+    borderColor: "#FFCC00",
+  },
+  momoButtonText: {
+    color: "#000000",
+    fontWeight: "bold",
+  },
+  smsButton: {
+    backgroundColor: Colors.light.gray[600],
+    borderColor: Colors.light.gray[600],
+  },
+  smsButtonText: {
+    color: "#FFFFFF",
+  },
+  footerContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+    alignItems: "center",
+    marginTop: 40,
+    paddingBottom: 24,
+    gap: 8,
+  },
+  footerText: {
+    textAlign: "center",
+    color: Colors.light.gray[400],
+    paddingHorizontal: 40,
+    fontSize: 12,
+  },
+});

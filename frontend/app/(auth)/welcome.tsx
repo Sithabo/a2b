@@ -1,17 +1,14 @@
 import React from "react";
-import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  Dimensions,
-  ScrollView,
-} from "react-native";
+import { View, Image, StyleSheet, Dimensions, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { Button } from "@/components/ui/Button";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ThemedText } from "@/components/ThemedText";
+import { Colors } from "@/constants/theme";
 
 const { width, height } = Dimensions.get("window");
+const isSmallDevice = width < 375;
+const isShortDevice = height < 700;
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -29,10 +26,10 @@ export default function WelcomeScreen() {
             source={require("../../assets/logo/a2b.png")}
             style={styles.headerLogo}
           />
-          <Text style={styles.headerText}>A2B</Text>
+          <ThemedText style={styles.headerText}>A2B</ThemedText>
         </View>
 
-        {/* Middle: Illustration (Placeholder A2B Logo) */}
+        {/* Middle: Illustration */}
         <View style={styles.centerImageContainer}>
           <View style={styles.imageWrapper}>
             <Image
@@ -44,17 +41,19 @@ export default function WelcomeScreen() {
 
         {/* Bottom: Text & Buttons */}
         <View style={styles.bottomContainer}>
-          {/* Top Indicator Line */}
+          {/* Top Indicator Line
           <View style={styles.indicatorContainer}>
             <View style={styles.topIndicator} />
-          </View>
+          </View> */}
 
           <View style={styles.textContainer}>
-            <Text style={styles.title}>Choose Your Role</Text>
-            <Text style={styles.description}>
+            <ThemedText type="title" style={styles.title}>
+              Choose Your Role
+            </ThemedText>
+            <ThemedText style={styles.description}>
               Are you sending goods across Uganda or delivering them? Select
               your role to get started with A2B.
-            </Text>
+            </ThemedText>
           </View>
 
           <View style={styles.buttonContainer}>
@@ -68,7 +67,7 @@ export default function WelcomeScreen() {
                 })
               }
               style={styles.shipperButton}
-              textClassName="text-gray-900 font-bold text-lg"
+              textStyle={styles.shipperButtonText}
             />
 
             {/* Driver Button */}
@@ -82,14 +81,14 @@ export default function WelcomeScreen() {
               }
               variant="outline"
               style={styles.driverButton}
-              textClassName="text-[#0F3D26] font-bold text-lg"
+              textStyle={styles.driverButtonText}
             />
           </View>
 
           {/* Bottom Indicator Line */}
-          <View style={styles.indicatorContainer}>
+          {/* <View style={styles.indicatorContainer}>
             <View style={styles.bottomIndicator} />
-          </View>
+          </View> */}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -108,8 +107,8 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: "center",
-    paddingTop: 16,
-    paddingBottom: 16, // Reduced padding
+    paddingTop: isShortDevice ? 10 : 16,
+    paddingBottom: isShortDevice ? 10 : 16,
     flexDirection: "row",
     justifyContent: "center",
     gap: 8,
@@ -122,12 +121,13 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: Colors.light.primary, // Forest
   },
   centerImageContainer: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 16, // Flexible padding
+    paddingVertical: isShortDevice ? 10 : 16,
+    flex: 1,
   },
   imageWrapper: {
     padding: 10,
@@ -136,51 +136,51 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   mainImage: {
-    width: width * 0.6, // Responsive width
-    height: width * 0.6, // Responsive height
+    width: isShortDevice ? width * 0.5 : width * 0.6,
+    height: isShortDevice ? width * 0.5 : width * 0.6,
     maxWidth: 250,
     maxHeight: 250,
     resizeMode: "contain",
   },
   bottomContainer: {
     paddingHorizontal: 24,
-    paddingBottom: 32,
+    paddingBottom: isShortDevice ? 20 : 32,
     width: "100%",
     maxWidth: 450,
     alignSelf: "center",
   },
   indicatorContainer: {
     alignItems: "center",
-    marginVertical: 16, // Reduced margins
+    marginVertical: isShortDevice ? 12 : 16,
   },
   topIndicator: {
     width: 32,
     height: 4,
     borderRadius: 2,
-    backgroundColor: "#0F3D26",
+    backgroundColor: Colors.light.primary,
   },
   bottomIndicator: {
     width: 128,
     height: 4,
     borderRadius: 2,
-    backgroundColor: "#0F3D26",
-    marginTop: 24,
+    backgroundColor: Colors.light.primary,
+    marginTop: isShortDevice ? 16 : 24,
   },
   textContainer: {
     alignItems: "center",
-    marginBottom: 24,
+    marginBottom: isShortDevice ? 16 : 24,
   },
   title: {
-    fontSize: 32, // Slightly smaller on strict mobile constraints if needed, but keeping large
+    fontSize: isSmallDevice ? 28 : 32,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: Colors.light.primary,
     marginBottom: 12,
     textAlign: "center",
   },
   description: {
-    fontSize: 16,
-    color: "#4B5563", // Gray-600
-    lineHeight: 24,
+    fontSize: isSmallDevice ? 14 : 16,
+    color: Colors.light.gray[600],
+    lineHeight: isSmallDevice ? 20 : 24,
     textAlign: "center",
     paddingHorizontal: 16,
   },
@@ -190,17 +190,27 @@ const styles = StyleSheet.create({
   },
   shipperButton: {
     width: "100%",
-    backgroundColor: "#C4E84A", // Lime Green
-    borderColor: "#C4E84A",
-    borderRadius: 12,
-    paddingVertical: 16,
+    backgroundColor: Colors.light.lime, // Lime Green
+    borderColor: Colors.light.lime,
+    borderRadius: 12, // rounded-xl
+    paddingVertical: isShortDevice ? 12 : 16,
+  },
+  shipperButtonText: {
+    color: Colors.light.gray[900],
+    fontWeight: "bold",
+    fontSize: 18,
   },
   driverButton: {
     width: "100%",
     backgroundColor: "#FFFFFF",
-    borderColor: "#0F3D26",
+    borderColor: Colors.light.primary,
     borderWidth: 2,
     borderRadius: 12,
-    paddingVertical: 16,
+    paddingVertical: isShortDevice ? 12 : 16,
+  },
+  driverButtonText: {
+    color: Colors.light.primary,
+    fontWeight: "bold",
+    fontSize: 18,
   },
 });
