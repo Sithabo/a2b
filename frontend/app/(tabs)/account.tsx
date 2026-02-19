@@ -2,53 +2,34 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Link } from "expo-router";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { Plus } from "lucide-react-native";
 
-export default function HomeScreen() {
+export default function AccountScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.header}>
-        <Text style={[styles.title, { color: theme.text }]}>A2B Shipper</Text>
+        <Text style={[styles.title, { color: theme.text }]}>Account</Text>
         <Text style={[styles.subtitle, { color: theme.gray[500] }]}>
-          Manage your loads
+          Your profile and settings
         </Text>
       </View>
 
       <View style={styles.content}>
         <Text style={[styles.placeholderText, { color: theme.text }]}>
-          Phase 1: Foundation & Navigation
+          User Profile Phase 5
         </Text>
 
         <View style={styles.buttonContainer}>
-          <Link href="/receipts" asChild>
+          <Link href="/" asChild>
             <TouchableOpacity
               style={[styles.linkButton, { borderColor: theme.primary }]}
             >
-              <Text style={{ color: theme.primary }}>Go to Receipts</Text>
-            </TouchableOpacity>
-          </Link>
-
-          <Link href="/account" asChild>
-            <TouchableOpacity
-              style={[styles.linkButton, { borderColor: theme.primary }]}
-            >
-              <Text style={{ color: theme.primary }}>Go to Account</Text>
+              <Text style={{ color: theme.primary }}>Back to Home</Text>
             </TouchableOpacity>
           </Link>
         </View>
-
-        <TouchableOpacity
-          style={[styles.primaryButton, { backgroundColor: theme.primary }]}
-          disabled
-        >
-          <Plus color="white" size={20} />
-          <Text style={styles.primaryButtonText}>
-            POST A NEW LOAD (Phase 3)
-          </Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -84,7 +65,6 @@ const styles = StyleSheet.create({
   buttonContainer: {
     width: "100%",
     gap: 12,
-    marginBottom: 32,
   },
   linkButton: {
     width: "100%",
@@ -92,20 +72,5 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     alignItems: "center",
-  },
-  primaryButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 18,
-    borderRadius: 16,
-    width: "100%",
-    gap: 8,
-    opacity: 0.5,
-  },
-  primaryButtonText: {
-    color: "white",
-    fontWeight: "bold",
-    letterSpacing: 1,
   },
 });

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>A2B User Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#1A4D2E", // Deep Forest Green
+                        "primary-dark": "#143A22",
+                        "secondary": "#E8F5E9", // Light Green for badges
+                        "background-light": "#F9F8F4", // Ivory
+                        "background-dark": "#121212", // Dark mode BG
+                        "surface-light": "#FFFFFF",
+                        "surface-dark": "#1E1E1E",
+                        "text-light": "#1F2937",
+                        "text-dark": "#F3F4F6",
+                        "text-muted-light": "#6B7280",
+                        "text-muted-dark": "#9CA3AF",
+                        "accent-red": "#EF4444",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "12px",
+                        "xl": "16px",
+                        "2xl": "20px",
+                    },
+                    boxShadow: {
+                        'soft': '0 2px 10px rgba(0, 0, 0, 0.03)',
+                    }
+                },
+            },
+        };
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased min-h-screen flex flex-col transition-colors duration-200">
+<header class="bg-primary pt-12 pb-8 px-6 rounded-b-[30px] shadow-lg relative z-10">
+<div class="flex flex-col items-center text-center space-y-3">
+<div class="h-20 w-20 bg-white rounded-full flex items-center justify-center shadow-md mb-1">
+<span class="text-2xl font-bold text-primary">JM</span>
+</div>
+<div>
+<h1 class="text-white text-xl font-bold tracking-tight">John Musa</h1>
+<p class="text-green-100 text-sm opacity-90">077-123-4567</p>
+</div>
+<div class="inline-flex items-center space-x-1.5 bg-[#2E6B46] border border-[#3E8B5B] rounded-full px-3 py-1">
+<span class="material-icons text-white text-[16px]">verified</span>
+<span class="text-white text-xs font-medium tracking-wide">Verified Shipper</span>
+</div>
+</div>
+</header>
+<main class="flex-1 px-5 -mt-6 pb-24 relative z-20 space-y-6">
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-soft overflow-hidden">
+<button class="w-full flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group">
+<div class="flex items-center space-x-3">
+<div class="bg-blue-50 dark:bg-blue-900/30 p-2 rounded-lg">
+<span class="material-icons-outlined text-blue-600 dark:text-blue-400 text-xl">business</span>
+</div>
+<span class="text-text-light dark:text-text-dark font-medium group-hover:text-primary dark:group-hover:text-white transition-colors">Business Details</span>
+</div>
+<span class="material-icons-outlined text-gray-400 text-xl">chevron_right</span>
+</button>
+<button class="w-full flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group">
+<div class="flex items-center space-x-3">
+<div class="bg-purple-50 dark:bg-purple-900/30 p-2 rounded-lg">
+<span class="material-icons-outlined text-purple-600 dark:text-purple-400 text-xl">credit_card</span>
+</div>
+<span class="text-text-light dark:text-text-dark font-medium group-hover:text-primary dark:group-hover:text-white transition-colors">Payment Methods</span>
+</div>
+<span class="material-icons-outlined text-gray-400 text-xl">chevron_right</span>
+</button>
+<button class="w-full flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group">
+<div class="flex items-center space-x-3">
+<div class="bg-teal-50 dark:bg-teal-900/30 p-2 rounded-lg">
+<span class="material-icons-outlined text-teal-600 dark:text-teal-400 text-xl">language</span>
+</div>
+<div class="flex flex-col items-start">
+<span class="text-text-light dark:text-text-dark font-medium group-hover:text-primary dark:group-hover:text-white transition-colors">Language</span>
+<span class="text-xs text-text-muted-light dark:text-text-muted-dark mt-0.5">English / Luganda</span>
+</div>
+</div>
+<span class="material-icons-outlined text-gray-400 text-xl">chevron_right</span>
+</button>
+<div class="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+<div class="flex items-center space-x-3">
+<div class="bg-amber-50 dark:bg-amber-900/30 p-2 rounded-lg">
+<span class="material-icons-outlined text-amber-600 dark:text-amber-400 text-xl">notifications</span>
+</div>
+<span class="text-text-light dark:text-text-dark font-medium">Notifications</span>
+</div>
+<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-primary translate-x-5" id="toggle" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-primary/30 cursor-pointer" for="toggle"></label>
+</div>
+</div>
+</div>
+<div class="space-y-3">
+<h3 class="text-sm font-semibold text-text-muted-light dark:text-text-muted-dark uppercase tracking-wider pl-1">Support &amp; Safety</h3>
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-soft p-5 space-y-4">
+<a class="flex items-center space-x-2 text-primary dark:text-green-400 font-medium text-sm mb-2 hover:underline" href="#">
+<span class="material-icons-outlined text-[18px]">help_outline</span>
+<span>How A2B Works</span>
+</a>
+<button class="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-3.5 px-4 rounded-xl shadow-sm flex items-center justify-center space-x-2 transition-all active:scale-[0.98]">
+<span class="material-icons text-[20px]">call</span>
+<span>Call A2B Support</span>
+</button>
+<button class="w-full bg-transparent border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-text-light dark:text-text-dark font-medium py-3.5 px-4 rounded-xl flex items-center justify-center space-x-2 transition-all">
+<span class="material-icons-outlined text-[20px] text-text-muted-light dark:text-text-muted-dark">flag</span>
+<span>Report an Issue</span>
+</button>
+</div>
+</div>
+<div class="text-center pt-2 pb-6">
+<button class="text-accent-red font-medium text-sm hover:opacity-80 transition-opacity flex items-center justify-center mx-auto space-x-1">
+<span class="material-icons-outlined text-[18px]">logout</span>
+<span>Log Out</span>
+</button>
+</div>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-surface-dark border-t border-gray-200 dark:border-gray-800 pb-safe pt-2 px-6 z-50">
+<div class="flex justify-between items-center max-w-md mx-auto h-16 pb-4">
+<a class="flex flex-col items-center group w-16" href="#">
+<span class="material-icons-outlined text-gray-400 dark:text-gray-500 group-hover:text-primary dark:group-hover:text-white text-[28px] transition-colors">home</span>
+<span class="text-[10px] font-medium text-gray-400 dark:text-gray-500 group-hover:text-primary dark:group-hover:text-white mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center group w-16" href="#">
+<span class="material-icons-outlined text-gray-400 dark:text-gray-500 group-hover:text-primary dark:group-hover:text-white text-[28px] transition-colors">receipt_long</span>
+<span class="text-[10px] font-medium text-gray-400 dark:text-gray-500 group-hover:text-primary dark:group-hover:text-white mt-1">Receipts</span>
+</a>
+<a class="flex flex-col items-center group w-16" href="#">
+<div class="relative">
+<span class="material-icons text-primary dark:text-white text-[28px]">person</span>
+<span class="absolute -top-1 -right-1 h-2.5 w-2.5 bg-accent-red rounded-full border-2 border-white dark:border-surface-dark"></span>
+</div>
+<span class="text-[10px] font-bold text-primary dark:text-white mt-1">Account</span>
+</a>
+</div>
+</nav>
+<style>
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #1A4D2E;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #1A4D2E;
+        }
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+    </style>
+
+</body></html>

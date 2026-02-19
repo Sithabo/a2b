@@ -1,38 +1,51 @@
 import { Tabs } from "expo-router";
 import React from "react";
+import { Package, ReceiptText, User } from "lucide-react-native";
 
-import { HapticTab } from "@/components/haptic-tab";
-import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarActiveTintColor: theme.primary,
+        tabBarInactiveTintColor: theme.gray[500],
+        tabBarStyle: {
+          backgroundColor: theme.background,
+          borderTopColor: theme.border,
+          height: 60,
+          paddingBottom: 10,
+        },
         headerShown: false,
-        tabBarButton: HapticTab,
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: "My Trip",
-          tabBarIcon: ({ color }: { color: string }) => (
-            <IconSymbol size={28} name="map.fill" color={color} />
+          title: "Home",
+          tabBarIcon: ({ color, size }) => (
+            <Package size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="receipts"
         options={{
-          title: "Explore",
-          tabBarIcon: ({ color }: { color: string }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+          title: "Receipts",
+          tabBarIcon: ({ color, size }) => (
+            <ReceiptText size={size} color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="account"
+        options={{
+          title: "Account",
+          tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
         }}
       />
     </Tabs>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>A2B Driver Found &amp; Deposit</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#134E35", // Deep Forest Green
+                        "background-light": "#F5F5F0", // Ivory/Beige background
+                        "background-dark": "#121212", // Dark background
+                        "surface-light": "#FFFFFF", // White card
+                        "surface-dark": "#1E1E1E", // Dark card
+                        "text-primary-light": "#111827",
+                        "text-primary-dark": "#F3F4F6",
+                        "text-secondary-light": "#6B7280",
+                        "text-secondary-dark": "#9CA3AF",
+                        "accent-amber": "#F59E0B",
+                        "accent-amber-light": "#FFFBEB",
+                        "accent-amber-dark": "#451A03",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        'xl': '1rem',
+                        '2xl': '1.5rem',
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                    }
+                },
+            },
+        };
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased flex justify-center min-h-screen">
+<div class="w-full max-w-md bg-background-light dark:bg-background-dark min-h-screen relative flex flex-col pb-24">
+<div class="h-12 w-full"></div>
+<div class="flex-1 px-5 flex flex-col items-center pt-6">
+<div class="w-full bg-surface-light dark:bg-surface-dark rounded-2xl shadow-soft p-6 flex flex-col items-center text-center space-y-6">
+<div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-2 shadow-lg shadow-primary/20">
+<span class="material-icons-round text-white text-3xl">local_shipping</span>
+</div>
+<div class="space-y-2">
+<h1 class="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark">
+                        Driver Accepted!
+                    </h1>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark px-4">
+                        A verified driver is ready to pick up your load
+                    </p>
+</div>
+<div class="w-full bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl p-4 text-left">
+<div class="flex items-start space-x-3">
+<span class="material-icons-round text-orange-600 dark:text-orange-400 text-lg mt-0.5">error_outline</span>
+<div>
+<h3 class="text-sm font-bold text-orange-800 dark:text-orange-300 mb-1">Action Required</h3>
+<p class="text-xs text-orange-700 dark:text-orange-400 leading-relaxed">
+                                Deposit funds to unlock driver details and confirm pickup
+                            </p>
+</div>
+</div>
+</div>
+<div class="w-full bg-background-light dark:bg-gray-800/50 rounded-xl py-6 px-4">
+<p class="text-xs uppercase tracking-wide text-text-secondary-light dark:text-text-secondary-dark font-medium mb-2">
+                        Amount to Deposit
+                    </p>
+<div class="text-3xl font-extrabold text-primary dark:text-white">
+                        150,000
+                        <span class="text-sm font-medium text-text-secondary-light dark:text-gray-400 block mt-1">UGX</span>
+</div>
+</div>
+<div class="flex items-center space-x-2 bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2 w-full justify-center border border-gray-100 dark:border-gray-700">
+<span class="material-icons-round text-gray-400 dark:text-gray-500 text-sm">verified_user</span>
+<p class="text-[10px] text-gray-500 dark:text-gray-400 text-left leading-tight">
+<span class="font-bold">Escrow Protection:</span> Money is held safely. Driver only gets paid upon confirmed delivery.
+                    </p>
+</div>
+<button class="w-full bg-primary hover:bg-[#0f422d] text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-primary/20 transform active:scale-[0.98] transition-all flex items-center justify-center space-x-2">
+<span>Deposit 150,000 UGX to Unlock Driver</span>
+</button>
+<button class="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark underline decoration-gray-300 dark:decoration-gray-600 hover:text-primary dark:hover:text-white transition-colors pb-2">
+                    Cancel &amp; Go Back
+                </button>
+</div>
+</div>
+<div class="fixed bottom-0 w-full max-w-md bg-surface-light dark:bg-surface-dark border-t border-gray-200 dark:border-gray-800 pb-6 pt-2 px-6 flex justify-between items-center z-10">
+<button class="flex flex-col items-center space-y-1 text-gray-400 hover:text-primary dark:text-gray-500 dark:hover:text-white transition-colors w-16">
+<span class="material-icons-round text-2xl">home</span>
+</button>
+<button class="flex flex-col items-center space-y-1 text-primary dark:text-white transition-colors w-16 relative">
+<div class="absolute -top-3 w-8 h-1 bg-primary rounded-b-full"></div>
+<span class="material-icons-round text-2xl">receipt_long</span>
+</button>
+<button class="flex flex-col items-center space-y-1 text-gray-400 hover:text-primary dark:text-gray-500 dark:hover:text-white transition-colors w-16">
+<span class="material-icons-round text-2xl">person_outline</span>
+</button>
+</div>
+</div>
+
+</body></html>
