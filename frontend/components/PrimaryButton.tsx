@@ -1,5 +1,11 @@
 import React from "react";
-import { TouchableOpacity, Text, ActivityIndicator, View } from "react-native";
+import {
+  TouchableOpacity,
+  Text,
+  ActivityIndicator,
+  View,
+  StyleSheet,
+} from "react-native";
 import { LucideIcon } from "lucide-react-native";
 
 interface PrimaryButtonProps {
@@ -22,52 +28,93 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
   const getVariantStyles = () => {
     switch (variant) {
       case "secondary":
-        return "bg-[#D4A017]";
+        return styles.secondaryButton;
       case "outline":
-        return "bg-transparent border-2 border-[#0F3D26]";
+        return styles.outlineButton;
       default:
-        return "bg-[#0F3D26]";
+        return styles.primaryButton;
     }
   };
 
   const getTextStyles = () => {
     switch (variant) {
       case "outline":
-        return "text-[#0F3D26]";
+        return styles.outlineText;
       default:
-        return "text-white";
+        return styles.primaryText;
     }
+  };
+
+  const getIconColor = () => {
+    return variant === "outline" ? "#0F3D26" : "white";
   };
 
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled || loading}
-      className={`${getVariantStyles()} p-4 rounded-xl flex-row items-center justify-center shadow-lg active:scale-[0.98] transition-transform ${
-        disabled || loading ? "opacity-50" : "opacity-100"
-      }`}
+      style={[
+        styles.buttonBase,
+        getVariantStyles(),
+        (disabled || loading) && styles.disabled,
+      ]}
     >
       {loading ? (
-        <ActivityIndicator
-          color={variant === "outline" ? "#0F3D26" : "white"}
-        />
+        <ActivityIndicator color={getIconColor()} />
       ) : (
         <>
           {Icon && (
-            <View className="mr-2">
-              <Icon
-                color={variant === "outline" ? "#0F3D26" : "white"}
-                size={20}
-              />
+            <View style={styles.iconContainer}>
+              <Icon color={getIconColor()} size={20} />
             </View>
           )}
-          <Text
-            className={`${getTextStyles()} font-bold text-base uppercase tracking-widest`}
-          >
-            {title}
-          </Text>
+          <Text style={[styles.textBase, getTextStyles()]}>{title}</Text>
         </>
       )}
     </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  buttonBase: {
+    padding: 16,
+    borderRadius: 12, // rounded-xl
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  primaryButton: {
+    backgroundColor: "#0F3D26", // Deep Forest Green
+  },
+  secondaryButton: {
+    backgroundColor: "#D4A017", // Amber
+  },
+  outlineButton: {
+    backgroundColor: "transparent",
+    borderWidth: 2,
+    borderColor: "#0F3D26",
+  },
+  textBase: {
+    fontWeight: "bold",
+    fontSize: 16,
+    textTransform: "uppercase",
+    letterSpacing: 1, // tracking-widest
+  },
+  primaryText: {
+    color: "white",
+  },
+  outlineText: {
+    color: "#0F3D26",
+  },
+  disabled: {
+    opacity: 0.5,
+  },
+  iconContainer: {
+    marginRight: 8,
+  },
+});

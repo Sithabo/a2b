@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { ShieldCheck } from "lucide-react-native";
 
 interface TrustBadgeProps {
@@ -8,32 +8,69 @@ interface TrustBadgeProps {
 
 export const TrustBadge: React.FC<TrustBadgeProps> = ({ message }) => {
   return (
-    <View className="bg-[#D4A017] p-4 rounded-2xl flex-row items-center shadow-md relative overflow-hidden">
+    <View style={styles.container}>
       {/* Subtle Pattern Overlay Effect */}
-      <View
-        className="absolute inset-0 opacity-10"
-        style={
-          {
-            backgroundColor: "transparent",
-            backgroundImage:
-              "radial-gradient(circle at 1px 1px, #fff 1px, transparent 0)",
-            backgroundSize: "8px 8px",
-          } as any
-        }
-      />
+      <View style={styles.overlay} />
 
-      <View className="bg-white/20 p-2 rounded-full mr-3">
+      <View style={styles.iconContainer}>
         <ShieldCheck color="white" size={24} />
       </View>
 
-      <View className="flex-1">
-        <Text className="text-white font-bold text-sm tracking-tight">
-          Trust & Security
-        </Text>
-        <Text className="text-white/90 text-xs font-medium mt-0.5 leading-tight">
-          {message}
-        </Text>
+      <View style={styles.contentContainer}>
+        <Text style={styles.title}>Trust & Security</Text>
+        <Text style={styles.message}>{message}</Text>
       </View>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "#D4A017", // Amber
+    padding: 16,
+    borderRadius: 16, // rounded-2xl
+    flexDirection: "row",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    position: "relative",
+    overflow: "hidden",
+  },
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 0.1,
+    backgroundColor: "transparent",
+    // Removed complex gradient styles as they aren't easily supported in RN StyleSheet without extra libs
+    // Keeping subtle overlay
+    backgroundColor: "#FFFFFF",
+  },
+  iconContainer: {
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    padding: 8,
+    borderRadius: 9999, // rounded-full
+    marginRight: 12,
+  },
+  contentContainer: {
+    flex: 1,
+  },
+  title: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 14,
+    letterSpacing: -0.25, // tracking-tight
+  },
+  message: {
+    color: "rgba(255, 255, 255, 0.9)",
+    fontSize: 12,
+    fontWeight: "500",
+    marginTop: 2,
+    lineHeight: 16, // leading-tight
+  },
+});
