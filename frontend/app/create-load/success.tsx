@@ -125,7 +125,7 @@ export default function LoadPostedScreen() {
           />
 
           <TouchableOpacity
-            onPress={() => router.dismissAll()}
+            onPress={() => router.replace("/(tabs)")}
             style={styles.homeButton}
             activeOpacity={0.8}
           >
