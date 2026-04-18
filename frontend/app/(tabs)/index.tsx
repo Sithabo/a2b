@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -17,7 +18,6 @@ import {
   Truck,
 } from "lucide-react-native";
 import { PrimaryButton } from "@/components/PrimaryButton";
-import { ScreenHeader } from "@/components/ScreenHeader";
 import { Card } from "@/components/Card";
 
 export default function HomeScreen() {
@@ -26,19 +26,22 @@ export default function HomeScreen() {
   const theme = Colors[colorScheme ?? "light"];
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <ScreenHeader
-        title="Hello, Musa Hardware"
-        subtitle="Manage your shipments"
-        rightElement={
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.background }]}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Greeting Header */}
+        <View style={styles.greeting}>
+          <View>
+            <Text style={styles.greetingLabel}>Good day 👋</Text>
+            <Text style={styles.greetingTitle}>Hello, Musa Hardware</Text>
+            <Text style={styles.greetingSubtitle}>Manage your shipments</Text>
+          </View>
           <TouchableOpacity style={styles.notificationButton}>
-            <Bell color="white" size={24} />
+            <Bell color={Colors.light.primary} size={22} />
             <View style={styles.notificationBadge} />
           </TouchableOpacity>
-        }
-      />
-
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+        </View>
         {/* Action Required Card */}
         <View style={styles.actionCard}>
           <View style={styles.actionCardBackground} />
@@ -109,7 +112,7 @@ export default function HomeScreen() {
           </Card>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -118,25 +121,59 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   notificationButton: {
-    padding: 8,
-    borderRadius: 9999,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
     position: "relative",
   },
   notificationBadge: {
     position: "absolute",
-    top: 8,
-    right: 8,
+    top: 10,
+    right: 10,
     width: 8,
     height: 8,
     backgroundColor: "#EF4444",
     borderRadius: 4,
-    borderWidth: 1,
-    borderColor: "#0F3D26",
+    borderWidth: 1.5,
+    borderColor: "#F5F5E9",
+  },
+  greeting: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 24,
+    paddingTop: 20,
+    paddingBottom: 8,
+    marginBottom: 4,
+  },
+  greetingLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#6B7280",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  greetingTitle: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: "#0F3D26",
+    letterSpacing: -0.5,
+  },
+  greetingSubtitle: {
+    fontSize: 14,
+    color: "#6B7280",
+    marginTop: 2,
+    fontWeight: "400",
   },
   scrollContent: {
-    padding: 20,
-    gap: 24,
+    gap: 20,
+    paddingHorizontal: 20,
     paddingBottom: 100,
   },
   actionCard: {

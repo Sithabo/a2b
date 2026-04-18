@@ -1,10 +1,11 @@
 import React from "react";
 import { View, Text, ScrollView, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { ArrowRight, Package, ArrowDown } from "lucide-react-native";
-import { ScreenHeader } from "@/components/ScreenHeader";
+import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/Card";
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { TrustBadge } from "@/components/TrustBadge";
@@ -15,8 +16,10 @@ export default function ReviewLoadScreen() {
   const theme = Colors[colorScheme ?? "light"];
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <ScreenHeader
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.background }]}
+    >
+      <PageHeader
         title="Review & Fund Offer"
         subtitle="Your money is safe until delivery"
         showBackButton
@@ -82,7 +85,7 @@ export default function ReviewLoadScreen() {
           icon={ArrowRight}
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 

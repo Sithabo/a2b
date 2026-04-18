@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -19,7 +20,7 @@ import {
   Info,
   ArrowRight,
 } from "lucide-react-native";
-import { ScreenHeader } from "@/components/ScreenHeader";
+import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/Card";
 import { PrimaryButton } from "@/components/PrimaryButton";
 
@@ -32,8 +33,10 @@ export default function CreateLoadScreen() {
   const loadTypes = ["Sacks", "Boxes", "Machinery", "Furniture"];
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <ScreenHeader
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.background }]}
+    >
+      <PageHeader
         title="Post a Load"
         subtitle="Tell us what you need to ship"
         showBackButton
@@ -174,7 +177,7 @@ export default function CreateLoadScreen() {
           icon={ArrowRight}
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
