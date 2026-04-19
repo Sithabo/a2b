@@ -13,12 +13,14 @@ import { ArrowLeft } from "lucide-react-native";
 import { Button } from "@/components/ui/Button";
 import { ThemedText } from "@/components/ThemedText";
 import { Colors } from "@/constants/theme";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function VerifyOtpScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const login = useAuthStore(state => state.login);
 
   const handleVerify = () => {
     setIsLoading(true);
@@ -27,7 +29,10 @@ export default function VerifyOtpScreen() {
     setTimeout(() => {
       setIsLoading(false);
 
-      const role = params.role;
+      const role = params.role as string;
+      const phone = params.phone as string;
+
+      login(phone || "", role);
 
       if (role === "driver") {
         router.push("/(auth)/driver/verify-identity");

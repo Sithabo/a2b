@@ -19,11 +19,13 @@ import {
 } from "lucide-react-native";
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { Card } from "@/components/Card";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function HomeScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+  const userProfile = useAuthStore(state => state.userProfile);
 
   return (
     <SafeAreaView
@@ -34,7 +36,7 @@ export default function HomeScreen() {
         <View style={styles.greeting}>
           <View>
             <Text style={styles.greetingLabel}>Good day 👋</Text>
-            <Text style={styles.greetingTitle}>Hello, Musa Hardware</Text>
+            <Text style={styles.greetingTitle}>Hello, {userProfile?.name || 'Shipper'}</Text>
             <Text style={styles.greetingSubtitle}>Manage your shipments</Text>
           </View>
           <TouchableOpacity style={styles.notificationButton}>

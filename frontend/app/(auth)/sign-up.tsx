@@ -22,17 +22,27 @@ import {
 import { Button } from "@/components/ui/Button";
 import { ThemedText } from "@/components/ThemedText";
 import { Colors } from "@/constants/theme";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function SignUpScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const signUp = useAuthStore(state => state.signUp);
 
   const handleSignUp = () => {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
+      signUp({
+        name: fullName || "New User",
+        phone: phone || "",
+        company: "",
+        role: (params.role as string) || "user"
+      });
       router.replace("/(tabs)");
     }, 1500);
   };
@@ -70,6 +80,8 @@ export default function SignUpScreen() {
                   placeholder="John Doe"
                   placeholderTextColor={Colors.light.gray[400]}
                   style={styles.textInput}
+                  value={fullName}
+                  onChangeText={setFullName}
                 />
               </View>
             </View>
@@ -95,10 +107,12 @@ export default function SignUpScreen() {
               <View style={styles.inputWrapper}>
                 <Phone size={20} color={Colors.light.gray[400]} />
                 <TextInput
-                  placeholder="+1 234 567 8900"
+                  placeholder="+256 700 000 000"
                   placeholderTextColor={Colors.light.gray[400]}
                   style={styles.textInput}
                   keyboardType="phone-pad"
+                  value={phone}
+                  onChangeText={setPhone}
                 />
               </View>
             </View>
