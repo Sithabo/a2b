@@ -111,7 +111,7 @@ export default function ReceiptsScreen() {
           {/* Active Shipment Card — with green left border accent */}
           <TouchableOpacity
             style={[styles.shipmentCard, styles.activeCard]}
-            onPress={() => {/* future: navigate to active delivery detail */}}
+            onPress={() => router.push('/active-delivery')}
             activeOpacity={0.8}
           >
             {/* Green left accent bar */}
