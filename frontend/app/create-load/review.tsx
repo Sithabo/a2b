@@ -9,11 +9,25 @@ import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/Card";
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { TrustBadge } from "@/components/TrustBadge";
+import { useShipmentStore } from "@/store/useShipmentStore";
 
 export default function ReviewLoadScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+  const addShipment = useShipmentStore((state) => state.addShipment);
+
+  const handlePostLoad = () => {
+    addShipment({
+      pickup: "Kampala, Makindye",
+      delivery: "Jinja, Industrial Area",
+      cargoType: "Rice bags (50kg × 10)",
+      weight: "500",
+      offerPrice: "150000",
+      status: "OPEN"
+    });
+    router.push("/create-load/success");
+  };
 
   return (
     <SafeAreaView
@@ -81,7 +95,7 @@ export default function ReviewLoadScreen() {
       <View style={styles.footer}>
         <PrimaryButton
           title="Post Load & Find Driver"
-          onPress={() => router.push("/create-load/success")}
+          onPress={handlePostLoad}
           icon={ArrowRight}
         />
       </View>
