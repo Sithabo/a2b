@@ -57,7 +57,7 @@ export default function HomeScreen() {
 
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => console.log("Pay to unlock")}
+            onPress={() => router.push('/match-pay/driver-found')}
             activeOpacity={0.8}
           >
             <Text style={styles.actionButtonText}>Pay to Unlock Driver</Text>
