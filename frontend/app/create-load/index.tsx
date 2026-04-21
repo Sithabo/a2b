@@ -28,6 +28,8 @@ import { LoadTypeSelector } from "@/components/LoadTypeSelector";
 import { PackageForm, PackageData } from "@/components/PackageForm";
 import { DateTimePickerSection } from "@/components/DateTimePickerSection";
 import { OfferSlider } from "@/components/OfferSlider";
+import { BottomSheet } from "@/components/BottomSheet";
+import { OrderSummary } from "@/components/OrderSummary";
 
 export default function CreateLoadScreen() {
   const router = useRouter();
@@ -36,6 +38,7 @@ export default function CreateLoadScreen() {
   const [selectedType, setSelectedType] = useState("general");
   const [startLocation, setStartLocation] = useState("Houston, TX");
   const [endLocation, setEndLocation] = useState("");
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [packages, setPackages] = useState<PackageData[]>([
     { id: "1", code: "", weight: "250", length: "12", width: "8", height: "10" }
   ]);
@@ -127,10 +130,40 @@ export default function CreateLoadScreen() {
           title="Request pickup"
           onPress={() => {
             console.log("Submitted Packages Data:", JSON.stringify(packages, null, 2));
-            router.push("/create-load/review");
+            setIsReviewModalOpen(true);
           }}
         />
       </View>
+
+      {/* Review Modal */}
+      <BottomSheet
+        isVisible={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        title="Expected on: 19 Jun 2025"
+      >
+        <OrderSummary
+          data={{
+            id: Date.now().toString().slice(-9),
+            title: packages.length > 0 && packages[0].code ? packages[0].code : "Mixed Cargo",
+            status: "Awaiting Pickup",
+            quantity: packages.length,
+            size: packages[0] ? `${packages[0].length}x${packages[0].width}x${packages[0].height}cm` : "0x0x0cm",
+            weight: packages.reduce((acc, p) => acc + (parseFloat(p.weight) || 0), 0) + "kg",
+            type: loadTypes.find((t) => t.id === selectedType)?.label || "General cargo",
+          }}
+        />
+
+        <View style={{ marginTop: 8 }}>
+          <PrimaryButton
+            title="Finalize order"
+            onPress={() => {
+              console.log("Order finalized!");
+              setIsReviewModalOpen(false);
+              router.back();
+            }}
+          />
+        </View>
+      </BottomSheet>
     </SafeAreaView>
   );
 }
