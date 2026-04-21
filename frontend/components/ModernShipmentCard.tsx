@@ -10,15 +10,15 @@ interface ModernShipmentCardProps {
   onPress?: () => void;
 }
 
-const timeAgoOrDate = (dateString: string) => {
-  const d = new Date(dateString);
-  if (isNaN(d.getTime())) return dateString;
-
-  return d.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+const timeAgo = (dateString: string) => {
+  const diffInMinutes = Math.floor(
+    (new Date().getTime() - new Date(dateString).getTime()) / 60000
+  );
+  if (isNaN(diffInMinutes) || diffInMinutes < 1) return "Just now";
+  if (diffInMinutes < 60) return `${diffInMinutes} mins ago`;
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) return `${diffInHours} hours ago`;
+  return `${Math.floor(diffInHours / 24)} days ago`;
 };
 
 export const ModernShipmentCard: React.FC<ModernShipmentCardProps> = ({
@@ -27,14 +27,17 @@ export const ModernShipmentCard: React.FC<ModernShipmentCardProps> = ({
   onPress,
 }) => {
   const isFound = status === "found";
+  const formattedPrice = shipment.offerPrice 
+    ? Number(shipment.offerPrice).toLocaleString() 
+    : "150,000"; // fallback
 
   return (
     <TouchableOpacity
       style={styles.cardContainer}
-      activeOpacity={0.8}
+      activeOpacity={0.9}
       onPress={onPress}
     >
-      {/* Optional Driver Header when found */}
+      {/* Driver Header (Found State Only) */}
       {isFound && (
         <View style={styles.driverHeader}>
           <View style={styles.driverInfoContainer}>
@@ -50,58 +53,69 @@ export const ModernShipmentCard: React.FC<ModernShipmentCardProps> = ({
 
           <View style={styles.driverActionsCapsule}>
             <TouchableOpacity style={styles.actionBtnWhite} activeOpacity={0.7}>
-              <MessageSquare size={16} color="#111827" fill="#111827" />
+              <MessageSquare size={14} color="#111827" fill="#111827" />
             </TouchableOpacity>
             <TouchableOpacity style={styles.actionBtnYellow} activeOpacity={0.7}>
-              <Phone size={16} color="#111827" fill="#111827" />
+              <Phone size={14} color="#111827" fill="#111827" />
             </TouchableOpacity>
           </View>
         </View>
       )}
 
-      {/* Top Meta Row */}
-      <View style={styles.topRow}>
-        <Text style={styles.orderId} numberOfLines={1}>
-          #{shipment.id}
-        </Text>
-        <Text style={styles.dateText}>
-          {timeAgoOrDate(shipment.createdAt)}
-        </Text>
+      {/* Order Row */}
+      <View style={[styles.orderRow, isFound && { marginTop: 0 }]}>
+        <View style={styles.orderLeft}>
+          {!isFound && (
+            <Image
+              source={require("@/assets/images/cargo_box.png")}
+              style={styles.tinyBox}
+              contentFit="cover"   // using cover to crop out padding if needed
+            />
+          )}
+          <Text style={styles.orderId} numberOfLines={1}>
+            #{shipment.id}
+          </Text>
+        </View>
+        <Text style={styles.priceText}>{formattedPrice} UGX</Text>
       </View>
 
-      {/* Main Delivery Timeline */}
-      <View style={styles.contentRow}>
-        <View style={styles.timelineCol}>
-          {/* Absolute Dashed Line spanning between dots */}
-          <View style={styles.dashedLine} />
+      {/* Timeline Layout */}
+      <View style={styles.timelineWrapper}>
+        <View style={styles.timelineDashedLine} />
 
-          {/* Pickup Step */}
-          <View style={styles.timelineStep}>
-            <View style={styles.dotContainer}>
-              <View style={[styles.dot, styles.dotBlack]} />
-            </View>
-            <View style={styles.stepTextContainer}>
-              <Text style={styles.timelineLabel}>Pickup</Text>
-              <Text style={styles.timelineValue} numberOfLines={2}>
-                {shipment.pickup || "Location not provided"}
-              </Text>
-            </View>
+        {/* Pickup */}
+        <View style={styles.timelineStep}>
+          <View style={styles.dotContainer}>
+            <View style={[styles.dot, styles.dotBlack]} />
           </View>
+          <View style={styles.stepTextContainer}>
+            <Text style={styles.stepLabel}>PICKUP</Text>
+            <Text style={styles.stepValue} numberOfLines={2}>
+              {shipment.pickup || "Location not provided"}
+            </Text>
+          </View>
+        </View>
 
-          {/* Delivery Step */}
-          <View style={styles.timelineStep}>
-            <View style={styles.dotContainer}>
-              <View style={[styles.dot, styles.dotYellow]} />
-            </View>
-            <View style={[styles.stepTextContainer, { paddingBottom: 0 }]}>
-              <Text style={styles.timelineLabel}>Deliver To</Text>
-              <Text style={styles.timelineValue} numberOfLines={2}>
-                {shipment.delivery || "Location not provided"}
-              </Text>
-            </View>
+        {/* Delivery */}
+        <View style={styles.timelineStep}>
+          <View style={styles.dotContainer}>
+            <View style={[styles.dot, styles.dotDarkGreen]} />
+          </View>
+          <View style={[styles.stepTextContainer, { paddingBottom: 0 }]}>
+            <Text style={styles.stepLabel}>DELIVERY</Text>
+            <Text style={styles.stepValue} numberOfLines={2}>
+              {shipment.delivery || "Location not provided"}
+            </Text>
           </View>
         </View>
       </View>
+
+      {/* Footer (Waiting State Only) */}
+      {!isFound && (
+        <Text style={styles.postedText}>
+          Posted {timeAgo(shipment.createdAt)}
+        </Text>
+      )}
     </TouchableOpacity>
   );
 };
@@ -109,23 +123,23 @@ export const ModernShipmentCard: React.FC<ModernShipmentCardProps> = ({
 const styles = StyleSheet.create({
   cardContainer: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 24,
-    padding: 24,
+    borderRadius: 20,
+    padding: 20,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.05,
-    shadowRadius: 16,
-    elevation: 3,
-    marginBottom: 20,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
+    marginBottom: 16,
     borderWidth: 1,
-    borderColor: "#F5F5F4",
+    borderColor: "#F3F4F6",
   },
   // Driver Header
   driverHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 28,
+    marginBottom: 20,
   },
   driverInfoContainer: {
     flexDirection: "row",
@@ -133,85 +147,97 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   driverAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: "#F3F4F6",
   },
   driverName: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "bold",
     color: "#111827",
   },
   driverRole: {
-    fontSize: 13,
-    color: "#6B7280", // gray-500
+    fontSize: 12,
+    color: "#6B7280",
     marginTop: 2,
   },
   driverActionsCapsule: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F9FAFB", // light gray container
+    backgroundColor: "#F9FAFB",
     borderRadius: 9999,
     padding: 4,
-    gap: 8,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: "#F3F4F6", // gentle bound for visibility
   },
   actionBtnWhite: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.05,
     shadowRadius: 2,
-    elevation: 2,
+    elevation: 1,
   },
   actionBtnYellow: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#FDE047", // vibrant yellow
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#FDE047",
     alignItems: "center",
     justifyContent: "center",
   },
-  // Order Detail
-  topRow: {
+
+  // Order Row
+  orderRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 24,
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  orderLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    flex: 1,
+  },
+  tinyBox: {
+    width: 32,
+    height: 32,
   },
   orderId: {
     fontSize: 18,
-    fontWeight: "900", // Black
-    color: "#1C1917", // stone-900
-    flex: 1,
+    fontWeight: "900",
+    color: "#1C1917", // near black
   },
-  dateText: {
-    fontSize: 14,
-    color: "#78716C",
-    fontWeight: "500",
+  priceText: {
+    fontSize: 18,
+    fontWeight: "900",
+    color: "#1C1917",
   },
-  contentRow: {
-    flexDirection: "row",
-  },
-  timelineCol: {
-    width: "100%",
+
+  // Timeline
+  timelineWrapper: {
     position: "relative",
+    width: "100%",
   },
-  dashedLine: {
+  timelineDashedLine: {
     position: "absolute",
-    left: 9, 
-    top: 14, 
-    bottom: 24, 
+    left: 7, // centered under dot -> 14px width dot -> center is 7
+    top: 14, // below top dot
+    bottom: 24, // stop above bottom dot bounding box
     width: 0,
     borderLeftWidth: 2,
-    borderColor: "#FACC15",
+    borderColor: "#0F3D26", // Dark green mapping to the mockup line color
     borderStyle: "dashed",
     zIndex: 1,
+    opacity: 0.8,
   },
   timelineStep: {
     flexDirection: "row",
@@ -219,43 +245,45 @@ const styles = StyleSheet.create({
   },
   dotContainer: {
     alignItems: "center",
-    width: 20, 
+    width: 14, // strictly dot width
     marginRight: 16,
   },
   dot: {
     width: 14,
     height: 14,
     borderRadius: 7,
-    marginTop: 4, 
-    borderWidth: 2,
-    borderColor: "#FFFFFF",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    marginTop: 2, // alignment tweak based on visual text label
     zIndex: 2,
   },
   dotBlack: {
-    backgroundColor: "#1C1917",
+    backgroundColor: "#1F2937",
   },
-  dotYellow: {
-    backgroundColor: "#FACC15",
+  dotDarkGreen: {
+    backgroundColor: "#0F3D26", // brand-forest
   },
   stepTextContainer: {
     flex: 1,
-    paddingBottom: 24,
+    paddingBottom: 22,
   },
-  timelineLabel: {
-    fontSize: 14,
-    color: "#78716C",
-    marginBottom: 4,
-    fontWeight: "500",
+  stepLabel: {
+    fontSize: 11,
+    color: "#6B7280", // gray-500
+    marginBottom: 2,
+    fontWeight: "600",
+    letterSpacing: 0.5,
   },
-  timelineValue: {
-    fontSize: 16,
+  stepValue: {
+    fontSize: 15,
     fontWeight: "bold",
-    color: "#1C1917",
-    lineHeight: 22,
+    color: "#111827",
+    lineHeight: 20,
+  },
+
+  // Footer
+  postedText: {
+    marginTop: 12,
+    fontSize: 13,
+    color: "#6B7280", // gray-500
+    fontWeight: "500",
   },
 });
