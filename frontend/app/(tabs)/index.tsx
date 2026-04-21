@@ -23,6 +23,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { TrackingCard } from "@/components/TrackingCard";
 import { ShippingCard } from "@/components/ShippingCard";
+import { ToolCard } from "@/components/ToolCard";
 import { useAuthStore } from "@/store/useAuthStore";
 
 export default function HomeScreen() {
@@ -88,6 +89,15 @@ export default function HomeScreen() {
               isFast={true}
             />
 
+            {/* Action Tools Grid */}
+            <View style={styles.toolsGrid}>
+              <ToolCard
+                title={"Calculate\nShipping Cost"}
+                icon={Calculator}
+                onPress={() => {}}
+              />
+            </View>
+
             {/* Recent Shipping Section */}
             <View style={styles.recentSection}>
               <Text style={styles.sectionHeading}>Recent Shipping</Text>
@@ -98,22 +108,6 @@ export default function HomeScreen() {
                 imageSource={require("@/assets/images/cargo_box.png")}
               />
             </View>
-
-            {/* Calculate Shipping Cost */}
-            <TouchableOpacity
-              style={styles.calculateButton}
-              activeOpacity={0.9}
-            >
-              <View style={styles.calculateButtonLeft}>
-                <View style={styles.calculateIconWrapper}>
-                  <Calculator size={20} color="#FFFFFF" />
-                </View>
-                <Text style={styles.calculateText}>
-                  Calculate Shipping Cost
-                </Text>
-              </View>
-              <ChevronRight size={24} color="#FFFFFF" />
-            </TouchableOpacity>
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -212,6 +206,11 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 20,
     gap: 20,
+  },
+  toolsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 16,
   },
   trackingCard: {
     backgroundColor: "#FFD700", // brand-gold
