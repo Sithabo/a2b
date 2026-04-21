@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>A2B Logistics - Shipper Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            ivory: "#F5F5E9",
+                            forest: "#0F3D26",
+                            gold: "#FFD700",
+                        }
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Public Sans", "sans-serif"],
+                        "body": ["Public Sans", "sans-serif"],
+                        "label": ["Public Sans", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Public Sans', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .bg-main-gradient {
+            background: linear-gradient(180deg, #0F3D26 0%, #FFFFFF 60%);
+        }
+        .fast-badge-star {
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+        }
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+    </style>
+</head>
+<body class="bg-main-gradient min-h-screen text-stone-900 pb-32">
+<!-- Header Integrated into Body -->
+<header class="w-full px-6 pt-12 pb-6">
+<div class="max-w-md mx-auto flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full overflow-hidden border-2 border-white/20">
+<img alt="Musa Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnf3R93FfYlV2L90gmCG8-_4Y3CRQqO84WevJBxlw8UlYpfa0odC8yirLKzQpZOiZCRBjMm3vHbY7UHDxOFEIBRfybq8Wp05bASCJrpfnWJuDBCklTGK5P-qC4V9H_TWIDrOJtOSy8---3O_Y7FjrL41p0MUSRTn2PlHUv0uvax3hPzZJlPSvYPdVTj2KN3LNEAVMFb12hteYOJXRc3wFvMYGNYGbY6U8-nGFWsKFcc7M8O8JhKF14JKW_NsOXsUTD_jiXoA6sRfAA"/>
+</div>
+<div>
+<h1 class="text-white font-sans font-semibold text-lg leading-tight">Hey Musa</h1>
+<div class="flex items-center gap-1 text-white/70 text-sm">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">location_on</span>
+<span>Kampala</span>
+</div>
+</div>
+</div>
+<button class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</div>
+</header>
+<main class="max-w-md mx-auto px-6 space-y-6">
+<!-- Search Bar -->
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-stone-400">search</span>
+<input class="w-full h-14 pl-12 pr-4 bg-white border-none rounded-full focus:ring-2 focus:ring-brand-forest transition-all shadow-sm" placeholder="Search Shipping" type="text"/>
+</div>
+<!-- Current Tracking Card -->
+<div class="bg-brand-gold rounded-3xl p-6 shadow-lg relative overflow-hidden">
+<div class="relative z-10 space-y-4">
+<div>
+<p class="text-brand-forest/60 text-xs font-bold">Current Tracking</p>
+<h2 class="text-brand-forest text-2xl font-black">#H62J568107</h2>
+</div>
+<div>
+<p class="text-brand-forest/60 text-xs font-bold">Current Location</p>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-brand-forest" style="font-variation-settings: 'FILL' 1;">location_on</span>
+<span class="text-brand-forest font-bold">Hunters Point, LA</span>
+</div>
+</div>
+<div>
+<p class="text-brand-forest/60 text-xs font-bold">Status</p>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 bg-brand-forest rounded-full"></span>
+<span class="text-brand-forest font-bold">In Transit</span>
+</div>
+</div>
+<!-- Simple Progress Line -->
+<div class="relative h-1 w-full bg-brand-forest/20 rounded-full mt-6">
+<div class="absolute top-0 left-0 h-full w-2/3 bg-brand-forest rounded-full"></div>
+<div class="absolute top-1/2 left-2/3 -translate-y-1/2 -translate-x-1/2 w-8 h-8 bg-brand-forest rounded-full flex items-center justify-center border-4 border-brand-gold">
+<span class="material-symbols-outlined text-white text-sm" data-icon="local_shipping">local_shipping</span>
+</div>
+</div>
+</div>
+<!-- Fast Badge -->
+<div class="absolute top-4 right-4 w-16 h-16 bg-white fast-badge-star flex items-center justify-center -rotate-12">
+<span class="text-[10px] font-black text-brand-forest uppercase">Fast</span>
+</div>
+<!-- Package Illustration Mockup -->
+<div class="absolute right-[-20px] bottom-[-20px] opacity-40">
+<img alt="Packages" class="w-48 rotate-[-15deg]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCy0Jwthlx25J8PWzcCReLF1EnO41b_nEcetHZMeImKzlLpL_OI5hkYjJ7oqmsVvivYW8yb-CvHwDPON6NCAvg0JDgXyFHkspHGgMWeS_6Sv56XEKg8cBMcbZMfEpEyH5-_9YZEHHY6j4wFAPLrIk7V0QhcB49IGANu6Lkj2qc5pkZ4jVOagAeBGwSNvfUEaybOnqRZBaVIyFE0OOmVnetxCrngSZbVxWUgZyDQA_MiijrlSGMzIaWNg0bhe4TxeW7ls1ZEesin5kCN"/>
+</div>
+</div>
+<!-- Recent Shipping Section -->
+<section class="space-y-4 pt-4">
+<h3 class="text-xl font-bold text-stone-900">Recent Shipping</h3>
+<div class="bg-stone-50/50 rounded-3xl p-5 border border-stone-100 shadow-sm relative overflow-hidden group">
+<div class="flex justify-between items-start mb-4">
+<span class="bg-brand-gold text-brand-forest px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide">In Transit</span>
+</div>
+<div class="flex justify-between items-end">
+<div class="space-y-1">
+<h4 class="text-lg font-black text-brand-forest">#H62J568107</h4>
+<p class="text-stone-400 text-xs font-bold uppercase">Delivery Date</p>
+<p class="text-stone-900 font-bold">15 Sep 2025</p>
+</div>
+<div class="w-24 h-24">
+<img alt="Package" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-EbwQqp1lzWS0l1rSW27UsQ6AA2FLegH2CECMQA8eFClU2kS_97iuv_I2geGoGvk3-atLJIe7uAl_FgqUYC1gvYuF_n0XV4CWxXAumxDCi5IyyfToDuxdl-tjdjwpY2RHtKcSz50KsqNT2CZYmDOZYiizVuJpJjGJUsC3zO5I6T--aH4WpCCtfvb3lKItFNhU3mvGm1oSGaigWf_e-J7nDr_LfrasaWyiXXtzfbw7lCc6wXV5jx5o_mpC87Wgzi1Vkwci7pDtgYJ_"/>
+</div>
+</div>
+<!-- Small Progress bar for item -->
+<div class="relative h-1 w-full bg-stone-200 rounded-full mt-4">
+<div class="absolute top-0 left-0 h-full w-1/2 bg-brand-gold rounded-full"></div>
+<div class="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 w-6 h-6 bg-brand-gold rounded-full flex items-center justify-center border-2 border-white">
+<span class="material-symbols-outlined text-brand-forest text-[12px]" data-icon="local_shipping">local_shipping</span>
+</div>
+</div>
+</div>
+<!-- Additional Mini Action -->
+<button class="w-full bg-brand-forest text-white p-5 rounded-3xl flex items-center justify-between shadow-lg active:scale-95 transition-transform">
+<div class="flex items-center gap-4">
+<div class="bg-white/10 p-2 rounded-xl">
+<span class="material-symbols-outlined" data-icon="calculate">calculate</span>
+</div>
+<span class="font-bold">Calculate Shipping Cost</span>
+</div>
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</section>
+</main>
+<!-- BottomNavBar Section -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-white border-t border-stone-100 shadow-[0_-2px_15px_rgba(0,0,0,0.05)] rounded-t-[2rem] pb-safe">
+<div class="max-w-md mx-auto px-4 h-20 flex justify-between items-center relative">
+<!-- 1. Home -->
+<a class="flex flex-col items-center justify-center text-brand-forest w-16" href="#">
+<span class="material-symbols-outlined text-2xl" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="text-[10px] font-bold mt-1">Home</span>
+</a>
+<!-- 2. Receipts/Orders -->
+<a class="flex flex-col items-center justify-center text-stone-400 hover:text-brand-forest transition-colors w-16" href="#">
+<span class="material-symbols-outlined text-2xl" data-icon="receipt_long">receipt_long</span>
+<span class="text-[10px] font-bold mt-1 uppercase">Orders</span>
+</a>
+<!-- 3. Central Prominent '+' Button -->
+<div class="relative -top-6">
+<button class="w-16 h-16 bg-brand-forest rounded-full flex items-center justify-center text-brand-gold shadow-xl border-4 border-white active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-3xl font-bold">add</span>
+</button>
+<span class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-black text-brand-forest whitespace-nowrap uppercase">Post Load</span>
+</div>
+<!-- 4. Notifications/Inbox -->
+<a class="flex flex-col items-center justify-center text-stone-400 hover:text-brand-forest transition-colors w-16" href="#">
+<span class="material-symbols-outlined text-2xl" data-icon="mail">mail</span>
+<span class="text-[10px] font-bold mt-1 uppercase">Inbox</span>
+</a>
+<!-- 5. Account -->
+<a class="flex flex-col items-center justify-center text-stone-400 hover:text-brand-forest transition-colors w-16" href="#">
+<span class="material-symbols-outlined text-2xl" data-icon="person">person</span>
+<span class="text-[10px] font-bold mt-1 uppercase">Account</span>
+</a>
+</div>
+</nav>
+</body></html>
