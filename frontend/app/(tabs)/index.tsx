@@ -22,6 +22,7 @@ import {
 } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { TrackingCard } from "@/components/TrackingCard";
+import { ShippingCard } from "@/components/ShippingCard";
 import { useAuthStore } from "@/store/useAuthStore";
 
 export default function HomeScreen() {
@@ -91,32 +92,11 @@ export default function HomeScreen() {
             <View style={styles.recentSection}>
               <Text style={styles.sectionHeading}>Recent Shipping</Text>
 
-              <View style={styles.recentCard}>
-                <View style={styles.recentHeader}>
-                  <View style={styles.inTransitPill}>
-                    <Text style={styles.inTransitPillText}>IN TRANSIT</Text>
-                  </View>
-                </View>
-
-                <View style={styles.recentBody}>
-                  <View style={styles.recentInfo}>
-                    <Text style={styles.recentId}>#H62J568107</Text>
-                    <Text style={styles.recentDateLabel}>DELIVERY DATE</Text>
-                    <Text style={styles.recentDateValue}>15 Sep 2025</Text>
-                  </View>
-                  <View style={styles.recentImageContainer}>
-                    <Package size={60} color="#D1D5DB" strokeWidth={1} />
-                  </View>
-                </View>
-
-                {/* Small Progress bar */}
-                <View style={styles.smallProgressTrack}>
-                  <View style={styles.smallProgressFill} />
-                  <View style={styles.smallProgressIconContainer}>
-                    <Truck size={10} color="#0F3D26" />
-                  </View>
-                </View>
-              </View>
+              <ShippingCard
+                trackingId="#H62J568107"
+                dateValue="15 Sep 2025"
+                imageSource={require("@/assets/images/cargo_box.png")}
+              />
             </View>
 
             {/* Calculate Shipping Cost */}
