@@ -1,5 +1,11 @@
 import React from "react";
-import { TouchableOpacity, Text, View, StyleSheet, ViewStyle } from "react-native";
+import {
+  TouchableOpacity,
+  Text,
+  View,
+  StyleSheet,
+  ViewStyle,
+} from "react-native";
 
 export interface ToolCardProps {
   title: string;
@@ -37,8 +43,8 @@ export const ToolCard: React.FC<ToolCardProps> = ({
 const styles = StyleSheet.create({
   card: {
     borderRadius: 24,
-    padding: 20,
-    width: "47%", // Fits 2 in a row nicely with gap
+    padding: 12,
+    width: "31%", // Fits 2 in a row nicely with gap
     aspectRatio: 1, // Makes it a perfect square
     justifyContent: "space-between", // Icon top, text bottom
     shadowColor: "#000",
@@ -48,15 +54,15 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   iconBox: {
-    width: 56,
-    height: 56,
+    width: 40,
+    height: 40,
     borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
   },
   title: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: "800", // Extrabold to match screenshot
-    lineHeight: 24,
+    lineHeight: 18,
   },
 });
