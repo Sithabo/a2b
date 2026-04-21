@@ -159,7 +159,7 @@ export default function CreateLoadScreen() {
             onPress={() => {
               console.log("Order finalized!");
               setIsReviewModalOpen(false);
-              router.back();
+              router.push("/create-load/status?state=confirmed");
             }}
           />
         </View>

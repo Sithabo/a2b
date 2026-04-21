@@ -4,7 +4,6 @@ import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-g
 import Animated, { 
     useSharedValue, 
     useAnimatedStyle, 
-    withSpring,
     withTiming,
     runOnJS 
 } from 'react-native-reanimated';
@@ -24,7 +23,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ isVisible, onClose, ti
 
   useEffect(() => {
     if (isVisible) {
-      translateY.value = withSpring(0, { damping: 20, stiffness: 200 });
+      translateY.value = withTiming(0, { duration: 300 });
       opacity.value = withTiming(1, { duration: 300 });
     } else {
       translateY.value = withTiming(SCREEN_HEIGHT, { duration: 300 });
@@ -49,7 +48,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ isVisible, onClose, ti
       if (event.translationY > 150 || event.velocityY > 500) {
         runOnJS(handleClose)();
       } else {
-        translateY.value = withSpring(0, { damping: 20, stiffness: 200 });
+        translateY.value = withTiming(0, { duration: 250 });
       }
     });
 
