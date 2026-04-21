@@ -18,7 +18,7 @@ export const OfferSlider = () => {
       <View style={styles.card}>
         {/* Dynamic Big Number Display */}
         <View style={styles.header}>
-          <Text style={styles.subtitle}>Suggested Offer</Text>
+          <Text style={styles.subtitle}>Your Offer</Text>
           <Text style={styles.amount}>
             {formatValue(offer)} <Text style={styles.currency}>UGX</Text>
           </Text>

@@ -7,7 +7,6 @@ export const DateTimePickerSection = () => {
   const [pickupDate, setPickupDate] = useState<Date | null>(null);
   const [deliveryDate, setDeliveryDate] = useState<Date | null>(null);
   const [time, setTime] = useState<Date | null>(null);
-  const [timeMode, setTimeMode] = useState<"AM" | "PM">("AM");
 
   // Picker visibility state
   const [showPicker, setShowPicker] = useState<"pickup" | "delivery" | "time" | null>(null);
@@ -23,7 +22,6 @@ export const DateTimePickerSection = () => {
       if (showPicker === "delivery") setDeliveryDate(selectedDate);
       if (showPicker === "time") {
         setTime(selectedDate);
-        setTimeMode(selectedDate.getHours() >= 12 ? "PM" : "AM");
       }
     }
     setShowPicker(null);
@@ -43,8 +41,8 @@ export const DateTimePickerSection = () => {
     return date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
-      hour12: true, // This handles AM/PM display string directly if wanted, but we also have the explicit buttons.
-    }).replace(/ [AP]M/, ""); // Remove AM/PM to show only HM, and use our custom buttons.
+      hour12: true,
+    });
   };
 
   return (
@@ -94,18 +92,7 @@ export const DateTimePickerSection = () => {
               {formatTime(time)}
             </Text>
           </View>
-          <View style={styles.timeModeContainer}>
-            <TouchableOpacity onPress={() => setTimeMode("AM")}>
-              <Text style={timeMode === "AM" ? styles.modeActive : styles.modeInactive}>
-                AM
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setTimeMode("PM")}>
-              <Text style={timeMode === "PM" ? styles.modeActive : styles.modeInactive}>
-                PM
-              </Text>
-            </TouchableOpacity>
-          </View>
+
         </TouchableOpacity>
       </View>
 
@@ -180,19 +167,5 @@ const styles = StyleSheet.create({
   },
   placeholder: {
     color: "#9CA3AF",
-  },
-  timeModeContainer: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  modeActive: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "#0F3D26",
-  },
-  modeInactive: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "#D1D5DB",
   },
 });
