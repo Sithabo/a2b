@@ -21,6 +21,7 @@ import {
   Package,
 } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { TrackingCard } from "@/components/TrackingCard";
 import { useAuthStore } from "@/store/useAuthStore";
 
 export default function HomeScreen() {
@@ -78,58 +79,13 @@ export default function HomeScreen() {
           {/* Content Body */}
           <View style={styles.content}>
             {/* Current Tracking Card */}
-            <View style={styles.trackingCard}>
-              <View style={styles.trackingContent}>
-                <View style={styles.trackingRow}>
-                  <Text style={styles.trackingLabel}>Current Tracking</Text>
-                  <Text style={styles.trackingId}>#H62J568107</Text>
-                </View>
-
-                <View style={styles.trackingRow}>
-                  <Text style={styles.trackingLabel}>Current Location</Text>
-                  <View style={styles.trackingValueContainer}>
-                    <MapPin size={14} color="#0F3D26" />
-                    <Text style={styles.trackingValue}>Hunters Point, LA</Text>
-                  </View>
-                </View>
-
-                <View style={styles.trackingRow}>
-                  <Text style={styles.trackingLabel}>Status</Text>
-                  <View style={styles.trackingValueContainer}>
-                    <View style={styles.statusDot} />
-                    <Text style={styles.trackingValue}>In Transit</Text>
-                  </View>
-                </View>
-
-                {/* Progress Line */}
-                <View style={styles.progressTrack}>
-                  <View style={styles.progressFill} />
-                  <View style={styles.progressIconContainer}>
-                    <Truck
-                      size={14}
-                      color="#FFFFFF"
-                      style={{ marginLeft: -1 }}
-                    />
-                  </View>
-                </View>
-              </View>
-
-              {/* Fast Badge */}
-              <View style={styles.fastBadge}>
-                <Text style={styles.fastBadgeText}>FAST</Text>
-              </View>
-
-              {/* Package Illustration (Mockup) */}
-              <View style={styles.packageImageContainer}>
-                {/* Using an Expo Image or simple View placeholder for now */}
-                <Package
-                  size={140}
-                  color="white"
-                  style={{ opacity: 0.2 }}
-                  strokeWidth={1}
-                />
-              </View>
-            </View>
+            <TrackingCard
+              trackingId="#H62J568107"
+              location="Hunters Point, LA"
+              status="In Transit"
+              progressPercentage={66}
+              isFast={true}
+            />
 
             {/* Recent Shipping Section */}
             <View style={styles.recentSection}>
@@ -397,16 +353,11 @@ const styles = StyleSheet.create({
     color: "#1C1917", // stone-900
   },
   recentCard: {
-    backgroundColor: "rgba(250, 250, 249, 0.5)", // stone-50/50
+    backgroundColor: "#FFFFFF", // stone-50/50
     borderRadius: 24, // 3xl
     padding: 20,
     borderWidth: 1,
     borderColor: "#F5F5F4", // stone-100
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
   },
   recentHeader: {
     alignItems: "flex-start",
