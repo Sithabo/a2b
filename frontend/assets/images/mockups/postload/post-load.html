@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>A2B Logistics - Post Load</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            ivory: "#F5F5E9",
+                            forest: "#0F3D26",
+                            gold: "#FFD700",
+                        }
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Public Sans", "sans-serif"],
+                        "body": ["Public Sans", "sans-serif"],
+                        "label": ["Public Sans", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Public Sans', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: #0F3D26;
+            border: 4px solid #FFFFFF;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="bg-brand-ivory min-h-screen text-stone-900 pb-32">
+<!-- Header Integrated into Body -->
+<header class="w-full px-6 pt-12 pb-6">
+<div class="max-w-md mx-auto flex justify-between items-center">
+<button class="w-10 h-10 flex items-center justify-center text-brand-forest">
+<span class="material-symbols-outlined">close</span>
+</button>
+<h1 class="text-brand-forest font-sans font-bold text-xl leading-tight">New order</h1>
+<div class="w-10"></div>
+</div>
+</header>
+<main class="max-w-md mx-auto px-6 space-y-6">
+<!-- Route Card -->
+<div class="bg-white rounded-3xl p-6 shadow-sm border border-stone-100 relative">
+<div class="flex flex-col gap-6 relative">
+<div class="flex items-start gap-4">
+<div class="flex flex-col items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-brand-forest" style="font-variation-settings: 'FILL' 1;">circle</span>
+<div class="w-0.5 h-12 border-l-2 border-dotted border-stone-300"></div>
+<span class="material-symbols-outlined text-stone-300" style="font-variation-settings: 'FILL' 1;">location_on</span>
+</div>
+<div class="flex-1 space-y-6">
+<div class="space-y-1">
+<label class="text-xs font-bold text-stone-400 uppercase tracking-wider">Start location</label>
+<input class="w-full border-none p-0 focus:ring-0 font-bold text-brand-forest text-lg" type="text" value="Houston, TX"/>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-bold text-stone-400 uppercase tracking-wider">Where</label>
+<input class="w-full border-none p-0 focus:ring-0 font-bold text-brand-forest text-lg" type="text" value="San antonio, TX"/>
+</div>
+</div>
+</div>
+<button class="absolute right-0 top-1/2 -translate-y-1/2 w-10 h-10 bg-stone-50 rounded-full flex items-center justify-center border border-stone-100">
+<span class="material-symbols-outlined text-brand-forest">swap_vert</span>
+</button>
+<button class="absolute right-0 bottom-0 w-8 h-8 flex items-center justify-center text-stone-400">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+<!-- Types of Loads -->
+<section class="space-y-3">
+<h3 class="text-lg font-bold text-brand-forest">Types of Loads</h3>
+<div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+<button class="flex-shrink-0 w-28 bg-white p-4 rounded-2xl border border-stone-100 flex flex-col items-center gap-2">
+<span class="material-symbols-outlined text-stone-400">inventory_2</span>
+<span class="text-xs font-bold text-stone-600">General cargo</span>
+</button>
+<button class="flex-shrink-0 w-28 bg-white p-4 rounded-2xl border border-stone-100 flex flex-col items-center gap-2">
+<span class="material-symbols-outlined text-stone-400">lock</span>
+<span class="text-xs font-bold text-stone-600">Bulk cargo</span>
+</button>
+<button class="flex-shrink-0 w-28 bg-white p-4 rounded-2xl border-2 border-brand-forest flex flex-col items-center gap-2">
+<span class="material-symbols-outlined text-brand-forest" style="font-variation-settings: 'FILL' 1;">image</span>
+<span class="text-xs font-bold text-brand-forest">Fragile cargo</span>
+</button>
+</div>
+</section>
+<!-- Your Own Package -->
+<section class="space-y-3">
+<h3 class="text-lg font-bold text-brand-forest">Your own package</h3>
+<div class="bg-white rounded-2xl border border-stone-200 overflow-hidden divide-y divide-stone-200">
+<div class="flex items-center justify-between p-4">
+<input class="border-none p-0 focus:ring-0 text-brand-forest font-medium w-full" placeholder="Cargo code" type="text"/>
+<span class="material-symbols-outlined text-stone-300">info</span>
+</div>
+<div class="flex divide-x divide-stone-200">
+<div class="flex-1 p-4 flex flex-col">
+<label class="text-[10px] font-bold text-stone-400 uppercase">Weight (kg)</label>
+<input class="border-none p-0 focus:ring-0 text-brand-forest font-bold" type="text" value="250"/>
+</div>
+<div class="p-4 flex items-center gap-3">
+<span class="text-brand-forest font-bold">lbs</span>
+<span class="text-stone-300 font-bold">cm</span>
+</div>
+</div>
+<div class="grid grid-cols-3 divide-x divide-stone-200">
+<div class="p-4">
+<label class="text-[10px] font-bold text-stone-400 uppercase">Length (in)</label>
+<input class="border-none p-0 focus:ring-0 text-brand-forest font-bold w-full" type="text" value="12"/>
+</div>
+<div class="p-4">
+<label class="text-[10px] font-bold text-stone-400 uppercase">Width (in)</label>
+<input class="border-none p-0 focus:ring-0 text-brand-forest font-bold w-full" type="text" value="8"/>
+</div>
+<div class="p-4">
+<label class="text-[10px] font-bold text-stone-400 uppercase">Height (in)</label>
+<input class="border-none p-0 focus:ring-0 text-brand-forest font-bold w-full" type="text" value="10"/>
+</div>
+</div>
+</div>
+<button class="flex items-center gap-1 text-brand-forest font-bold text-sm">
+<span class="material-symbols-outlined text-lg">add</span>
+<span>Add package</span>
+</button>
+</section>
+<!-- Book a Load -->
+<section class="space-y-3">
+<h3 class="text-lg font-bold text-brand-forest">Book a load</h3>
+<div class="bg-white rounded-2xl border border-stone-200 overflow-hidden divide-y divide-stone-200">
+<div class="flex items-center justify-between p-4">
+<div class="flex-1">
+<label class="text-[10px] font-bold text-stone-400 uppercase">Pickup Date</label>
+<input class="border-none p-0 focus:ring-0 text-brand-forest font-bold w-full" placeholder="Select Date" type="text"/>
+</div>
+<span class="material-symbols-outlined text-stone-400">calendar_month</span>
+</div>
+<div class="flex items-center justify-between p-4">
+<div class="flex-1">
+<label class="text-[10px] font-bold text-stone-400 uppercase">Delivery Date</label>
+<input class="border-none p-0 focus:ring-0 text-brand-forest font-bold w-full" placeholder="Select Date" type="text"/>
+</div>
+<span class="material-symbols-outlined text-stone-400">calendar_month</span>
+</div>
+<div class="flex items-center justify-between p-4">
+<div class="flex-1">
+<label class="text-[10px] font-bold text-stone-400 uppercase">Time</label>
+<input class="border-none p-0 focus:ring-0 text-brand-forest font-bold w-full" placeholder="Set Time" type="text"/>
+</div>
+<div class="flex gap-2 text-xs font-bold">
+<button class="text-brand-forest">AM</button>
+<button class="text-stone-300">PM</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Recommended Offer -->
+<section class="space-y-4">
+<h3 class="text-lg font-bold text-brand-forest">Recommended Offer</h3>
+<div class="bg-white rounded-3xl p-6 shadow-sm border border-stone-100 space-y-6">
+<div class="text-center">
+<p class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-1">Suggested Offer</p>
+<div class="text-3xl font-black text-brand-forest">150,000 <span class="text-sm font-bold">UGX</span></div>
+</div>
+<div class="space-y-4 px-2">
+<input class="w-full h-2 bg-stone-100 rounded-lg appearance-none cursor-pointer accent-brand-forest" max="180" min="130" step="10" type="range" value="150"/>
+<div class="flex justify-between text-[10px] font-black text-stone-400 uppercase tracking-tighter">
+<div class="text-center">
+<span class="block">Budget</span>
+<span>130k</span>
+</div>
+<div class="text-center text-brand-forest">
+<span class="block">Fair</span>
+<span>150k</span>
+</div>
+<div class="text-center">
+<span class="block">Priority</span>
+<span>180k</span>
+</div>
+</div>
+</div>
+<div class="bg-brand-forest/5 rounded-2xl p-4 flex gap-3">
+<span class="material-symbols-outlined text-brand-forest text-xl" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+<p class="text-xs text-brand-forest font-medium leading-relaxed">
+<span class="font-bold">Tips:</span> Offers above 165,000 UGX are 3x more likely to be accepted within an hour.
+                    </p>
+</div>
+</div>
+</section>
+<button class="w-full bg-brand-forest text-white py-5 rounded-full font-bold shadow-lg active:scale-95 transition-transform">
+            Request pickup
+        </button>
+</main>
+<!-- BottomNavBar Section -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-white border-t border-stone-100 shadow-[0_-2px_15px_rgba(0,0,0,0.05)] rounded-t-[2rem] pb-safe">
+<div class="max-w-md mx-auto px-4 h-20 flex justify-between items-center relative">
+<!-- 1. Home -->
+<a class="flex flex-col items-center justify-center text-stone-400 w-16" href="#">
+<span class="material-symbols-outlined text-2xl" data-icon="home">home</span>
+<span class="text-[10px] font-bold mt-1 uppercase">Home</span>
+</a>
+<!-- 2. Receipts/Orders -->
+<a class="flex flex-col items-center justify-center text-stone-400 hover:text-brand-forest transition-colors w-16" href="#">
+<span class="material-symbols-outlined text-2xl" data-icon="receipt_long">receipt_long</span>
+<span class="text-[10px] font-bold mt-1 uppercase">Orders</span>
+</a>
+<!-- 3. Central Prominent '+' Button -->
+<div class="relative -top-6">
+<button class="w-16 h-16 bg-brand-forest rounded-full flex items-center justify-center text-brand-gold shadow-xl border-4 border-white active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-3xl font-bold">add</span>
+</button>
+<span class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-black text-brand-forest whitespace-nowrap uppercase">Post Load</span>
+</div>
+<!-- 4. Notifications/Inbox -->
+<a class="flex flex-col items-center justify-center text-stone-400 hover:text-brand-forest transition-colors w-16" href="#">
+<span class="material-symbols-outlined text-2xl" data-icon="mail">mail</span>
+<span class="text-[10px] font-bold mt-1 uppercase">Inbox</span>
+</a>
+<!-- 5. Account -->
+<a class="flex flex-col items-center justify-center text-stone-400 hover:text-brand-forest transition-colors w-16" href="#">
+<span class="material-symbols-outlined text-2xl" data-icon="person">person</span>
+<span class="text-[10px] font-bold mt-1 uppercase">Account</span>
+</a>
+</div>
+</nav>
+</body></html>

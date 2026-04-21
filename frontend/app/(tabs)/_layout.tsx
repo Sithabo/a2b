@@ -92,7 +92,7 @@ export default function TabLayout() {
                     shadowRadius: 8,
                   }}
                 >
-                  <Plus size={32} color="#FFD700" strokeWidth={3} />
+                  <Plus size={32} color="#ffffffff" strokeWidth={3} />
                 </TouchableOpacity>
                 <Text
                   style={{

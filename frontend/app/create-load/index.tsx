@@ -15,22 +15,36 @@ import {
   MapPin,
   Navigation,
   Package,
-  Scale,
-  Banknote,
-  Info,
   ArrowRight,
+  Lock,
+  Image as ImageIcon,
+  Plus,
 } from "lucide-react-native";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/Card";
 import { PrimaryButton } from "@/components/PrimaryButton";
+import { LocationPicker } from "@/components/LocationPicker";
+import { LoadTypeSelector } from "@/components/LoadTypeSelector";
+import { PackageForm, PackageData } from "@/components/PackageForm";
+import { DateTimePickerSection } from "@/components/DateTimePickerSection";
+import { OfferSlider } from "@/components/OfferSlider";
 
 export default function CreateLoadScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
-  const [selectedType, setSelectedType] = useState("Sacks");
+  const [selectedType, setSelectedType] = useState("general");
+  const [startLocation, setStartLocation] = useState("Houston, TX");
+  const [endLocation, setEndLocation] = useState("");
+  const [packages, setPackages] = useState<PackageData[]>([
+    { id: "1", code: "", weight: "250", length: "12", width: "8", height: "10" }
+  ]);
 
-  const loadTypes = ["Sacks", "Boxes", "Machinery", "Furniture"];
+  const loadTypes = [
+    { id: "general", label: "General cargo", icon: Package },
+    { id: "bulk", label: "Bulk cargo", icon: Lock },
+    { id: "fragile", label: "Fragile cargo", icon: ImageIcon },
+  ];
 
   return (
     <SafeAreaView
@@ -43,138 +57,78 @@ export default function CreateLoadScreen() {
       />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Locations Card */}
-        <Card style={styles.cardSpace}>
-          <View style={styles.inputGroup}>
-            <View style={styles.labelContainer}>
-              <MapPin size={14} color="#0F3D26" />
-              <Text style={styles.labelText}>Pickup Location</Text>
-            </View>
-            <TextInput
-              style={styles.input}
-              placeholder="e.g., Kampala, Makindye District"
-              placeholderTextColor="#9CA3AF"
-            />
-          </View>
+        {/* Locations Routing Component */}
+        <LocationPicker
+          startLocation={startLocation}
+          endLocation={endLocation}
+          onChangeStart={setStartLocation}
+          onChangeEnd={setEndLocation}
+          onSwap={() => {
+            const temp = startLocation;
+            setStartLocation(endLocation);
+            setEndLocation(temp);
+          }}
+          onAddStop={() => console.log("Add intermediate stop")}
+        />
 
-          {/* Connector Line */}
-          <View style={styles.connectorLine} />
+        {/* Load Types */}
+        <LoadTypeSelector
+          options={loadTypes}
+          selectedId={selectedType}
+          onSelect={setSelectedType}
+        />
 
-          <View style={styles.inputGroupRelative}>
-            <View style={styles.labelContainer}>
-              <Navigation size={14} color="#D97706" />
-              <Text style={styles.labelText}>Delivery Location</Text>
-            </View>
-            <TextInput
-              style={styles.input}
-              placeholder="e.g., Jinja, Industrial Area"
-              placeholderTextColor="#9CA3AF"
-            />
+        {/* Your Own Package */}
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>Your own package</Text>
+          <View style={styles.packagesList}>
+            {packages.map((pkg, index) => (
+              <PackageForm
+                key={pkg.id}
+                data={pkg}
+                onChange={(updatedPkg) => {
+                  const newPackages = [...packages];
+                  newPackages[index] = updatedPkg;
+                  setPackages(newPackages);
+                }}
+              />
+            ))}
           </View>
-        </Card>
+          <TouchableOpacity
+            style={styles.addPackageButton}
+            onPress={() => {
+              setPackages([
+                ...packages,
+                {
+                  id: Date.now().toString(),
+                  code: "",
+                  weight: "0",
+                  length: "0",
+                  width: "0",
+                  height: "0",
+                },
+              ]);
+            }}
+          >
+            <Plus size={18} color="#0F3D26" />
+            <Text style={styles.addPackageText}>Add package</Text>
+          </TouchableOpacity>
+        </View>
 
-        {/* Load Details Card */}
-        <Card style={styles.cardSpace}>
-          <View>
-            <View style={styles.labelContainer}>
-              <Package size={14} color="#6B7280" />
-              <Text style={styles.labelText}>Load Details</Text>
-            </View>
-            <TextInput
-              style={styles.input}
-              placeholder="e.g., Rice bags (50kg x 10)"
-              placeholderTextColor="#9CA3AF"
-            />
+        {/* Book a Load */}
+        <DateTimePickerSection />
 
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.chipContainer}
-            >
-              {loadTypes.map((type) => (
-                <TouchableOpacity
-                  key={type}
-                  onPress={() => setSelectedType(type)}
-                  style={[
-                    styles.chip,
-                    selectedType === type
-                      ? styles.chipSelected
-                      : styles.chipUnselected,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.chipText,
-                      selectedType === type
-                        ? styles.chipTextSelected
-                        : styles.chipTextUnselected,
-                    ]}
-                  >
-                    {type}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-
-          <View style={styles.marginTop}>
-            <View style={styles.labelContainer}>
-              <Scale size={14} color="#6B7280" />
-              <Text style={styles.labelText}>Weight</Text>
-            </View>
-            <TextInput
-              style={styles.input}
-              placeholder="e.g., 500 kg"
-              placeholderTextColor="#9CA3AF"
-            />
-          </View>
-        </Card>
-
-        {/* Offer Price Card */}
-        <Card>
-          <View style={styles.labelContainer}>
-            <Banknote size={14} color="#D97706" />
-            <Text style={styles.labelText}>Your Offer Price (UGX)</Text>
-          </View>
-          <View style={styles.priceInputContainer}>
-            <TextInput
-              style={styles.priceInput}
-              placeholder="150,000"
-              keyboardType="numeric"
-              placeholderTextColor="#D1D5DB"
-            />
-            <View style={styles.currencyLabel}>
-              <Text style={styles.currencyText}>UGX</Text>
-            </View>
-          </View>
-          <View style={styles.infoContainer}>
-            <Info size={14} color="#6B7280" />
-            <Text style={styles.infoText}>
-              This is what drivers will see and decide to accept.
-            </Text>
-          </View>
-        </Card>
-
-        {/* Notes Card */}
-        <Card>
-          <Text style={[styles.labelText, styles.marginBottom]}>
-            Notes (Optional)
-          </Text>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            placeholder="e.g., Handle with care, fragile items..."
-            placeholderTextColor="#9CA3AF"
-            multiline
-            numberOfLines={3}
-          />
-        </Card>
+        {/* Recommended Offer */}
+        <OfferSlider />
       </ScrollView>
 
       <View style={styles.footer}>
         <PrimaryButton
-          title="Next: Review Offer"
-          onPress={() => router.push("/create-load/review")}
-          icon={ArrowRight}
+          title="Request pickup"
+          onPress={() => {
+            console.log("Submitted Packages Data:", JSON.stringify(packages, null, 2));
+            router.push("/create-load/review");
+          }}
         />
       </View>
     </SafeAreaView>
@@ -189,6 +143,28 @@ const styles = StyleSheet.create({
     padding: 20,
     gap: 24,
     paddingBottom: 100,
+  },
+  sectionContainer: {
+    gap: 12,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#0F3D26",
+  },
+  packagesList: {
+    gap: 16,
+  },
+  addPackageButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 4,
+  },
+  addPackageText: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#0F3D26",
   },
   cardSpace: {
     gap: 16,
