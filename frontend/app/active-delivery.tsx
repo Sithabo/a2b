@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Image } from 'expo-image';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { 
@@ -135,51 +136,70 @@ export default function ActiveDeliveryScreen() {
         </View>
 
         {/* Shipment Details */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-             <Package color="#6B7280" size={14} />
-             <Text style={styles.cardTitle}>Shipment Details</Text>
-          </View>
+        <View style={styles.modernCard}>
+           <View style={styles.modernSubheadingRow}>
+              <Package color="#9CA3AF" size={14} />
+              <Text style={styles.modernSubheading}>PICKUP DETAILS</Text>
+           </View>
+           <View style={styles.modernTopRow}>
+              <Text style={styles.modernOrderId}>#V99MZLQ</Text>
+              <Text style={styles.modernPriceText}>150,000 UGX</Text>
+           </View>
 
-          <View style={styles.timeline}>
-             <View style={styles.timelineLine} />
-             <View style={styles.timelineRow}>
-                <View style={styles.timelineDotStart} />
-                <View>
-                  <Text style={styles.timelineLabel}>Pickup Location</Text>
-                  <Text style={styles.timelineVal}>Kampala, Makindye District</Text>
-                </View>
-             </View>
-             <View style={styles.timelineRow}>
-                <View style={styles.timelineDotEnd} />
-                <View>
-                  <Text style={styles.timelineLabel}>Delivery Location</Text>
-                  <Text style={styles.timelineVal}>Jinja, Industrial Area</Text>
-                </View>
-             </View>
-          </View>
+           <View style={styles.timelineWrapper}>
+             <View style={styles.timelineDashedLine} />
 
-          <View style={styles.cargoBox}>
-            <View style={styles.cargoColLeft}>
-              <Text style={styles.cargoLabel}>Load Description</Text>
-              <Text style={styles.cargoVal}>Rice bags (50kg × 10)</Text>
-            </View>
-            <View style={styles.cargoColRight}>
-              <Text style={styles.cargoLabel}>Weight</Text>
-              <Text style={styles.cargoVal}>500 kg</Text>
-            </View>
-          </View>
+             {/* Pickup */}
+             <View style={styles.timelineStep}>
+               <View style={styles.dotContainer}>
+                 <View style={[styles.dot, styles.dotBlack]} />
+               </View>
+               <View style={styles.stepTextContainer}>
+                 <Text style={styles.stepLabel}>PICKUP</Text>
+                 <Text style={styles.stepValue} numberOfLines={2}>
+                   Kampala, Makindye
+                 </Text>
+               </View>
+             </View>
 
-          <View style={styles.footerRow}>
-             <View>
-               <Text style={styles.offerLabel}>Offer Amount</Text>
-               <Text style={styles.offerAmt}>150,000 <Text style={styles.offerCurrency}>UGX</Text></Text>
+             {/* Delivery */}
+             <View style={styles.timelineStep}>
+               <View style={styles.dotContainer}>
+                 <View style={[styles.dot, styles.dotDarkGreen]} />
+               </View>
+               <View style={[styles.stepTextContainer, { paddingBottom: 0 }]}>
+                 <Text style={styles.stepLabel}>DELIVERY</Text>
+                 <Text style={styles.stepValue} numberOfLines={2}>
+                   Jinja, Industrial Area
+                 </Text>
+               </View>
              </View>
-             <View style={styles.securedBadge}>
-               <CheckCircle color="#B45309" size={12} />
-               <Text style={styles.securedText}>Secured in Escrow</Text>
-             </View>
-          </View>
+           </View>
+           
+           {/* Cargo specifics unique to this page */}
+           <View style={styles.modernCargoList}>
+              <View style={styles.cargoItem}>
+                 <Image source={require("@/assets/images/cargo_box.png")} style={styles.cargoItemImg} contentFit="cover" />
+                 <View style={styles.cargoItemDetails}>
+                    <Text style={styles.cargoItemTitle}>Fragile Cargo</Text>
+                    <Text style={styles.cargoItemMeta}>40x40x50 cm • 15 kg</Text>
+                 </View>
+              </View>
+              <View style={styles.cargoItem}>
+                 <Image source={require("@/assets/images/cargo_box.png")} style={styles.cargoItemImg} contentFit="cover" />
+                 <View style={styles.cargoItemDetails}>
+                    <Text style={styles.cargoItemTitle}>Bulk Cargo</Text>
+                    <Text style={styles.cargoItemMeta}>120x80x100 cm • 200 kg</Text>
+                 </View>
+              </View>
+              <View style={styles.cargoItem}>
+                 <Image source={require("@/assets/images/cargo_box.png")} style={styles.cargoItemImg} contentFit="cover" />
+                 <View style={styles.cargoItemDetails}>
+                    <Text style={styles.cargoItemTitle}>General Cargo</Text>
+                    <Text style={styles.cargoItemMeta}>60x40x40 cm • 25 kg</Text>
+                 </View>
+              </View>
+           </View>
         </View>
 
       </ScrollView>
@@ -468,134 +488,133 @@ const styles = StyleSheet.create({
     fontFamily: 'monospace',
     color: '#1F2937',
   },
-  timeline: {
-    width: '100%',
-    position: 'relative',
-    paddingLeft: 16,
-    gap: 24,
+  modernCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
   },
-  timelineLine: {
-    position: 'absolute',
-    left: 20,
-    top: 6,
-    bottom: 24,
-    width: 2,
-    backgroundColor: '#E5E7EB',
+  modernSubheadingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 12,
   },
-  timelineRow: {
-    position: 'relative',
-  },
-  timelineDotStart: {
-    position: 'absolute',
-    left: -16,
-    top: 4,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#0F3D26',
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-  },
-  timelineDotEnd: {
-    position: 'absolute',
-    left: -16,
-    top: 4,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#0F3D26',
-  },
-  timelineLabel: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: '#9CA3AF',
-    textTransform: 'uppercase',
+  modernSubheading: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "#9CA3AF", // gray-400 for a suitably grayed out look
+    textTransform: "uppercase",
     letterSpacing: 0.5,
   },
-  timelineVal: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#111827',
+  modernTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  modernOrderId: {
+    fontSize: 18,
+    fontWeight: "900",
+    color: "#1C1917", // near black
+  },
+  modernPriceText: {
+    fontSize: 18,
+    fontWeight: "900",
+    color: "#1C1917",
+  },
+  timelineWrapper: {
+    position: "relative",
+    width: "100%",
+  },
+  timelineDashedLine: {
+    position: "absolute",
+    left: 7, // centered under dot -> 14px width dot -> center is 7
+    top: 14, // below top dot
+    bottom: 24, // stop above bottom dot bounding box
+    width: 0,
+    borderLeftWidth: 2,
+    borderColor: "#0F3D26",
+    borderStyle: "dashed",
+    zIndex: 1,
+    opacity: 0.8,
+  },
+  timelineStep: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  dotContainer: {
+    alignItems: "center",
+    width: 14, // strictly dot width
+    marginRight: 16,
+  },
+  dot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
     marginTop: 2,
+    zIndex: 2,
   },
-  cargoBox: {
-    width: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#F9FAFB',
+  dotBlack: {
+    backgroundColor: "#1F2937",
+  },
+  dotDarkGreen: {
+    backgroundColor: "#0F3D26", // brand-forest
+  },
+  stepTextContainer: {
+    flex: 1,
+    paddingBottom: 22,
+  },
+  stepLabel: {
+    fontSize: 11,
+    color: "#6B7280",
+    marginBottom: 2,
+    fontWeight: "600",
+    letterSpacing: 0.5,
+  },
+  stepValue: {
+    fontSize: 15,
+    fontWeight: "bold",
+    color: "#111827",
+    lineHeight: 20,
+  },
+  modernCargoList: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#F3F4F6",
+    gap: 16,
+  },
+  cargoItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  cargoItemImg: {
+    width: 40,
+    height: 40,
     borderRadius: 8,
-    padding: 12,
+    backgroundColor: "#F9FAFB",
     borderWidth: 1,
-    borderColor: '#F3F4F6',
-    marginTop: 20,
+    borderColor: "#E5E7EB",
   },
-  cargoColLeft: {
+  cargoItemDetails: {
     flex: 1,
   },
-  cargoColRight: {
-    paddingLeft: 16,
-    borderLeftWidth: 1,
-    borderLeftColor: '#E5E7EB',
-    alignItems: 'flex-end',
-  },
-  cargoLabel: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#9CA3AF',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  cargoVal: {
+  cargoItemTitle: {
     fontSize: 14,
-    fontWeight: '500',
-    color: '#1F2937',
-    marginTop: 2,
+    fontWeight: "bold",
+    color: "#111827",
   },
-  footerRow: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
-    paddingTop: 16,
-    marginTop: 16,
-  },
-  offerLabel: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#9CA3AF',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 4,
-  },
-  offerAmt: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#111827',
-  },
-  offerCurrency: {
+  cargoItemMeta: {
     fontSize: 12,
-    fontWeight: 'normal',
-    color: '#6B7280',
-  },
-  securedBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: '#FEF3C7',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-  },
-  securedText: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: '#B45309',
+    color: "#6B7280",
+    marginTop: 2,
   },
 });
