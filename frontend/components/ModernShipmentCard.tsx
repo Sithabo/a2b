@@ -1,7 +1,8 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
-import { Shipment } from "@/store/useShipmentStore"; // Ensure path is right based on project
+import { Shipment } from "@/store/useShipmentStore";
+import { MessageSquare, Phone } from "lucide-react-native";
 
 interface ModernShipmentCardProps {
   shipment: Shipment | any;
@@ -33,39 +34,45 @@ export const ModernShipmentCard: React.FC<ModernShipmentCardProps> = ({
       activeOpacity={0.8}
       onPress={onPress}
     >
+      {/* Optional Driver Header when found */}
+      {isFound && (
+        <View style={styles.driverHeader}>
+          <View style={styles.driverInfoContainer}>
+            <Image
+              source={{ uri: "https://i.pravatar.cc/150?img=11" }}
+              style={styles.driverAvatar}
+            />
+            <View>
+              <Text style={styles.driverName}>Guy Hawkins</Text>
+              <Text style={styles.driverRole}>Delivery Partner</Text>
+            </View>
+          </View>
+
+          <View style={styles.driverActionsCapsule}>
+            <TouchableOpacity style={styles.actionBtnWhite} activeOpacity={0.7}>
+              <MessageSquare size={16} color="#111827" fill="#111827" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionBtnYellow} activeOpacity={0.7}>
+              <Phone size={16} color="#111827" fill="#111827" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
       {/* Top Meta Row */}
       <View style={styles.topRow}>
         <Text style={styles.orderId} numberOfLines={1}>
           #{shipment.id}
         </Text>
-
-        <View style={styles.rightMetaGroup}>
-          <View
-            style={[
-              styles.statusPill,
-              isFound ? styles.statusFound : styles.statusWaiting,
-            ]}
-          >
-            <Text
-              style={[
-                styles.statusText,
-                isFound ? styles.statusTextFound : styles.statusTextWaiting,
-              ]}
-            >
-              {isFound ? "Driver Found" : "Waiting..."}
-            </Text>
-          </View>
-          <Text style={styles.dateText}>
-            {timeAgoOrDate(shipment.createdAt)}
-          </Text>
-        </View>
+        <Text style={styles.dateText}>
+          {timeAgoOrDate(shipment.createdAt)}
+        </Text>
       </View>
 
-      {/* Main Delivery Timeline & Mockup */}
+      {/* Main Delivery Timeline */}
       <View style={styles.contentRow}>
-        {/* Timeline Col */}
         <View style={styles.timelineCol}>
-          {/* Absolute Dashed Line spanning the gap between top dot and bottom dot */}
+          {/* Absolute Dashed Line spanning between dots */}
           <View style={styles.dashedLine} />
 
           {/* Pickup Step */}
@@ -95,15 +102,6 @@ export const ModernShipmentCard: React.FC<ModernShipmentCardProps> = ({
           </View>
         </View>
       </View>
-
-      {/* Modern Edge Box Mockup */}
-      <View style={styles.cargoImageWrapper} pointerEvents="none">
-        <Image
-          source={require("@/assets/images/cargo_box.png")}
-          style={styles.cargoImage}
-          contentFit="contain"
-        />
-      </View>
     </TouchableOpacity>
   );
 };
@@ -119,54 +117,78 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 3,
     marginBottom: 20,
-    minHeight: 200,
     borderWidth: 1,
     borderColor: "#F5F5F4",
-    position: "relative",
-    overflow: "hidden", // Critical to clip the box image cleanly
   },
+  // Driver Header
+  driverHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 28,
+  },
+  driverInfoContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  driverAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#F3F4F6",
+  },
+  driverName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#111827",
+  },
+  driverRole: {
+    fontSize: 13,
+    color: "#6B7280", // gray-500
+    marginTop: 2,
+  },
+  driverActionsCapsule: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F9FAFB", // light gray container
+    borderRadius: 9999,
+    padding: 4,
+    gap: 8,
+  },
+  actionBtnWhite: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  actionBtnYellow: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#FDE047", // vibrant yellow
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  // Order Detail
   topRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
+    alignItems: "center",
     marginBottom: 24,
-    zIndex: 2,
   },
   orderId: {
     fontSize: 18,
     fontWeight: "900", // Black
     color: "#1C1917", // stone-900
     flex: 1,
-    paddingRight: 16,
-  },
-  rightMetaGroup: {
-    alignItems: "flex-end",
-    gap: 6,
-  },
-  statusPill: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 9999,
-  },
-  statusFound: {
-    backgroundColor: "#ECFDF5", // emerald-50
-    borderWidth: 1,
-    borderColor: "#6EE7B7",
-  },
-  statusWaiting: {
-    backgroundColor: "#FEF3C7", // amber-50
-    borderWidth: 1,
-    borderColor: "#FDE68A",
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: "bold",
-  },
-  statusTextFound: {
-    color: "#059669",
-  },
-  statusTextWaiting: {
-    color: "#D97706",
   },
   dateText: {
     fontSize: 14,
@@ -175,10 +197,6 @@ const styles = StyleSheet.create({
   },
   contentRow: {
     flexDirection: "row",
-    position: "relative",
-    zIndex: 2,
-    // Ensures text never stretches over the box image
-    paddingRight: 100, 
   },
   timelineCol: {
     width: "100%",
@@ -186,9 +204,9 @@ const styles = StyleSheet.create({
   },
   dashedLine: {
     position: "absolute",
-    left: 9, // Exactly centered under the 20px wide dotContainer (width 20 -> center is 10. dot width 14)
-    top: 14, // Start exactly below top dot
-    bottom: 24, // End slightly above bottom dot bounds
+    left: 9, 
+    top: 14, 
+    bottom: 24, 
     width: 0,
     borderLeftWidth: 2,
     borderColor: "#FACC15",
@@ -201,14 +219,14 @@ const styles = StyleSheet.create({
   },
   dotContainer: {
     alignItems: "center",
-    width: 20, // Strict width to center the dashed line easily
+    width: 20, 
     marginRight: 16,
   },
   dot: {
     width: 14,
     height: 14,
     borderRadius: 7,
-    marginTop: 4, // Drop slightly so it aligns with the first text line visually
+    marginTop: 4, 
     borderWidth: 2,
     borderColor: "#FFFFFF",
     shadowColor: "#000",
@@ -226,7 +244,7 @@ const styles = StyleSheet.create({
   },
   stepTextContainer: {
     flex: 1,
-    paddingBottom: 24, // Spacing between steps
+    paddingBottom: 24,
   },
   timelineLabel: {
     fontSize: 14,
@@ -239,21 +257,5 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#1C1917",
     lineHeight: 22,
-  },
-  cargoImageWrapper: {
-    position: "absolute",
-    right: -25,
-    bottom: -20,
-    width: 120,
-    height: 120,
-    zIndex: 1,
-    opacity: 0.95,
-  },
-  cargoImage: {
-    width: "100%",
-    height: "100%",
-    // The image has a white background in the asset itself which blocks elements natively.
-    // Adding mixBlendMode multiply can strip the white background, but it's not supported natively in all RN versions.
-    // Instead we just constrain it tightly to the bottom right and keep text margins away from it.
   },
 });
