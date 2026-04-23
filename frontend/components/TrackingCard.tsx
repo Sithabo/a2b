@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Image, ViewStyle, TextStyle } from "react-native";
+import { View, Text, StyleSheet, Image, ViewStyle, TextStyle, TouchableOpacity } from "react-native";
 import { MapPin, Truck } from "lucide-react-native";
 import Svg, { Polygon, Text as SvgText } from "react-native-svg";
 
@@ -13,6 +13,7 @@ export interface TrackingCardProps {
   labelColor?: string;
   isFast?: boolean;
   style?: ViewStyle;
+  onPress?: () => void;
 }
 
 export const TrackingCard: React.FC<TrackingCardProps> = ({
@@ -25,9 +26,10 @@ export const TrackingCard: React.FC<TrackingCardProps> = ({
   labelColor = "rgba(15, 61, 38, 0.6)",
   isFast = true,
   style,
+  onPress,
 }) => {
   return (
-    <View style={[styles.card, { backgroundColor }, style]}>
+    <TouchableOpacity style={[styles.card, { backgroundColor }, style]} onPress={onPress} activeOpacity={0.9}>
       {/* Background illustration */}
       <Image
         source={{
@@ -111,7 +113,7 @@ export const TrackingCard: React.FC<TrackingCardProps> = ({
           </Svg>
         </View>
       )}
-    </View>
+    </TouchableOpacity>
   );
 };
 

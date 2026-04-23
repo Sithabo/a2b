@@ -87,6 +87,7 @@ export default function HomeScreen() {
               status="In Transit"
               progressPercentage={66}
               isFast={true}
+              onPress={() => router.push({ pathname: "/active-delivery", params: { trackingId: "#H62J568107" } })}
             />
 
             {/* Action Tools Grid */}
