@@ -57,6 +57,7 @@ export default function ReceiptsScreen() {
       key={shipment.id}
       shipment={shipment}
       status="waiting"
+      onPress={() => router.push("/pending-delivery")}
     />
   );
 
@@ -106,6 +107,7 @@ export default function ReceiptsScreen() {
                   pickup: "Kampala, Makindye",
                   delivery: "Jinja, Industrial Area",
                 }}
+                onPress={() => router.push("/pending-delivery")}
               />
               <ModernShipmentCard
                 key="mock2"
@@ -116,13 +118,14 @@ export default function ReceiptsScreen() {
                   pickup: "Entebbe, Airport Road",
                   delivery: "Kampala, City Center",
                 }}
+                onPress={() => router.push("/pending-delivery")}
               />
             </>
           )}
         </View>
 
         {/* ── Section 2: Paid & Active ── */}
-        <View style={styles.activeSection}>
+        <View>
           <View style={styles.sectionHeader}>
             <View style={styles.sectionLabelRow}>
               <CheckCircle color="#059669" size={18} />
