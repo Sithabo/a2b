@@ -106,6 +106,7 @@ export default function HomeScreen() {
                 trackingId="#H62J568107"
                 dateValue="15 Sep 2025"
                 imageSource={require("@/assets/images/cargo_box.png")}
+                onPress={() => router.push({ pathname: "/active-delivery", params: { trackingId: "#H62J568107" } })}
               />
             </View>
           </View>

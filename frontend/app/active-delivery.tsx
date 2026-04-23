@@ -15,9 +15,11 @@ import {
   MessageSquare, 
   Package 
 } from 'lucide-react-native';
+import { useLocalSearchParams } from 'expo-router';
 
 export default function ActiveDeliveryScreen() {
   const router = useRouter();
+  const { trackingId } = useLocalSearchParams<{ trackingId: string }>();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? 'light'];
 
@@ -142,7 +144,7 @@ export default function ActiveDeliveryScreen() {
               <Text style={styles.modernSubheading}>PICKUP DETAILS</Text>
            </View>
            <View style={styles.modernTopRow}>
-              <Text style={styles.modernOrderId}>#V99MZLQ</Text>
+              <Text style={styles.modernOrderId}>{trackingId || "#V99MZLQ"}</Text>
               <Text style={styles.modernPriceText}>150,000 UGX</Text>
            </View>
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Image, ViewStyle, ImageSourcePropType } from "react-native";
+import { View, Text, StyleSheet, Image, ViewStyle, ImageSourcePropType, TouchableOpacity } from "react-native";
 import { Truck } from "lucide-react-native";
 
 export interface ShippingCardProps {
@@ -10,6 +10,7 @@ export interface ShippingCardProps {
   progressPercentage?: number;
   imageSource?: ImageSourcePropType;
   style?: ViewStyle;
+  onPress?: () => void;
 }
 
 export const ShippingCard: React.FC<ShippingCardProps> = ({
@@ -20,9 +21,10 @@ export const ShippingCard: React.FC<ShippingCardProps> = ({
   progressPercentage = 50,
   imageSource,
   style,
+  onPress,
 }) => {
   return (
-    <View style={[styles.card, style]}>
+    <TouchableOpacity style={[styles.card, style]} onPress={onPress} activeOpacity={0.8}>
       <View style={styles.header}>
         <View style={styles.statusPill}>
           <Text style={styles.statusPillText}>{statusText}</Text>
@@ -53,7 +55,7 @@ export const ShippingCard: React.FC<ShippingCardProps> = ({
           <Truck size={10} color="#0F3D26" />
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
