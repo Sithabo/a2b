@@ -21,7 +21,7 @@ export default function ReleaseFundsScreen() {
             <ArrowLeft color="#111827" size={24} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Release Funds</Text>
-          <View style={{ width: 40 }} /> {/* Spacer */}
+          <View style={{ width: 40 }} />
         </View>
       </View>
 

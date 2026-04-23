@@ -22,7 +22,7 @@ export default function ConfirmDeliveryScreen() {
             <ArrowLeft color="#111827" size={24} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Confirm Delivery</Text>
-          <View style={{ width: 40 }} /> {/* Spacer for centering */}
+          <View style={{ width: 40 }} />
         </View>
       </View>
 

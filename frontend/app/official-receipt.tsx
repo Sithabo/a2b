@@ -21,7 +21,7 @@ export default function OfficialReceiptScreen() {
             <ArrowLeft color="#111827" size={24} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Official Receipt</Text>
-          <View style={{ width: 40 }} /> {/* Spacer */}
+          <View style={{ width: 40 }} />
         </View>
       </View>
 
