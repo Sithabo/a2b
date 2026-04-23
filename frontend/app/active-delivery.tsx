@@ -650,17 +650,6 @@ const styles = StyleSheet.create({
     right: 0,
     paddingHorizontal: 20,
   },
-  confirmButton: {
-    backgroundColor: "#0F3D26",
-    borderRadius: 12,
-    paddingVertical: 18,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
-  },
   confirmButtonText: {
     color: "#FFFFFF",
     fontSize: 16,

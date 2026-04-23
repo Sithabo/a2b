@@ -35,7 +35,7 @@ export default function PendingDeliveryScreen() {
             <ArrowLeft color="#FFFFFF" size={24} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Order Details</Text>
-          <View style={{ width: 40 }} /> {/* Spacer for centering */}
+          <View style={{ width: 40 }} />
         </View>
       </View>
 
