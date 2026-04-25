@@ -7,11 +7,12 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
+import CountryPicker, { CountryCode, Country } from 'react-native-country-picker-modal';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import { Button } from "@/components/ui/Button";
 import { ThemedText } from "@/components/ThemedText";
 import { Colors } from "@/constants/theme";
@@ -20,9 +21,27 @@ export default function LoginScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [countryCode, setCountryCode] = useState<CountryCode>('UG');
+  const [callingCode, setCallingCode] = useState('256');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const onSelectCountry = (country: Country) => {
+    setCountryCode(country.cca2);
+    setCallingCode(country.callingCode[0]);
+    setError("");
+  };
 
   const handleLogin = (method: "momo" | "sms") => {
+    const fullNumber = `+${callingCode}${phoneNumber}`;
+    const parsedNumber = parsePhoneNumberFromString(fullNumber);
+
+    if (!parsedNumber || !parsedNumber.isValid()) {
+      setError("Please enter a valid phone number.");
+      return;
+    }
+
+    setError("");
     setIsLoading(true);
     // Simulate API call
     setTimeout(() => {
@@ -30,7 +49,7 @@ export default function LoginScreen() {
       // Pass the method and role to the next screen
       router.push({
         pathname: "/(auth)/verify-otp",
-        params: { role: params.role, method, phone: phoneNumber },
+        params: { role: params.role, method, phone: fullNumber },
       });
     }, 1000);
   };
@@ -55,7 +74,7 @@ export default function LoginScreen() {
               Enter Your Phone
             </ThemedText>
             <ThemedText style={styles.headerSubtitle}>
-              Verify with MTN MoMo or SMS to continue as a{" "}
+              Verify with SMS to continue as a{" "}
               <ThemedText style={{ fontWeight: "bold", fontSize: 18 }}>
                 {params.role || "user"}
               </ThemedText>
@@ -68,9 +87,17 @@ export default function LoginScreen() {
             {/* Phone Input */}
             <View style={styles.inputGroup}>
               <ThemedText style={styles.inputLabel}>Phone Number</ThemedText>
-              <View style={styles.inputWrapper}>
-                <View style={styles.countryCode}>
-                  <ThemedText style={styles.countryCodeText}>+256</ThemedText>
+              <View style={[styles.inputWrapper, error ? styles.inputError : null]}>
+                <View style={styles.countryCodePicker}>
+                  <CountryPicker
+                    withFilter
+                    withFlag
+                    withCallingCode
+                    withCallingCodeButton
+                    countryCode={countryCode}
+                    onSelect={onSelectCountry}
+                    containerButtonStyle={styles.pickerButton}
+                  />
                 </View>
                 <TextInput
                   placeholder="700 000 000"
@@ -78,22 +105,23 @@ export default function LoginScreen() {
                   style={styles.textInput}
                   keyboardType="phone-pad"
                   value={phoneNumber}
-                  onChangeText={setPhoneNumber}
-                  maxLength={9}
+                  onChangeText={(text) => { setPhoneNumber(text); setError(""); }}
+                  maxLength={15}
                 />
               </View>
+              {error ? <ThemedText style={styles.errorText}>{error}</ThemedText> : null}
             </View>
 
             <View style={styles.buttonGroup}>
-              {/* MTN MoMo Button */}
-              <Button
+              {/* MTN MoMo Button - Disabled as per request */}
+              {/* <Button
                 title="MTN MoMo"
                 size="lg"
                 onPress={() => handleLogin("momo")}
                 isLoading={isLoading}
                 style={styles.momoButton}
                 textStyle={styles.momoButtonText}
-              />
+              /> */}
 
               <Button
                 title="Send SMS Code"
@@ -175,25 +203,33 @@ const styles = StyleSheet.create({
     height: 56,
     paddingHorizontal: 16,
   },
-  countryCode: {
+  inputError: {
+    borderColor: "red",
+  },
+  countryCodePicker: {
     backgroundColor: Colors.light.gray[100],
     height: "100%",
     justifyContent: "center",
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
     marginRight: 8,
     marginLeft: -16, // to touch the edge
     borderRightWidth: 1,
     borderRightColor: Colors.light.gray[200],
   },
-  countryCodeText: {
-    color: Colors.light.gray[600],
-    fontWeight: "bold",
+  pickerButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
   textInput: {
     flex: 1,
     fontSize: 18,
     color: Colors.light.gray[900],
     fontWeight: "500",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 12,
   },
   buttonGroup: {
     gap: 16,
