@@ -30,11 +30,13 @@ import { DateTimePickerSection } from "@/components/DateTimePickerSection";
 import { OfferSlider } from "@/components/OfferSlider";
 import { BottomSheet } from "@/components/BottomSheet";
 import { OrderSummary } from "@/components/OrderSummary";
+import { useShipmentStore } from "@/store/useShipmentStore";
 
 export default function CreateLoadScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+  const addShipment = useShipmentStore((state) => state.addShipment);
   const [selectedType, setSelectedType] = useState("general");
   const [startLocation, setStartLocation] = useState("Houston, TX");
   const [endLocation, setEndLocation] = useState("");
@@ -157,6 +159,20 @@ export default function CreateLoadScreen() {
           <PrimaryButton
             title="Finalize order"
             onPress={() => {
+              const totalWeight = packages.reduce((acc, p) => acc + (parseFloat(p.weight) || 0), 0).toString();
+              const cargoTypeStr = loadTypes.find((t) => t.id === selectedType)?.label || "General cargo";
+              
+              addShipment({
+                pickup: startLocation,
+                delivery: endLocation,
+                cargoType: cargoTypeStr,
+                weight: totalWeight,
+                offerPrice: "150000",
+                status: "OPEN",
+                deliveryDate: new Date(Date.now() + 2 * 86400000).toISOString(),
+                acceptedByDriver: false,
+              });
+
               console.log("Order finalized!");
               setIsReviewModalOpen(false);
               router.push("/create-load/status?state=confirmed");

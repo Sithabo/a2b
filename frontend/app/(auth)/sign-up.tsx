@@ -11,6 +11,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { ArrowLeft, CheckSquare, Square } from "lucide-react-native";
+import CountryPicker, { CountryCode, Country } from 'react-native-country-picker-modal';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import { Button } from "@/components/ui/Button";
 import { ThemedText } from "@/components/ThemedText";
 import { Colors } from "@/constants/theme";
@@ -18,13 +20,31 @@ import { Colors } from "@/constants/theme";
 export default function SignUpScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const [phone, setPhone] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [countryCode, setCountryCode] = useState<CountryCode>('UG');
+  const [callingCode, setCallingCode] = useState('256');
   const [isLoading, setIsLoading] = useState(false);
   const [agreed, setAgreed] = useState(false);
+  const [error, setError] = useState("");
+
+  const onSelectCountry = (country: Country) => {
+    setCountryCode(country.cca2);
+    setCallingCode(country.callingCode[0]);
+    setError("");
+  };
 
   const handleSignUp = () => {
-    if (!agreed || !phone) return;
-    
+    if (!agreed) return;
+
+    const fullNumber = `+${callingCode}${phoneNumber}`;
+    const parsedNumber = parsePhoneNumberFromString(fullNumber);
+
+    if (!parsedNumber || !parsedNumber.isValid()) {
+      setError("Please enter a valid phone number.");
+      return;
+    }
+
+    setError("");
     setIsLoading(true);
     // Simulate sending OTP
     setTimeout(() => {
@@ -32,7 +52,7 @@ export default function SignUpScreen() {
       // Navigate to OTP with phone and role
       router.push({
         pathname: "/(auth)/verify-otp",
-        params: { role: params.role || "user", phone },
+        params: { role: params.role || "user", phone: fullNumber },
       });
     }, 1000);
   };
@@ -64,20 +84,29 @@ export default function SignUpScreen() {
             {/* Phone */}
             <View style={styles.inputGroup}>
               <ThemedText style={styles.inputLabel}>Mobile Number</ThemedText>
-              <View style={styles.inputWrapper}>
-                <View style={styles.countryCode}>
-                  <ThemedText style={styles.countryCodeText}>+256</ThemedText>
+              <View style={[styles.inputWrapper, error ? styles.inputError : null]}>
+                <View style={styles.countryCodePicker}>
+                  <CountryPicker
+                    withFilter
+                    withFlag
+                    withCallingCode
+                    withCallingCodeButton
+                    countryCode={countryCode}
+                    onSelect={onSelectCountry}
+                    containerButtonStyle={styles.pickerButton}
+                  />
                 </View>
                 <TextInput
                   placeholder="700 000 000"
                   placeholderTextColor={Colors.light.gray[400]}
                   style={styles.textInput}
                   keyboardType="phone-pad"
-                  value={phone}
-                  onChangeText={setPhone}
-                  maxLength={9}
+                  value={phoneNumber}
+                  onChangeText={(text) => { setPhoneNumber(text); setError(""); }}
+                  maxLength={15}
                 />
               </View>
+              {error ? <ThemedText style={styles.errorText}>{error}</ThemedText> : null}
             </View>
 
             {/* Terms Checkbox */}
@@ -87,7 +116,7 @@ export default function SignUpScreen() {
               activeOpacity={0.7}
             >
               {agreed ? (
-                <CheckSquare size={20} color="#8A2BE2" /> 
+                <CheckSquare size={20} color="#000000" /> 
               ) : (
                 <Square size={20} color={Colors.light.gray[400]} />
               )}
@@ -101,7 +130,7 @@ export default function SignUpScreen() {
               size="lg"
               onPress={handleSignUp}
               isLoading={isLoading}
-              disabled={!agreed || !phone}
+              disabled={!agreed || !phoneNumber}
               style={styles.createButton}
               textStyle={styles.createButtonText}
             />
@@ -126,7 +155,7 @@ export default function SignUpScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.light.ivory, // or "#FFFFFF" based on UI, keeping ivory for theme
+    backgroundColor: Colors.light.ivory,
   },
   keyboardView: {
     flex: 1,
@@ -180,22 +209,29 @@ const styles = StyleSheet.create({
     height: 56,
     paddingHorizontal: 16,
   },
-  countryCode: {
+  inputError: {
+    borderColor: "red",
+  },
+  countryCodePicker: {
     marginRight: 8,
     borderRightWidth: 1,
     borderRightColor: Colors.light.gray[200],
     paddingRight: 8,
     justifyContent: "center",
   },
-  countryCodeText: {
-    color: Colors.light.gray[800],
-    fontWeight: "600",
-    fontSize: 16,
+  pickerButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
   textInput: {
     flex: 1,
     fontSize: 16,
     color: Colors.light.gray[900],
+  },
+  errorText: {
+    color: "red",
+    fontSize: 12,
   },
   checkboxContainer: {
     flexDirection: "row",

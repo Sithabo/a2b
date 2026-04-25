@@ -1,10 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   StyleSheet,
+  Modal,
+  TextInput,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Image } from "expo-image";
@@ -23,15 +28,44 @@ import {
   PhoneCall,
   LogOut,
   ChevronRight,
+  AlertCircle,
+  X,
 } from "lucide-react-native";
 
 export default function AccountScreen() {
   const router = useRouter();
-  const { userProfile, logout } = useAuthStore();
+  const { userProfile, logout, updateProfile } = useAuthStore();
+  
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [editCompany, setEditCompany] = useState("");
+  const [editRegion, setEditRegion] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleLogout = () => {
     logout();
     router.replace("/(auth)/login");
+  };
+
+  const openEditModal = () => {
+    setEditCompany(userProfile?.company || "");
+    setEditRegion(userProfile?.region || "");
+    setEditEmail(userProfile?.email || "");
+    setIsEditModalVisible(true);
+  };
+
+  const handleSaveProfile = () => {
+    setIsSaving(true);
+    setTimeout(() => {
+      updateProfile({
+        company: editCompany,
+        region: editRegion,
+        email: editEmail,
+        name: editCompany, // Keep name synced with company for shippers
+      });
+      setIsSaving(false);
+      setIsEditModalVisible(false);
+    }, 2000);
   };
 
   return (
@@ -55,6 +89,16 @@ export default function AccountScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* Warning Banner */}
+        {!userProfile?.email && (
+          <View style={styles.warningBanner}>
+            <AlertCircle color="#B45309" size={20} />
+            <Text style={styles.warningText}>
+              Please add your email address to secure your account.
+            </Text>
+          </View>
+        )}
+
         {/* Profile Card */}
         <View style={styles.profileCard}>
           <View style={styles.profileLeft}>
@@ -65,12 +109,16 @@ export default function AccountScreen() {
             />
             <View style={styles.profileInfo}>
               <Text style={styles.profileName}>
-                {userProfile?.name || "John Musa"}
+                {userProfile?.company || userProfile?.name || "John Musa"}
               </Text>
-              <Text style={styles.profileEmail}>johnmusa@email.com</Text>
+              {userProfile?.email ? (
+                <Text style={styles.profileEmail}>{userProfile.email}</Text>
+              ) : (
+                <Text style={[styles.profileEmail, { color: "#EF4444" }]}>No Email Added</Text>
+              )}
             </View>
           </View>
-          <TouchableOpacity style={styles.editButton} activeOpacity={0.7}>
+          <TouchableOpacity style={styles.editButton} activeOpacity={0.7} onPress={openEditModal}>
             <Pencil color="#0F3D26" size={20} />
           </TouchableOpacity>
         </View>
@@ -80,7 +128,7 @@ export default function AccountScreen() {
           <Text style={styles.sectionTitle}>General</Text>
           <View style={styles.card}>
             {/* Business Details */}
-            <TouchableOpacity style={styles.rowItem} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.rowItem} activeOpacity={0.7} onPress={openEditModal}>
               <View style={styles.rowLeft}>
                 <View style={styles.iconBoxGreen}>
                   <Building2 color="#0F3D26" size={20} />
@@ -187,6 +235,82 @@ export default function AccountScreen() {
           <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Edit Profile Bottom Sheet Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isEditModalVisible}
+        onRequestClose={() => !isSaving && setIsEditModalVisible(false)}
+      >
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.modalOverlay}
+        >
+          <TouchableOpacity 
+            style={styles.modalBackdrop} 
+            activeOpacity={1} 
+            onPress={() => !isSaving && setIsEditModalVisible(false)} 
+          />
+          <View style={styles.bottomSheet}>
+            <View style={styles.sheetHeader}>
+              <Text style={styles.sheetTitle}>Edit Business Details</Text>
+              <TouchableOpacity onPress={() => !isSaving && setIsEditModalVisible(false)}>
+                <X color="#111827" size={24} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.sheetContent}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Company Name</Text>
+                <TextInput
+                  style={styles.textInput}
+                  value={editCompany}
+                  onChangeText={setEditCompany}
+                  placeholder="Acme Logistics"
+                  placeholderTextColor="#9CA3AF"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Operating Region</Text>
+                <TextInput
+                  style={styles.textInput}
+                  value={editRegion}
+                  onChangeText={setEditRegion}
+                  placeholder="e.g. Kampala Hub"
+                  placeholderTextColor="#9CA3AF"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Email Address</Text>
+                <TextInput
+                  style={styles.textInput}
+                  value={editEmail}
+                  onChangeText={setEditEmail}
+                  placeholder="your@email.com"
+                  placeholderTextColor="#9CA3AF"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </View>
+
+              <TouchableOpacity 
+                style={styles.saveButton} 
+                onPress={handleSaveProfile}
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.saveButtonText}>Save Details</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </View>
   );
 }
@@ -223,6 +347,22 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     gap: 24,
   },
+  warningBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FEF3C7", // Amber-100
+    padding: 16,
+    borderRadius: 12,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: "#FDE68A", // Amber-200
+  },
+  warningText: {
+    flex: 1,
+    color: "#92400E", // Amber-700
+    fontSize: 14,
+    fontWeight: "500",
+  },
   profileCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 20,
@@ -230,11 +370,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    // shadowColor: "#000",
-    // shadowOffset: { width: 0, height: 4 },
-    // shadowOpacity: 0.05,
-    // shadowRadius: 10,
-    // elevation: 3,
   },
   profileLeft: {
     flexDirection: "row",
@@ -276,11 +411,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 20,
     padding: 20,
-    // shadowColor: "#000",
-    // shadowOffset: { width: 0, height: 4 },
-    // shadowOpacity: 0.05,
-    // shadowRadius: 10,
-    // elevation: 3,
   },
   rowItem: {
     flexDirection: "row",
@@ -334,15 +464,76 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingVertical: 18,
     gap: 12,
-    // shadowColor: "#000",
-    // shadowOffset: { width: 0, height: 4 },
-    // shadowOpacity: 0.05,
-    // shadowRadius: 10,
-    // elevation: 3,
     marginBottom: 70,
   },
   logoutText: {
     color: "#EF4444",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  modalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.4)",
+  },
+  bottomSheet: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 10,
+  },
+  sheetHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  sheetTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#111827",
+  },
+  sheetContent: {
+    gap: 16,
+  },
+  inputGroup: {
+    gap: 8,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+    marginLeft: 4,
+  },
+  textInput: {
+    backgroundColor: "#F9FAFB",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    height: 56,
+    fontSize: 16,
+    color: "#111827",
+  },
+  saveButton: {
+    backgroundColor: "#000000",
+    borderRadius: 12,
+    height: 56,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 16,
+  },
+  saveButtonText: {
+    color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "bold",
   },

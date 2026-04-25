@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   TextInput,
@@ -18,9 +18,28 @@ export default function VerifyOtpScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const [otp, setOtp] = useState("");
+  const [generatedCode, setGeneratedCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const generateNewCode = () => {
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    setGeneratedCode(code);
+    setOtp("");
+    setError("");
+  };
+
+  useEffect(() => {
+    generateNewCode();
+  }, []);
 
   const handleVerify = () => {
+    if (otp !== generatedCode) {
+      setError("Incorrect verification code.");
+      return;
+    }
+
+    setError("");
     setIsLoading(true);
 
     // Simulate API Verification
@@ -59,23 +78,31 @@ export default function VerifyOtpScreen() {
             Verification Code
           </ThemedText>
           <ThemedText style={styles.headerSubtitle}>
-            We sent a code to +256 {params.phone || "*******"}.
+            We sent a code to {params.phone || "*******"}.
           </ThemedText>
         </View>
 
         <View style={styles.formContainer}>
+          {/* Developer Hint */}
+          <View style={styles.devHintBox}>
+            <ThemedText style={styles.devHintText}>
+              Dev Mode: Your code is <ThemedText style={{fontWeight: 'bold'}}>{generatedCode}</ThemedText>
+            </ThemedText>
+          </View>
+
           <View style={styles.inputContainer}>
             <ThemedText style={styles.inputLabel}>Enter Code</ThemedText>
             <TextInput
               placeholder="000000"
               placeholderTextColor={Colors.light.gray[400]}
-              style={styles.otpInput}
+              style={[styles.otpInput, error ? styles.inputError : null]}
               keyboardType="numeric"
               value={otp}
-              onChangeText={setOtp}
+              onChangeText={(text) => { setOtp(text); setError(""); }}
               maxLength={6}
               autoFocus
             />
+            {error ? <ThemedText style={styles.errorText}>{error}</ThemedText> : null}
           </View>
 
           <Button
@@ -89,7 +116,7 @@ export default function VerifyOtpScreen() {
           />
         </View>
 
-        <TouchableOpacity style={styles.resendContainer}>
+        <TouchableOpacity style={styles.resendContainer} onPress={generateNewCode}>
           <ThemedText style={styles.resendText}>Resend Code</ThemedText>
         </TouchableOpacity>
       </KeyboardAvoidingView>
@@ -129,8 +156,21 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: Colors.light.gray[500],
   },
+  devHintBox: {
+    backgroundColor: Colors.light.gray[100],
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.light.gray[300],
+    marginBottom: 8,
+  },
+  devHintText: {
+    color: Colors.light.gray[700],
+    textAlign: "center",
+    fontSize: 14,
+  },
   formContainer: {
-    gap: 32,
+    gap: 24,
   },
   inputContainer: {
     gap: 8,
@@ -152,6 +192,14 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     letterSpacing: 10,
     color: Colors.light.gray[900],
+  },
+  inputError: {
+    borderColor: "red",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 14,
+    textAlign: "center",
   },
   verifyButton: {
     width: "100%",

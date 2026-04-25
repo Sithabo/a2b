@@ -57,7 +57,7 @@ export default function HomeScreen() {
                 </Text>
                 <View style={styles.locationContainer}>
                   <MapPin color="rgba(255, 255, 255, 0.7)" size={14} />
-                  <Text style={styles.locationText}>Kampala</Text>
+                  <Text style={styles.locationText}>{userProfile?.region || "Select Region"}</Text>
                 </View>
               </View>
             </View>

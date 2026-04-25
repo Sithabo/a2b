@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, TextInput, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { View, Text, TextInput, StyleSheet, TouchableOpacity } from "react-native";
 import { Info } from "lucide-react-native";
 
 export interface PackageData {
@@ -17,6 +17,8 @@ export interface PackageFormProps {
 }
 
 export const PackageForm: React.FC<PackageFormProps> = ({ data, onChange }) => {
+  const [weightUnit, setWeightUnit] = useState<"kg" | "lbs">("kg");
+
   const handleChange = (field: keyof PackageData, value: string) => {
     onChange({ ...data, [field]: value });
   };
@@ -38,7 +40,7 @@ export const PackageForm: React.FC<PackageFormProps> = ({ data, onChange }) => {
       {/* Weight Row */}
       <View style={styles.weightRow}>
         <View style={styles.weightInputContainer}>
-          <Text style={styles.label}>WEIGHT (KG)</Text>
+          <Text style={styles.label}>WEIGHT ({weightUnit.toUpperCase()})</Text>
           <TextInput
             style={styles.boldInput}
             value={data.weight}
@@ -49,8 +51,12 @@ export const PackageForm: React.FC<PackageFormProps> = ({ data, onChange }) => {
           />
         </View>
         <View style={styles.unitToggles}>
-          <Text style={styles.unitActive}>lbs</Text>
-          <Text style={styles.unitInactive}>cm</Text>
+          <TouchableOpacity onPress={() => setWeightUnit("lbs")}>
+            <Text style={weightUnit === "lbs" ? styles.unitActive : styles.unitInactive}>lbs</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setWeightUnit("kg")}>
+            <Text style={weightUnit === "kg" ? styles.unitActive : styles.unitInactive}>kg</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
