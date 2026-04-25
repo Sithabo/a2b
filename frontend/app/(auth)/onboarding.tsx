@@ -1,5 +1,4 @@
 import React, { useState, useRef } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   View,
   TouchableOpacity,
@@ -19,6 +18,7 @@ import { Button } from "@/components/ui/Button";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/theme";
 import { ThemedText } from "@/components/ThemedText";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -51,6 +51,7 @@ const SLIDES = [
 
 export default function OnboardingScreen() {
   const router = useRouter();
+  const { completeOnboarding } = useAuthStore();
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollRef = useRef<Animated.ScrollView>(null);
   const scrollX = useSharedValue(0);
@@ -65,7 +66,7 @@ export default function OnboardingScreen() {
     },
   });
 
-  const handleNext = async () => {
+  const handleNext = () => {
     if (currentIndex < SLIDES.length - 1) {
       const nextIndex = currentIndex + 1;
       if (scrollRef.current) {
@@ -77,24 +78,14 @@ export default function OnboardingScreen() {
         setCurrentIndex(nextIndex);
       }
     } else {
-      try {
-        await AsyncStorage.setItem("hasLaunched", "true");
-        router.replace("/(auth)/welcome");
-      } catch (error) {
-        console.error("Error saving onboarding status:", error);
-        router.replace("/(auth)/welcome");
-      }
+      completeOnboarding();
+      router.replace("/(auth)/welcome");
     }
   };
 
-  const handleSkip = async () => {
-    try {
-      await AsyncStorage.setItem("hasLaunched", "true");
-      router.replace("/(auth)/welcome");
-    } catch (error) {
-      console.error("Error saving onboarding status:", error);
-      router.replace("/(auth)/welcome");
-    }
+  const handleSkip = () => {
+    completeOnboarding();
+    router.replace("/(auth)/welcome");
   };
 
   const handleDotPress = (index: number) => {

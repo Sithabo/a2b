@@ -12,7 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
 import CountryPicker, { CountryCode, Country } from 'react-native-country-picker-modal';
-import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import { parsePhoneNumberFromString } from 'libphonenumber-js/min';
 import { Button } from "@/components/ui/Button";
 import { ThemedText } from "@/components/ThemedText";
 import { Colors } from "@/constants/theme";
