@@ -95,7 +95,7 @@ export default function HomeScreen() {
               <ToolCard
                 title={"Calculate\nShipping Cost"}
                 icon={Calculator}
-                onPress={() => {}}
+                onPress={() => router.push("/calculator")}
               />
             </View>
 
