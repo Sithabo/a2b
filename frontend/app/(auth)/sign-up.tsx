@@ -10,41 +10,31 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import {
-  ArrowLeft,
-  Mail,
-  Lock,
-  User,
-  Phone,
-  Eye,
-  EyeOff,
-} from "lucide-react-native";
+import { ArrowLeft, CheckSquare, Square } from "lucide-react-native";
 import { Button } from "@/components/ui/Button";
 import { ThemedText } from "@/components/ThemedText";
 import { Colors } from "@/constants/theme";
-import { useAuthStore } from "@/store/useAuthStore";
 
 export default function SignUpScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
-  const signUp = useAuthStore(state => state.signUp);
+  const [isLoading, setIsLoading] = useState(false);
+  const [agreed, setAgreed] = useState(false);
 
   const handleSignUp = () => {
+    if (!agreed || !phone) return;
+    
     setIsLoading(true);
+    // Simulate sending OTP
     setTimeout(() => {
       setIsLoading(false);
-      signUp({
-        name: fullName || "New User",
-        phone: phone || "",
-        company: "",
-        role: (params.role as string) || "user"
+      // Navigate to OTP with phone and role
+      router.push({
+        pathname: "/(auth)/verify-otp",
+        params: { role: params.role || "user", phone },
       });
-      router.replace("/(tabs)");
-    }, 1500);
+    }, 1000);
   };
 
   return (
@@ -58,94 +48,62 @@ export default function SignUpScreen() {
             onPress={() => router.back()}
             style={styles.backButton}
           >
-            <ArrowLeft size={20} color="#333" />
+            <ArrowLeft size={20} color={Colors.light.gray[900]} />
           </TouchableOpacity>
 
           <View style={styles.headerContainer}>
             <ThemedText type="title" style={styles.headerTitle}>
-              Create Account
+              Sign Up
             </ThemedText>
             <ThemedText style={styles.headerSubtitle}>
-              Start your journey as a {params.role || "user"}.
+              Just a few quick things to get started
             </ThemedText>
           </View>
 
           <View style={styles.formContainer}>
-            {/* Full Name */}
-            <View style={styles.inputGroup}>
-              <ThemedText style={styles.inputLabel}>Full Name</ThemedText>
-              <View style={styles.inputWrapper}>
-                <User size={20} color={Colors.light.gray[400]} />
-                <TextInput
-                  placeholder="John Doe"
-                  placeholderTextColor={Colors.light.gray[400]}
-                  style={styles.textInput}
-                  value={fullName}
-                  onChangeText={setFullName}
-                />
-              </View>
-            </View>
-
-            {/* Email */}
-            <View style={styles.inputGroup}>
-              <ThemedText style={styles.inputLabel}>Email Address</ThemedText>
-              <View style={styles.inputWrapper}>
-                <Mail size={20} color={Colors.light.gray[400]} />
-                <TextInput
-                  placeholder="john@example.com"
-                  placeholderTextColor={Colors.light.gray[400]}
-                  style={styles.textInput}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-              </View>
-            </View>
-
             {/* Phone */}
             <View style={styles.inputGroup}>
-              <ThemedText style={styles.inputLabel}>Phone Number</ThemedText>
+              <ThemedText style={styles.inputLabel}>Mobile Number</ThemedText>
               <View style={styles.inputWrapper}>
-                <Phone size={20} color={Colors.light.gray[400]} />
+                <View style={styles.countryCode}>
+                  <ThemedText style={styles.countryCodeText}>+256</ThemedText>
+                </View>
                 <TextInput
-                  placeholder="+256 700 000 000"
+                  placeholder="700 000 000"
                   placeholderTextColor={Colors.light.gray[400]}
                   style={styles.textInput}
                   keyboardType="phone-pad"
                   value={phone}
                   onChangeText={setPhone}
+                  maxLength={9}
                 />
               </View>
             </View>
 
-            {/* Password */}
-            <View style={styles.inputGroup}>
-              <ThemedText style={styles.inputLabel}>Password</ThemedText>
-              <View style={styles.inputWrapper}>
-                <Lock size={20} color={Colors.light.gray[400]} />
-                <TextInput
-                  placeholder="Create a password"
-                  placeholderTextColor={Colors.light.gray[400]}
-                  style={styles.textInput}
-                  secureTextEntry={!showPassword}
-                />
-                <TouchableOpacity
-                  onPress={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff size={20} color={Colors.light.gray[400]} />
-                  ) : (
-                    <Eye size={20} color={Colors.light.gray[400]} />
-                  )}
-                </TouchableOpacity>
-              </View>
-            </View>
+            {/* Terms Checkbox */}
+            <TouchableOpacity 
+              style={styles.checkboxContainer} 
+              onPress={() => setAgreed(!agreed)}
+              activeOpacity={0.7}
+            >
+              {agreed ? (
+                <CheckSquare size={20} color="#8A2BE2" /> 
+              ) : (
+                <Square size={20} color={Colors.light.gray[400]} />
+              )}
+              <ThemedText style={styles.checkboxLabel}>
+                I Agree With The Terms And Conditions
+              </ThemedText>
+            </TouchableOpacity>
 
             <Button
-              title="Create Account"
+              title="Sign Up"
               size="lg"
               onPress={handleSignUp}
               isLoading={isLoading}
+              disabled={!agreed || !phone}
               style={styles.createButton}
+              textStyle={styles.createButtonText}
             />
           </View>
 
@@ -155,7 +113,7 @@ export default function SignUpScreen() {
                 Already have an account?
               </ThemedText>
               <TouchableOpacity onPress={() => router.push("/(auth)/login")}>
-                <ThemedText style={styles.loginLink}>Log In</ThemedText>
+                <ThemedText style={styles.loginLink}>Sign In</ThemedText>
               </TouchableOpacity>
             </View>
           </View>
@@ -168,7 +126,7 @@ export default function SignUpScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.light.ivory,
+    backgroundColor: Colors.light.ivory, // or "#FFFFFF" based on UI, keeping ivory for theme
   },
   keyboardView: {
     flex: 1,
@@ -193,12 +151,13 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   headerTitle: {
-    color: Colors.light.primary,
+    color: "#000000",
     fontSize: 28,
+    fontWeight: "bold",
   },
   headerSubtitle: {
-    fontSize: 18,
-    color: Colors.light.gray[500],
+    fontSize: 16,
+    color: Colors.light.gray[600],
   },
   formContainer: {
     gap: 20,
@@ -208,7 +167,7 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontWeight: "600",
-    color: Colors.light.primary,
+    color: "#000000",
     marginLeft: 4,
   },
   inputWrapper: {
@@ -218,17 +177,45 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.light.gray[200],
     borderRadius: 12,
-    paddingHorizontal: 16,
     height: 56,
+    paddingHorizontal: 16,
+  },
+  countryCode: {
+    marginRight: 8,
+    borderRightWidth: 1,
+    borderRightColor: Colors.light.gray[200],
+    paddingRight: 8,
+    justifyContent: "center",
+  },
+  countryCodeText: {
+    color: Colors.light.gray[800],
+    fontWeight: "600",
+    fontSize: 16,
   },
   textInput: {
     flex: 1,
-    marginLeft: 12,
     fontSize: 16,
     color: Colors.light.gray[900],
   },
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+    gap: 12,
+  },
+  checkboxLabel: {
+    fontSize: 14,
+    color: "#000000",
+    fontWeight: "500",
+  },
   createButton: {
     marginTop: 24,
+    backgroundColor: "#000000",
+    borderRadius: 12,
+  },
+  createButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "bold",
   },
   footerContainer: {
     flex: 1,
@@ -246,6 +233,7 @@ const styles = StyleSheet.create({
   },
   loginLink: {
     fontWeight: "bold",
-    color: Colors.light.primary,
+    color: "#000000",
+    textDecorationLine: "underline",
   },
 });

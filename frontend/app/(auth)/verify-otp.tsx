@@ -13,14 +13,12 @@ import { ArrowLeft } from "lucide-react-native";
 import { Button } from "@/components/ui/Button";
 import { ThemedText } from "@/components/ThemedText";
 import { Colors } from "@/constants/theme";
-import { useAuthStore } from "@/store/useAuthStore";
 
 export default function VerifyOtpScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const login = useAuthStore(state => state.login);
 
   const handleVerify = () => {
     setIsLoading(true);
@@ -32,12 +30,13 @@ export default function VerifyOtpScreen() {
       const role = params.role as string;
       const phone = params.phone as string;
 
-      login(phone || "", role);
-
       if (role === "driver") {
         router.push("/(auth)/driver/verify-identity");
       } else {
-        router.replace("/(tabs)");
+        router.push({
+          pathname: "/(auth)/business-details",
+          params: { role: role || "user", phone },
+        });
       }
     }, 1500);
   };
@@ -86,6 +85,7 @@ export default function VerifyOtpScreen() {
             isLoading={isLoading}
             disabled={otp.length < 6}
             style={styles.verifyButton}
+            textStyle={styles.verifyButtonText}
           />
         </View>
 
@@ -156,6 +156,9 @@ const styles = StyleSheet.create({
   verifyButton: {
     width: "100%",
   },
+  verifyButtonText: {
+    fontWeight: "bold",
+  },
   resendContainer: {
     alignItems: "center",
     marginTop: 24,
@@ -164,5 +167,6 @@ const styles = StyleSheet.create({
     color: Colors.light.primary,
     fontWeight: "600",
     fontSize: 16,
+    textDecorationLine: "underline",
   },
 });

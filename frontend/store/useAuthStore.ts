@@ -7,6 +7,7 @@ export interface UserProfile {
   company: string;
   phone: string;
   role: string;
+  region?: string;
 }
 
 interface AuthState {
