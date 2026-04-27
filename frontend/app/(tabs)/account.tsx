@@ -141,7 +141,11 @@ export default function AccountScreen() {
             <View style={styles.divider} />
 
             {/* Payment Methods */}
-            <TouchableOpacity style={styles.rowItem} activeOpacity={0.7}>
+            <TouchableOpacity 
+              style={styles.rowItem} 
+              activeOpacity={0.7}
+              onPress={() => router.push("/payment-methods")}
+            >
               <View style={styles.rowLeft}>
                 <View style={styles.iconBoxGreen}>
                   <CreditCard color="#0F3D26" size={20} />
@@ -244,7 +248,7 @@ export default function AccountScreen() {
         onRequestClose={() => !isSaving && setIsEditModalVisible(false)}
       >
         <KeyboardAvoidingView 
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={styles.modalOverlay}
         >
           <TouchableOpacity 
