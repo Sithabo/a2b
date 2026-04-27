@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthStore } from "@/store/useAuthStore";
 import {
@@ -41,6 +42,7 @@ export default function AccountScreen() {
   const [editRegion, setEditRegion] = useState("");
   const [editEmail, setEditEmail] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [editProfileImage, setEditProfileImage] = useState<string | null>(null);
 
   const handleLogout = () => {
     logout();
@@ -51,7 +53,21 @@ export default function AccountScreen() {
     setEditCompany(userProfile?.company || "");
     setEditRegion(userProfile?.region || "");
     setEditEmail(userProfile?.email || "");
+    setEditProfileImage(userProfile?.profileImage || null);
     setIsEditModalVisible(true);
+  };
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setEditProfileImage(result.assets[0].uri);
+    }
   };
 
   const handleSaveProfile = () => {
@@ -62,6 +78,7 @@ export default function AccountScreen() {
         region: editRegion,
         email: editEmail,
         name: editCompany, // Keep name synced with company for shippers
+        profileImage: editProfileImage || undefined,
       });
       setIsSaving(false);
       setIsEditModalVisible(false);
@@ -103,7 +120,7 @@ export default function AccountScreen() {
         <View style={styles.profileCard}>
           <View style={styles.profileLeft}>
             <Image
-              source={{ uri: "https://i.pravatar.cc/150?img=11" }}
+              source={{ uri: userProfile?.profileImage || "https://i.pravatar.cc/150?img=11" }}
               style={styles.avatarImage}
               contentFit="cover"
             />
@@ -265,6 +282,17 @@ export default function AccountScreen() {
             </View>
 
             <View style={styles.sheetContent}>
+              <TouchableOpacity style={styles.imageUploadContainer} onPress={pickImage} activeOpacity={0.8}>
+                <Image
+                  source={{ uri: editProfileImage || "https://i.pravatar.cc/150?img=11" }}
+                  style={styles.uploadAvatar}
+                  contentFit="cover"
+                />
+                <View style={styles.uploadOverlay}>
+                  <Pencil color="#FFFFFF" size={16} />
+                </View>
+              </TouchableOpacity>
+
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Company Name</Text>
                 <TextInput
@@ -508,6 +536,30 @@ const styles = StyleSheet.create({
   },
   sheetContent: {
     gap: 16,
+  },
+  imageUploadContainer: {
+    alignSelf: "center",
+    marginBottom: 8,
+    position: "relative",
+  },
+  uploadAvatar: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: "#F3F4F6",
+  },
+  uploadOverlay: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: "#0F3D26",
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 3,
+    borderColor: "#FFFFFF",
   },
   inputGroup: {
     gap: 8,

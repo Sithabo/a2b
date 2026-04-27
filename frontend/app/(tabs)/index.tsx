@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { Image } from "expo-image";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
@@ -46,10 +47,18 @@ export default function HomeScreen() {
           {/* Header Integrated into Body */}
           <View style={styles.headerContainer}>
             <View style={styles.headerLeft}>
-              <View style={styles.avatarContainer}>
-                <Text style={styles.avatarText}>
-                  {userProfile?.name?.charAt(0).toUpperCase() || "M"}
-                </Text>
+              <View style={[styles.avatarContainer, userProfile?.profileImage && { borderWidth: 0 }]}>
+                {userProfile?.profileImage ? (
+                  <Image
+                    source={{ uri: userProfile.profileImage }}
+                    style={{ width: 48, height: 48, borderRadius: 24 }}
+                    contentFit="cover"
+                  />
+                ) : (
+                  <Text style={styles.avatarText}>
+                    {userProfile?.name?.charAt(0).toUpperCase() || "M"}
+                  </Text>
+                )}
               </View>
               <View>
                 <Text style={styles.headerTitle}>
