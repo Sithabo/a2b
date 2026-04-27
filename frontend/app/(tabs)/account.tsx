@@ -19,6 +19,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import {
   ArrowLeft,
   Pencil,
+  User,
   Building2,
   CreditCard,
   Globe,
@@ -119,11 +120,17 @@ export default function AccountScreen() {
         {/* Profile Card */}
         <View style={styles.profileCard}>
           <View style={styles.profileLeft}>
-            <Image
-              source={{ uri: userProfile?.profileImage || "https://i.pravatar.cc/150?img=11" }}
-              style={styles.avatarImage}
-              contentFit="cover"
-            />
+            {userProfile?.profileImage ? (
+              <Image
+                source={{ uri: userProfile.profileImage }}
+                style={styles.avatarImage}
+                contentFit="cover"
+              />
+            ) : (
+              <View style={[styles.avatarImage, { alignItems: "center", justifyContent: "center" }]}>
+                <User color="#9CA3AF" size={32} />
+              </View>
+            )}
             <View style={styles.profileInfo}>
               <Text style={styles.profileName}>
                 {userProfile?.company || userProfile?.name || "John Musa"}
@@ -283,11 +290,17 @@ export default function AccountScreen() {
 
             <View style={styles.sheetContent}>
               <TouchableOpacity style={styles.imageUploadContainer} onPress={pickImage} activeOpacity={0.8}>
-                <Image
-                  source={{ uri: editProfileImage || "https://i.pravatar.cc/150?img=11" }}
-                  style={styles.uploadAvatar}
-                  contentFit="cover"
-                />
+                {editProfileImage ? (
+                  <Image
+                    source={{ uri: editProfileImage }}
+                    style={styles.uploadAvatar}
+                    contentFit="cover"
+                  />
+                ) : (
+                  <View style={[styles.uploadAvatar, { alignItems: "center", justifyContent: "center" }]}>
+                    <User color="#9CA3AF" size={40} />
+                  </View>
+                )}
                 <View style={styles.uploadOverlay}>
                   <Pencil color="#FFFFFF" size={16} />
                 </View>

@@ -20,6 +20,7 @@ import {
   Calculator,
   ChevronRight,
   Package,
+  User,
 } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { TrackingCard } from "@/components/TrackingCard";
@@ -55,9 +56,7 @@ export default function HomeScreen() {
                     contentFit="cover"
                   />
                 ) : (
-                  <Text style={styles.avatarText}>
-                    {userProfile?.name?.charAt(0).toUpperCase() || "M"}
-                  </Text>
+                  <User color="#FFFFFF" size={24} />
                 )}
               </View>
               <View>
