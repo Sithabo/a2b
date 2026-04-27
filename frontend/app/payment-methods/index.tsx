@@ -11,37 +11,58 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { ArrowLeft, MoreVertical, Plus, MapPin, ChevronRight, CheckCircle2, Circle, X } from "lucide-react-native";
-import { FontAwesome5 } from '@expo/vector-icons';
+import {
+  ArrowLeft,
+  MoreVertical,
+  Plus,
+  MapPin,
+  ChevronRight,
+  CheckCircle2,
+  Circle,
+  X,
+} from "lucide-react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { useBillingStore, CreditCard } from "@/store/useBillingStore";
-import { CreditCardInput } from "react-native-credit-card-input";
+import { CreditCardInput, CreditCardView, LiteCreditCardInput } from "react-native-credit-card-input";
 import { PrimaryButton } from "@/components/PrimaryButton";
 
 export default function PaymentMethodsScreen() {
   const router = useRouter();
-  const { cards, addresses, addCard, updateCard, setDefaultCard } = useBillingStore();
-  
-  const defaultAddress = addresses.find(a => a.isDefault) || addresses[0];
+  const { cards, addresses, addCard, updateCard, setDefaultCard } =
+    useBillingStore();
+
+  const defaultAddress = addresses.find((a) => a.isDefault) || addresses[0];
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingCardId, setEditingCardId] = useState<string | null>(null);
   const [cardFormData, setCardFormData] = useState<any>(null);
+  const [focusedField, setFocusedField] = useState<any>();
 
   const openAddModal = () => {
     setEditingCardId(null);
     setCardFormData(null);
+    setFocusedField(undefined);
     setIsModalVisible(true);
   };
 
   const openEditModal = (card: CreditCard) => {
     setEditingCardId(card.id);
-    setCardFormData({ valid: true, values: { number: card.number, expiry: card.expiry, cvc: card.cvc, name: card.name, type: card.type } });
+    setCardFormData({
+      valid: true,
+      values: {
+        number: card.number,
+        expiry: card.expiry,
+        cvc: card.cvc,
+        name: card.name,
+        type: card.type,
+      },
+    });
     setIsModalVisible(true);
   };
 
   const handleSaveCard = () => {
     if (!cardFormData || !cardFormData.valid) return;
-    
+
     const newCardData = {
       name: cardFormData.values.name || "Cardholder",
       number: cardFormData.values.number,
@@ -56,24 +77,32 @@ export default function PaymentMethodsScreen() {
     } else {
       addCard(newCardData);
     }
-    
+
     setIsModalVisible(false);
-    
+
     // If it's a new card, show status
     if (!editingCardId) {
-      router.push({ pathname: "/payment-methods/status", params: { state: "confirmed" } });
+      router.push({
+        pathname: "/payment-methods/status",
+        params: { state: "confirmed" },
+      });
     }
   };
 
   const getCardIcon = (type: string) => {
-    switch(type) {
-      case 'master-card':
-      case 'mastercard': return <FontAwesome5 name="cc-mastercard" size={24} color="#EB001B" />;
-      case 'visa': return <FontAwesome5 name="cc-visa" size={24} color="#1A1F71" />;
-      case 'american-express':
-      case 'amex': return <FontAwesome5 name="cc-amex" size={24} color="#002663" />;
-      case 'discover': return <FontAwesome5 name="cc-discover" size={24} color="#FF6000" />;
-      default: return <FontAwesome5 name="credit-card" size={24} color="#111827" />;
+    switch (type) {
+      case "master-card":
+      case "mastercard":
+        return <FontAwesome5 name="cc-mastercard" size={24} color="#EB001B" />;
+      case "visa":
+        return <FontAwesome5 name="cc-visa" size={24} color="#1A1F71" />;
+      case "american-express":
+      case "amex":
+        return <FontAwesome5 name="cc-amex" size={24} color="#002663" />;
+      case "discover":
+        return <FontAwesome5 name="cc-discover" size={24} color="#FF6000" />;
+      default:
+        return <FontAwesome5 name="credit-card" size={24} color="#111827" />;
     }
   };
 
@@ -81,7 +110,11 @@ export default function PaymentMethodsScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.headerButton} onPress={() => router.back()} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={styles.headerButton}
+          onPress={() => router.back()}
+          activeOpacity={0.7}
+        >
           <ArrowLeft color="#111827" size={20} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Payment Method</Text>
@@ -90,23 +123,27 @@ export default function PaymentMethodsScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Cards List */}
         <View style={styles.sectionCard}>
           {cards.map((card) => (
-            <TouchableOpacity 
-              key={card.id} 
-              style={styles.cardRow} 
+            <TouchableOpacity
+              key={card.id}
+              style={styles.cardRow}
               activeOpacity={0.7}
               onPress={() => openEditModal(card)}
             >
               <View style={styles.cardRowLeft}>
-                <View style={styles.cardIconBox}>
-                  {getCardIcon(card.type)}
-                </View>
+                <View style={styles.cardIconBox}>{getCardIcon(card.type)}</View>
                 <View>
                   <Text style={styles.cardName}>
-                    {card.type ? card.type.charAt(0).toUpperCase() + card.type.slice(1).replace('-', ' ') : 'Credit Card'}
+                    {card.type
+                      ? card.type.charAt(0).toUpperCase() +
+                        card.type.slice(1).replace("-", " ")
+                      : "Credit Card"}
                   </Text>
                   <Text style={styles.cardNumber}>
                     ******** {card.number.slice(-4)}
@@ -124,7 +161,11 @@ export default function PaymentMethodsScreen() {
           ))}
 
           {/* Add Payment Button */}
-          <TouchableOpacity style={styles.addPaymentButton} activeOpacity={0.7} onPress={openAddModal}>
+          <TouchableOpacity
+            style={styles.addPaymentButton}
+            activeOpacity={0.7}
+            onPress={openAddModal}
+          >
             <Plus color="#111827" size={20} />
             <Text style={styles.addPaymentText}>Add Payment Method</Text>
           </TouchableOpacity>
@@ -133,8 +174,8 @@ export default function PaymentMethodsScreen() {
         {/* Business Address */}
         <View style={styles.addressSection}>
           <Text style={styles.sectionTitle}>Business Address</Text>
-          <TouchableOpacity 
-            style={styles.addressCard} 
+          <TouchableOpacity
+            style={styles.addressCard}
             activeOpacity={0.7}
             onPress={() => router.push("/payment-methods/addresses")}
           >
@@ -146,7 +187,9 @@ export default function PaymentMethodsScreen() {
                 {defaultAddress ? (
                   <>
                     <Text style={styles.cardName}>{defaultAddress.title}</Text>
-                    <Text style={styles.cardNumber}>{defaultAddress.address}</Text>
+                    <Text style={styles.cardNumber}>
+                      {defaultAddress.address}
+                    </Text>
                   </>
                 ) : (
                   <>
@@ -168,30 +211,43 @@ export default function PaymentMethodsScreen() {
         visible={isModalVisible}
         onRequestClose={() => setIsModalVisible(false)}
       >
-        <KeyboardAvoidingView 
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
           style={styles.modalOverlay}
         >
-          <TouchableOpacity 
-            style={styles.modalBackdrop} 
-            activeOpacity={1} 
-            onPress={() => setIsModalVisible(false)} 
+          <TouchableOpacity
+            style={styles.modalBackdrop}
+            activeOpacity={1}
+            onPress={() => setIsModalVisible(false)}
           />
           <View style={styles.bottomSheet}>
+            <View style={styles.dragIndicator} />
             <View style={styles.sheetHeader}>
-              <Text style={styles.sheetTitle}>{editingCardId ? "Edit Card" : "Add Card"}</Text>
-              <TouchableOpacity onPress={() => setIsModalVisible(false)}>
-                <X color="#111827" size={24} />
-              </TouchableOpacity>
+              <Text style={styles.sheetTitle}>
+                {editingCardId ? "Edit Card" : "Add Card"}
+              </Text>
             </View>
 
-            <ScrollView contentContainerStyle={{ paddingBottom: 20 }} showsVerticalScrollIndicator={false}>
-              <CreditCardInput 
-                autoFocus 
-                requiresName 
-                requiresCVC 
-                allowScroll 
+            <ScrollView
+              contentContainerStyle={{ paddingBottom: 20 }}
+              showsVerticalScrollIndicator={false}
+            >
+              <CreditCardView
+                focusedField={focusedField}
+                type={cardFormData?.values?.type}
+                number={cardFormData?.values?.number}
+                expiry={cardFormData?.values?.expiry}
+                cvc={cardFormData?.values?.cvc}
+                style={{ alignSelf: 'center', marginBottom: 24 }}
+              />
+
+              <CreditCardInput
+                autoFocus
+                requiresName
+                requiresCVC
+                allowScroll
                 onChange={setCardFormData}
+                onFocusField={setFocusedField}
                 inputContainerStyle={styles.ccInputContainer}
                 inputStyle={styles.ccInput}
                 labelStyle={styles.ccLabel}
@@ -200,8 +256,8 @@ export default function PaymentMethodsScreen() {
                 placeholderColor="#9CA3AF"
               />
 
-              <PrimaryButton 
-                title={editingCardId ? "Save Changes" : "Save Card"} 
+              <PrimaryButton
+                title={editingCardId ? "Save Changes" : "Save Card"}
                 onPress={handleSaveCard}
                 style={{ marginTop: 24 }}
                 disabled={!cardFormData?.valid}
@@ -337,15 +393,23 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 24,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 24,
-    maxHeight: '90%',
+    paddingBottom: Platform.OS === "ios" ? 40 : 24,
+    maxHeight: "90%",
+  },
+  dragIndicator: {
+    width: 40,
+    height: 4,
+    backgroundColor: "#E5E7EB",
+    borderRadius: 2,
+    alignSelf: "center",
+    marginBottom: 16,
   },
   sheetHeader: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 24,
-    position: 'relative',
+    position: "relative",
   },
   sheetTitle: {
     fontSize: 20,
