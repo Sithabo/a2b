@@ -60,7 +60,11 @@ export default function LoginScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
       >
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+        >
           {/* Header */}
           <TouchableOpacity
             onPress={() => router.back()}
@@ -209,6 +213,8 @@ const styles = StyleSheet.create({
   countryCodePicker: {
     backgroundColor: Colors.light.gray[100],
     height: "100%",
+    flexShrink: 0,
+    minWidth: 96,
     justifyContent: "center",
     paddingHorizontal: 8,
     marginRight: 8,
@@ -223,9 +229,12 @@ const styles = StyleSheet.create({
   },
   textInput: {
     flex: 1,
+    minWidth: 0,
     fontSize: 18,
     color: Colors.light.gray[900],
     fontWeight: "500",
+    paddingVertical: 0,
+    textAlignVertical: "center",
   },
   errorText: {
     color: "red",
