@@ -102,7 +102,7 @@ export const LocationSearchModal = ({
   }, [debouncedQuery]);
 
   // Render search results grouped cleanly (SectionList styling using custom FlatList rendering)
-  const getRenderData = () => {
+  const renderData = React.useMemo(() => {
     const listData: ({ type: "header"; title: string } | { type: "item"; item: LocationData })[] = [];
 
     if (filteredPorts.length > 0) {
@@ -120,7 +120,7 @@ export const LocationSearchModal = ({
     }
 
     return listData;
-  };
+  }, [filteredPorts, filteredAddresses]);
 
   return (
     <Modal
@@ -145,7 +145,11 @@ export const LocationSearchModal = ({
 
           {/* Search Input Box */}
           <View style={styles.searchBar}>
-            <Search size={18} color="#9CA3AF" style={styles.searchIcon} />
+            {isLoading ? (
+              <ActivityIndicator size="small" color="#0F3D26" style={styles.searchIcon} />
+            ) : (
+              <Search size={18} color="#9CA3AF" style={styles.searchIcon} />
+            )}
             <TextInput
               ref={inputRef}
               style={styles.input}
@@ -165,11 +169,7 @@ export const LocationSearchModal = ({
           </View>
 
           {/* Results List */}
-          {isLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="small" color="#0F3D26" />
-            </View>
-          ) : query && filteredPorts.length === 0 && filteredAddresses.length === 0 ? (
+          {query && filteredPorts.length === 0 && filteredAddresses.length === 0 && !isLoading ? (
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>{"No results found for \"" + query + "\""}</Text>
               <Text style={styles.emptySubText}>{'Try typing "Demerara" or "Georgetown" to test port detection.'}</Text>
@@ -207,7 +207,7 @@ export const LocationSearchModal = ({
             </View>
           ) : (
             <FlatList
-              data={getRenderData()}
+              data={renderData}
               keyExtractor={(item, index) => index.toString()}
               contentContainerStyle={styles.listContent}
               keyboardShouldPersistTaps="handled"

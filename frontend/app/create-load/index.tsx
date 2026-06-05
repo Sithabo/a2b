@@ -13,7 +13,6 @@ import { useRouter } from "expo-router";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
-  MapPin,
   Anchor,
   ChevronRight,
   ArrowLeft,
@@ -21,6 +20,7 @@ import {
 } from "lucide-react-native";
 import { useShipmentStore, LocationData } from "@/store/useShipmentStore";
 import { LocationSearchModal } from "@/components/LocationSearchModal";
+import { LocationPicker } from "@/components/LocationPicker";
 
 export default function RouteSelectionScreen() {
   const router = useRouter();
@@ -99,69 +99,19 @@ export default function RouteSelectionScreen() {
           Select your cargo source and final delivery point. Importing wharves trigger customs validations automatically.
         </Text>
 
-        {/* Inputs Stack */}
-        <View style={styles.routeContainer}>
-          {/* Timeline connecting line */}
-          <View style={styles.timelineWrapper}>
-            <View style={[styles.timelineDot, pickupLocation?.is_port && styles.timelineDotPort]} />
-            <View style={styles.timelineLine} />
-            <View style={[styles.timelinePin, dropoffLocation && styles.timelinePinActive]} />
-          </View>
-
-          {/* Pressable Inputs */}
-          <View style={styles.inputsWrapper}>
-            {/* Start Location Card */}
-            <TouchableOpacity
-              style={[
-                styles.locationCard,
-                pickupLocation && styles.locationCardActive,
-                pickupLocation?.is_port && styles.locationCardPort,
-              ]}
-              onPress={() => setActiveModalType("pickup")}
-              activeOpacity={0.8}
-            >
-              <View style={styles.cardHeader}>
-                <Text style={styles.cardLabel}>START LOCATION</Text>
-                {pickupLocation?.is_port && (
-                  <View style={styles.portLabelBadge}>
-                    <Text style={styles.portLabelBadgeText}>PORT ZONE</Text>
-                  </View>
-                )}
-              </View>
-              {pickupLocation ? (
-                <View style={styles.selectedLocationRow}>
-                  {pickupLocation.is_port ? (
-                    <Anchor size={20} color="#0F3D26" style={styles.cardIcon} />
-                  ) : (
-                    <MapPin size={20} color="#0F3D26" style={styles.cardIcon} />
-                  )}
-                  <Text style={styles.selectedLocationText}>{pickupLocation.name}</Text>
-                </View>
-              ) : (
-                <Text style={styles.placeholderText}>Tap to select pickup point...</Text>
-              )}
-            </TouchableOpacity>
-
-            {/* Delivery Location Card */}
-            <TouchableOpacity
-              style={[styles.locationCard, dropoffLocation && styles.locationCardActive]}
-              onPress={() => setActiveModalType("dropoff")}
-              activeOpacity={0.8}
-            >
-              <View style={styles.cardHeader}>
-                <Text style={styles.cardLabel}>DELIVERY LOCATION</Text>
-              </View>
-              {dropoffLocation ? (
-                <View style={styles.selectedLocationRow}>
-                  <MapPin size={20} color="#6B7280" style={styles.cardIcon} />
-                  <Text style={styles.selectedLocationText}>{dropoffLocation.name}</Text>
-                </View>
-              ) : (
-                <Text style={styles.placeholderText}>Tap to select delivery point...</Text>
-              )}
-            </TouchableOpacity>
-          </View>
-        </View>
+        {/* Locations Routing Component */}
+        <LocationPicker
+          style={styles.locationPickerContainer}
+          startLocation={pickupLocation?.name || ""}
+          endLocation={dropoffLocation?.name || ""}
+          onPressStart={() => setActiveModalType("pickup")}
+          onPressEnd={() => setActiveModalType("dropoff")}
+          onSwap={() => {
+            const temp = pickupLocation;
+            setPickupLocation(dropoffLocation);
+            setDropoffLocation(temp);
+          }}
+        />
       </View>
 
       {/* Sticky Bottom Actions */}
@@ -293,107 +243,8 @@ const styles = StyleSheet.create({
     color: "#6B7280",
     lineHeight: 18,
   },
-  routeContainer: {
-    flexDirection: "row",
-    marginTop: 24,
-    gap: 16,
-    flex: 1,
-  },
-  timelineWrapper: {
-    alignItems: "center",
-    paddingTop: 24,
-  },
-  timelineDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: "#9CA3AF",
-  },
-  timelineDotPort: {
-    backgroundColor: "#D4A017", // Amber for port pickup
-  },
-  timelineLine: {
-    width: 2,
-    flex: 1,
-    backgroundColor: "#E5E7EB",
-    borderStyle: "dashed",
-    marginVertical: 8,
-  },
-  timelinePin: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: "#9CA3AF",
-  },
-  timelinePinActive: {
-    backgroundColor: "#0F3D26",
-  },
-  inputsWrapper: {
-    flex: 1,
-    gap: 20,
-  },
-  locationCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1.5,
-    borderColor: "#E5E7EB",
-    height: 96,
-    justifyContent: "center",
-    gap: 6,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
-    shadowRadius: 3,
-  },
-  locationCardActive: {
-    borderColor: "#E5E7EB",
-  },
-  locationCardPort: {
-    borderColor: "#F5A623", // Amber highlight for geofenced port
-    backgroundColor: "rgba(245, 166, 35, 0.02)",
-  },
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  cardLabel: {
-    fontSize: 10,
-    fontWeight: "bold",
-    color: "#9CA3AF",
-    letterSpacing: 0.5,
-  },
-  portLabelBadge: {
-    backgroundColor: "#FFFBEB",
-    borderWidth: 1,
-    borderColor: "#FDE68A",
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  portLabelBadgeText: {
-    fontSize: 8,
-    fontWeight: "bold",
-    color: "#B45309",
-  },
-  placeholderText: {
-    fontSize: 15,
-    color: "#9CA3AF",
-    fontStyle: "italic",
-  },
-  selectedLocationRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  cardIcon: {
-    marginRight: 8,
-  },
-  selectedLocationText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#111827",
-    flex: 1,
+  locationPickerContainer: {
+    marginTop: 16,
   },
   footer: {
     padding: 16,

@@ -6,11 +6,13 @@ import { Card } from "./Card"; // Assuming Card is in the same directory, if not
 export interface LocationPickerProps {
   startLocation: string;
   endLocation: string;
-  onChangeStart: (text: string) => void;
-  onChangeEnd: (text: string) => void;
+  onChangeStart?: (text: string) => void;
+  onChangeEnd?: (text: string) => void;
   onSwap?: () => void;
   onAddStop?: () => void;
   style?: ViewStyle;
+  onPressStart?: () => void;
+  onPressEnd?: () => void;
 }
 
 export const LocationPicker: React.FC<LocationPickerProps> = ({
@@ -21,6 +23,8 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
   onSwap,
   onAddStop,
   style,
+  onPressStart,
+  onPressEnd,
 }) => {
   return (
     <View style={[styles.container, style]}>
@@ -34,27 +38,55 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
 
         {/* Right Column: Inputs */}
         <View style={styles.inputsColumn}>
-          <View style={styles.inputSection}>
-            <Text style={styles.label}>START LOCATION</Text>
-            <TextInput
-              style={styles.input}
-              value={startLocation}
-              onChangeText={onChangeStart}
-              placeholder="e.g. Houston, TX"
-              placeholderTextColor="#9CA3AF"
-            />
-          </View>
+          {onPressStart ? (
+            <TouchableOpacity
+              onPress={onPressStart}
+              activeOpacity={0.7}
+              style={styles.inputSectionPressable}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            >
+              <Text style={styles.label}>START LOCATION</Text>
+              <Text style={[styles.input, !startLocation && styles.placeholderText]}>
+                {startLocation || "e.g. Houston, TX"}
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.inputSection}>
+              <Text style={styles.label}>START LOCATION</Text>
+              <TextInput
+                style={styles.input}
+                value={startLocation}
+                onChangeText={onChangeStart}
+                placeholder="e.g. Houston, TX"
+                placeholderTextColor="#9CA3AF"
+              />
+            </View>
+          )}
           
-          <View style={styles.inputSection}>
-            <Text style={styles.label}>WHERE</Text>
-            <TextInput
-              style={styles.input}
-              value={endLocation}
-              onChangeText={onChangeEnd}
-              placeholder="e.g. San Antonio, TX"
-              placeholderTextColor="#9CA3AF"
-            />
-          </View>
+          {onPressEnd ? (
+            <TouchableOpacity
+              onPress={onPressEnd}
+              activeOpacity={0.7}
+              style={styles.inputSectionPressable}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            >
+              <Text style={styles.label}>WHERE</Text>
+              <Text style={[styles.input, !endLocation && styles.placeholderText]}>
+                {endLocation || "e.g. San Antonio, TX"}
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.inputSection}>
+              <Text style={styles.label}>WHERE</Text>
+              <TextInput
+                style={styles.input}
+                value={endLocation}
+                onChangeText={onChangeEnd}
+                placeholder="e.g. San Antonio, TX"
+                placeholderTextColor="#9CA3AF"
+              />
+            </View>
+          )}
         </View>
 
         {/* Floating Swap Button */}
@@ -109,6 +141,11 @@ const styles = StyleSheet.create({
   inputSection: {
     gap: 4,
   },
+  inputSectionPressable: {
+    gap: 4,
+    paddingVertical: 4,
+    marginVertical: -4,
+  },
   label: {
     fontSize: 10,
     fontWeight: "bold",
@@ -121,6 +158,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#0F3D26",
     padding: 0, // Remove default Android padding
+  },
+  placeholderText: {
+    color: "#9CA3AF",
+    fontWeight: "normal",
   },
   swapButton: {
     position: "absolute",
