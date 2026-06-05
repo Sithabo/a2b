@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export type ShipmentStatus = 'OPEN' | 'MATCHED' | 'SECURED' | 'ACTIVE' | 'COMPLETED';
+export type ShipmentStatus = 'OPEN' | 'MATCHED' | 'SECURED' | 'ACTIVE' | 'COMPLETED' | 'DRAFT_PENDING_DOCS';
 
 export interface Shipment {
   id: string;
@@ -17,15 +17,21 @@ export interface Shipment {
   acceptedByDriver: boolean;
   driverId?: string;
   driverName?: string;
+  is_import?: boolean;
+  containerId?: string;
+  documents?: { [key: string]: { name: string; size: string } };
 }
 
 interface ShipmentState {
   shipments: Shipment[];
+  draftShipment: (Partial<Shipment> & { containerId?: string; documents?: any }) | null;
   addShipment: (shipment: Omit<Shipment, 'id' | 'createdAt'>) => void;
   editShipment: (id: string, updatedData: Partial<Omit<Shipment, 'id' | 'createdAt'>>) => void;
   deleteShipment: (id: string) => void;
   updateShipmentStatus: (id: string, newStatus: ShipmentStatus) => void;
   getAllShipments: () => Shipment[];
+  setDraftShipment: (draft: (Partial<Shipment> & { containerId?: string; documents?: any }) | null) => void;
+  clearDraftShipment: () => void;
   clearAll: () => void;
 }
 
@@ -65,6 +71,7 @@ export const useShipmentStore = create<ShipmentState>()(
   persist(
     (set, get) => ({
       shipments: initialShipments,
+      draftShipment: null,
       
       addShipment: (shipmentData) => set((state) => ({
         shipments: [
@@ -96,6 +103,10 @@ export const useShipmentStore = create<ShipmentState>()(
       getAllShipments: () => {
         return get().shipments;
       },
+      
+      setDraftShipment: (draft) => set({ draftShipment: draft }),
+      
+      clearDraftShipment: () => set({ draftShipment: null }),
       
       clearAll: () => set({ shipments: [] }),
     }),

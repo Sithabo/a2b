@@ -10,6 +10,8 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Switch,
+  LayoutAnimation,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Image } from "expo-image";
@@ -32,6 +34,7 @@ import {
   ChevronRight,
   AlertCircle,
   X,
+  CheckCircle,
 } from "lucide-react-native";
 
 export default function AccountScreen() {
@@ -44,6 +47,9 @@ export default function AccountScreen() {
   const [editEmail, setEditEmail] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [editProfileImage, setEditProfileImage] = useState<string | null>(null);
+  const [editIsImporter, setEditIsImporter] = useState(false);
+  const [editTin, setEditTin] = useState("");
+  const [tinError, setTinError] = useState("");
 
   const handleLogout = () => {
     logout();
@@ -55,6 +61,9 @@ export default function AccountScreen() {
     setEditRegion(userProfile?.region || "");
     setEditEmail(userProfile?.email || "");
     setEditProfileImage(userProfile?.profileImage || null);
+    setEditIsImporter(userProfile?.is_importer || false);
+    setEditTin(userProfile?.tin || "");
+    setTinError("");
     setIsEditModalVisible(true);
   };
 
@@ -72,6 +81,13 @@ export default function AccountScreen() {
   };
 
   const handleSaveProfile = () => {
+    if (editIsImporter) {
+      const tinRegex = /^\d{9}$/;
+      if (!tinRegex.test(editTin)) {
+        setTinError("Valid 9-digit GRA Tax Identification Number required to bypass customs processing constraints.");
+        return;
+      }
+    }
     setIsSaving(true);
     setTimeout(() => {
       updateProfile({
@@ -80,6 +96,8 @@ export default function AccountScreen() {
         email: editEmail,
         name: editCompany, // Keep name synced with company for shippers
         profileImage: editProfileImage || undefined,
+        is_importer: editIsImporter,
+        tin: editIsImporter ? editTin : null,
       });
       setIsSaving(false);
       setIsEditModalVisible(false);
@@ -97,7 +115,7 @@ export default function AccountScreen() {
           onPress={() => router.back()}
           activeOpacity={0.7}
         >
-          <ArrowLeft color="#0F3D26" size={20} />
+          <ArrowLeft color="#F5F5E9" size={20} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Account</Text>
         <View style={{ width: 40 }} />
@@ -229,7 +247,7 @@ export default function AccountScreen() {
             <TouchableOpacity style={styles.rowItem} activeOpacity={0.7}>
               <View style={styles.rowLeft}>
                 <MessageCircle color="#111827" size={20} />
-                <Text style={styles.rowText}>Need help? Let's chat</Text>
+                <Text style={styles.rowText}>{"Need help? Let's chat"}</Text>
               </View>
               <ChevronRight color="#9CA3AF" size={20} />
             </TouchableOpacity>
@@ -341,6 +359,66 @@ export default function AccountScreen() {
                 />
               </View>
 
+              {/* Enable Port Pickups / Imports Custom Card */}
+              <View style={styles.importCard}>
+                <View style={styles.importRow}>
+                  <View style={styles.importRowLeft}>
+                    <Text style={styles.importCardTitle}>Enable Port Pickups / Imports</Text>
+                    <Text style={styles.importCardSub}>Enable customs-cleared container pickups</Text>
+                  </View>
+                  <Switch
+                    value={editIsImporter}
+                    onValueChange={(val) => {
+                      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                      setEditIsImporter(val);
+                      if (!val) {
+                        setEditTin("");
+                        setTinError("");
+                      }
+                    }}
+                    trackColor={{ false: "#D1D5DB", true: "#E6F4EA" }}
+                    thumbColor={editIsImporter ? "#0F3D26" : "#F4F3F0"}
+                  />
+                </View>
+
+                {editIsImporter && (
+                  <View style={styles.tinContainer}>
+                    <Text style={styles.inputLabel}>GRA Tax Identification Number (TIN)</Text>
+                    <View style={[
+                      styles.tinInputWrapper,
+                      editTin.length > 0 && !/^\d{9}$/.test(editTin) ? { borderColor: "#CC0000", borderWidth: 1.5 } : null,
+                      /^\d{9}$/.test(editTin) ? { borderColor: "#10B981", borderWidth: 1.5 } : null,
+                    ]}>
+                      <TextInput
+                        style={styles.tinInput}
+                        value={editTin}
+                        onChangeText={(text) => {
+                          const cleaned = text.replace(/[^0-9]/g, "");
+                          setEditTin(cleaned);
+                          if (cleaned.length > 0 && !/^\d{9}$/.test(cleaned)) {
+                            setTinError("Valid 9-digit GRA Tax Identification Number required to bypass customs processing constraints.");
+                          } else {
+                            setTinError("");
+                          }
+                        }}
+                        placeholder="e.g. 123456789"
+                        placeholderTextColor="#9CA3AF"
+                        keyboardType="numeric"
+                        maxLength={9}
+                      />
+                      {/^\d{9}$/.test(editTin) && (
+                        <View style={styles.emeraldCheck}>
+                          <CheckCircle size={18} color="#10B981" fill="#FFFFFF" />
+                        </View>
+                      )}
+                    </View>
+                    {tinError ? (
+                      <Text style={styles.tinErrorText}>{tinError}</Text>
+                    ) : null}
+                  </View>
+                )}
+              </View>
+
               <TouchableOpacity 
                 style={styles.saveButton} 
                 onPress={handleSaveProfile}
@@ -370,22 +448,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingTop: 16,
+    paddingBottom: 24,
+    backgroundColor: "#0F3D26",
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
   backButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: "rgba(255, 255, 255, 0.25)",
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: "#F5F5E9",
   },
   scrollContent: {
     paddingHorizontal: 20,
@@ -605,5 +687,63 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  importCard: {
+    backgroundColor: "#F9FAFB",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    padding: 16,
+    marginTop: 8,
+    gap: 16,
+  },
+  importRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  importRowLeft: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  importCardTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  importCardSub: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 2,
+  },
+  tinContainer: {
+    gap: 8,
+    borderTopWidth: 1,
+    borderTopColor: "#E5E7EB",
+    paddingTop: 16,
+  },
+  tinInputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 8,
+    height: 48,
+    paddingHorizontal: 12,
+  },
+  tinInput: {
+    flex: 1,
+    fontSize: 15,
+    color: "#111827",
+    padding: 0,
+  },
+  emeraldCheck: {
+    marginLeft: 8,
+  },
+  tinErrorText: {
+    fontSize: 12,
+    color: "#CC0000",
+    marginLeft: 4,
   },
 });

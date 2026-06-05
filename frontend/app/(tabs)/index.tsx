@@ -21,17 +21,20 @@ import {
   ChevronRight,
   Package,
   User,
+  AlertTriangle,
 } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { TrackingCard } from "@/components/TrackingCard";
 import { ShippingCard } from "@/components/ShippingCard";
 import { ToolCard } from "@/components/ToolCard";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useShipmentStore } from "@/store/useShipmentStore";
 
 export default function HomeScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const userProfile = useAuthStore((state) => state.userProfile);
+  const draftShipment = useShipmentStore((state) => state.draftShipment);
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
@@ -88,6 +91,27 @@ export default function HomeScreen() {
 
           {/* Content Body */}
           <View style={styles.content}>
+            {/* Active Alert Card if draft exists */}
+            {draftShipment && draftShipment.status === 'DRAFT_PENDING_DOCS' && (
+              <TouchableOpacity
+                style={styles.alertCard}
+                activeOpacity={0.9}
+                onPress={() => router.push("/create-load/document-vault")}
+              >
+                <View style={styles.alertCardHeader}>
+                  <AlertTriangle color="#D97706" size={20} />
+                  <Text style={styles.alertCardTitle}>⚠️ Unfinished Import Shipment Detected</Text>
+                </View>
+                <Text style={styles.alertCardText}>
+                  Your route information from {draftShipment.pickup || "Georgetown Port"} is saved. Tap here to complete your document uploads and release this load.
+                </Text>
+                <View style={styles.alertCardFooter}>
+                  <Text style={styles.alertCardBtnText}>Complete Document Vault Uploads</Text>
+                  <ChevronRight color="#D97706" size={16} />
+                </View>
+              </TouchableOpacity>
+            )}
+
             {/* Current Tracking Card */}
             <TrackingCard
               trackingId="#H62J568107"
@@ -455,5 +479,47 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#FFFFFF",
     fontSize: 16,
+  },
+  alertCard: {
+    backgroundColor: "#FFFBEB",
+    borderWidth: 1.5,
+    borderColor: "#F59E0B",
+    borderRadius: 20,
+    padding: 16,
+    gap: 8,
+    shadowColor: "#F59E0B",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  alertCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  alertCardTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#B45309",
+  },
+  alertCardText: {
+    fontSize: 12,
+    color: "#78350F",
+    lineHeight: 18,
+  },
+  alertCardFooter: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderTopWidth: 1,
+    borderTopColor: "#FEF3C7",
+    paddingTop: 10,
+    marginTop: 4,
+  },
+  alertCardBtnText: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "#B45309",
   },
 });

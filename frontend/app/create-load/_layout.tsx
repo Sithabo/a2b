@@ -14,6 +14,7 @@ export default function CreateLoadLayout() {
       }}
     >
       <Stack.Screen name="index" />
+      <Stack.Screen name="document-vault" />
       <Stack.Screen name="review" />
       <Stack.Screen name="success" />
     </Stack>

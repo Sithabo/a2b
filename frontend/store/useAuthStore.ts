@@ -10,6 +10,8 @@ export interface UserProfile {
   region?: string;
   email?: string;
   profileImage?: string;
+  is_importer?: boolean;
+  tin?: string | null;
 }
 
 interface AuthState {

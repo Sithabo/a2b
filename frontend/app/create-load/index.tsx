@@ -3,9 +3,10 @@ import {
   View,
   Text,
   ScrollView,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
+  Modal,
+  Dimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -13,15 +14,15 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
   MapPin,
-  Navigation,
   Package,
-  ArrowRight,
   Lock,
   Image as ImageIcon,
   Plus,
+  Anchor,
+  Map as MapIcon,
+  ShieldAlert,
 } from "lucide-react-native";
 import { PageHeader } from "@/components/PageHeader";
-import { Card } from "@/components/Card";
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { LocationPicker } from "@/components/LocationPicker";
 import { LoadTypeSelector } from "@/components/LoadTypeSelector";
@@ -44,6 +45,19 @@ export default function CreateLoadScreen() {
   const [packages, setPackages] = useState<PackageData[]>([
     { id: "1", code: "", weight: "250", length: "12", width: "8", height: "10" }
   ]);
+  
+  const [geoModalVisible, setGeoModalVisible] = useState(false);
+  const [isMapFrozen, setIsMapFrozen] = useState(false);
+  const [isImportShipment, setIsImportShipment] = useState(false);
+
+  const handleStartLocationChange = (text: string) => {
+    setStartLocation(text);
+    const lower = text.toLowerCase();
+    if (lower.includes("port") || lower.includes("wharves") || lower.includes("demerara")) {
+      setIsMapFrozen(true);
+      setGeoModalVisible(true);
+    }
+  };
 
   const loadTypes = [
     { id: "general", label: "General cargo", icon: Package },
@@ -62,11 +76,94 @@ export default function CreateLoadScreen() {
       />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Visual Map Mockup */}
+        <View style={styles.mapCard}>
+          <View style={styles.mapHeader}>
+            <MapIcon size={16} color="#0F3D26" />
+            <Text style={styles.mapHeaderText}>Guyana Port Logistics Geofence Map</Text>
+          </View>
+          
+          <View style={[styles.mapCanvas, isMapFrozen && styles.mapCanvasFrozen]}>
+            {/* Water body / River */}
+            <View style={styles.waterBody} />
+            {/* Coastline */}
+            <View style={styles.coastline} />
+            {/* Roads */}
+            <View style={styles.highwayRoute1} />
+            <View style={styles.highwayRoute2} />
+
+            {/* Georgetown Port Pin */}
+            <TouchableOpacity 
+              style={[styles.mapPin, { top: 35, left: 95 }]}
+              disabled={isMapFrozen}
+              onPress={() => {
+                setStartLocation("Georgetown Wharves (Port Zone)");
+                setIsMapFrozen(true);
+                setGeoModalVisible(true);
+              }}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.pinDot, { backgroundColor: "#D4A017" }]}>
+                <Anchor size={12} color="#FFFFFF" />
+              </View>
+              <View style={styles.pinLabel}>
+                <Text style={styles.pinLabelText}>⚓ Georgetown Wharves</Text>
+              </View>
+            </TouchableOpacity>
+
+            {/* Demerara Terminals Pin */}
+            <TouchableOpacity 
+              style={[styles.mapPin, { top: 110, left: 45 }]}
+              disabled={isMapFrozen}
+              onPress={() => {
+                setStartLocation("Demerara Terminals (Port Zone)");
+                setIsMapFrozen(true);
+                setGeoModalVisible(true);
+              }}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.pinDot, { backgroundColor: "#D4A017" }]}>
+                <Anchor size={12} color="#FFFFFF" />
+              </View>
+              <View style={styles.pinLabel}>
+                <Text style={styles.pinLabelText}>⚓ Demerara Terminals</Text>
+              </View>
+            </TouchableOpacity>
+
+            {/* Linden Highway Domestic Pin */}
+            <TouchableOpacity 
+              style={[styles.mapPin, { top: 175, right: 30 }]}
+              disabled={isMapFrozen}
+              onPress={() => {
+                setStartLocation("Linden Highway (Domestic)");
+                setIsImportShipment(false);
+                setIsMapFrozen(false);
+              }}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.pinDot, { backgroundColor: "#0F3D26" }]}>
+                <MapPin size={12} color="#FFFFFF" />
+              </View>
+              <View style={styles.pinLabel}>
+                <Text style={styles.pinLabelText}>📍 Linden Highway</Text>
+              </View>
+            </TouchableOpacity>
+
+            {isMapFrozen && (
+              <View style={styles.mapFreezeOverlay}>
+                <ShieldAlert size={20} color="#D4A017" />
+                <Text style={styles.mapFreezeText}>Map Locked (Customs Overlay Active)</Text>
+              </View>
+            )}
+          </View>
+          <Text style={styles.mapHint}>Tap on any port anchor to simulate geofence trigger</Text>
+        </View>
+
         {/* Locations Routing Component */}
         <LocationPicker
           startLocation={startLocation}
           endLocation={endLocation}
-          onChangeStart={setStartLocation}
+          onChangeStart={handleStartLocationChange}
           onChangeEnd={setEndLocation}
           onSwap={() => {
             const temp = startLocation;
@@ -171,6 +268,7 @@ export default function CreateLoadScreen() {
                 status: "OPEN",
                 deliveryDate: new Date(Date.now() + 2 * 86400000).toISOString(),
                 acceptedByDriver: false,
+                is_import: isImportShipment,
               });
 
               console.log("Order finalized!");
@@ -180,6 +278,82 @@ export default function CreateLoadScreen() {
           />
         </View>
       </BottomSheet>
+
+      {/* Port Pickup Verification Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={geoModalVisible}
+        onRequestClose={() => {
+          setIsMapFrozen(false);
+          setGeoModalVisible(false);
+        }}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBackdropBlur} />
+          
+          <View style={styles.geoModalContainer}>
+            {/* Header Section */}
+            <View style={styles.geoModalHeader}>
+              <View style={styles.anchorIconBg}>
+                <Anchor size={28} color="#D4A017" />
+              </View>
+              <Text style={styles.geoModalTitle}>⚓ Port Pickup Verification</Text>
+            </View>
+
+            {/* Body Content */}
+            <View style={styles.geoModalBody}>
+              <Text style={styles.geoModalText}>
+                This shipment originates from a customs-controlled zone. A2B requires pre-cleared customs documentation (Form C21/Bill of Lading) to ensure your driver passes port checkpoints without delays.
+              </Text>
+              
+              <View style={styles.warningAlertBox}>
+                <ShieldAlert size={18} color="#B45309" />
+                <Text style={styles.warningAlertText}>
+                  A2B requires pre-cleared customs documentation (Form C21/Bill of Lading) to bypass customs constraints.
+                </Text>
+              </View>
+            </View>
+
+            {/* Action CTAs */}
+            <View style={styles.geoModalFooter}>
+              <TouchableOpacity
+                style={styles.geoModalPrimaryButton}
+                activeOpacity={0.8}
+                onPress={() => {
+                  setIsImportShipment(true);
+                  setGeoModalVisible(false);
+                  
+                  router.push({
+                    pathname: "/create-load/document-vault",
+                    params: {
+                      pickup: startLocation,
+                      delivery: endLocation,
+                      cargoType: selectedType,
+                      weight: packages.reduce((acc, p) => acc + (parseFloat(p.weight) || 0), 0).toString(),
+                    }
+                  });
+                }}
+              >
+                <Text style={styles.geoModalPrimaryButtonText}>Continue to Document Vault</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.geoModalSecondaryButton}
+                activeOpacity={0.7}
+                onPress={() => {
+                  setIsMapFrozen(false);
+                  setIsImportShipment(false);
+                  setStartLocation("Houston, TX"); // Reset to standard domestic location
+                  setGeoModalVisible(false);
+                }}
+              >
+                <Text style={styles.geoModalSecondaryButtonText}>Cancel & Route Domestic</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -350,5 +524,238 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#E5E7EB",
     paddingBottom: 32,
+  },
+  mapCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: "#F5F5F4",
+    padding: 16,
+    gap: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  mapHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  mapHeaderText: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#0F3D26",
+  },
+  mapCanvas: {
+    height: 220,
+    backgroundColor: "#E6F4EA",
+    borderRadius: 16,
+    overflow: "hidden",
+    position: "relative",
+    borderWidth: 1,
+    borderColor: "#D1D5DB",
+  },
+  mapCanvasFrozen: {
+    opacity: 0.9,
+  },
+  waterBody: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "40%",
+    height: "100%",
+    backgroundColor: "#BFDBFE", // light blue water
+  },
+  coastline: {
+    position: "absolute",
+    top: 0,
+    left: "40%",
+    width: 2,
+    height: "100%",
+    backgroundColor: "#93C5FD",
+    borderStyle: "dashed",
+  },
+  highwayRoute1: {
+    position: "absolute",
+    top: 60,
+    left: "30%",
+    width: "70%",
+    height: 6,
+    backgroundColor: "#9CA3AF",
+    borderRadius: 3,
+  },
+  highwayRoute2: {
+    position: "absolute",
+    top: 130,
+    left: "20%",
+    width: "80%",
+    height: 6,
+    backgroundColor: "#9CA3AF",
+    borderRadius: 3,
+  },
+  mapPin: {
+    position: "absolute",
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "transparent",
+    zIndex: 20,
+  },
+  pinDot: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  pinLabel: {
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginLeft: 6,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  pinLabelText: {
+    fontSize: 10,
+    fontWeight: "bold",
+    color: "#1F2937",
+  },
+  mapFreezeOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    zIndex: 50,
+  },
+  mapFreezeText: {
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontSize: 13,
+    backgroundColor: "rgba(15, 61, 38, 0.95)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    overflow: "hidden",
+  },
+  mapHint: {
+    fontSize: 11,
+    color: "#6B7280",
+    textAlign: "center",
+    fontStyle: "italic",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalBackdropBlur: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+  },
+  geoModalContainer: {
+    width: Dimensions.get("window").width * 0.88,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 24,
+    gap: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
+  },
+  geoModalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+    paddingBottom: 16,
+  },
+  anchorIconBg: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#FFFBEB",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#FEF3C7",
+  },
+  geoModalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#111827",
+  },
+  geoModalBody: {
+    gap: 12,
+  },
+  geoModalText: {
+    fontSize: 14,
+    color: "#4B5563",
+    lineHeight: 20,
+  },
+  warningAlertBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FEF3C7",
+    borderWidth: 1,
+    borderColor: "#FDE68A",
+    borderRadius: 8,
+    padding: 12,
+    gap: 10,
+  },
+  warningAlertText: {
+    flex: 1,
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#92400E",
+  },
+  geoModalFooter: {
+    gap: 8,
+    marginTop: 8,
+  },
+  geoModalPrimaryButton: {
+    width: "100%",
+    height: 52,
+    backgroundColor: "#0F3D26",
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  geoModalPrimaryButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  geoModalSecondaryButton: {
+    width: "100%",
+    height: 52,
+    backgroundColor: "#F3F4F6",
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  geoModalSecondaryButtonText: {
+    color: "#4B5563",
+    fontSize: 15,
+    fontWeight: "600",
   },
 });
