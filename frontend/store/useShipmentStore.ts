@@ -4,6 +4,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type ShipmentStatus = 'OPEN' | 'MATCHED' | 'SECURED' | 'ACTIVE' | 'COMPLETED' | 'DRAFT_PENDING_DOCS';
 
+export interface LocationData {
+  id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  is_port: boolean;
+  cargo_restrictions?: string[];
+}
+
 export interface Shipment {
   id: string;
   pickup: string;
@@ -25,6 +34,13 @@ export interface Shipment {
 interface ShipmentState {
   shipments: Shipment[];
   draftShipment: (Partial<Shipment> & { containerId?: string; documents?: any }) | null;
+  
+  // Route selection & Wizard states
+  currentStep: number;
+  pickupLocation: LocationData | null;
+  dropoffLocation: LocationData | null;
+  isImportFlow: boolean;
+
   addShipment: (shipment: Omit<Shipment, 'id' | 'createdAt'>) => void;
   editShipment: (id: string, updatedData: Partial<Omit<Shipment, 'id' | 'createdAt'>>) => void;
   deleteShipment: (id: string) => void;
@@ -32,6 +48,13 @@ interface ShipmentState {
   getAllShipments: () => Shipment[];
   setDraftShipment: (draft: (Partial<Shipment> & { containerId?: string; documents?: any }) | null) => void;
   clearDraftShipment: () => void;
+  
+  // Wizard actions
+  setCurrentStep: (step: number) => void;
+  setPickupLocation: (location: LocationData | null) => void;
+  setDropoffLocation: (location: LocationData | null) => void;
+  resetRouteState: () => void;
+  
   clearAll: () => void;
 }
 
@@ -73,6 +96,12 @@ export const useShipmentStore = create<ShipmentState>()(
       shipments: initialShipments,
       draftShipment: null,
       
+      // Wizard initial state
+      currentStep: 1,
+      pickupLocation: null,
+      dropoffLocation: null,
+      isImportFlow: false,
+
       addShipment: (shipmentData) => set((state) => ({
         shipments: [
           ...state.shipments,
@@ -108,7 +137,31 @@ export const useShipmentStore = create<ShipmentState>()(
       
       clearDraftShipment: () => set({ draftShipment: null }),
       
-      clearAll: () => set({ shipments: [] }),
+      // Wizard actions
+      setCurrentStep: (step) => set({ currentStep: step }),
+      
+      setPickupLocation: (location) => set({ 
+        pickupLocation: location,
+        isImportFlow: location ? location.is_port : false 
+      }),
+      
+      setDropoffLocation: (location) => set({ dropoffLocation: location }),
+      
+      resetRouteState: () => set({
+        currentStep: 1,
+        pickupLocation: null,
+        dropoffLocation: null,
+        isImportFlow: false
+      }),
+      
+      clearAll: () => set({ 
+        shipments: [], 
+        draftShipment: null,
+        currentStep: 1,
+        pickupLocation: null,
+        dropoffLocation: null,
+        isImportFlow: false
+      }),
     }),
     {
       name: 'shipment-storage',

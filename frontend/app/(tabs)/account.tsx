@@ -115,7 +115,7 @@ export default function AccountScreen() {
           onPress={() => router.back()}
           activeOpacity={0.7}
         >
-          <ArrowLeft color="#F5F5E9" size={20} />
+          <ArrowLeft color="#0F3D26" size={20} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Account</Text>
         <View style={{ width: 40 }} />
@@ -448,26 +448,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 24,
-    backgroundColor: "#0F3D26",
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    paddingVertical: 16,
   },
   backButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.25)",
+    borderColor: "#E5E7EB",
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#F5F5E9",
+    color: "#0F3D26",
   },
   scrollContent: {
     paddingHorizontal: 20,

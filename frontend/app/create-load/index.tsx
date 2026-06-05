@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  ScrollView,
   TouchableOpacity,
   StyleSheet,
   Modal,
+  Platform,
   Dimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -14,343 +14,220 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
   MapPin,
-  Package,
-  Lock,
-  Image as ImageIcon,
-  Plus,
   Anchor,
-  Map as MapIcon,
+  ChevronRight,
+  ArrowLeft,
   ShieldAlert,
 } from "lucide-react-native";
-import { PageHeader } from "@/components/PageHeader";
-import { PrimaryButton } from "@/components/PrimaryButton";
-import { LocationPicker } from "@/components/LocationPicker";
-import { LoadTypeSelector } from "@/components/LoadTypeSelector";
-import { PackageForm, PackageData } from "@/components/PackageForm";
-import { DateTimePickerSection } from "@/components/DateTimePickerSection";
-import { OfferSlider } from "@/components/OfferSlider";
-import { BottomSheet } from "@/components/BottomSheet";
-import { OrderSummary } from "@/components/OrderSummary";
-import { useShipmentStore } from "@/store/useShipmentStore";
+import { useShipmentStore, LocationData } from "@/store/useShipmentStore";
+import { LocationSearchModal } from "@/components/LocationSearchModal";
 
-export default function CreateLoadScreen() {
+export default function RouteSelectionScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
-  const addShipment = useShipmentStore((state) => state.addShipment);
-  const [selectedType, setSelectedType] = useState("general");
-  const [startLocation, setStartLocation] = useState("Houston, TX");
-  const [endLocation, setEndLocation] = useState("");
-  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [packages, setPackages] = useState<PackageData[]>([
-    { id: "1", code: "", weight: "250", length: "12", width: "8", height: "10" }
-  ]);
-  
-  const [geoModalVisible, setGeoModalVisible] = useState(false);
-  const [isMapFrozen, setIsMapFrozen] = useState(false);
-  const [isImportShipment, setIsImportShipment] = useState(false);
 
-  const handleStartLocationChange = (text: string) => {
-    setStartLocation(text);
-    const lower = text.toLowerCase();
-    if (lower.includes("port") || lower.includes("wharves") || lower.includes("demerara")) {
-      setIsMapFrozen(true);
-      setGeoModalVisible(true);
+  const pickupLocation = useShipmentStore((state) => state.pickupLocation);
+  const dropoffLocation = useShipmentStore((state) => state.dropoffLocation);
+  const isImportFlow = useShipmentStore((state) => state.isImportFlow);
+  const setPickupLocation = useShipmentStore((state) => state.setPickupLocation);
+  const setDropoffLocation = useShipmentStore((state) => state.setDropoffLocation);
+  const setCurrentStep = useShipmentStore((state) => state.setCurrentStep);
+  const resetRouteState = useShipmentStore((state) => state.resetRouteState);
+
+  const [activeModalType, setActiveModalType] = useState<"pickup" | "dropoff" | null>(null);
+  const [showPortVerification, setShowPortVerification] = useState(false);
+
+  // Sync wizard steps on load
+  useEffect(() => {
+    setCurrentStep(1);
+  }, [setCurrentStep]);
+
+  const handleSelectLocation = (location: LocationData) => {
+    if (activeModalType === "pickup") {
+      setPickupLocation(location);
+      setActiveModalType(null);
+
+      // Trigger geofence interstitial overlay if it's a port node
+      if (location.is_port) {
+        setShowPortVerification(true);
+      }
+    } else if (activeModalType === "dropoff") {
+      setDropoffLocation(location);
+      setActiveModalType(null);
     }
   };
 
-  const loadTypes = [
-    { id: "general", label: "General cargo", icon: Package },
-    { id: "bulk", label: "Bulk cargo", icon: Lock },
-    { id: "fragile", label: "Fragile cargo", icon: ImageIcon },
-  ];
+  const handleCancelAndBack = () => {
+    resetRouteState();
+    router.back();
+  };
+
+  const handleProceedToCargo = () => {
+    setCurrentStep(2);
+    router.push("/create-load/cargo-details");
+  };
+
+  const isFormComplete = pickupLocation !== null && dropoffLocation !== null;
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.background }]}
-    >
-      <PageHeader
-        title="Post a Load"
-        subtitle="Tell us what you need to ship"
-        showBackButton
-      />
-
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Visual Map Mockup */}
-        <View style={styles.mapCard}>
-          <View style={styles.mapHeader}>
-            <MapIcon size={16} color="#0F3D26" />
-            <Text style={styles.mapHeaderText}>Guyana Port Logistics Geofence Map</Text>
-          </View>
-          
-          <View style={[styles.mapCanvas, isMapFrozen && styles.mapCanvasFrozen]}>
-            {/* Water body / River */}
-            <View style={styles.waterBody} />
-            {/* Coastline */}
-            <View style={styles.coastline} />
-            {/* Roads */}
-            <View style={styles.highwayRoute1} />
-            <View style={styles.highwayRoute2} />
-
-            {/* Georgetown Port Pin */}
-            <TouchableOpacity 
-              style={[styles.mapPin, { top: 35, left: 95 }]}
-              disabled={isMapFrozen}
-              onPress={() => {
-                setStartLocation("Georgetown Wharves (Port Zone)");
-                setIsMapFrozen(true);
-                setGeoModalVisible(true);
-              }}
-              activeOpacity={0.7}
-            >
-              <View style={[styles.pinDot, { backgroundColor: "#D4A017" }]}>
-                <Anchor size={12} color="#FFFFFF" />
-              </View>
-              <View style={styles.pinLabel}>
-                <Text style={styles.pinLabelText}>⚓ Georgetown Wharves</Text>
-              </View>
-            </TouchableOpacity>
-
-            {/* Demerara Terminals Pin */}
-            <TouchableOpacity 
-              style={[styles.mapPin, { top: 110, left: 45 }]}
-              disabled={isMapFrozen}
-              onPress={() => {
-                setStartLocation("Demerara Terminals (Port Zone)");
-                setIsMapFrozen(true);
-                setGeoModalVisible(true);
-              }}
-              activeOpacity={0.7}
-            >
-              <View style={[styles.pinDot, { backgroundColor: "#D4A017" }]}>
-                <Anchor size={12} color="#FFFFFF" />
-              </View>
-              <View style={styles.pinLabel}>
-                <Text style={styles.pinLabelText}>⚓ Demerara Terminals</Text>
-              </View>
-            </TouchableOpacity>
-
-            {/* Linden Highway Domestic Pin */}
-            <TouchableOpacity 
-              style={[styles.mapPin, { top: 175, right: 30 }]}
-              disabled={isMapFrozen}
-              onPress={() => {
-                setStartLocation("Linden Highway (Domestic)");
-                setIsImportShipment(false);
-                setIsMapFrozen(false);
-              }}
-              activeOpacity={0.7}
-            >
-              <View style={[styles.pinDot, { backgroundColor: "#0F3D26" }]}>
-                <MapPin size={12} color="#FFFFFF" />
-              </View>
-              <View style={styles.pinLabel}>
-                <Text style={styles.pinLabelText}>📍 Linden Highway</Text>
-              </View>
-            </TouchableOpacity>
-
-            {isMapFrozen && (
-              <View style={styles.mapFreezeOverlay}>
-                <ShieldAlert size={20} color="#D4A017" />
-                <Text style={styles.mapFreezeText}>Map Locked (Customs Overlay Active)</Text>
-              </View>
-            )}
-          </View>
-          <Text style={styles.mapHint}>Tap on any port anchor to simulate geofence trigger</Text>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      {/* Wizard Header */}
+      <View style={styles.headerRow}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={handleCancelAndBack}
+          activeOpacity={0.7}
+        >
+          <ArrowLeft color="#0F3D26" size={20} />
+        </TouchableOpacity>
+        <View style={styles.headerTitleContainer}>
+          <Text style={styles.headerTitle}>Post a Load</Text>
+          <Text style={styles.headerSubtitle}>
+            {isImportFlow ? "Step 1 of 3: Route Selection" : "Step 1 of 2: Route Selection"}
+          </Text>
         </View>
-
-        {/* Locations Routing Component */}
-        <LocationPicker
-          startLocation={startLocation}
-          endLocation={endLocation}
-          onChangeStart={handleStartLocationChange}
-          onChangeEnd={setEndLocation}
-          onSwap={() => {
-            const temp = startLocation;
-            setStartLocation(endLocation);
-            setEndLocation(temp);
-          }}
-          onAddStop={() => console.log("Add intermediate stop")}
-        />
-
-        {/* Load Types */}
-        <LoadTypeSelector
-          options={loadTypes}
-          selectedId={selectedType}
-          onSelect={setSelectedType}
-        />
-
-        {/* Your Own Package */}
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Your own package</Text>
-          <View style={styles.packagesList}>
-            {packages.map((pkg, index) => (
-              <PackageForm
-                key={pkg.id}
-                data={pkg}
-                onChange={(updatedPkg) => {
-                  const newPackages = [...packages];
-                  newPackages[index] = updatedPkg;
-                  setPackages(newPackages);
-                }}
-              />
-            ))}
-          </View>
-          <TouchableOpacity
-            style={styles.addPackageButton}
-            onPress={() => {
-              setPackages([
-                ...packages,
-                {
-                  id: Date.now().toString(),
-                  code: "",
-                  weight: "0",
-                  length: "0",
-                  width: "0",
-                  height: "0",
-                },
-              ]);
-            }}
-          >
-            <Plus size={18} color="#0F3D26" />
-            <Text style={styles.addPackageText}>Add package</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Book a Load */}
-        <DateTimePickerSection />
-
-        {/* Recommended Offer */}
-        <OfferSlider />
-      </ScrollView>
-
-      <View style={styles.footer}>
-        <PrimaryButton
-          title="Request pickup"
-          onPress={() => {
-            console.log("Submitted Packages Data:", JSON.stringify(packages, null, 2));
-            setIsReviewModalOpen(true);
-          }}
-        />
+        <TouchableOpacity onPress={handleCancelAndBack} activeOpacity={0.7}>
+          <Text style={styles.cancelText}>Cancel</Text>
+        </TouchableOpacity>
       </View>
 
-      {/* Review Modal */}
-      <BottomSheet
-        isVisible={isReviewModalOpen}
-        onClose={() => setIsReviewModalOpen(false)}
-        title="Expected on: 19 Jun 2025"
-      >
-        <OrderSummary
-          data={{
-            id: Date.now().toString().slice(-9),
-            title: packages.length > 0 && packages[0].code ? packages[0].code : "Mixed Cargo",
-            status: "Awaiting Pickup",
-            quantity: packages.length,
-            size: packages[0] ? `${packages[0].length}x${packages[0].width}x${packages[0].height}cm` : "0x0x0cm",
-            weight: packages.reduce((acc, p) => acc + (parseFloat(p.weight) || 0), 0) + "kg",
-            type: loadTypes.find((t) => t.id === selectedType)?.label || "General cargo",
-          }}
-        />
+      {/* Main Content Area */}
+      <View style={styles.content}>
+        <Text style={styles.sectionTitle}>Specify Route Details</Text>
+        <Text style={styles.sectionSubtitle}>
+          Select your cargo source and final delivery point. Importing wharves trigger customs validations automatically.
+        </Text>
 
-        <View style={{ marginTop: 8 }}>
-          <PrimaryButton
-            title="Finalize order"
-            onPress={() => {
-              const totalWeight = packages.reduce((acc, p) => acc + (parseFloat(p.weight) || 0), 0).toString();
-              const cargoTypeStr = loadTypes.find((t) => t.id === selectedType)?.label || "General cargo";
-              
-              addShipment({
-                pickup: startLocation,
-                delivery: endLocation,
-                cargoType: cargoTypeStr,
-                weight: totalWeight,
-                offerPrice: "150000",
-                status: "OPEN",
-                deliveryDate: new Date(Date.now() + 2 * 86400000).toISOString(),
-                acceptedByDriver: false,
-                is_import: isImportShipment,
-              });
+        {/* Inputs Stack */}
+        <View style={styles.routeContainer}>
+          {/* Timeline connecting line */}
+          <View style={styles.timelineWrapper}>
+            <View style={[styles.timelineDot, pickupLocation?.is_port && styles.timelineDotPort]} />
+            <View style={styles.timelineLine} />
+            <View style={[styles.timelinePin, dropoffLocation && styles.timelinePinActive]} />
+          </View>
 
-              console.log("Order finalized!");
-              setIsReviewModalOpen(false);
-              router.push("/create-load/status?state=confirmed");
-            }}
-          />
+          {/* Pressable Inputs */}
+          <View style={styles.inputsWrapper}>
+            {/* Start Location Card */}
+            <TouchableOpacity
+              style={[
+                styles.locationCard,
+                pickupLocation && styles.locationCardActive,
+                pickupLocation?.is_port && styles.locationCardPort,
+              ]}
+              onPress={() => setActiveModalType("pickup")}
+              activeOpacity={0.8}
+            >
+              <View style={styles.cardHeader}>
+                <Text style={styles.cardLabel}>START LOCATION</Text>
+                {pickupLocation?.is_port && (
+                  <View style={styles.portLabelBadge}>
+                    <Text style={styles.portLabelBadgeText}>PORT ZONE</Text>
+                  </View>
+                )}
+              </View>
+              {pickupLocation ? (
+                <View style={styles.selectedLocationRow}>
+                  {pickupLocation.is_port ? (
+                    <Anchor size={20} color="#0F3D26" style={styles.cardIcon} />
+                  ) : (
+                    <MapPin size={20} color="#0F3D26" style={styles.cardIcon} />
+                  )}
+                  <Text style={styles.selectedLocationText}>{pickupLocation.name}</Text>
+                </View>
+              ) : (
+                <Text style={styles.placeholderText}>Tap to select pickup point...</Text>
+              )}
+            </TouchableOpacity>
+
+            {/* Delivery Location Card */}
+            <TouchableOpacity
+              style={[styles.locationCard, dropoffLocation && styles.locationCardActive]}
+              onPress={() => setActiveModalType("dropoff")}
+              activeOpacity={0.8}
+            >
+              <View style={styles.cardHeader}>
+                <Text style={styles.cardLabel}>DELIVERY LOCATION</Text>
+              </View>
+              {dropoffLocation ? (
+                <View style={styles.selectedLocationRow}>
+                  <MapPin size={20} color="#6B7280" style={styles.cardIcon} />
+                  <Text style={styles.selectedLocationText}>{dropoffLocation.name}</Text>
+                </View>
+              ) : (
+                <Text style={styles.placeholderText}>Tap to select delivery point...</Text>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
-      </BottomSheet>
+      </View>
 
-      {/* Port Pickup Verification Modal */}
+      {/* Sticky Bottom Actions */}
+      <View style={styles.footer}>
+        <TouchableOpacity
+          style={[styles.nextButton, !isFormComplete && styles.nextButtonDisabled]}
+          onPress={handleProceedToCargo}
+          disabled={!isFormComplete}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.nextButtonText}>NEXT: CARGO DETAILS</Text>
+          <ChevronRight size={18} color="#FFFFFF" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Full Screen Autocomplete Modals */}
+      <LocationSearchModal
+        isVisible={activeModalType !== null}
+        onClose={() => setActiveModalType(null)}
+        onSelectLocation={handleSelectLocation}
+        title={activeModalType === "pickup" ? "Select Start Location" : "Select Delivery Location"}
+        placeholder={
+          activeModalType === "pickup"
+            ? "Search ports, terminals or addresses..."
+            : "Search delivery addresses..."
+        }
+      />
+
+      {/* Focused Interstitial Port Pickup Verification Modal */}
       <Modal
         animationType="fade"
         transparent={true}
-        visible={geoModalVisible}
-        onRequestClose={() => {
-          setIsMapFrozen(false);
-          setGeoModalVisible(false);
-        }}
+        visible={showPortVerification}
+        onRequestClose={() => setShowPortVerification(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalBackdropBlur} />
+        <View style={styles.verificationOverlay}>
+          <View style={styles.verificationBackdrop} />
           
-          <View style={styles.geoModalContainer}>
-            {/* Header Section */}
-            <View style={styles.geoModalHeader}>
-              <View style={styles.anchorIconBg}>
-                <Anchor size={28} color="#D4A017" />
-              </View>
-              <Text style={styles.geoModalTitle}>⚓ Port Pickup Verification</Text>
+          <View style={styles.verificationContainer}>
+            <View style={styles.modalHeaderIconBg}>
+              <Anchor size={30} color="#D4A017" />
             </View>
-
-            {/* Body Content */}
-            <View style={styles.geoModalBody}>
-              <Text style={styles.geoModalText}>
-                This shipment originates from a customs-controlled zone. A2B requires pre-cleared customs documentation (Form C21/Bill of Lading) to ensure your driver passes port checkpoints without delays.
+            
+            <Text style={styles.modalTitle}>⚓ Port Pickup Verified</Text>
+            
+            <Text style={styles.modalText}>
+              This shipment originates from a customs-controlled zone. A2B will require valid clearing documentation (Form C21/Bill of Lading) on Step 2 to bypass port gates seamlessly.
+            </Text>
+            
+            <View style={styles.warningBox}>
+              <ShieldAlert size={18} color="#B45309" />
+              <Text style={styles.warningBoxText}>
+                Failure to provide valid paperwork halts driver clearance at port checkpoints.
               </Text>
-              
-              <View style={styles.warningAlertBox}>
-                <ShieldAlert size={18} color="#B45309" />
-                <Text style={styles.warningAlertText}>
-                  A2B requires pre-cleared customs documentation (Form C21/Bill of Lading) to bypass customs constraints.
-                </Text>
-              </View>
             </View>
 
-            {/* Action CTAs */}
-            <View style={styles.geoModalFooter}>
-              <TouchableOpacity
-                style={styles.geoModalPrimaryButton}
-                activeOpacity={0.8}
-                onPress={() => {
-                  setIsImportShipment(true);
-                  setGeoModalVisible(false);
-                  
-                  router.push({
-                    pathname: "/create-load/document-vault",
-                    params: {
-                      pickup: startLocation,
-                      delivery: endLocation,
-                      cargoType: selectedType,
-                      weight: packages.reduce((acc, p) => acc + (parseFloat(p.weight) || 0), 0).toString(),
-                    }
-                  });
-                }}
-              >
-                <Text style={styles.geoModalPrimaryButtonText}>Continue to Document Vault</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.geoModalSecondaryButton}
-                activeOpacity={0.7}
-                onPress={() => {
-                  setIsMapFrozen(false);
-                  setIsImportShipment(false);
-                  setStartLocation("Houston, TX"); // Reset to standard domestic location
-                  setGeoModalVisible(false);
-                }}
-              >
-                <Text style={styles.geoModalSecondaryButtonText}>Cancel & Route Domestic</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              style={styles.modalCTAButton}
+              activeOpacity={0.8}
+              onPress={() => {
+                setShowPortVerification(false);
+                // Prompt user to complete flow
+              }}
+            >
+              <Text style={styles.modalCTAButtonText}>Proceed to Cargo Details</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -362,355 +239,234 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollContent: {
-    padding: 20,
-    gap: 24,
-    paddingBottom: 100,
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+    backgroundColor: "#FFFFFF",
   },
-  sectionContainer: {
-    gap: 12,
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#F3F4F6",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
   },
-  sectionTitle: {
+  headerTitleContainer: {
+    flex: 1,
+    marginLeft: 16,
+  },
+  headerTitle: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#0F3D26",
   },
-  packagesList: {
+  headerSubtitle: {
+    fontSize: 11,
+    color: "#6B7280",
+    marginTop: 2,
+  },
+  cancelText: {
+    fontSize: 14,
+    color: "#EF4444",
+    fontWeight: "bold",
+  },
+  content: {
+    flex: 1,
+    padding: 20,
     gap: 16,
   },
-  addPackageButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    marginTop: 4,
-  },
-  addPackageText: {
-    fontSize: 14,
+  sectionTitle: {
+    fontSize: 22,
     fontWeight: "bold",
     color: "#0F3D26",
   },
-  cardSpace: {
+  sectionSubtitle: {
+    fontSize: 13,
+    color: "#6B7280",
+    lineHeight: 18,
+  },
+  routeContainer: {
+    flexDirection: "row",
+    marginTop: 24,
     gap: 16,
+    flex: 1,
   },
-  labelContainer: {
-    flexDirection: "row",
+  timelineWrapper: {
     alignItems: "center",
-    gap: 4,
-    marginBottom: 6,
-    marginLeft: 4,
+    paddingTop: 24,
   },
-  labelText: {
-    fontSize: 12, // text-xs
-    fontWeight: "600", // font-semibold
-    color: "#6B7280", // text-gray-500
-    textTransform: "uppercase",
-    letterSpacing: 0.5, // tracking-wide
+  timelineDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#9CA3AF",
   },
-  input: {
-    width: "100%",
-    paddingHorizontal: 16, // px-4
-    paddingVertical: 14, // py-3.5
-    backgroundColor: "#F9FAFB", // bg-gray-50
-    borderWidth: 1,
-    borderColor: "#E5E7EB", // border-gray-200
-    borderRadius: 8, // rounded-lg
-    fontSize: 14, // text-sm
-    color: "#111827",
+  timelineDotPort: {
+    backgroundColor: "#D4A017", // Amber for port pickup
   },
-  inputGroup: {
-    position: "relative",
-  },
-  inputGroupRelative: {
-    position: "relative",
-    zIndex: 10,
-  },
-  connectorLine: {
-    position: "absolute",
-    left: 29,
-    top: 60,
-    height: 32, // h-8
-    borderLeftWidth: 2,
-    borderColor: "#D1D5DB", // border-gray-300
+  timelineLine: {
+    width: 2,
+    flex: 1,
+    backgroundColor: "#E5E7EB",
     borderStyle: "dashed",
-    zIndex: 0,
+    marginVertical: 8,
   },
-  chipContainer: {
-    flexDirection: "row",
-    gap: 8, // gap-2
-    marginTop: 12, // mt-3
-    paddingBottom: 4,
+  timelinePin: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#9CA3AF",
   },
-  chip: {
-    paddingHorizontal: 12, // px-3
-    paddingVertical: 6, // py-1.5
-    borderRadius: 9999, // rounded-full
-    borderWidth: 1,
-  },
-  chipSelected: {
+  timelinePinActive: {
     backgroundColor: "#0F3D26",
-    borderColor: "#0F3D26",
   },
-  chipUnselected: {
+  inputsWrapper: {
+    flex: 1,
+    gap: 20,
+  },
+  locationCard: {
     backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1.5,
+    borderColor: "#E5E7EB",
+    height: 96,
+    justifyContent: "center",
+    gap: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 3,
+  },
+  locationCardActive: {
     borderColor: "#E5E7EB",
   },
-  chipText: {
-    fontSize: 12, // text-xs
-    fontWeight: "500", // font-medium
+  locationCardPort: {
+    borderColor: "#F5A623", // Amber highlight for geofenced port
+    backgroundColor: "rgba(245, 166, 35, 0.02)",
   },
-  chipTextSelected: {
-    color: "#FFFFFF",
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
-  chipTextUnselected: {
-    color: "#6B7280",
-  },
-  marginTop: {
-    marginTop: 16,
-  },
-  priceInputContainer: {
-    position: "relative",
-  },
-  priceInput: {
-    width: "100%",
-    paddingHorizontal: 16,
-    paddingVertical: 16, // py-4
-    backgroundColor: "#FFFFFF",
-    borderWidth: 2,
-    borderColor: "#D97706", // border-amber
-    borderRadius: 8,
-    fontSize: 18, // text-lg
+  cardLabel: {
+    fontSize: 10,
     fontWeight: "bold",
-    color: "#111827",
+    color: "#9CA3AF",
+    letterSpacing: 0.5,
   },
-  currencyLabel: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    right: 16,
-    justifyContent: "center",
+  portLabelBadge: {
+    backgroundColor: "#FFFBEB",
+    borderWidth: 1,
+    borderColor: "#FDE68A",
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
   },
-  currencyText: {
-    color: "#9CA3AF", // text-gray-400
-    fontWeight: "500",
-    fontSize: 12,
-    textTransform: "uppercase",
+  portLabelBadgeText: {
+    fontSize: 8,
+    fontWeight: "bold",
+    color: "#B45309",
   },
-  infoContainer: {
+  placeholderText: {
+    fontSize: 15,
+    color: "#9CA3AF",
+    fontStyle: "italic",
+  },
+  selectedLocationRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-    marginTop: 8,
-    marginLeft: 4,
   },
-  infoText: {
-    fontSize: 12, // text-xs
-    color: "#6B7280", // text-gray-500
+  cardIcon: {
+    marginRight: 8,
   },
-  marginBottom: {
-    marginBottom: 6,
-    marginLeft: 4,
-  },
-  textArea: {
-    textAlignVertical: "top",
-    minHeight: 80,
+  selectedLocationText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#111827",
+    flex: 1,
   },
   footer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
     padding: 16,
     backgroundColor: "#FFFFFF",
     borderTopWidth: 1,
     borderTopColor: "#E5E7EB",
-    paddingBottom: 32,
+    paddingBottom: Platform.OS === "ios" ? 34 : 20,
   },
-  mapCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: "#F5F5F4",
-    padding: 16,
-    gap: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  mapHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  mapHeaderText: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#0F3D26",
-  },
-  mapCanvas: {
-    height: 220,
-    backgroundColor: "#E6F4EA",
-    borderRadius: 16,
-    overflow: "hidden",
-    position: "relative",
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
-  },
-  mapCanvasFrozen: {
-    opacity: 0.9,
-  },
-  waterBody: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "40%",
-    height: "100%",
-    backgroundColor: "#BFDBFE", // light blue water
-  },
-  coastline: {
-    position: "absolute",
-    top: 0,
-    left: "40%",
-    width: 2,
-    height: "100%",
-    backgroundColor: "#93C5FD",
-    borderStyle: "dashed",
-  },
-  highwayRoute1: {
-    position: "absolute",
-    top: 60,
-    left: "30%",
-    width: "70%",
-    height: 6,
-    backgroundColor: "#9CA3AF",
-    borderRadius: 3,
-  },
-  highwayRoute2: {
-    position: "absolute",
-    top: 130,
-    left: "20%",
-    width: "80%",
-    height: 6,
-    backgroundColor: "#9CA3AF",
-    borderRadius: 3,
-  },
-  mapPin: {
-    position: "absolute",
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "transparent",
-    zIndex: 20,
-  },
-  pinDot: {
-    width: 24,
-    height: 24,
+  nextButton: {
+    height: 52,
+    backgroundColor: "#0F3D26",
     borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  pinLabel: {
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    marginLeft: 6,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  pinLabelText: {
-    fontSize: 10,
-    fontWeight: "bold",
-    color: "#1F2937",
-  },
-  mapFreezeOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    zIndex: 50,
   },
-  mapFreezeText: {
+  nextButtonDisabled: {
+    backgroundColor: "#9CA3AF",
+    opacity: 0.5,
+  },
+  nextButtonText: {
     color: "#FFFFFF",
+    fontSize: 16,
     fontWeight: "bold",
-    fontSize: 13,
-    backgroundColor: "rgba(15, 61, 38, 0.95)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    overflow: "hidden",
   },
-  mapHint: {
-    fontSize: 11,
-    color: "#6B7280",
-    textAlign: "center",
-    fontStyle: "italic",
-  },
-  modalOverlay: {
+  verificationOverlay: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
-  modalBackdropBlur: {
+  verificationBackdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.6)",
   },
-  geoModalContainer: {
+  verificationContainer: {
     width: Dimensions.get("window").width * 0.88,
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 24,
+    alignItems: "center",
     gap: 16,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
+    shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.25,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowRadius: 20,
+    elevation: 10,
     borderWidth: 1,
     borderColor: "#F3F4F6",
   },
-  geoModalHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
-    paddingBottom: 16,
-  },
-  anchorIconBg: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+  modalHeaderIconBg: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: "#FFFBEB",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
     borderColor: "#FEF3C7",
   },
-  geoModalTitle: {
-    fontSize: 18,
+  modalTitle: {
+    fontSize: 19,
     fontWeight: "bold",
     color: "#111827",
+    textAlign: "center",
   },
-  geoModalBody: {
-    gap: 12,
-  },
-  geoModalText: {
+  modalText: {
     fontSize: 14,
     color: "#4B5563",
     lineHeight: 20,
+    textAlign: "center",
   },
-  warningAlertBox: {
+  warningBox: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#FEF3C7",
@@ -719,43 +475,27 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     gap: 10,
+    width: "100%",
   },
-  warningAlertText: {
+  warningBoxText: {
     flex: 1,
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "500",
-    color: "#92400E",
+    color: "#B45309",
+    lineHeight: 16,
   },
-  geoModalFooter: {
-    gap: 8,
-    marginTop: 8,
-  },
-  geoModalPrimaryButton: {
+  modalCTAButton: {
     width: "100%",
     height: 52,
     backgroundColor: "#0F3D26",
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
+    marginTop: 8,
   },
-  geoModalPrimaryButtonText: {
+  modalCTAButtonText: {
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "bold",
-  },
-  geoModalSecondaryButton: {
-    width: "100%",
-    height: 52,
-    backgroundColor: "#F3F4F6",
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-  },
-  geoModalSecondaryButtonText: {
-    color: "#4B5563",
-    fontSize: 15,
-    fontWeight: "600",
   },
 });

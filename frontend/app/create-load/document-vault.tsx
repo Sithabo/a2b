@@ -42,6 +42,9 @@ export default function DocumentVaultScreen() {
   const draftShipment = useShipmentStore((state) => state.draftShipment);
   const setDraftShipment = useShipmentStore((state) => state.setDraftShipment);
   const clearDraftShipment = useShipmentStore((state) => state.clearDraftShipment);
+  const resetRouteState = useShipmentStore((state) => state.resetRouteState);
+  const pickupLocation = useShipmentStore((state) => state.pickupLocation);
+  const dropoffLocation = useShipmentStore((state) => state.dropoffLocation);
 
   // Get search params if routing from create-load screen
   const params = useLocalSearchParams<{
@@ -52,8 +55,8 @@ export default function DocumentVaultScreen() {
   }>();
 
   // Restore from draft or params
-  const pickup = draftShipment?.pickup || params.pickup || "Georgetown Port";
-  const delivery = draftShipment?.delivery || params.delivery || "";
+  const pickup = draftShipment?.pickup || pickupLocation?.name || params.pickup || "Georgetown Port";
+  const delivery = draftShipment?.delivery || dropoffLocation?.name || params.delivery || "";
   const cargoType = draftShipment?.cargoType || params.cargoType || "general";
   const weight = draftShipment?.weight || params.weight || "250";
 
@@ -107,6 +110,7 @@ export default function DocumentVaultScreen() {
               style: "destructive",
               onPress: () => {
                 clearDraftShipment();
+                resetRouteState();
                 navigation.dispatch(e.data.action);
               },
             },
@@ -143,6 +147,7 @@ export default function DocumentVaultScreen() {
     weight,
     clearDraftShipment,
     setDraftShipment,
+    resetRouteState,
   ]);
 
   const openMockPicker = (slot: "bol" | "invoice" | "clearance") => {
@@ -188,6 +193,7 @@ export default function DocumentVaultScreen() {
 
     // Clear draft state
     clearDraftShipment();
+    resetRouteState();
 
     // Route to success confirmation state
     router.replace("/create-load/status?state=confirmed");
@@ -229,7 +235,7 @@ export default function DocumentVaultScreen() {
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Compliance Vault</Text>
-          <Text style={styles.headerSubtitle}>Guyanese customs processing clearance</Text>
+          <Text style={styles.headerSubtitle}>Step 3 of 3: Document Uploads</Text>
         </View>
         <Lock size={20} color="#0F3D26" />
       </View>
