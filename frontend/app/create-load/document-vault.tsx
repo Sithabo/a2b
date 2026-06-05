@@ -61,18 +61,23 @@ export default function DocumentVaultScreen() {
   const weight = draftShipment?.weight || params.weight || "250";
 
   const [containerId, setContainerId] = useState(draftShipment?.containerId || "");
+  
+  const requiresGoInvestWaiver = draftShipment?.cargo?.requiresGoInvestWaiver === true;
+
   const [uploadedFiles, setUploadedFiles] = useState<{
     bol: DocumentInfo | null;
     invoice: DocumentInfo | null;
     clearance: DocumentInfo | null;
+    goInvest: DocumentInfo | null;
   }>({
     bol: draftShipment?.documents?.bol || null,
     invoice: draftShipment?.documents?.invoice || null,
     clearance: draftShipment?.documents?.clearance || null,
+    goInvest: draftShipment?.documents?.goInvest || null,
   });
 
   const [isPickerOpen, setIsPickerOpen] = useState(false);
-  const [activeSlot, setActiveSlot] = useState<"bol" | "invoice" | "clearance" | null>(null);
+  const [activeSlot, setActiveSlot] = useState<"bol" | "invoice" | "clearance" | "goInvest" | null>(null);
   const [isSubmissionComplete, setIsSubmissionComplete] = useState(false);
 
   // Check if everything is filled
@@ -80,7 +85,8 @@ export default function DocumentVaultScreen() {
     containerId.trim().length > 4 &&
     uploadedFiles.bol !== null &&
     uploadedFiles.invoice !== null &&
-    uploadedFiles.clearance !== null;
+    uploadedFiles.clearance !== null &&
+    (!requiresGoInvestWaiver || uploadedFiles.goInvest !== null);
 
   // Intercept navigation to cache draft if incomplete
   useEffect(() => {
@@ -95,7 +101,8 @@ export default function DocumentVaultScreen() {
         containerId.trim().length > 0 ||
         uploadedFiles.bol !== null ||
         uploadedFiles.invoice !== null ||
-        uploadedFiles.clearance !== null;
+        uploadedFiles.clearance !== null ||
+        uploadedFiles.goInvest !== null;
 
       if (hasProgress) {
         // Prevent default action
@@ -123,9 +130,10 @@ export default function DocumentVaultScreen() {
                   cargoType,
                   weight,
                   containerId,
-                  documents: uploadedFiles,
+                  documents: uploadedFiles as any,
                   status: "DRAFT_PENDING_DOCS",
                   createdAt: new Date().toISOString(),
+                  cargo: draftShipment?.cargo, // Preserve cargo details!
                 });
                 navigation.dispatch(e.data.action);
               },
@@ -148,9 +156,10 @@ export default function DocumentVaultScreen() {
     clearDraftShipment,
     setDraftShipment,
     resetRouteState,
+    draftShipment,
   ]);
 
-  const openMockPicker = (slot: "bol" | "invoice" | "clearance") => {
+  const openMockPicker = (slot: "bol" | "invoice" | "clearance" | "goInvest") => {
     setActiveSlot(slot);
     setIsPickerOpen(true);
   };
@@ -172,23 +181,31 @@ export default function DocumentVaultScreen() {
 
     setIsSubmissionComplete(true);
 
+    const docsRecord: { [key: string]: { name: string; size: string } } = {
+      bol: uploadedFiles.bol!,
+      invoice: uploadedFiles.invoice!,
+      clearance: uploadedFiles.clearance!,
+    };
+    if (uploadedFiles.goInvest) {
+      docsRecord.goInvest = uploadedFiles.goInvest;
+    }
+
     // Save final load to useShipmentStore
     addShipment({
       pickup,
       delivery,
       cargoType,
       weight,
-      offerPrice: "185000", // Guyanese ports premium offer
+      offerPrice: draftShipment?.offerPrice || "185000", // Guyanese ports premium offer or dynamic offer
       status: "OPEN",
       deliveryDate: new Date(Date.now() + 3 * 86400000).toISOString(),
       acceptedByDriver: false,
       is_import: true,
       containerId,
-      documents: {
-        bol: uploadedFiles.bol!,
-        invoice: uploadedFiles.invoice!,
-        clearance: uploadedFiles.clearance!,
-      },
+      documents: docsRecord,
+      pickupLocation: draftShipment?.pickupLocation || null,
+      dropoffLocation: draftShipment?.dropoffLocation || null,
+      cargo: draftShipment?.cargo,
     });
 
     // Clear draft state
@@ -216,6 +233,11 @@ export default function DocumentVaultScreen() {
         return [
           { name: "C21_Customs_Clearance_Form.pdf", size: "89 KB" },
           { name: "C32_Entry_Clearance_Stamped.pdf", size: "155 KB" },
+        ];
+      case "goInvest":
+        return [
+          { name: "GO_Invest_Concession_Letter_Approved.pdf", size: "82 KB" },
+          { name: "GRA_Duty_Free_Concession_Approval.pdf", size: "115 KB" },
         ];
       default:
         return [];
@@ -385,6 +407,55 @@ export default function DocumentVaultScreen() {
             </View>
             <ChevronRight size={18} color={uploadedFiles.clearance ? "#10B981" : "#D1D5DB"} />
           </TouchableOpacity>
+
+          {/* Slot 4: GO-Invest Tax Waiver Letter (Conditional) */}
+          {requiresGoInvestWaiver && (
+            <View style={styles.goInvestContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.uploadCard,
+                  uploadedFiles.goInvest ? styles.uploadCardCompleted : styles.uploadCardEmpty,
+                ]}
+                onPress={() => openMockPicker("goInvest")}
+                activeOpacity={0.75}
+              >
+                <View
+                  style={[
+                    styles.iconWrapper,
+                    uploadedFiles.goInvest ? styles.iconWrapperCompleted : styles.iconWrapperEmpty,
+                  ]}
+                >
+                  {uploadedFiles.goInvest ? (
+                    <CheckCircle size={20} color="#FFFFFF" />
+                  ) : (
+                    <Upload size={20} color="#6B7280" />
+                  )}
+                </View>
+                <View style={styles.cardInfo}>
+                  <Text
+                    style={[
+                      styles.cardLabel,
+                      uploadedFiles.goInvest ? styles.cardLabelCompleted : styles.cardLabelEmpty,
+                    ]}
+                  >
+                    GO-Invest Tax Waiver Concession
+                  </Text>
+                  <Text style={styles.cardMicrocopy}>
+                    {uploadedFiles.goInvest
+                      ? `${uploadedFiles.goInvest.name} (${uploadedFiles.goInvest.size})`
+                      : "Approved GO-Invest Zero-Rated Concession Letter."}
+                  </Text>
+                </View>
+                <ChevronRight size={18} color={uploadedFiles.goInvest ? "#10B981" : "#D1D5DB"} />
+              </TouchableOpacity>
+              
+              <View style={styles.goInvestWarningCallout}>
+                <Text style={styles.goInvestWarningCalloutText}>
+                  ⚠️ <Text style={styles.goInvestWarningCalloutBold}>Warning:</Text> Machinery for this sector qualifies for zero-rated customs tax. Upload your GO-Invest concession approval letter to ensure your driver is not delayed at customs checkpoints over duty disputes.
+                </Text>
+              </View>
+            </View>
+          )}
         </View>
 
         {/* Port metadata card for context */}
@@ -740,5 +811,23 @@ const styles = StyleSheet.create({
     color: "#9CA3AF",
     textAlign: "center",
     fontStyle: "italic",
+  },
+  goInvestContainer: {
+    gap: 8,
+  },
+  goInvestWarningCallout: {
+    backgroundColor: "#FEF3C7", // amber-100
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#FCD34D", // amber-300
+  },
+  goInvestWarningCalloutText: {
+    fontSize: 12,
+    color: "#D97706", // amber-600
+    lineHeight: 18,
+  },
+  goInvestWarningCalloutBold: {
+    fontWeight: "bold",
   },
 });

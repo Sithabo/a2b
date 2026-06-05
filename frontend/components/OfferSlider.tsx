@@ -1,26 +1,53 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Slider from "@react-native-community/slider";
 import { Lightbulb } from "lucide-react-native";
 
-export const OfferSlider = () => {
-  const [offer, setOffer] = useState(150000);
+interface OfferSliderProps {
+  value: number;
+  onChange: (val: number) => void;
+  isMachinery: boolean;
+  isImport: boolean;
+}
+
+export const OfferSlider: React.FC<OfferSliderProps> = ({
+  value,
+  onChange,
+  isMachinery,
+  isImport,
+}) => {
+  const baseOffer = 150000;
+  const machinerySurcharge = isMachinery ? 50000 : 0;
+  const importSurcharge = isImport ? 20000 : 0;
+  const recommendedPrice = baseOffer + machinerySurcharge + importSurcharge;
+
+  // Sync recommended price when surcharges change
+  useEffect(() => {
+    onChange(recommendedPrice);
+  }, [isMachinery, isImport, onChange, recommendedPrice]);
+
+  const minPrice = recommendedPrice - 20000;
+  const maxPrice = recommendedPrice + 30000;
 
   // Format number with commas
   const formatValue = (val: number) => {
     return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
+  const formatK = (val: number) => {
+    return `${Math.round(val / 1000)}k`;
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.sectionTitle}>Recommended Offer (UGX)</Text>
+      <Text style={styles.sectionTitle}>Recommended Offer (GYD)</Text>
 
       <View style={styles.card}>
         {/* Dynamic Big Number Display */}
         <View style={styles.header}>
           <Text style={styles.subtitle}>Your Offer</Text>
           <Text style={styles.amount}>
-            {formatValue(offer)} <Text style={styles.currency}>UGX</Text>
+            {formatValue(value)} <Text style={styles.currency}>GYD</Text>
           </Text>
         </View>
 
@@ -28,11 +55,11 @@ export const OfferSlider = () => {
         <View style={styles.sliderContainer}>
           <Slider
             style={styles.slider}
-            minimumValue={130000}
-            maximumValue={180000}
-            step={1000}
-            value={offer}
-            onValueChange={setOffer}
+            minimumValue={minPrice}
+            maximumValue={maxPrice}
+            step={5000}
+            value={value}
+            onValueChange={onChange}
             minimumTrackTintColor="#0F3D26"
             maximumTrackTintColor="#E5E7EB" // stone-200
             thumbTintColor="#0F3D26"
@@ -42,25 +69,51 @@ export const OfferSlider = () => {
           <View style={styles.labelsRow}>
             <View style={styles.labelCol}>
               <Text style={styles.stepText}>Budget</Text>
-              <Text style={styles.stepValue}>(130k)</Text>
+              <Text style={styles.stepValue}>({formatK(minPrice)})</Text>
             </View>
             <View style={styles.labelColActive}>
               <Text style={styles.stepTextActive}>Fair</Text>
-              <Text style={styles.stepValueActive}>(150k)</Text>
+              <Text style={styles.stepValueActive}>({formatK(recommendedPrice)})</Text>
             </View>
             <View style={styles.labelCol}>
               <Text style={styles.stepText}>Priority</Text>
-              <Text style={styles.stepValue}>(180k)</Text>
+              <Text style={styles.stepValue}>({formatK(maxPrice)})</Text>
             </View>
           </View>
         </View>
+
+        {/* Dynamic Surcharge Breakdown Card */}
+        {(isMachinery || isImport) && (
+          <View style={styles.breakdownCard}>
+            <Text style={styles.breakdownTitle}>Surcharge Breakdown</Text>
+            <View style={styles.breakdownRow}>
+              <Text style={styles.breakdownLabel}>Base Rate</Text>
+              <Text style={styles.breakdownValue}>150,000 GYD</Text>
+            </View>
+            {isMachinery && (
+              <View style={styles.breakdownRow}>
+                <Text style={styles.breakdownLabel}>⚡ Heavy-Haul Surcharge</Text>
+                <Text style={styles.breakdownValue}>+50,000 GYD</Text>
+              </View>
+            )}
+            {isImport && (
+              <View style={styles.breakdownRow}>
+                <Text style={styles.breakdownLabel}>⚓ Port Delay Surcharge</Text>
+                <Text style={styles.breakdownValue}>+20,000 GYD</Text>
+              </View>
+            )}
+            <View style={[styles.breakdownRow, styles.breakdownTotalRow]}>
+              <Text style={styles.breakdownTotalLabel}>Total Recommended</Text>
+              <Text style={styles.breakdownTotalValue}>{formatValue(recommendedPrice)} GYD</Text>
+            </View>
+          </View>
+        )}
 
         {/* Tooltip Tips */}
         <View style={styles.tipsContainer}>
           <Lightbulb size={24} color="#0F3D26" fill="#0F3D26" />
           <Text style={styles.tipsText}>
-            <Text style={styles.tipsBold}>Tips:</Text> Offers above 165,000 UGX
-            are 3x more likely to be accepted within an hour.
+            <Text style={styles.tipsBold}>Tips:</Text> Offers above {formatValue(recommendedPrice + 15000)} GYD are 3x more likely to be accepted within an hour.
           </Text>
         </View>
       </View>
@@ -81,7 +134,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FAFAF9", // stone-50 to match screenshot feel
     borderRadius: 24,
     padding: 24,
-    gap: 24,
+    gap: 20,
   },
   header: {
     alignItems: "center",
@@ -141,6 +194,53 @@ const styles = StyleSheet.create({
   stepValueActive: {
     fontSize: 14,
     fontWeight: "900",
+    color: "#0F3D26",
+  },
+  breakdownCard: {
+    backgroundColor: "#F3F4F6", // gray-100
+    borderRadius: 16,
+    padding: 16,
+    gap: 8,
+  },
+  breakdownTitle: {
+    fontSize: 11,
+    fontWeight: "bold",
+    color: "#374151", // gray-700
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+    paddingBottom: 6,
+    marginBottom: 4,
+  },
+  breakdownRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  breakdownLabel: {
+    fontSize: 12,
+    color: "#4B5563", // gray-600
+  },
+  breakdownValue: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  breakdownTotalRow: {
+    borderTopWidth: 1,
+    borderTopColor: "#E5E7EB",
+    paddingTop: 6,
+    marginTop: 4,
+  },
+  breakdownTotalLabel: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "#0F3D26",
+  },
+  breakdownTotalValue: {
+    fontSize: 12,
+    fontWeight: "bold",
     color: "#0F3D26",
   },
   tipsContainer: {

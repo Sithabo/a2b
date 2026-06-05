@@ -2,34 +2,16 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export type ShipmentStatus = 'OPEN' | 'MATCHED' | 'SECURED' | 'ACTIVE' | 'COMPLETED' | 'DRAFT_PENDING_DOCS';
+import { 
+  Shipment, 
+  LocationData, 
+  ShipmentStatus, 
+  CargoDetails, 
+  CargoType, 
+  MachinerySector 
+} from '../types/shipment';
 
-export interface LocationData {
-  id: string;
-  name: string;
-  latitude: number;
-  longitude: number;
-  is_port: boolean;
-  cargo_restrictions?: string[];
-}
-
-export interface Shipment {
-  id: string;
-  pickup: string;
-  delivery: string;
-  cargoType: string;
-  weight: string;
-  offerPrice: string;
-  status: ShipmentStatus;
-  createdAt: string;
-  deliveryDate: string;
-  acceptedByDriver: boolean;
-  driverId?: string;
-  driverName?: string;
-  is_import?: boolean;
-  containerId?: string;
-  documents?: { [key: string]: { name: string; size: string } };
-}
+export { Shipment, LocationData, ShipmentStatus, CargoDetails, CargoType, MachinerySector };
 
 interface ShipmentState {
   shipments: Shipment[];
@@ -75,6 +57,9 @@ const initialShipments: Shipment[] = [
     acceptedByDriver: true,
     driverId: "drv_001",
     driverName: "Guy Hawkins",
+    is_import: false,
+    pickupLocation: null,
+    dropoffLocation: null,
   },
   {
     id: "P2AL01Z89",
@@ -87,6 +72,9 @@ const initialShipments: Shipment[] = [
     createdAt: new Date(Date.now() - 15 * 60000).toISOString(),
     deliveryDate: new Date(Date.now() + 4 * 86400000).toISOString(),
     acceptedByDriver: false,
+    is_import: false,
+    pickupLocation: null,
+    dropoffLocation: null,
   }
 ];
 
