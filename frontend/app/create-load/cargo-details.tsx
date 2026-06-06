@@ -170,23 +170,30 @@ export default function CargoDetailsScreen() {
 
   const cargoTypeStr = loadTypes.find((t) => t.id === selectedType)?.label || "General Cargo";
 
-  const getPortDelaySurcharge = () => {
+  const getSurchargeBreakdown = (): { label: string; amount: number }[] => {
+    const list: { label: string; amount: number }[] = [];
     if (selectedType === "GENERAL_CARGO") {
-      return 10000;
+      list.push({ label: "📄 Import License Surcharge", amount: 10000 });
+    } else if (selectedType === "HEAVY_MACHINERY") {
+      list.push({ label: "🏗️ Capital Equipment Concession", amount: 30000 });
+      if (requiresFlatbedLowboy) {
+        list.push({ label: "🚛 Route Clearance Surcharge", amount: 15000 });
+      }
+      if (requiresHydraulicTipper) {
+        list.push({ label: "⚖️ Tipper Gate Fee", amount: 10000 });
+      }
+    } else if (selectedType === "CHEMICALS_PHARMA") {
+      list.push({ label: "🧪 PTCCD Hazard Clearance", amount: 45000 });
+    } else if (selectedType === "FOOD_BEVERAGE") {
+      const storageLabel = storageEnvironment === "FROZEN" ? "Frozen" : (storageEnvironment === "CHILLED" ? "Chilled" : "Ambient");
+      const icon = storageEnvironment === "FROZEN" ? "❄️" : (storageEnvironment === "CHILLED" ? "🌡️" : "📦");
+      list.push({
+        label: `${icon} GA-FDD Safe-Handling (${storageLabel})`,
+        amount: storageEnvironment === "FROZEN" ? 35000 : (storageEnvironment === "CHILLED" ? 25000 : 15000)
+      });
     }
-    if (selectedType === "HEAVY_MACHINERY") {
-      return 30000 + (requiresFlatbedLowboy ? 15000 : 0) + (requiresHydraulicTipper ? 10000 : 0);
-    }
-    if (selectedType === "CHEMICALS_PHARMA") {
-      return 45000;
-    }
-    if (selectedType === "FOOD_BEVERAGE") {
-      return storageEnvironment === "FROZEN" ? 35000 : (storageEnvironment === "CHILLED" ? 25000 : 15000);
-    }
-    return 0;
+    return list;
   };
-
-  const portDelaySurcharge = getPortDelaySurcharge();
 
   const handleNextStep = () => {
     if (!isFormValid) return;
@@ -640,7 +647,7 @@ export default function CargoDetailsScreen() {
             <OfferSlider
               value={offerPrice}
               onChange={setOfferPrice}
-              surcharge={portDelaySurcharge}
+              surcharges={getSurchargeBreakdown()}
               baseRate={150000}
             />
 

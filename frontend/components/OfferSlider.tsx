@@ -3,25 +3,31 @@ import { View, Text, StyleSheet } from "react-native";
 import Slider from "@react-native-community/slider";
 import { Lightbulb } from "lucide-react-native";
 
+interface SurchargeItem {
+  label: string;
+  amount: number;
+}
+
 interface OfferSliderProps {
   value: number;
   onChange: (val: number) => void;
-  surcharge: number;
+  surcharges: SurchargeItem[];
   baseRate?: number;
 }
 
 export const OfferSlider: React.FC<OfferSliderProps> = ({
   value,
   onChange,
-  surcharge,
+  surcharges,
   baseRate = 150000,
 }) => {
-  const recommendedPrice = baseRate + surcharge;
+  const totalSurcharge = surcharges.reduce((sum, item) => sum + item.amount, 0);
+  const recommendedPrice = baseRate + totalSurcharge;
 
   // Sync recommended price when surcharges change
   useEffect(() => {
     onChange(recommendedPrice);
-  }, [surcharge, baseRate, onChange, recommendedPrice]);
+  }, [totalSurcharge, baseRate, onChange, recommendedPrice]);
 
   const minPrice = recommendedPrice - 20000;
   const maxPrice = recommendedPrice + 30000;
@@ -80,17 +86,19 @@ export const OfferSlider: React.FC<OfferSliderProps> = ({
         </View>
 
         {/* Dynamic Surcharge Breakdown Card */}
-        {surcharge > 0 && (
+        {totalSurcharge > 0 && (
           <View style={styles.breakdownCard}>
             <Text style={styles.breakdownTitle}>Surcharge Breakdown</Text>
             <View style={styles.breakdownRow}>
               <Text style={styles.breakdownLabel}>Base Rate</Text>
               <Text style={styles.breakdownValue}>{formatValue(baseRate)} GYD</Text>
             </View>
-            <View style={styles.breakdownRow}>
-              <Text style={styles.breakdownLabel}>⚓ Port Delay Surcharge</Text>
-              <Text style={styles.breakdownValue}>+{formatValue(surcharge)} GYD</Text>
-            </View>
+            {surcharges.map((item, idx) => (
+              <View key={idx} style={styles.breakdownRow}>
+                <Text style={styles.breakdownLabel}>{item.label}</Text>
+                <Text style={styles.breakdownValue}>+{formatValue(item.amount)} GYD</Text>
+              </View>
+            ))}
             <View style={[styles.breakdownRow, styles.breakdownTotalRow]}>
               <Text style={styles.breakdownTotalLabel}>Total Recommended</Text>
               <Text style={styles.breakdownTotalValue}>{formatValue(recommendedPrice)} GYD</Text>
