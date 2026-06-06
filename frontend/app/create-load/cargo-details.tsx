@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -70,9 +70,13 @@ export default function CargoDetailsScreen() {
   // Pricing State
   const [offerPrice, setOfferPrice] = useState(150000);
 
+  const [subStep, setSubStep] = useState(1);
+  const scrollViewRef = useRef<ScrollView>(null);
+
   // Sync wizard step
   useEffect(() => {
     setCurrentStep(2);
+    setSubStep(1);
   }, [setCurrentStep]);
 
   // Load from draft if exists
@@ -275,7 +279,14 @@ export default function CargoDetailsScreen() {
       <View style={styles.headerRow}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={() => {
+            if (subStep > 1) {
+              setSubStep(subStep - 1);
+              scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+            } else {
+              router.back();
+            }
+          }}
           activeOpacity={0.7}
         >
           <ArrowLeft color="#0F3D26" size={20} />
@@ -283,7 +294,7 @@ export default function CargoDetailsScreen() {
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Post a Load</Text>
           <Text style={styles.headerSubtitle}>
-            {isImportFlow ? "Step 2 of 3: Cargo Details" : "Step 2 of 2: Cargo Details"}
+            {isImportFlow ? "Step 2 of 3: Cargo Details" : "Step 2 of 2: Cargo Details"} (Part {subStep} of 3)
           </Text>
         </View>
         <TouchableOpacity
@@ -297,327 +308,383 @@ export default function CargoDetailsScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Load Types */}
-        <LoadTypeSelector
-          options={loadTypes}
-          selectedId={selectedType}
-          onSelect={(id) => setSelectedType(id as CargoType)}
-        />
+      <ScrollView ref={scrollViewRef} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {subStep === 1 && (
+          <>
+            {/* Load Types */}
+            <LoadTypeSelector
+              options={loadTypes}
+              selectedId={selectedType}
+              onSelect={(id) => setSelectedType(id as CargoType)}
+            />
 
-        {/* Heavy Machinery details card (Conditional) */}
-        {selectedType === "HEAVY_MACHINERY" && (
-          <View style={styles.detailsCard}>
-            <Text style={styles.detailsTitle}>Heavy Machinery Details</Text>
-            
-            {/* Weight Input */}
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Weight (Tons)</Text>
-              <View style={styles.inputWithSuffix}>
-                <TextInput
-                  style={styles.textInput}
-                  value={machineryWeightTons}
-                  onChangeText={setMachineryWeightTons}
-                  keyboardType="numeric"
-                  placeholder="20"
-                  placeholderTextColor="#9CA3AF"
-                />
-                <Text style={styles.inputSuffix}>Tons</Text>
-              </View>
-            </View>
+            {/* Heavy Machinery details card (Conditional) */}
+            {selectedType === "HEAVY_MACHINERY" && (
+              <View style={styles.detailsCard}>
+                <Text style={styles.detailsTitle}>Heavy Machinery Details</Text>
+                
+                {/* Weight Input */}
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>Weight (Tons)</Text>
+                  <View style={styles.inputWithSuffix}>
+                    <TextInput
+                      style={styles.textInput}
+                      value={machineryWeightTons}
+                      onChangeText={setMachineryWeightTons}
+                      keyboardType="numeric"
+                      placeholder="20"
+                      placeholderTextColor="#9CA3AF"
+                    />
+                    <Text style={styles.inputSuffix}>Tons</Text>
+                  </View>
+                </View>
 
-            {/* Dimensions Safety Check (Optional Height & Width) */}
-            <View style={styles.inputsRow}>
-              <View style={styles.halfInputContainer}>
-                <Text style={styles.inputLabel}>Max Width (m) (Optional)</Text>
-                <View style={styles.inputWithSuffix}>
-                  <TextInput
-                    style={styles.textInput}
-                    value={machineryWidthMeters}
-                    onChangeText={setMachineryWidthMeters}
-                    keyboardType="numeric"
-                    placeholder="e.g. 3.2"
-                    placeholderTextColor="#9CA3AF"
-                  />
-                  <Text style={styles.inputSuffix}>m</Text>
+                {/* Dimensions Safety Check (Optional Height & Width) */}
+                <View style={styles.inputsRow}>
+                  <View style={styles.halfInputContainer}>
+                    <Text style={styles.inputLabel}>Max Width (m) (Optional)</Text>
+                    <View style={styles.inputWithSuffix}>
+                      <TextInput
+                        style={styles.textInput}
+                        value={machineryWidthMeters}
+                        onChangeText={setMachineryWidthMeters}
+                        keyboardType="numeric"
+                        placeholder="e.g. 3.2"
+                        placeholderTextColor="#9CA3AF"
+                      />
+                      <Text style={styles.inputSuffix}>m</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.halfInputContainer}>
+                    <Text style={styles.inputLabel}>Max Height (m) (Optional)</Text>
+                    <View style={styles.inputWithSuffix}>
+                      <TextInput
+                        style={styles.textInput}
+                        value={machineryHeightMeters}
+                        onChangeText={setMachineryHeightMeters}
+                        keyboardType="numeric"
+                        placeholder="e.g. 4.1"
+                        placeholderTextColor="#9CA3AF"
+                      />
+                      <Text style={styles.inputSuffix}>m</Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Checkboxes Row */}
+                <View style={styles.checkboxesRow}>
+                  <TouchableOpacity
+                    style={styles.checkboxItem}
+                    onPress={() => setRequiresFlatbedLowboy(!requiresFlatbedLowboy)}
+                    activeOpacity={0.8}
+                  >
+                    <View style={styles.checkbox}>
+                      {requiresFlatbedLowboy ? (
+                        <CheckCircle size={20} color="#0F3D26" />
+                      ) : (
+                        <View style={styles.checkboxOutline} />
+                      )}
+                    </View>
+                    <Text style={styles.checkboxLabel}>Requires Flatbed/Lowboy</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.checkboxItem}
+                    onPress={() => setRequiresHydraulicTipper(!requiresHydraulicTipper)}
+                    activeOpacity={0.8}
+                  >
+                    <View style={styles.checkbox}>
+                      {requiresHydraulicTipper ? (
+                        <CheckCircle size={20} color="#0F3D26" />
+                      ) : (
+                        <View style={styles.checkboxOutline} />
+                      )}
+                    </View>
+                    <Text style={styles.checkboxLabel}>Requires Hydraulic Tipper (Mechanical Dump)</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Soft Amber Notification Card */}
+                <View style={styles.amberNotificationCard}>
+                  <Text style={styles.amberNotificationText}>
+                    ℹ️ <Text style={styles.amberNotificationBold}>Zero-Rated Status:</Text> This cargo qualifies for GRA Tax Concessions. A GO-Invest letter will be required in the Document Vault.
+                  </Text>
                 </View>
               </View>
+            )}
 
-              <View style={styles.halfInputContainer}>
-                <Text style={styles.inputLabel}>Max Height (m) (Optional)</Text>
-                <View style={styles.inputWithSuffix}>
-                  <TextInput
-                    style={styles.textInput}
-                    value={machineryHeightMeters}
-                    onChangeText={setMachineryHeightMeters}
-                    keyboardType="numeric"
-                    placeholder="e.g. 4.1"
-                    placeholderTextColor="#9CA3AF"
-                  />
-                  <Text style={styles.inputSuffix}>m</Text>
+            {/* Chemicals & Pharma details card (Conditional) */}
+            {selectedType === "CHEMICALS_PHARMA" && (
+              <View style={styles.detailsCard}>
+                <Text style={styles.detailsTitle}>Chemicals & Pharma Details</Text>
+                
+                {/* Weight and Volume Inputs */}
+                <View style={styles.inputsRow}>
+                  <View style={styles.halfInputContainer}>
+                    <Text style={styles.inputLabel}>Weight (Tons)</Text>
+                    <View style={styles.inputWithSuffix}>
+                      <TextInput
+                        style={styles.textInput}
+                        value={chemicalsWeightTons}
+                        onChangeText={setChemicalsWeightTons}
+                        keyboardType="numeric"
+                        placeholder="20"
+                        placeholderTextColor="#9CA3AF"
+                      />
+                      <Text style={styles.inputSuffix}>Tons</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.halfInputContainer}>
+                    <Text style={styles.inputLabel}>Volume (m³)</Text>
+                    <View style={styles.inputWithSuffix}>
+                      <TextInput
+                        style={styles.textInput}
+                        value={chemicalsVolume}
+                        onChangeText={setChemicalsVolume}
+                        keyboardType="numeric"
+                        placeholder="15"
+                        placeholderTextColor="#9CA3AF"
+                      />
+                      <Text style={styles.inputSuffix}>m³</Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* High Visibility Warning Banner */}
+                <View style={styles.containerSelectionSection}>
+                  <Text style={styles.inputLabel}>Containment Unit (Optional)</Text>
+                  <View style={styles.containerGrid}>
+                    {([
+                      { id: "TANKER", label: "Tanker" },
+                      { id: "IBC_TOTES", label: "IBC Totes" },
+                      { id: "DRUMS", label: "Drums" },
+                      { id: "PALLETS", label: "Pallets" },
+                    ] as const).map((unit) => {
+                      const isActive = chemicalContainer === unit.id;
+                      return (
+                        <TouchableOpacity
+                          key={unit.id}
+                          style={[
+                            styles.containerButton,
+                            isActive ? styles.containerActive : styles.containerInactive,
+                          ]}
+                          onPress={() => setChemicalContainer(isActive ? null : unit.id)}
+                          activeOpacity={0.8}
+                        >
+                          <Text
+                            style={[
+                              styles.containerText,
+                              isActive ? styles.containerTextActive : styles.containerTextInactive,
+                            ]}
+                          >
+                            {unit.label}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                </View>
+
+                {/* High Visibility Warning Banner */}
+                <View style={styles.redWarningBanner}>
+                  <Text style={styles.redWarningText}>
+                    ⚠️ <Text style={styles.redWarningBold}>Hazard Tracking:</Text> This load requires verified clearance from the Pesticide, Toxic Chemicals Control Department (PTCCD).
+                  </Text>
                 </View>
               </View>
-            </View>
+            )}
 
-            {/* Checkboxes Row */}
-            <View style={styles.checkboxesRow}>
-              <TouchableOpacity
-                style={styles.checkboxItem}
-                onPress={() => setRequiresFlatbedLowboy(!requiresFlatbedLowboy)}
-                activeOpacity={0.8}
-              >
-                <View style={styles.checkbox}>
-                  {requiresFlatbedLowboy ? (
-                    <CheckCircle size={20} color="#0F3D26" />
-                  ) : (
-                    <View style={styles.checkboxOutline} />
-                  )}
+            {/* Food & Beverages details card (Conditional) */}
+            {selectedType === "FOOD_BEVERAGE" && (
+              <View style={styles.detailsCard}>
+                <Text style={styles.detailsTitle}>Food & Beverages Details</Text>
+                
+                {/* Weight and Volume Inputs */}
+                <View style={styles.inputsRow}>
+                  <View style={styles.halfInputContainer}>
+                    <Text style={styles.inputLabel}>Weight (Tons)</Text>
+                    <View style={styles.inputWithSuffix}>
+                      <TextInput
+                        style={styles.textInput}
+                        value={foodWeightTons}
+                        onChangeText={setFoodWeightTons}
+                        keyboardType="numeric"
+                        placeholder="20"
+                        placeholderTextColor="#9CA3AF"
+                      />
+                      <Text style={styles.inputSuffix}>Tons</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.halfInputContainer}>
+                    <Text style={styles.inputLabel}>Volume (m³)</Text>
+                    <View style={styles.inputWithSuffix}>
+                      <TextInput
+                        style={styles.textInput}
+                        value={foodVolume}
+                        onChangeText={setFoodVolume}
+                        keyboardType="numeric"
+                        placeholder="15"
+                        placeholderTextColor="#9CA3AF"
+                      />
+                      <Text style={styles.inputSuffix}>m³</Text>
+                    </View>
+                  </View>
                 </View>
-                <Text style={styles.checkboxLabel}>Requires Flatbed/Lowboy</Text>
-              </TouchableOpacity>
 
-              <TouchableOpacity
-                style={styles.checkboxItem}
-                onPress={() => setRequiresHydraulicTipper(!requiresHydraulicTipper)}
-                activeOpacity={0.8}
-              >
-                <View style={styles.checkbox}>
-                  {requiresHydraulicTipper ? (
-                    <CheckCircle size={20} color="#0F3D26" />
-                  ) : (
-                    <View style={styles.checkboxOutline} />
-                  )}
+                {/* Segmented Control Storage Environment */}
+                <View style={styles.storageControlContainer}>
+                  <Text style={styles.inputLabel}>Storage Environment</Text>
+                  <View style={styles.segmentedControl}>
+                    {(["AMBIENT", "CHILLED", "FROZEN"] as const).map((env) => {
+                      const isActive = storageEnvironment === env;
+                      return (
+                        <TouchableOpacity
+                          key={env}
+                          style={[
+                            styles.segmentButton,
+                            isActive ? styles.segmentActive : styles.segmentInactive,
+                          ]}
+                          onPress={() => setStorageEnvironment(env)}
+                          activeOpacity={0.8}
+                        >
+                          <Text
+                            style={[
+                              styles.segmentText,
+                              isActive ? styles.segmentTextActive : styles.segmentTextInactive,
+                            ]}
+                          >
+                            {env.charAt(0) + env.slice(1).toLowerCase()}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
                 </View>
-                <Text style={styles.checkboxLabel}>Requires Hydraulic Tipper (Mechanical Dump)</Text>
-              </TouchableOpacity>
-            </View>
 
-            {/* Soft Amber Notification Card */}
-            <View style={styles.amberNotificationCard}>
-              <Text style={styles.amberNotificationText}>
-                ℹ️ <Text style={styles.amberNotificationBold}>Zero-Rated Status:</Text> This cargo qualifies for GRA Tax Concessions. A GO-Invest letter will be required in the Document Vault.
-              </Text>
-            </View>
-          </View>
-        )}
-
-        {/* Chemicals & Pharma details card (Conditional) */}
-        {selectedType === "CHEMICALS_PHARMA" && (
-          <View style={styles.detailsCard}>
-            <Text style={styles.detailsTitle}>Chemicals & Pharma Details</Text>
-            
-            {/* Weight and Volume Inputs */}
-            <View style={styles.inputsRow}>
-              <View style={styles.halfInputContainer}>
-                <Text style={styles.inputLabel}>Weight (Tons)</Text>
-                <View style={styles.inputWithSuffix}>
-                  <TextInput
-                    style={styles.textInput}
-                    value={chemicalsWeightTons}
-                    onChangeText={setChemicalsWeightTons}
-                    keyboardType="numeric"
-                    placeholder="20"
-                    placeholderTextColor="#9CA3AF"
-                  />
-                  <Text style={styles.inputSuffix}>Tons</Text>
-                </View>
-              </View>
-
-              <View style={styles.halfInputContainer}>
-                <Text style={styles.inputLabel}>Volume (m³)</Text>
-                <View style={styles.inputWithSuffix}>
-                  <TextInput
-                    style={styles.textInput}
-                    value={chemicalsVolume}
-                    onChangeText={setChemicalsVolume}
-                    keyboardType="numeric"
-                    placeholder="15"
-                    placeholderTextColor="#9CA3AF"
-                  />
-                  <Text style={styles.inputSuffix}>m³</Text>
+                {/* Informative Text Block */}
+                <View style={styles.blueInfoBlock}>
+                  <Text style={styles.blueInfoText}>
+                    ℹ️ <Text style={styles.blueInfoBold}>GA-FDD Regulations:</Text> Requires certified safe-handling paperwork or US FDA state commerce certificates.
+                  </Text>
                 </View>
               </View>
-            </View>
+            )}
 
-            {/* High Visibility Warning Banner */}
-            <View style={styles.containerSelectionSection}>
-              <Text style={styles.inputLabel}>Containment Unit (Optional)</Text>
-              <View style={styles.containerGrid}>
-                {([
-                  { id: "TANKER", label: "Tanker" },
-                  { id: "IBC_TOTES", label: "IBC Totes" },
-                  { id: "DRUMS", label: "Drums" },
-                  { id: "PALLETS", label: "Pallets" },
-                ] as const).map((unit) => {
-                  const isActive = chemicalContainer === unit.id;
-                  return (
-                    <TouchableOpacity
-                      key={unit.id}
-                      style={[
-                        styles.containerButton,
-                        isActive ? styles.containerActive : styles.containerInactive,
-                      ]}
-                      onPress={() => setChemicalContainer(isActive ? null : unit.id)}
-                      activeOpacity={0.8}
-                    >
-                      <Text
-                        style={[
-                          styles.containerText,
-                          isActive ? styles.containerTextActive : styles.containerTextInactive,
-                        ]}
-                      >
-                        {unit.label}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </View>
-
-            {/* High Visibility Warning Banner */}
-            <View style={styles.redWarningBanner}>
-              <Text style={styles.redWarningText}>
-                ⚠️ <Text style={styles.redWarningBold}>Hazard Tracking:</Text> This load requires verified clearance from the Pesticide, Toxic Chemicals Control Department (PTCCD).
-              </Text>
-            </View>
-          </View>
-        )}
-
-        {/* Food & Beverages details card (Conditional) */}
-        {selectedType === "FOOD_BEVERAGE" && (
-          <View style={styles.detailsCard}>
-            <Text style={styles.detailsTitle}>Food & Beverages Details</Text>
-            
-            {/* Weight and Volume Inputs */}
-            <View style={styles.inputsRow}>
-              <View style={styles.halfInputContainer}>
-                <Text style={styles.inputLabel}>Weight (Tons)</Text>
-                <View style={styles.inputWithSuffix}>
-                  <TextInput
-                    style={styles.textInput}
-                    value={foodWeightTons}
-                    onChangeText={setFoodWeightTons}
-                    keyboardType="numeric"
-                    placeholder="20"
-                    placeholderTextColor="#9CA3AF"
-                  />
-                  <Text style={styles.inputSuffix}>Tons</Text>
+            {/* Your Own Package (Only visible for General Cargo) */}
+            {selectedType === "GENERAL_CARGO" && (
+              <View style={styles.sectionContainer}>
+                <Text style={styles.sectionTitle}>Your own package</Text>
+                <View style={styles.packagesList}>
+                  {packages.map((pkg, index) => (
+                    <PackageForm
+                      key={pkg.id}
+                      data={pkg}
+                      onChange={(updatedPkg) => {
+                        const newPackages = [...packages];
+                        newPackages[index] = updatedPkg;
+                        setPackages(newPackages);
+                      }}
+                    />
+                  ))}
                 </View>
-              </View>
-
-              <View style={styles.halfInputContainer}>
-                <Text style={styles.inputLabel}>Volume (m³)</Text>
-                <View style={styles.inputWithSuffix}>
-                  <TextInput
-                    style={styles.textInput}
-                    value={foodVolume}
-                    onChangeText={setFoodVolume}
-                    keyboardType="numeric"
-                    placeholder="15"
-                    placeholderTextColor="#9CA3AF"
-                  />
-                  <Text style={styles.inputSuffix}>m³</Text>
-                </View>
-              </View>
-            </View>
-
-            {/* Segmented Control Storage Environment */}
-            <View style={styles.storageControlContainer}>
-              <Text style={styles.inputLabel}>Storage Environment</Text>
-              <View style={styles.segmentedControl}>
-                {(["AMBIENT", "CHILLED", "FROZEN"] as const).map((env) => {
-                  const isActive = storageEnvironment === env;
-                  return (
-                    <TouchableOpacity
-                      key={env}
-                      style={[
-                        styles.segmentButton,
-                        isActive ? styles.segmentActive : styles.segmentInactive,
-                      ]}
-                      onPress={() => setStorageEnvironment(env)}
-                      activeOpacity={0.8}
-                    >
-                      <Text
-                        style={[
-                          styles.segmentText,
-                          isActive ? styles.segmentTextActive : styles.segmentTextInactive,
-                        ]}
-                      >
-                        {env.charAt(0) + env.slice(1).toLowerCase()}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </View>
-
-            {/* Informative Text Block */}
-            <View style={styles.blueInfoBlock}>
-              <Text style={styles.blueInfoText}>
-                ℹ️ <Text style={styles.blueInfoBold}>GA-FDD Regulations:</Text> Requires certified safe-handling paperwork or US FDA state commerce certificates.
-              </Text>
-            </View>
-          </View>
-        )}
-
-        {/* Your Own Package (Only visible for General Cargo) */}
-        {selectedType === "GENERAL_CARGO" && (
-          <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>Your own package</Text>
-            <View style={styles.packagesList}>
-              {packages.map((pkg, index) => (
-                <PackageForm
-                  key={pkg.id}
-                  data={pkg}
-                  onChange={(updatedPkg) => {
-                    const newPackages = [...packages];
-                    newPackages[index] = updatedPkg;
-                    setPackages(newPackages);
+                <TouchableOpacity
+                  style={styles.addPackageButton}
+                  onPress={() => {
+                    setPackages([
+                      ...packages,
+                      {
+                        id: Date.now().toString(),
+                        code: "",
+                        weight: "0",
+                        length: "0",
+                        width: "0",
+                        height: "0",
+                      },
+                    ]);
                   }}
-                />
-              ))}
-            </View>
-            <TouchableOpacity
-              style={styles.addPackageButton}
-              onPress={() => {
-                setPackages([
-                  ...packages,
-                  {
-                    id: Date.now().toString(),
-                    code: "",
-                    weight: "0",
-                    length: "0",
-                    width: "0",
-                    height: "0",
-                  },
-                ]);
-              }}
-            >
-              <Plus size={18} color="#0F3D26" />
-              <Text style={styles.addPackageText}>Add package</Text>
-            </TouchableOpacity>
-          </View>
+                >
+                  <Plus size={18} color="#0F3D26" />
+                  <Text style={styles.addPackageText}>Add package</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </>
         )}
 
-        {/* Date Time Picker Section */}
-        <DateTimePickerSection />
+        {subStep === 2 && (
+          <>
+            {/* Date Time Picker Section */}
+            <DateTimePickerSection />
 
-        {/* Recommended Offer */}
-        <OfferSlider
-          value={offerPrice}
-          onChange={setOfferPrice}
-          isMachinery={selectedType === "HEAVY_MACHINERY"}
-          isImport={isImportFlow}
-        />
+            {/* Back action */}
+            <TouchableOpacity
+              style={styles.backLinkButton}
+              onPress={() => {
+                setSubStep(1);
+                scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.backLinkText}>← Back to Cargo Details</Text>
+            </TouchableOpacity>
+          </>
+        )}
+
+        {subStep === 3 && (
+          <>
+            {/* Recommended Offer */}
+            <OfferSlider
+              value={offerPrice}
+              onChange={setOfferPrice}
+              isMachinery={selectedType === "HEAVY_MACHINERY"}
+              isImport={isImportFlow}
+            />
+
+            {/* Back action */}
+            <TouchableOpacity
+              style={styles.backLinkButton}
+              onPress={() => {
+                setSubStep(2);
+                scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.backLinkText}>← Back to Booking Schedule</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </ScrollView>
 
       {/* Sticky Bottom Next/Finalize Button */}
       <View style={styles.footer}>
-        <PrimaryButton
-          title={isImportFlow ? "NEXT: DOCUMENT VAULT" : "REQUEST PICKUP"}
-          onPress={handleNextStep}
-          disabled={!isFormValid}
-        />
+        {subStep === 1 ? (
+          <PrimaryButton
+            title="NEXT: BOOKING SCHEDULE"
+            onPress={() => {
+              setSubStep(2);
+              scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+            }}
+            disabled={!isFormValid}
+          />
+        ) : subStep === 2 ? (
+          <PrimaryButton
+            title="NEXT: SET OFFER"
+            onPress={() => {
+              setSubStep(3);
+              scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+            }}
+            disabled={!isFormValid}
+          />
+        ) : (
+          <PrimaryButton
+            title={isImportFlow ? "NEXT: DOCUMENT VAULT" : "REQUEST PICKUP"}
+            onPress={handleNextStep}
+            disabled={!isFormValid}
+          />
+        )}
       </View>
 
       {/* Review Bottom Sheet (Domestic Flow Only) */}
@@ -943,5 +1010,16 @@ const styles = StyleSheet.create({
   },
   containerTextInactive: {
     color: "#4B5563",
+  },
+  backLinkButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 8,
+    paddingVertical: 12,
+  },
+  backLinkText: {
+    fontSize: 14,
+    color: "#6B7280",
+    fontWeight: "bold",
   },
 });
