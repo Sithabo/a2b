@@ -1,146 +1,153 @@
 import { Tabs, useRouter } from "expo-router";
 import React from "react";
-import { TouchableOpacity, View, Text } from "react-native";
-import { Package, ReceiptText, User, Plus, Mail } from "lucide-react-native";
+import {
+  TouchableOpacity,
+  View,
+  Text,
+  Platform,
+  StyleSheet,
+} from "react-native";
+import { Home, Plus, User } from "lucide-react-native";
+import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+// ─── Tab Config ───────────────────────────────────────────────────────────────
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
+const TAB_ROUTES = [
+  { name: "index", label: "Home", Icon: Home },
+  { name: "post-load-placeholder", label: "Post", Icon: Plus, isAction: true },
+  { name: "account", label: "Account", Icon: User },
+];
+
+// ─── Custom Floating Tab Bar ───────────────────────────────────────────────────
+
+function CustomTabBar({ state, navigation }: BottomTabBarProps) {
   const router = useRouter();
 
   return (
+    <View style={styles.floatingBarWrapper} pointerEvents="box-none">
+      <View style={styles.floatingBar}>
+        {TAB_ROUTES.map((tab, index) => {
+          const routeIndex = state.routes.findIndex((r) => r.name === tab.name);
+          const isActive = state.index === routeIndex;
+          const { Icon } = tab;
+
+          const handlePress = () => {
+            if (tab.isAction) {
+              router.push("/create-load");
+              return;
+            }
+            const event = navigation.emit({
+              type: "tabPress",
+              target: state.routes[routeIndex]?.key,
+              canPreventDefault: true,
+            });
+            if (!event.defaultPrevented) {
+              navigation.navigate(tab.name);
+            }
+          };
+
+          if (isActive) {
+            // ── Active Tab: White Pill Card ──────────────────────────────────
+            return (
+              <TouchableOpacity
+                key={tab.name}
+                onPress={handlePress}
+                activeOpacity={0.85}
+                style={styles.activePill}
+              >
+                <Icon size={20} color="#111111" strokeWidth={2.2} />
+                <Text style={styles.activeLabel}>{tab.label}</Text>
+              </TouchableOpacity>
+            );
+          }
+
+          // ── Inactive Tab: Dark Square Icon ───────────────────────────────
+          return (
+            <TouchableOpacity
+              key={tab.name}
+              onPress={handlePress}
+              activeOpacity={0.75}
+              style={styles.inactivePill}
+            >
+              <Icon size={22} color="#FFFFFF" strokeWidth={2} />
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+// ─── Styles ────────────────────────────────────────────────────────────────────
+
+const BOTTOM_PADDING = Platform.OS === "ios" ? 36 : 20;
+
+const styles = StyleSheet.create({
+  floatingBarWrapper: {
+    position: "absolute",
+    bottom: BOTTOM_PADDING,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+  },
+  floatingBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#111111",
+    borderRadius: 40,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    gap: 8,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
+    shadowRadius: 20,
+    elevation: 18,
+  },
+  activePill: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 28,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    gap: 8,
+  },
+  activeLabel: {
+    color: "#111111",
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: 0.2,
+  },
+  inactivePill: {
+    width: 52,
+    height: 52,
+    borderRadius: 20,
+    backgroundColor: "#27272A",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
+
+// ─── Tab Layout ────────────────────────────────────────────────────────────────
+
+export default function TabLayout() {
+  return (
     <Tabs
+      tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
-        tabBarActiveTintColor: "#0F3D26",
-        tabBarInactiveTintColor: "#a8a29e", // stone-400
-        tabBarStyle: {
-          backgroundColor: "#FFFFFF",
-          borderTopColor: "#F5F5F4", // stone-100
-          borderTopWidth: 1,
-          height: 80,
-          paddingBottom: 25,
-          paddingTop: 10,
-          borderTopLeftRadius: 32,
-          borderTopRightRadius: 32,
-          position: "absolute",
-          bottom: 0,
-          elevation: 10,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.05,
-          shadowRadius: 15,
-        },
         headerShown: false,
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ color }) => <Package size={24} color={color} />,
-          tabBarLabelStyle: { fontSize: 10, fontWeight: "bold", marginTop: 4 },
-        }}
-      />
-      {/* Commented out for consolidation
-      <Tabs.Screen
-        name="receipts"
-        options={{
-          title: "Orders",
-          tabBarIcon: ({ color }) => <ReceiptText size={24} color={color} />,
-          tabBarLabelStyle: {
-            fontSize: 10,
-            fontWeight: "bold",
-            marginTop: 4,
-            textTransform: "uppercase",
-          },
-        }}
-      />
-      */}
-
-      {/* Central Post Load Button Placeholder Tab */}
+      <Tabs.Screen name="index" options={{ title: "Home" }} />
       <Tabs.Screen
         name="post-load-placeholder"
-        options={{
-          title: "Post Load",
-          tabBarButton: () => (
-            <View
-              style={{
-                flex: 1,
-                alignItems: "center",
-                justifyContent: "flex-start",
-              }}
-            >
-              <View
-                style={{ position: "absolute", top: -24, alignItems: "center" }}
-              >
-                <TouchableOpacity
-                  onPress={() => router.push("/create-load")}
-                  activeOpacity={0.8}
-                  style={{
-                    width: 64,
-                    height: 64,
-                    backgroundColor: "#0F3D26",
-                    borderRadius: 32,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderWidth: 4,
-                    borderColor: "#FFFFFF",
-                    shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: 0.2,
-                    shadowRadius: 8,
-                  }}
-                >
-                  <Plus size={32} color="#ffffffff" strokeWidth={3} />
-                </TouchableOpacity>
-                <Text
-                  style={{
-                    marginTop: 4,
-                    fontSize: 10,
-                    fontWeight: "900",
-                    color: "#0F3D26",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Post Load
-                </Text>
-              </View>
-            </View>
-          ),
-        }}
+        options={{ title: "Post Load" }}
       />
-
-      {/* Commented out for consolidation
-      <Tabs.Screen
-        name="inbox"
-        options={{
-          title: "Inbox",
-          tabBarIcon: ({ color }) => <Mail size={24} color={color} />,
-          tabBarLabelStyle: {
-            fontSize: 10,
-            fontWeight: "bold",
-            marginTop: 4,
-            textTransform: "uppercase",
-          },
-        }}
-      />
-      */}
-      <Tabs.Screen
-        name="account"
-        options={{
-          title: "Account",
-          tabBarIcon: ({ color }) => <User size={24} color={color} />,
-          tabBarLabelStyle: {
-            fontSize: 10,
-            fontWeight: "bold",
-            marginTop: 4,
-            textTransform: "uppercase",
-          },
-        }}
-      />
+      {/* Commented out for consolidation */}
+      {/* <Tabs.Screen name="receipts" options={{ title: "Orders" }} /> */}
+      {/* <Tabs.Screen name="inbox" options={{ title: "Inbox" }} /> */}
+      <Tabs.Screen name="account" options={{ title: "Account" }} />
     </Tabs>
   );
 }
