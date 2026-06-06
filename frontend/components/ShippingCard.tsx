@@ -109,9 +109,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 24,
     padding: 16,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    boxShadow: "rgba(0, 0, 0, 0.1) 0px 10px 50px",
+    // borderWidth: 1,
+    // borderColor: "#E5E7EB",
   },
   topRow: {
     flexDirection: "row",

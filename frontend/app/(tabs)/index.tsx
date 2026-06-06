@@ -70,13 +70,13 @@ export default function HomeScreen() {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: "#F5F5E9" }]}>
+    <View style={[styles.container, { backgroundColor: "#f5f6ff" }]}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <LinearGradient
-          colors={["#0F3D26", "#F5F5E9"]}
+          colors={["#0F3D26", "#f5f6ff"]}
           locations={[0, 0.85]}
           style={[styles.gradientHeader, { paddingTop: insets.top }]}
         >
