@@ -109,8 +109,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 24,
     padding: 16,
-    // borderWidth: 1,
-    // borderColor: "#E5E7EB",
   },
   topRow: {
     flexDirection: "row",
