@@ -37,17 +37,28 @@ export default function HomeScreen() {
   const draftShipment = useShipmentStore((state) => state.draftShipment);
   const shipments = useShipmentStore((state) => state.shipments);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState<"ALL" | "ACTIVE" | "PENDING" | "COMPLETED">("ALL");
   const insets = useSafeAreaInsets();
 
   const filteredShipments = shipments.filter((s) => {
     const query = searchQuery.toLowerCase().trim();
-    if (!query) return true;
-    return (
+    const matchesSearch = !query || (
       s.id.toLowerCase().includes(query) ||
       (s.pickup && s.pickup.toLowerCase().includes(query)) ||
       (s.delivery && s.delivery.toLowerCase().includes(query)) ||
       (s.cargoType && s.cargoType.toLowerCase().includes(query))
     );
+
+    let matchesStatus = true;
+    if (selectedStatus === "ACTIVE") {
+      matchesStatus = s.status === "ACTIVE" || s.status === "MATCHED" || s.status === "SECURED";
+    } else if (selectedStatus === "PENDING") {
+      matchesStatus = s.status === "OPEN";
+    } else if (selectedStatus === "COMPLETED") {
+      matchesStatus = s.status === "COMPLETED" || s.status === "DELIVERED";
+    }
+
+    return matchesSearch && matchesStatus;
   });
 
   const activeShipments = filteredShipments.filter(
@@ -59,13 +70,13 @@ export default function HomeScreen() {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: "#FFFFFF" }]}>
+    <View style={[styles.container, { backgroundColor: "#F5F5E9" }]}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <LinearGradient
-          colors={["#0F3D26", "#FFFFFF"]}
+          colors={["#0F3D26", "#F5F5E9"]}
           locations={[0, 0.85]}
           style={[styles.gradientHeader, { paddingTop: insets.top }]}
         >
@@ -109,6 +120,43 @@ export default function HomeScreen() {
               onChangeText={setSearchQuery}
             />
           </View>
+
+          {/* Status Pills */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.pillsContainer}
+            contentContainerStyle={styles.pillsScrollContent}
+          >
+            {([
+              { id: "ALL", label: "All" },
+              { id: "ACTIVE", label: "Active" },
+              { id: "PENDING", label: "Pending" },
+              { id: "COMPLETED", label: "Completed" },
+            ] as const).map((item) => {
+              const isActive = selectedStatus === item.id;
+              return (
+                <TouchableOpacity
+                  key={item.id}
+                  style={[
+                    styles.pillButton,
+                    isActive && styles.pillButtonActive,
+                  ]}
+                  onPress={() => setSelectedStatus(item.id)}
+                  activeOpacity={0.8}
+                >
+                  <Text
+                    style={[
+                      styles.pillText,
+                      isActive && styles.pillTextActive,
+                    ]}
+                  >
+                    {item.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
 
           {/* Top Content inside gradient */}
           <View style={styles.topContent}>
@@ -602,5 +650,40 @@ const styles = StyleSheet.create({
     color: "#6B7280",
     textAlign: "center",
     paddingHorizontal: 20,
+  },
+  pillsContainer: {
+    marginBottom: 20,
+  },
+  pillsScrollContent: {
+    paddingHorizontal: 24,
+    gap: 10,
+  },
+  pillButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  pillButtonActive: {
+    backgroundColor: "#FFFFFF",
+    borderColor: "#FFFFFF",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  pillText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#FFFFFF",
+  },
+  pillTextActive: {
+    color: "#0F3D26",
+    fontWeight: "bold",
   },
 });
