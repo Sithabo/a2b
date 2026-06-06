@@ -232,7 +232,7 @@ export default function HomeScreen() {
               <Package color="#9CA3AF" size={48} />
               <Text style={styles.emptyTitle}>No Shipments Found</Text>
               <Text style={styles.emptySubtitle}>
-                We couldn't find any shipments matching "{searchQuery}"
+                {"We couldn't find any shipments matching \"" + searchQuery + "\""}
               </Text>
             </View>
           )}

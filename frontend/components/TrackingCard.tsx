@@ -77,16 +77,6 @@ export const TrackingCard: React.FC<TrackingCardProps> = ({
 
   const progress = getProgressPercentage();
 
-  // Status mapping to display label
-  const getStatusText = (status: string) => {
-    if (status === "ACTIVE") return "In transit";
-    if (status === "MATCHED") return "Driver Found";
-    if (status === "SECURED") return "Secured";
-    if (status === "COMPLETED" || status === "DELIVERED") return "Delivered";
-    return "Pending";
-  };
-
-  const statusText = getStatusText(shipment.status);
 
   // Cargo icon based on type
   const getCargoIcon = (type?: string) => {
@@ -141,30 +131,12 @@ export const TrackingCard: React.FC<TrackingCardProps> = ({
         </View>
       </View>
 
-      {/* Bottom Section: Map and Forest Green details card */}
+      {/* Bottom Section: Icon card and Forest Green details card */}
       <View style={styles.bottomSection}>
-        {/* Map block with cargo icon and status badge */}
-        <View style={styles.mapBlock}>
-          {/* Vector Road Lines */}
-          <View style={styles.mapContainer}>
-            <View style={styles.roadLine1} />
-            <View style={styles.roadLine2} />
-            <View style={styles.roadLine3} />
-            <View style={styles.mapPinCircle} />
-          </View>
-
-          {/* White square containing item category icon */}
-          <View style={styles.itemIconBox}>
-            <CargoIcon size={26} color="#0F3D26" strokeWidth={2.5} />
-          </View>
-
-          {/* Status badge */}
-          <View style={styles.statusPill}>
-            <Text style={styles.statusPillText}>{statusText}</Text>
-          </View>
+        <View style={styles.iconBlock}>
+          <CargoIcon size={28} color="#0F3D26" strokeWidth={2.5} />
         </View>
 
-        {/* Forest Green card holding Tracking number and QR badge */}
         <View style={styles.greenBlock}>
           <View style={styles.trackingInfo}>
             <Text style={styles.trackingLabel}>Tracking number</Text>
@@ -211,7 +183,7 @@ const styles = StyleSheet.create({
   },
   locationName: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontWeight: "semibold",
     color: "#111827",
     marginBottom: 4,
   },
@@ -278,95 +250,19 @@ const styles = StyleSheet.create({
     marginTop: 20,
     width: "100%",
   },
-  mapBlock: {
-    flex: 1,
-    height: 100,
+  iconBlock: {
+    width: 80,
+    height: 80,
     borderRadius: 16,
-    overflow: "hidden",
-    position: "relative",
     borderWidth: 1,
     borderColor: "#E5E7EB",
-  },
-  mapContainer: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "#F3F4F6",
-  },
-  roadLine1: {
-    position: "absolute",
-    top: 30,
-    left: -20,
-    width: 250,
-    height: 6,
-    backgroundColor: "#FFFFFF",
-    transform: [{ rotate: "15deg" }],
-  },
-  roadLine2: {
-    position: "absolute",
-    top: 60,
-    left: -20,
-    width: 250,
-    height: 6,
-    backgroundColor: "#FFFFFF",
-    transform: [{ rotate: "-25deg" }],
-  },
-  roadLine3: {
-    position: "absolute",
-    top: -10,
-    left: 70,
-    width: 6,
-    height: 120,
-    backgroundColor: "#FFFFFF",
-    transform: [{ rotate: "10deg" }],
-  },
-  mapPinCircle: {
-    position: "absolute",
-    top: 45,
-    left: 80,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "#0F3D26",
-    borderWidth: 2,
-    borderColor: "#FFFFFF",
-  },
-  itemIconBox: {
-    position: "absolute",
-    left: 12,
-    top: 20,
-    width: 60,
-    height: 60,
-    borderRadius: 12,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F9FAFB",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  statusPill: {
-    position: "absolute",
-    right: 8,
-    top: 8,
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 1,
-    elevation: 1,
-  },
-  statusPillText: {
-    fontSize: 10,
-    fontWeight: "bold",
-    color: "#374151",
   },
   greenBlock: {
     flex: 1,
-    height: 100,
+    height: 80,
     borderRadius: 16,
     backgroundColor: "#0F3D26",
     padding: 14,
@@ -384,8 +280,8 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   trackingCode: {
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 18,
+    fontWeight: "semibold",
     color: "#FFFFFF",
     marginTop: 4,
   },
