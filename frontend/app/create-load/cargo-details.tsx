@@ -52,12 +52,15 @@ export default function CargoDetailsScreen() {
 
   // Heavy Machinery States
   const [machineryWeightTons, setMachineryWeightTons] = useState("20");
+  const [machineryWidthMeters, setMachineryWidthMeters] = useState("");
+  const [machineryHeightMeters, setMachineryHeightMeters] = useState("");
   const [requiresFlatbedLowboy, setRequiresFlatbedLowboy] = useState(false);
   const [requiresHydraulicTipper, setRequiresHydraulicTipper] = useState(false);
 
   // Chemicals & Pharma States
   const [chemicalsWeightTons, setChemicalsWeightTons] = useState("20");
   const [chemicalsVolume, setChemicalsVolume] = useState("15");
+  const [chemicalContainer, setChemicalContainer] = useState<'TANKER' | 'IBC_TOTES' | 'DRUMS' | 'PALLETS' | null>(null);
 
   // Food & Beverages States
   const [foodWeightTons, setFoodWeightTons] = useState("20");
@@ -85,6 +88,12 @@ export default function CargoDetailsScreen() {
         if (draftShipment.cargo?.requiresHydraulicTipper !== undefined) {
           setRequiresHydraulicTipper(draftShipment.cargo.requiresHydraulicTipper);
         }
+        if (draftShipment.cargo?.dimensions?.widthMeters !== undefined) {
+          setMachineryWidthMeters(draftShipment.cargo.dimensions.widthMeters.toString());
+        }
+        if (draftShipment.cargo?.dimensions?.heightMeters !== undefined) {
+          setMachineryHeightMeters(draftShipment.cargo.dimensions.heightMeters.toString());
+        }
         if (draftShipment.weight) {
           const matched = draftShipment.weight.match(/^(\d+(\.\d+)?)/);
           if (matched) setMachineryWeightTons(matched[1]);
@@ -97,6 +106,9 @@ export default function CargoDetailsScreen() {
         }
         if (draftShipment.cargo?.volumeCubicMeters !== undefined) {
           setChemicalsVolume(draftShipment.cargo.volumeCubicMeters.toString());
+        }
+        if (draftShipment.cargo?.chemicalContainer) {
+          setChemicalContainer(draftShipment.cargo.chemicalContainer);
         }
       }
       if (draftShipment.cargo?.type === 'FOOD_BEVERAGE') {
@@ -165,6 +177,10 @@ export default function CargoDetailsScreen() {
         lengthMeters: parseFloat(packages[0]?.length) || 0,
         widthMeters: parseFloat(packages[0]?.width) || 0,
         heightMeters: parseFloat(packages[0]?.height) || 0,
+      } : selectedType === 'HEAVY_MACHINERY' ? {
+        lengthMeters: 0,
+        widthMeters: parseFloat(machineryWidthMeters) || 0,
+        heightMeters: parseFloat(machineryHeightMeters) || 0,
       } : undefined,
       requiresGoInvestWaiver: selectedType === 'HEAVY_MACHINERY' ? true : undefined,
       requiresFlatbedLowboy: selectedType === 'HEAVY_MACHINERY' ? requiresFlatbedLowboy : undefined,
@@ -175,6 +191,7 @@ export default function CargoDetailsScreen() {
         ? parseFloat(foodVolume)
         : undefined,
       storageEnvironment: selectedType === 'FOOD_BEVERAGE' ? storageEnvironment : undefined,
+      chemicalContainer: selectedType === 'CHEMICALS_PHARMA' ? (chemicalContainer || undefined) : undefined,
     };
 
     if (isImportFlow) {
@@ -215,6 +232,10 @@ export default function CargoDetailsScreen() {
         lengthMeters: parseFloat(packages[0]?.length) || 0,
         widthMeters: parseFloat(packages[0]?.width) || 0,
         heightMeters: parseFloat(packages[0]?.height) || 0,
+      } : selectedType === 'HEAVY_MACHINERY' ? {
+        lengthMeters: 0,
+        widthMeters: parseFloat(machineryWidthMeters) || 0,
+        heightMeters: parseFloat(machineryHeightMeters) || 0,
       } : undefined,
       requiresGoInvestWaiver: selectedType === 'HEAVY_MACHINERY' ? true : undefined,
       requiresFlatbedLowboy: selectedType === 'HEAVY_MACHINERY' ? requiresFlatbedLowboy : undefined,
@@ -225,6 +246,7 @@ export default function CargoDetailsScreen() {
         ? parseFloat(foodVolume)
         : undefined,
       storageEnvironment: selectedType === 'FOOD_BEVERAGE' ? storageEnvironment : undefined,
+      chemicalContainer: selectedType === 'CHEMICALS_PHARMA' ? (chemicalContainer || undefined) : undefined,
     };
 
     addShipment({
@@ -301,6 +323,39 @@ export default function CargoDetailsScreen() {
                   placeholderTextColor="#9CA3AF"
                 />
                 <Text style={styles.inputSuffix}>Tons</Text>
+              </View>
+            </View>
+
+            {/* Dimensions Safety Check (Optional Height & Width) */}
+            <View style={styles.inputsRow}>
+              <View style={styles.halfInputContainer}>
+                <Text style={styles.inputLabel}>Max Width (m) (Optional)</Text>
+                <View style={styles.inputWithSuffix}>
+                  <TextInput
+                    style={styles.textInput}
+                    value={machineryWidthMeters}
+                    onChangeText={setMachineryWidthMeters}
+                    keyboardType="numeric"
+                    placeholder="e.g. 3.2"
+                    placeholderTextColor="#9CA3AF"
+                  />
+                  <Text style={styles.inputSuffix}>m</Text>
+                </View>
+              </View>
+
+              <View style={styles.halfInputContainer}>
+                <Text style={styles.inputLabel}>Max Height (m) (Optional)</Text>
+                <View style={styles.inputWithSuffix}>
+                  <TextInput
+                    style={styles.textInput}
+                    value={machineryHeightMeters}
+                    onChangeText={setMachineryHeightMeters}
+                    keyboardType="numeric"
+                    placeholder="e.g. 4.1"
+                    placeholderTextColor="#9CA3AF"
+                  />
+                  <Text style={styles.inputSuffix}>m</Text>
+                </View>
               </View>
             </View>
 
@@ -381,6 +436,41 @@ export default function CargoDetailsScreen() {
                   />
                   <Text style={styles.inputSuffix}>m³</Text>
                 </View>
+              </View>
+            </View>
+
+            {/* High Visibility Warning Banner */}
+            <View style={styles.containerSelectionSection}>
+              <Text style={styles.inputLabel}>Containment Unit (Optional)</Text>
+              <View style={styles.containerGrid}>
+                {([
+                  { id: "TANKER", label: "Tanker" },
+                  { id: "IBC_TOTES", label: "IBC Totes" },
+                  { id: "DRUMS", label: "Drums" },
+                  { id: "PALLETS", label: "Pallets" },
+                ] as const).map((unit) => {
+                  const isActive = chemicalContainer === unit.id;
+                  return (
+                    <TouchableOpacity
+                      key={unit.id}
+                      style={[
+                        styles.containerButton,
+                        isActive ? styles.containerActive : styles.containerInactive,
+                      ]}
+                      onPress={() => setChemicalContainer(isActive ? null : unit.id)}
+                      activeOpacity={0.8}
+                    >
+                      <Text
+                        style={[
+                          styles.containerText,
+                          isActive ? styles.containerTextActive : styles.containerTextInactive,
+                        ]}
+                      >
+                        {unit.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
             </View>
 
@@ -542,7 +632,7 @@ export default function CargoDetailsScreen() {
             title: selectedType === 'HEAVY_MACHINERY'
               ? `Heavy Machinery (${machineryWeightTons} Tons)`
               : selectedType === 'CHEMICALS_PHARMA'
-              ? `Chemicals & Pharma (${chemicalsWeightTons} Tons)`
+              ? `Chemicals & Pharma (${chemicalsWeightTons} Tons${chemicalContainer ? `, ${chemicalContainer.replace('_', ' ')}` : ''})`
               : selectedType === 'FOOD_BEVERAGE'
               ? `Food & Beverages (${foodWeightTons} Tons)`
               : (packages.length > 0 && packages[0].code ? packages[0].code : "Mixed Cargo"),
@@ -550,10 +640,14 @@ export default function CargoDetailsScreen() {
             quantity: selectedType === 'GENERAL_CARGO' ? packages.length : 1,
             size: selectedType === 'GENERAL_CARGO'
               ? (packages[0] ? `${packages[0].length}x${packages[0].width}x${packages[0].height}cm` : "0x0x0cm")
+              : selectedType === 'HEAVY_MACHINERY'
+              ? (machineryWidthMeters || machineryHeightMeters
+                ? `${machineryWidthMeters || "-"}m (W) x ${machineryHeightMeters || "-"}m (H)`
+                : "Standard Dimensions")
               : selectedType === 'CHEMICALS_PHARMA'
-              ? `${chemicalsVolume} m³`
+              ? `${chemicalsVolume} m³${chemicalContainer ? ` (${chemicalContainer.replace('_', ' ')})` : ''}`
               : selectedType === 'FOOD_BEVERAGE'
-              ? `${foodVolume} m³`
+              ? `${foodVolume} m³ (${storageEnvironment})`
               : "N/A",
             weight: totalWeight + (selectedType === 'GENERAL_CARGO' ? " kg" : ""),
             type: cargoTypeStr,
@@ -813,6 +907,41 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
   },
   segmentTextInactive: {
+    color: "#4B5563",
+  },
+  containerSelectionSection: {
+    gap: 8,
+    marginTop: 4,
+  },
+  containerGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  containerButton: {
+    width: "48%", // 2 columns
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1.5,
+  },
+  containerActive: {
+    backgroundColor: "#E6F4EA",
+    borderColor: "#0F3D26",
+  },
+  containerInactive: {
+    backgroundColor: "#FFFFFF",
+    borderColor: "#E5E7EB",
+  },
+  containerText: {
+    fontSize: 13,
+    fontWeight: "bold",
+  },
+  containerTextActive: {
+    color: "#0F3D26",
+  },
+  containerTextInactive: {
     color: "#4B5563",
   },
 });

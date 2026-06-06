@@ -35,6 +35,7 @@ export interface CargoDetails {
   // Milestone 3 Overhaul Specifics
   requiresFlatbedLowboy?: boolean;
   storageEnvironment?: 'AMBIENT' | 'CHILLED' | 'FROZEN';
+  chemicalContainer?: 'TANKER' | 'IBC_TOTES' | 'DRUMS' | 'PALLETS';
 }
 
 export interface LocationData {
