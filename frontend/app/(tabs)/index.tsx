@@ -185,11 +185,7 @@ export default function HomeScreen() {
             {activeShipments.map((s) => (
               <TrackingCard
                 key={s.id}
-                trackingId={`#${s.id}`}
-                location={s.delivery}
-                status={s.status === "ACTIVE" ? "In Transit" : s.status}
-                progressPercentage={s.status === "ACTIVE" ? 66 : 100}
-                isFast={true}
+                shipment={s}
                 onPress={() => router.push({ pathname: "/active-delivery", params: { trackingId: `#${s.id}` } })}
               />
             ))}
