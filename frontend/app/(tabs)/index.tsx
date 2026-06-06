@@ -7,7 +7,7 @@ import {
   StyleSheet,
   TextInput,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Image } from "expo-image";
 import { Colors } from "@/constants/theme";
@@ -37,6 +37,7 @@ export default function HomeScreen() {
   const draftShipment = useShipmentStore((state) => state.draftShipment);
   const shipments = useShipmentStore((state) => state.shipments);
   const [searchQuery, setSearchQuery] = useState("");
+  const insets = useSafeAreaInsets();
 
   const filteredShipments = shipments.filter((s) => {
     const query = searchQuery.toLowerCase().trim();
@@ -58,15 +59,15 @@ export default function HomeScreen() {
   );
 
   return (
-    <LinearGradient
-      colors={["#0F3D26", "#F3F4F6"]}
-      locations={[0, 0.35]}
-      style={styles.container}
-    >
-      <SafeAreaView style={styles.safeArea}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
+    <View style={[styles.container, { backgroundColor: "#FFFFFF" }]}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <LinearGradient
+          colors={["#0F3D26", "#FFFFFF"]}
+          locations={[0, 0.85]}
+          style={[styles.gradientHeader, { paddingTop: insets.top }]}
         >
           {/* Header Integrated into Body */}
           <View style={styles.headerContainer}>
@@ -109,8 +110,8 @@ export default function HomeScreen() {
             />
           </View>
 
-          {/* Content Body */}
-          <View style={styles.content}>
+          {/* Top Content inside gradient */}
+          <View style={styles.topContent}>
             {/* Active Alert Card if draft exists */}
             {draftShipment && draftShipment.status === 'DRAFT_PENDING_DOCS' && (
               <TouchableOpacity
@@ -153,44 +154,47 @@ export default function HomeScreen() {
                 onPress={() => router.push("/calculator")}
               />
             </View>
-
-            {/* Recent Shipping Section */}
-            {recentShipments.length > 0 && (
-              <View style={styles.recentSection}>
-                <Text style={styles.sectionHeading}>Recent Shipping</Text>
-
-                {recentShipments.map((s) => (
-                  <ShippingCard
-                    key={s.id}
-                    trackingId={`#${s.id}`}
-                    dateValue={new Date(s.deliveryDate).toLocaleDateString("en-GB", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                    statusText={s.status === "ACTIVE" ? "IN TRANSIT" : s.status}
-                    progressPercentage={s.status === "ACTIVE" ? 66 : 50}
-                    imageSource={require("@/assets/images/cargo_box.png")}
-                    onPress={() => router.push({ pathname: s.status === "ACTIVE" ? "/active-delivery" : "/pending-delivery", params: { trackingId: `#${s.id}` } })}
-                  />
-                ))}
-              </View>
-            )}
-
-            {/* Search Empty State */}
-            {filteredShipments.length === 0 && (
-              <View style={styles.emptyContainer}>
-                <Package color="#9CA3AF" size={48} />
-                <Text style={styles.emptyTitle}>No Shipments Found</Text>
-                <Text style={styles.emptySubtitle}>
-                  We couldn't find any shipments matching "{searchQuery}"
-                </Text>
-              </View>
-            )}
           </View>
-        </ScrollView>
-      </SafeAreaView>
-    </LinearGradient>
+        </LinearGradient>
+
+        {/* Bottom Content on pure white page background */}
+        <View style={styles.bottomContent}>
+          {/* Recent Shipping Section */}
+          {recentShipments.length > 0 && (
+            <View style={styles.recentSection}>
+              <Text style={styles.sectionHeading}>Recent Shipping</Text>
+
+              {recentShipments.map((s) => (
+                <ShippingCard
+                  key={s.id}
+                  trackingId={`#${s.id}`}
+                  dateValue={new Date(s.deliveryDate).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                  statusText={s.status === "ACTIVE" ? "IN TRANSIT" : s.status}
+                  progressPercentage={s.status === "ACTIVE" ? 66 : 50}
+                  imageSource={require("@/assets/images/cargo_box.png")}
+                  onPress={() => router.push({ pathname: s.status === "ACTIVE" ? "/active-delivery" : "/pending-delivery", params: { trackingId: `#${s.id}` } })}
+                />
+              ))}
+            </View>
+          )}
+
+          {/* Search Empty State */}
+          {filteredShipments.length === 0 && (
+            <View style={styles.emptyContainer}>
+              <Package color="#9CA3AF" size={48} />
+              <Text style={styles.emptyTitle}>No Shipments Found</Text>
+              <Text style={styles.emptySubtitle}>
+                We couldn't find any shipments matching "{searchQuery}"
+              </Text>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -198,8 +202,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  safeArea: {
-    flex: 1,
+  gradientHeader: {
+    width: "100%",
+  },
+  topContent: {
+    paddingHorizontal: 20,
+    gap: 20,
+    paddingBottom: 24,
+  },
+  bottomContent: {
+    paddingHorizontal: 20,
+    gap: 20,
+    paddingTop: 12,
   },
   scrollContent: {
     paddingBottom: 100,
