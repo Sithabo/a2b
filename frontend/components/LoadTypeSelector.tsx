@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { LucideIcon } from "lucide-react-native";
 
 export interface LoadTypeOption {
@@ -22,11 +22,7 @@ export const LoadTypeSelector: React.FC<LoadTypeSelectorProps> = ({
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>Types of Loads</Text>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
+      <View style={styles.gridContainer}>
         {options.map((option) => {
           const isSelected = selectedId === option.id;
           const Icon = option.icon;
@@ -57,7 +53,7 @@ export const LoadTypeSelector: React.FC<LoadTypeSelectorProps> = ({
             </TouchableOpacity>
           );
         })}
-      </ScrollView>
+      </View>
     </View>
   );
 };
@@ -72,22 +68,29 @@ const styles = StyleSheet.create({
     color: "#0F3D26",
     marginBottom: 12,
   },
-  scrollContent: {
-    gap: 12, // Spaces between buttons
-    paddingRight: 20, // To allow scrolling completely
+  gridContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    rowGap: 12,
   },
   optionCard: {
-    width: 112, // w-28
-    height: 100,
+    width: "48%", // 2 columns with spacing
+    height: 90,
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
-    gap: 12, // Space between icon and text
+    gap: 8,
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.02,
+    shadowRadius: 4,
+    elevation: 1,
   },
   cardUnselected: {
-    borderWidth: 1,
-    borderColor: "#F5F5F4", // stone-100
+    borderColor: "#E5E7EB", // stone-200 / gray-200 approx
   },
   cardSelected: {
     borderWidth: 2,
@@ -96,6 +99,7 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 12,
     fontWeight: "bold",
+    textAlign: "center",
   },
   textUnselected: {
     color: "#57534E", // stone-600

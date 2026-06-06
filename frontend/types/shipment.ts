@@ -31,6 +31,10 @@ export interface CargoDetails {
   bulkType?: 'DRY_BULK' | 'LIQUID_BULK';
   volumeCubicMeters?: number;
   requiresHydraulicTipper?: boolean;
+
+  // Milestone 3 Overhaul Specifics
+  requiresFlatbedLowboy?: boolean;
+  storageEnvironment?: 'AMBIENT' | 'CHILLED' | 'FROZEN';
 }
 
 export interface LocationData {
