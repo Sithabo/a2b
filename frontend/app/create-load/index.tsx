@@ -8,19 +8,18 @@ import {
   Platform,
   Dimensions,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
   Anchor,
   ChevronRight,
-  ArrowLeft,
   ShieldAlert,
 } from "lucide-react-native";
 import { useShipmentStore, LocationData } from "@/store/useShipmentStore";
 import { LocationSearchModal } from "@/components/LocationSearchModal";
 import { LocationPicker } from "@/components/LocationPicker";
+import { ScreenHeader } from "@/components/ScreenHeader";
 
 export default function RouteSelectionScreen() {
   const router = useRouter();
@@ -71,26 +70,13 @@ export default function RouteSelectionScreen() {
   const isFormComplete = pickupLocation !== null && dropoffLocation !== null;
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Wizard Header */}
-      <View style={styles.headerRow}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={handleCancelAndBack}
-          activeOpacity={0.7}
-        >
-          <ArrowLeft color="#0F3D26" size={20} />
-        </TouchableOpacity>
-        <View style={styles.headerTitleContainer}>
-          <Text style={styles.headerTitle}>Post a Load</Text>
-          <Text style={styles.headerSubtitle}>
-            {isImportFlow ? "Step 1 of 3: Route Selection" : "Step 1 of 2: Route Selection"}
-          </Text>
-        </View>
-        <TouchableOpacity onPress={handleCancelAndBack} activeOpacity={0.7}>
-          <Text style={styles.cancelText}>Cancel</Text>
-        </TouchableOpacity>
-      </View>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <ScreenHeader
+        title="Post a Load"
+        subtitle={isImportFlow ? "Step 1 of 3: Route Selection" : "Step 1 of 2: Route Selection"}
+        onBackPress={handleCancelAndBack}
+        onCancelPress={handleCancelAndBack}
+      />
 
       {/* Main Content Area */}
       <View style={styles.content}>
@@ -181,7 +167,7 @@ export default function RouteSelectionScreen() {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 }
 

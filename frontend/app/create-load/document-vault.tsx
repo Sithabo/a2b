@@ -10,13 +10,11 @@ import {
   Platform,
   Alert,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useNavigation } from "@react-navigation/native";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
-  ArrowLeft,
   Lock,
   Upload,
   CheckCircle,
@@ -26,6 +24,7 @@ import {
   ChevronRight,
 } from "lucide-react-native";
 import { useShipmentStore } from "@/store/useShipmentStore";
+import { ScreenHeader } from "@/components/ScreenHeader";
 
 interface DocumentInfo {
   name: string;
@@ -245,22 +244,13 @@ export default function DocumentVaultScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Custom Page Header */}
-      <View style={styles.headerRow}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-          activeOpacity={0.7}
-        >
-          <ArrowLeft color="#0F3D26" size={20} />
-        </TouchableOpacity>
-        <View style={styles.headerTitleContainer}>
-          <Text style={styles.headerTitle}>Compliance Vault</Text>
-          <Text style={styles.headerSubtitle}>Step 3 of 3: Document Uploads</Text>
-        </View>
-        <Lock size={20} color="#0F3D26" />
-      </View>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <ScreenHeader
+        title="Compliance Vault"
+        subtitle="Step 3 of 3: Document Uploads"
+        onBackPress={() => router.back()}
+        rightElement={<Lock size={20} color="#0F3D26" />}
+      />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Secure Info Banner */}
@@ -536,7 +526,7 @@ export default function DocumentVaultScreen() {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 }
 

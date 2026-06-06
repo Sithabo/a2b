@@ -1,11 +1,10 @@
 import React from "react";
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowLeft } from "lucide-react-native";
 import { StatusHero } from "@/components/StatusHero";
 import { ReceiptCard, ReceiptDivider, ReceiptRow } from "@/components/ReceiptCard";
 import { PrimaryButton } from "@/components/PrimaryButton";
+import { ScreenHeader } from "@/components/ScreenHeader";
 
 export default function StatusScreen() {
   const router = useRouter();
@@ -27,15 +26,11 @@ export default function StatusScreen() {
   const loadId = "#A2B-" + Math.floor(1000 + Math.random() * 9000);
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Top Header */}
-      <View style={styles.navBar}>
-        <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
-          <ArrowLeft size={24} color="#0F3D26" />
-        </TouchableOpacity>
-        <Text style={styles.navTitle}>Post Status</Text>
-        <View style={{ width: 24 }} />
-      </View>
+    <View style={styles.container}>
+      <ScreenHeader
+        title="Post Status"
+        onBackPress={() => router.back()}
+      />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -78,7 +73,7 @@ export default function StatusScreen() {
           onPress={() => router.replace("/(tabs)")}
         />
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 

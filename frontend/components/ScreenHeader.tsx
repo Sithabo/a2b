@@ -8,6 +8,7 @@ interface ScreenHeaderProps {
   subtitle?: string;
   onBackPress?: () => void;
   onCancelPress?: () => void;
+  rightElement?: React.ReactNode;
 }
 
 export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
@@ -15,6 +16,7 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
   subtitle,
   onBackPress,
   onCancelPress,
+  rightElement,
 }) => {
   return (
     <View style={styles.container}>
@@ -37,7 +39,9 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
           {subtitle && <Text style={styles.subtitleText}>{subtitle}</Text>}
         </View>
 
-        {onCancelPress ? (
+        {rightElement ? (
+          rightElement
+        ) : onCancelPress ? (
           <TouchableOpacity onPress={onCancelPress} activeOpacity={0.7}>
             <Text style={styles.cancelText}>Cancel</Text>
           </TouchableOpacity>
@@ -51,25 +55,18 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#0F3D26",
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
     paddingHorizontal: 20,
-    paddingBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
+    paddingBottom: 8,
   },
   safeArea: {
-    backgroundColor: "#0F3D26",
+    backgroundColor: "transparent",
   },
   contentRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     marginTop: Platform.OS === "android" ? 10 : 5,
+    height: 52,
   },
   backButton: {
     width: 40,
@@ -78,6 +75,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
   },
   titleContainer: {
     flex: 1,
@@ -85,20 +84,20 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
   },
   titleText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
-    color: "#FFFFFF",
+    color: "#0F3D26",
     textAlign: "center",
   },
   subtitleText: {
-    fontSize: 11,
-    color: "rgba(255, 255, 255, 0.75)",
+    fontSize: 12,
+    color: "#6B7280",
     marginTop: 2,
     textAlign: "center",
   },
   cancelText: {
     fontSize: 14,
-    color: "#FF6B6B",
+    color: "#EF4444",
     fontWeight: "bold",
   },
   placeholder: {
