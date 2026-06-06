@@ -35,7 +35,27 @@ export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const userProfile = useAuthStore((state) => state.userProfile);
   const draftShipment = useShipmentStore((state) => state.draftShipment);
+  const shipments = useShipmentStore((state) => state.shipments);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredShipments = shipments.filter((s) => {
+    const query = searchQuery.toLowerCase().trim();
+    if (!query) return true;
+    return (
+      s.id.toLowerCase().includes(query) ||
+      (s.pickup && s.pickup.toLowerCase().includes(query)) ||
+      (s.delivery && s.delivery.toLowerCase().includes(query)) ||
+      (s.cargoType && s.cargoType.toLowerCase().includes(query))
+    );
+  });
+
+  const activeShipments = filteredShipments.filter(
+    (s) => s.status === "ACTIVE" || s.status === "MATCHED" || s.status === "SECURED"
+  );
+  
+  const recentShipments = filteredShipments.filter(
+    (s) => s.status !== "DRAFT_PENDING_DOCS"
+  );
 
   return (
     <LinearGradient
@@ -112,15 +132,18 @@ export default function HomeScreen() {
               </TouchableOpacity>
             )}
 
-            {/* Current Tracking Card */}
-            <TrackingCard
-              trackingId="#H62J568107"
-              location="Hunters Point, LA"
-              status="In Transit"
-              progressPercentage={66}
-              isFast={true}
-              onPress={() => router.push({ pathname: "/active-delivery", params: { trackingId: "#H62J568107" } })}
-            />
+            {/* Current Tracking Cards */}
+            {activeShipments.map((s) => (
+              <TrackingCard
+                key={s.id}
+                trackingId={`#${s.id}`}
+                location={s.delivery}
+                status={s.status === "ACTIVE" ? "In Transit" : s.status}
+                progressPercentage={s.status === "ACTIVE" ? 66 : 100}
+                isFast={true}
+                onPress={() => router.push({ pathname: "/active-delivery", params: { trackingId: `#${s.id}` } })}
+              />
+            ))}
 
             {/* Action Tools Grid */}
             <View style={styles.toolsGrid}>
@@ -132,16 +155,38 @@ export default function HomeScreen() {
             </View>
 
             {/* Recent Shipping Section */}
-            <View style={styles.recentSection}>
-              <Text style={styles.sectionHeading}>Recent Shipping</Text>
+            {recentShipments.length > 0 && (
+              <View style={styles.recentSection}>
+                <Text style={styles.sectionHeading}>Recent Shipping</Text>
 
-              <ShippingCard
-                trackingId="#H62J568107"
-                dateValue="15 Sep 2025"
-                imageSource={require("@/assets/images/cargo_box.png")}
-                onPress={() => router.push({ pathname: "/active-delivery", params: { trackingId: "#H62J568107" } })}
-              />
-            </View>
+                {recentShipments.map((s) => (
+                  <ShippingCard
+                    key={s.id}
+                    trackingId={`#${s.id}`}
+                    dateValue={new Date(s.deliveryDate).toLocaleDateString("en-GB", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                    statusText={s.status === "ACTIVE" ? "IN TRANSIT" : s.status}
+                    progressPercentage={s.status === "ACTIVE" ? 66 : 50}
+                    imageSource={require("@/assets/images/cargo_box.png")}
+                    onPress={() => router.push({ pathname: s.status === "ACTIVE" ? "/active-delivery" : "/pending-delivery", params: { trackingId: `#${s.id}` } })}
+                  />
+                ))}
+              </View>
+            )}
+
+            {/* Search Empty State */}
+            {filteredShipments.length === 0 && (
+              <View style={styles.emptyContainer}>
+                <Package color="#9CA3AF" size={48} />
+                <Text style={styles.emptyTitle}>No Shipments Found</Text>
+                <Text style={styles.emptySubtitle}>
+                  We couldn't find any shipments matching "{searchQuery}"
+                </Text>
+              </View>
+            )}
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -521,5 +566,27 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "bold",
     color: "#B45309",
+  },
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    gap: 12,
+    marginTop: 10,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#0F3D26",
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: "#6B7280",
+    textAlign: "center",
+    paddingHorizontal: 20,
   },
 });

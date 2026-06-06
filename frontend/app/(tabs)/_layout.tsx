@@ -44,6 +44,7 @@ export default function TabLayout() {
           tabBarLabelStyle: { fontSize: 10, fontWeight: "bold", marginTop: 4 },
         }}
       />
+      {/* Commented out for consolidation
       <Tabs.Screen
         name="receipts"
         options={{
@@ -57,6 +58,7 @@ export default function TabLayout() {
           },
         }}
       />
+      */}
 
       {/* Central Post Load Button Placeholder Tab */}
       <Tabs.Screen
@@ -111,6 +113,7 @@ export default function TabLayout() {
         }}
       />
 
+      {/* Commented out for consolidation
       <Tabs.Screen
         name="inbox"
         options={{
@@ -124,6 +127,7 @@ export default function TabLayout() {
           },
         }}
       />
+      */}
       <Tabs.Screen
         name="account"
         options={{
