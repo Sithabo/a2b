@@ -10,6 +10,7 @@ const ivory = '#F5F5E9';
 const amber = '#D97706';
 const lime = '#C4E84A'; // New Lime Green
 const white = '#FFFFFF';
+const whiteAsh = '#f5f6ff'
 const black = '#000000';
 const gray = {
   100: '#F3F4F6',
@@ -39,6 +40,7 @@ export const Colors = {
     ivory: ivory,
     amber: amber,
     gray: gray,
+    whiteAsh: whiteAsh,
   },
   dark: {
     text: ivory,
@@ -57,6 +59,7 @@ export const Colors = {
      ivory: ivory,
      amber: amber,
      gray: gray, // In dark mode, we might want to invert these, but for now keeping consistent mapping
+     whiteAsh: whiteAsh,
   },
 };
 
