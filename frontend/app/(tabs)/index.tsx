@@ -211,14 +211,7 @@ export default function HomeScreen() {
               {recentShipments.map((s) => (
                 <ShippingCard
                   key={s.id}
-                  trackingId={`#${s.id}`}
-                  dateValue={new Date(s.deliveryDate).toLocaleDateString("en-GB", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                  statusText={s.status === "ACTIVE" ? "IN TRANSIT" : s.status}
-                  progressPercentage={s.status === "ACTIVE" ? 66 : 50}
+                  shipment={s}
                   imageSource={require("@/assets/images/cargo_box.png")}
                   onPress={() => router.push({ pathname: s.status === "ACTIVE" ? "/active-delivery" : "/pending-delivery", params: { trackingId: `#${s.id}` } })}
                 />
