@@ -66,6 +66,11 @@ export default function CargoDetailsScreen() {
   const [foodVolume, setFoodVolume] = useState("15");
   const [storageEnvironment, setStorageEnvironment] = useState<'AMBIENT' | 'CHILLED' | 'FROZEN'>('AMBIENT');
 
+  // Date/Time States
+  const [pickupDate, setPickupDate] = useState<Date | null>(null);
+  const [deliveryDate, setDeliveryDate] = useState<Date | null>(null);
+  const [time, setTime] = useState<Date | null>(null);
+
   // Pricing State
   const [offerPrice, setOfferPrice] = useState(150000);
 
@@ -138,6 +143,9 @@ export default function CargoDetailsScreen() {
       }
       if (draftShipment.offerPrice) {
         setOfferPrice(parseFloat(draftShipment.offerPrice) || 150000);
+      }
+      if (draftShipment.deliveryDate) {
+        setDeliveryDate(new Date(draftShipment.deliveryDate));
       }
     }
   }, [draftShipment]);
@@ -233,6 +241,7 @@ export default function CargoDetailsScreen() {
         pickupLocation,
         dropoffLocation,
         cargo: cargoDetails,
+        deliveryDate: deliveryDate ? deliveryDate.toISOString() : undefined,
       });
 
       setCurrentStep(3);
@@ -284,7 +293,7 @@ export default function CargoDetailsScreen() {
       weight: totalWeight + (selectedType === 'GENERAL_CARGO' ? " kg" : ""),
       offerPrice: offerPrice.toString(),
       status: "OPEN",
-      deliveryDate: new Date(Date.now() + 2 * 86400000).toISOString(),
+      deliveryDate: deliveryDate ? deliveryDate.toISOString() : new Date(Date.now() + 2 * 86400000).toISOString(),
       acceptedByDriver: false,
       is_import: false,
       pickupLocation,
@@ -625,7 +634,14 @@ export default function CargoDetailsScreen() {
         {subStep === 2 && (
           <>
             {/* Date Time Picker Section */}
-            <DateTimePickerSection />
+            <DateTimePickerSection
+              pickupDate={pickupDate}
+              setPickupDate={setPickupDate}
+              deliveryDate={deliveryDate}
+              setDeliveryDate={setDeliveryDate}
+              time={time}
+              setTime={setTime}
+            />
 
             {/* Back action */}
             <TouchableOpacity
@@ -684,13 +700,13 @@ export default function CargoDetailsScreen() {
               setSubStep(3);
               scrollViewRef.current?.scrollTo({ y: 0, animated: false });
             }}
-            disabled={!isFormValid}
+            disabled={!isFormValid || !pickupDate || !deliveryDate || !time}
           />
         ) : (
           <PrimaryButton
             title={isImportFlow ? "NEXT: DOCUMENT VAULT" : "REQUEST PICKUP"}
             onPress={handleNextStep}
-            disabled={!isFormValid}
+            disabled={!isFormValid || !pickupDate || !deliveryDate || !time}
           />
         )}
       </View>

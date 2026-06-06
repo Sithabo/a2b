@@ -3,11 +3,23 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { CalendarDays, Clock } from "lucide-react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
-export const DateTimePickerSection = () => {
-  const [pickupDate, setPickupDate] = useState<Date | null>(null);
-  const [deliveryDate, setDeliveryDate] = useState<Date | null>(null);
-  const [time, setTime] = useState<Date | null>(null);
+interface DateTimePickerSectionProps {
+  pickupDate: Date | null;
+  setPickupDate: (date: Date | null) => void;
+  deliveryDate: Date | null;
+  setDeliveryDate: (date: Date | null) => void;
+  time: Date | null;
+  setTime: (time: Date | null) => void;
+}
 
+export const DateTimePickerSection: React.FC<DateTimePickerSectionProps> = ({
+  pickupDate,
+  setPickupDate,
+  deliveryDate,
+  setDeliveryDate,
+  time,
+  setTime,
+}) => {
   // Picker visibility state
   const [showPicker, setShowPicker] = useState<"pickup" | "delivery" | "time" | null>(null);
 
