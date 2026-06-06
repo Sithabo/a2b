@@ -189,6 +189,7 @@ const styles = StyleSheet.create({
   },
   dateTimeText: {
     fontSize: 12,
+    fontWeight: "600",
     color: "#6B7280",
     marginTop: 2,
   },
