@@ -70,7 +70,7 @@ export default function RouteSelectionScreen() {
   const isFormComplete = pickupLocation !== null && dropoffLocation !== null;
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.whiteAsh }]}>
       <ScreenHeader
         title="Post a Load"
         subtitle={isImportFlow ? "Step 1 of 3: Route Selection" : "Step 1 of 2: Route Selection"}

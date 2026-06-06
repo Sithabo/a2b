@@ -307,7 +307,7 @@ export default function CargoDetailsScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.whiteAsh }]}>
       <ScreenHeader
         title="Post a Load"
         subtitle={`Step 2: Cargo Details (Part ${subStep} of 3)`}

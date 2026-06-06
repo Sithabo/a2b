@@ -5,6 +5,7 @@ import { StatusHero } from "@/components/StatusHero";
 import { ReceiptCard, ReceiptDivider, ReceiptRow } from "@/components/ReceiptCard";
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { ScreenHeader } from "@/components/ScreenHeader";
+import { Colors } from "@/constants/theme";
 
 export default function StatusScreen() {
   const router = useRouter();
@@ -80,7 +81,7 @@ export default function StatusScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F7F6ED", // Beige background matching the image
+    backgroundColor: Colors.light.whiteAsh, // Beige background matching the image
   },
   navBar: {
     flexDirection: "row",

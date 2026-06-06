@@ -47,7 +47,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
             >
               <Text style={styles.label}>START LOCATION</Text>
               <Text style={[styles.input, !startLocation && styles.placeholderText]}>
-                {startLocation || "e.g. Houston, TX"}
+                {startLocation || "e.g. Paramaribo, Suriname"}
               </Text>
             </TouchableOpacity>
           ) : (
@@ -57,7 +57,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
                 style={styles.input}
                 value={startLocation}
                 onChangeText={onChangeStart}
-                placeholder="e.g. Houston, TX"
+                placeholder="e.g. GeorgeTown, Guyana"
                 placeholderTextColor="#9CA3AF"
               />
             </View>
@@ -72,7 +72,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
             >
               <Text style={styles.label}>WHERE</Text>
               <Text style={[styles.input, !endLocation && styles.placeholderText]}>
-                {endLocation || "e.g. San Antonio, TX"}
+                {endLocation || "e.g. GeorgeTown Guyana"}
               </Text>
             </TouchableOpacity>
           ) : (

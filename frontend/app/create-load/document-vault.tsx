@@ -244,7 +244,7 @@ export default function DocumentVaultScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.whiteAsh }]}>
       <ScreenHeader
         title="Compliance Vault"
         subtitle="Step 3 of 3: Document Uploads"
