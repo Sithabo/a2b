@@ -6,25 +6,22 @@ import { Lightbulb } from "lucide-react-native";
 interface OfferSliderProps {
   value: number;
   onChange: (val: number) => void;
-  isMachinery: boolean;
-  isImport: boolean;
+  surcharge: number;
+  baseRate?: number;
 }
 
 export const OfferSlider: React.FC<OfferSliderProps> = ({
   value,
   onChange,
-  isMachinery,
-  isImport,
+  surcharge,
+  baseRate = 150000,
 }) => {
-  const baseOffer = 150000;
-  const machinerySurcharge = isMachinery ? 50000 : 0;
-  const importSurcharge = isImport ? 20000 : 0;
-  const recommendedPrice = baseOffer + machinerySurcharge + importSurcharge;
+  const recommendedPrice = baseRate + surcharge;
 
   // Sync recommended price when surcharges change
   useEffect(() => {
     onChange(recommendedPrice);
-  }, [isMachinery, isImport, onChange, recommendedPrice]);
+  }, [surcharge, baseRate, onChange, recommendedPrice]);
 
   const minPrice = recommendedPrice - 20000;
   const maxPrice = recommendedPrice + 30000;
@@ -83,25 +80,17 @@ export const OfferSlider: React.FC<OfferSliderProps> = ({
         </View>
 
         {/* Dynamic Surcharge Breakdown Card */}
-        {(isMachinery || isImport) && (
+        {surcharge > 0 && (
           <View style={styles.breakdownCard}>
             <Text style={styles.breakdownTitle}>Surcharge Breakdown</Text>
             <View style={styles.breakdownRow}>
               <Text style={styles.breakdownLabel}>Base Rate</Text>
-              <Text style={styles.breakdownValue}>150,000 GYD</Text>
+              <Text style={styles.breakdownValue}>{formatValue(baseRate)} GYD</Text>
             </View>
-            {isMachinery && (
-              <View style={styles.breakdownRow}>
-                <Text style={styles.breakdownLabel}>⚡ Heavy-Haul Surcharge</Text>
-                <Text style={styles.breakdownValue}>+50,000 GYD</Text>
-              </View>
-            )}
-            {isImport && (
-              <View style={styles.breakdownRow}>
-                <Text style={styles.breakdownLabel}>⚓ Port Delay Surcharge</Text>
-                <Text style={styles.breakdownValue}>+20,000 GYD</Text>
-              </View>
-            )}
+            <View style={styles.breakdownRow}>
+              <Text style={styles.breakdownLabel}>⚓ Port Delay Surcharge</Text>
+              <Text style={styles.breakdownValue}>+{formatValue(surcharge)} GYD</Text>
+            </View>
             <View style={[styles.breakdownRow, styles.breakdownTotalRow]}>
               <Text style={styles.breakdownTotalLabel}>Total Recommended</Text>
               <Text style={styles.breakdownTotalValue}>{formatValue(recommendedPrice)} GYD</Text>

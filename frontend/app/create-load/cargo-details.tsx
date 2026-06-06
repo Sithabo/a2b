@@ -8,14 +8,12 @@ import {
   StyleSheet,
   Platform,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
   Package,
   Plus,
-  ArrowLeft,
   Wrench,
   Apple,
   FlaskConical,
@@ -29,6 +27,7 @@ import { OfferSlider } from "@/components/OfferSlider";
 import { BottomSheet } from "@/components/BottomSheet";
 import { OrderSummary } from "@/components/OrderSummary";
 import { useShipmentStore, CargoType, CargoDetails } from "@/store/useShipmentStore";
+import { ScreenHeader } from "@/components/ScreenHeader";
 
 export default function CargoDetailsScreen() {
   const router = useRouter();
@@ -171,6 +170,24 @@ export default function CargoDetailsScreen() {
 
   const cargoTypeStr = loadTypes.find((t) => t.id === selectedType)?.label || "General Cargo";
 
+  const getPortDelaySurcharge = () => {
+    if (selectedType === "GENERAL_CARGO") {
+      return 10000;
+    }
+    if (selectedType === "HEAVY_MACHINERY") {
+      return 30000 + (requiresFlatbedLowboy ? 15000 : 0) + (requiresHydraulicTipper ? 10000 : 0);
+    }
+    if (selectedType === "CHEMICALS_PHARMA") {
+      return 45000;
+    }
+    if (selectedType === "FOOD_BEVERAGE") {
+      return storageEnvironment === "FROZEN" ? 35000 : (storageEnvironment === "CHILLED" ? 25000 : 15000);
+    }
+    return 0;
+  };
+
+  const portDelaySurcharge = getPortDelaySurcharge();
+
   const handleNextStep = () => {
     if (!isFormValid) return;
 
@@ -274,39 +291,23 @@ export default function CargoDetailsScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Wizard Header */}
-      <View style={styles.headerRow}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => {
-            if (subStep > 1) {
-              setSubStep(subStep - 1);
-              scrollViewRef.current?.scrollTo({ y: 0, animated: false });
-            } else {
-              router.back();
-            }
-          }}
-          activeOpacity={0.7}
-        >
-          <ArrowLeft color="#0F3D26" size={20} />
-        </TouchableOpacity>
-        <View style={styles.headerTitleContainer}>
-          <Text style={styles.headerTitle}>Post a Load</Text>
-          <Text style={styles.headerSubtitle}>
-            {isImportFlow ? "Step 2 of 3: Cargo Details" : "Step 2 of 2: Cargo Details"} (Part {subStep} of 3)
-          </Text>
-        </View>
-        <TouchableOpacity
-          onPress={() => {
-            resetRouteState();
-            router.replace("/(tabs)");
-          }}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.cancelText}>Cancel</Text>
-        </TouchableOpacity>
-      </View>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <ScreenHeader
+        title="Post a Load"
+        subtitle={`Step 2: Cargo Details (Part ${subStep} of 3)`}
+        onBackPress={() => {
+          if (subStep > 1) {
+            setSubStep(subStep - 1);
+            scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+          } else {
+            router.back();
+          }
+        }}
+        onCancelPress={() => {
+          resetRouteState();
+          router.replace("/(tabs)");
+        }}
+      />
 
       <ScrollView ref={scrollViewRef} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {subStep === 1 && (
@@ -639,8 +640,8 @@ export default function CargoDetailsScreen() {
             <OfferSlider
               value={offerPrice}
               onChange={setOfferPrice}
-              isMachinery={selectedType === "HEAVY_MACHINERY"}
-              isImport={isImportFlow}
+              surcharge={portDelaySurcharge}
+              baseRate={150000}
             />
 
             {/* Back action */}
@@ -729,7 +730,7 @@ export default function CargoDetailsScreen() {
           />
         </View>
       </BottomSheet>
-    </SafeAreaView>
+    </View>
   );
 }
 
