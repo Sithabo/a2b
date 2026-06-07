@@ -201,7 +201,11 @@ export default function AccountScreen() {
             <View style={styles.divider} />
 
             {/* Language */}
-            <TouchableOpacity style={styles.rowItem} activeOpacity={0.7}>
+            <TouchableOpacity
+              style={styles.rowItem}
+              activeOpacity={0.7}
+              onPress={() => router.push("/account/language")}
+            >
               <View style={styles.rowLeft}>
                 <View style={styles.iconBoxGreen}>
                   <Globe color="#0F3D26" size={20} />
@@ -217,6 +221,7 @@ export default function AccountScreen() {
             <TouchableOpacity
               style={[styles.rowItem, { paddingBottom: 0 }]}
               activeOpacity={0.7}
+              onPress={() => router.push("/account/notifications")}
             >
               <View style={styles.rowLeft}>
                 <View style={styles.iconBoxGreen}>
@@ -234,7 +239,11 @@ export default function AccountScreen() {
           <Text style={styles.sectionTitle}>Support</Text>
           <View style={styles.card}>
             {/* How A2B Works */}
-            <TouchableOpacity style={styles.rowItem} activeOpacity={0.7}>
+            <TouchableOpacity
+              style={styles.rowItem}
+              activeOpacity={0.7}
+              onPress={() => router.push("/account/how-it-works")}
+            >
               <View style={styles.rowLeft}>
                 <HelpCircle color="#111827" size={20} />
                 <Text style={styles.rowText}>How A2B Works</Text>
@@ -245,7 +254,11 @@ export default function AccountScreen() {
             <View style={styles.divider} />
 
             {/* Let's chat */}
-            <TouchableOpacity style={styles.rowItem} activeOpacity={0.7}>
+            <TouchableOpacity
+              style={styles.rowItem}
+              activeOpacity={0.7}
+              onPress={() => router.push("/account/chat")}
+            >
               <View style={styles.rowLeft}>
                 <MessageCircle color="#111827" size={20} />
                 <Text style={styles.rowText}>{"Need help? Let's chat"}</Text>
@@ -256,7 +269,11 @@ export default function AccountScreen() {
             <View style={styles.divider} />
 
             {/* Privacy Policy */}
-            <TouchableOpacity style={styles.rowItem} activeOpacity={0.7}>
+            <TouchableOpacity
+              style={styles.rowItem}
+              activeOpacity={0.7}
+              onPress={() => router.push("/account/privacy")}
+            >
               <View style={styles.rowLeft}>
                 <Info color="#111827" size={20} />
                 <Text style={styles.rowText}>Privacy Policy</Text>
