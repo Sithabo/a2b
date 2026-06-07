@@ -5,21 +5,78 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  Dimensions,
+  Alert,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { Image } from "expo-image";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { ArrowLeft, Clock, CheckCircle } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-const { width } = Dimensions.get("window");
+import { useShipmentStore } from "@/store/useShipmentStore";
 
 export default function PendingDeliveryScreen() {
   const router = useRouter();
+  const { trackingId } = useLocalSearchParams<{ trackingId: string }>();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+
+  const idToFind = trackingId ? trackingId.replace("#", "") : "";
+  const shipments = useShipmentStore((state) => state.shipments);
+  const deleteShipment = useShipmentStore((state) => state.deleteShipment);
+
+  // Find dynamic shipment or fallback to default
+  const shipment = shipments.find((s) => s.id === idToFind) || shipments[1];
+
+  const formatCurrency = (val?: string) => {
+    if (!val) return "0 GYD";
+    const num = parseFloat(val);
+    return isNaN(num) ? `${val} GYD` : `${num.toLocaleString("en-US")} GYD`;
+  };
+
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return "--";
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      const day = d.getDate();
+      const months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+      return `${day} ${months[d.getMonth()]} ${d.getFullYear().toString().slice(-2)}`;
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const handleCancelOrder = () => {
+    Alert.alert(
+      "Cancel Order",
+      "Are you sure you want to delete this pending order?",
+      [
+        { text: "No", style: "cancel" },
+        {
+          text: "Yes, Cancel",
+          style: "destructive",
+          onPress: () => {
+            deleteShipment(shipment.id);
+            router.replace("/(tabs)");
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -64,7 +121,7 @@ export default function PendingDeliveryScreen() {
                   contentFit="contain"
                 />
               </View>
-              <Text style={styles.priceText}>150,000 UGX</Text>
+              <Text style={styles.priceText}>{formatCurrency(shipment.offerPrice)}</Text>
             </View>
 
             {/* Visual Divider with Cutouts */}
@@ -78,11 +135,11 @@ export default function PendingDeliveryScreen() {
             <View style={styles.metadataSection}>
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Order ID:</Text>
-                <Text style={styles.metaValue}>#1unqdbk</Text>
+                <Text style={styles.metaValue}>#{shipment.id}</Text>
               </View>
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Date Posted:</Text>
-                <Text style={styles.metaValue}>26 Sep 2022</Text>
+                <Text style={styles.metaValue}>{formatDate(shipment.createdAt)}</Text>
               </View>
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Payment Status:</Text>
@@ -104,7 +161,7 @@ export default function PendingDeliveryScreen() {
                 <View style={styles.timelineDot} />
                 <View style={styles.timelineTextContainer}>
                   <Text style={styles.timelineSubLabel}>PICKUP</Text>
-                  <Text style={styles.timelineLocation}>Kampala, Makindye</Text>
+                  <Text style={styles.timelineLocation}>{shipment.pickup}</Text>
                 </View>
               </View>
 
@@ -113,9 +170,7 @@ export default function PendingDeliveryScreen() {
                 <View style={styles.timelineDot} />
                 <View style={styles.timelineTextContainer}>
                   <Text style={styles.timelineSubLabel}>DELIVERY</Text>
-                  <Text style={styles.timelineLocation}>
-                    Jinja, Industrial Area
-                  </Text>
+                  <Text style={styles.timelineLocation}>{shipment.delivery}</Text>
                 </View>
               </View>
             </View>
@@ -128,10 +183,14 @@ export default function PendingDeliveryScreen() {
               </Text>
             </View>
 
-            {/* Edit Offer Button */}
-            {/* <TouchableOpacity style={styles.editButton} activeOpacity={0.8}>
-              <Text style={styles.editButtonText}>Edit Offer</Text>
-            </TouchableOpacity> */}
+            {/* Cancel Order Button */}
+            <TouchableOpacity
+              style={styles.cancelButton}
+              activeOpacity={0.8}
+              onPress={handleCancelOrder}
+            >
+              <Text style={styles.cancelButtonText}>Cancel Order</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
@@ -154,7 +213,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingTop: 16, // Top padding just for visual balance under SafeArea
+    paddingTop: 16,
   },
   backButton: {
     padding: 8,
@@ -170,13 +229,13 @@ const styles = StyleSheet.create({
   },
   statusPillContainer: {
     paddingHorizontal: 16,
-    marginTop: -16, // pull it up slightly if needed, or just normal margin. We want it floating.
+    marginTop: -16,
     alignItems: "center",
     zIndex: 11,
     paddingTop: 24,
   },
   statusPill: {
-    backgroundColor: "#D97706", // Amber
+    backgroundColor: "#D97706",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -205,9 +264,6 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     paddingVertical: 32,
     position: "relative",
-    // Overflow hidden removed so we can use absolute cutouts outside bounds?
-    // Actually the cutouts should ideally have the background color #F5F5E9
-    // So overflow: hidden is not strictly needed for the cutouts if they are absolute.
   },
   receiptHeader: {
     alignItems: "center",
@@ -236,7 +292,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     position: "relative",
-    height: 30, // height of the cutout
+    height: 30,
     marginVertical: 8,
   },
   dashedLineHorizontal: {
@@ -245,16 +301,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: "#E5E7EB",
     borderStyle: "dashed",
-    marginHorizontal: 15, // Space for the cutouts
+    marginHorizontal: 15,
   },
   cutoutLeft: {
     position: "absolute",
-    left: -15, // Pull outside the card
+    left: -15,
     top: 0,
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: "#F5F5E9", // Matches main background
+    backgroundColor: "#F5F5E9",
     zIndex: 2,
   },
   cutoutRight: {
@@ -309,7 +365,7 @@ const styles = StyleSheet.create({
   },
   timelineLine: {
     position: "absolute",
-    left: 31, // 24 (padding) + 7 (half of dot width 14)
+    left: 31,
     top: 10,
     bottom: 24,
     width: 2,
@@ -346,7 +402,7 @@ const styles = StyleSheet.create({
   tipBox: {
     marginHorizontal: 24,
     marginTop: 32,
-    backgroundColor: "#ECFDF5", // Light green background
+    backgroundColor: "#ECFDF5",
     borderWidth: 1,
     borderColor: "#A7F3D0",
     borderRadius: 8,
@@ -360,16 +416,18 @@ const styles = StyleSheet.create({
   tipBold: {
     fontWeight: "bold",
   },
-  editButton: {
+  cancelButton: {
     marginHorizontal: 24,
     marginTop: 24,
-    backgroundColor: "#0F3D26",
+    backgroundColor: "#FEF2F2",
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#FEE2E2",
   },
-  editButtonText: {
-    color: "#FFFFFF",
+  cancelButtonText: {
+    color: "#EF4444",
     fontSize: 16,
     fontWeight: "bold",
   },

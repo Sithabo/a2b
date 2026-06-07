@@ -101,6 +101,9 @@ export default function LoginScreen() {
                     countryCode={countryCode}
                     onSelect={onSelectCountry}
                     containerButtonStyle={styles.pickerButton}
+                    modalProps={{
+                      presentationStyle: 'pageSheet',
+                    }}
                   />
                 </View>
                 <TextInput

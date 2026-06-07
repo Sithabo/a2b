@@ -91,12 +91,12 @@ export const ShippingCard: React.FC<ShippingCardProps> = ({
       </View>
 
       <View style={styles.bottomRow}>
-        <View style={styles.locCol}>
-          <Text style={styles.locLabel}>{pickupName}</Text>
+        <View style={[styles.locCol, { marginRight: 8, flex: 1 }]}>
+          <Text style={styles.locLabel} numberOfLines={1} ellipsizeMode="tail">{pickupName}</Text>
           <Text style={styles.locDate}>{pickupDate}</Text>
         </View>
-        <View style={styles.locColRight}>
-          <Text style={styles.locLabelRight}>{deliveryName}</Text>
+        <View style={[styles.locColRight, { marginLeft: 8, flex: 1 }]}>
+          <Text style={styles.locLabelRight} numberOfLines={1} ellipsizeMode="tail">{deliveryName}</Text>
           <Text style={styles.locDate}>{deliveryDate}</Text>
         </View>
       </View>

@@ -121,7 +121,7 @@ export default function OnboardingScreen() {
           >
             {SLIDES.map((item) => (
               <View key={item.id} style={styles.slide}>
-                <Image source={item.icon} style={styles.image} />
+                <Image source={item.icon} style={styles.image} height={200} width={200}/>
 
                 {/* Content */}
                 <View style={styles.contentContainer}>
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: SCREEN_WIDTH - 80,
-    height: 300,
+    height: SCREEN_WIDTH - 80,
     resizeMode: "contain",
     marginBottom: 40,
   },

@@ -98,6 +98,9 @@ export default function SignUpScreen() {
                     countryCode={countryCode}
                     onSelect={onSelectCountry}
                     containerButtonStyle={styles.pickerButton}
+                    modalProps={{
+                      presentationStyle: 'pageSheet',
+                    }}
                   />
                 </View>
                 <TextInput

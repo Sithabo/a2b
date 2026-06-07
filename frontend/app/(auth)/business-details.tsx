@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   View,
+  Text,
   TextInput,
   TouchableOpacity,
   KeyboardAvoidingView,
@@ -15,12 +16,15 @@ import { Button } from "@/components/ui/Button";
 import { ThemedText } from "@/components/ThemedText";
 import { Colors } from "@/constants/theme";
 import { useAuthStore } from "@/store/useAuthStore";
+import CountryPicker, { Country, CountryCode } from "react-native-country-picker-modal";
 
 export default function BusinessDetailsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const [companyName, setCompanyName] = useState("");
   const [region, setRegion] = useState("");
+  const [countryCode, setCountryCode] = useState<CountryCode>("UG");
+  const [showPicker, setShowPicker] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const signUp = useAuthStore((state) => state.signUp);
 
@@ -88,16 +92,38 @@ export default function BusinessDetailsScreen() {
               <ThemedText style={styles.inputLabel}>
                 Preferred Operating Region
               </ThemedText>
-              <View style={styles.inputWrapper}>
+              <TouchableOpacity
+                style={styles.inputWrapper}
+                activeOpacity={0.7}
+                onPress={() => setShowPicker(true)}
+              >
                 <MapPin size={20} color={Colors.light.gray[400]} />
-                <TextInput
-                  placeholder="e.g. Nairobi Hub"
-                  placeholderTextColor={Colors.light.gray[400]}
-                  style={styles.textInput}
-                  value={region}
-                  onChangeText={setRegion}
-                />
-              </View>
+                <Text
+                  style={[
+                    styles.textInput,
+                    !region ? { color: Colors.light.gray[400] } : null,
+                  ]}
+                >
+                  {region || "Select Country..."}
+                </Text>
+                <View style={{ width: 0, height: 0, opacity: 0 }}>
+                  <CountryPicker
+                    withFilter
+                    withFlag
+                    countryCode={countryCode}
+                    visible={showPicker}
+                    onClose={() => setShowPicker(false)}
+                    onSelect={(country: Country) => {
+                      setRegion(country.name as string);
+                      setCountryCode(country.cca2);
+                      setShowPicker(false);
+                    }}
+                    modalProps={{
+                      presentationStyle: "pageSheet",
+                    }}
+                  />
+                </View>
+              </TouchableOpacity>
             </View>
 
             <Button
