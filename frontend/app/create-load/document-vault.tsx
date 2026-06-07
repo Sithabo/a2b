@@ -11,6 +11,7 @@ import {
   Alert,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -36,6 +37,7 @@ export default function DocumentVaultScreen() {
   const navigation = useNavigation();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+  const insets = useSafeAreaInsets();
   
   const addShipment = useShipmentStore((state) => state.addShipment);
   const draftShipment = useShipmentStore((state) => state.draftShipment);
@@ -252,7 +254,7 @@ export default function DocumentVaultScreen() {
         rightElement={<Lock size={20} color="#0F3D26" />}
       />
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 96 }]} showsVerticalScrollIndicator={false}>
         {/* Secure Info Banner */}
         <View style={styles.secureBanner}>
           <Shield size={20} color="#0F3D26" />
@@ -467,7 +469,7 @@ export default function DocumentVaultScreen() {
       </ScrollView>
 
       {/* Footer Submission Button */}
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: insets.bottom > 0 ? insets.bottom : 16 }]}>
         <TouchableOpacity
           style={[styles.submitButton, !isFormValid && styles.submitButtonDisabled]}
           onPress={handleFinalizeVerification}
@@ -491,7 +493,7 @@ export default function DocumentVaultScreen() {
             activeOpacity={1}
             onPress={() => setIsPickerOpen(false)}
           />
-          <View style={styles.pickerSheet}>
+          <View style={[styles.pickerSheet, { paddingBottom: insets.bottom > 0 ? insets.bottom + 16 : 24 }]}>
             <View style={styles.pickerHeader}>
               <Text style={styles.pickerTitle}>Simulated Document Vault Picker</Text>
               <TouchableOpacity onPress={() => setIsPickerOpen(false)}>

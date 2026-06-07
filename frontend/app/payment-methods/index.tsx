@@ -9,7 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import {
   ArrowLeft,
@@ -30,6 +30,7 @@ export default function PaymentMethodsScreen() {
   const router = useRouter();
   const { cards, addresses, addCard, updateCard, setDefaultCard } =
     useBillingStore();
+  const insets = useSafeAreaInsets();
 
   const defaultAddress = addresses.find((a) => a.isDefault) || addresses[0];
 
@@ -220,7 +221,7 @@ export default function PaymentMethodsScreen() {
             activeOpacity={1}
             onPress={() => setIsModalVisible(false)}
           />
-          <View style={styles.bottomSheet}>
+          <View style={[styles.bottomSheet, { paddingBottom: insets.bottom > 0 ? insets.bottom + 12 : 24 }]}>
             <View style={styles.dragIndicator} />
             <View style={styles.sheetHeader}>
               <Text style={styles.sheetTitle}>

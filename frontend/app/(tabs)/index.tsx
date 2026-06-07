@@ -72,7 +72,7 @@ export default function HomeScreen() {
   return (
     <View style={[styles.container, { backgroundColor: "#f5f6ff" }]}>
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }]}
         showsVerticalScrollIndicator={false}
       >
         <LinearGradient

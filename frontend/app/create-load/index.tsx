@@ -9,6 +9,7 @@ import {
   Dimensions,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
@@ -25,6 +26,7 @@ export default function RouteSelectionScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+  const insets = useSafeAreaInsets();
 
   const pickupLocation = useShipmentStore((state) => state.pickupLocation);
   const dropoffLocation = useShipmentStore((state) => state.dropoffLocation);
@@ -101,7 +103,7 @@ export default function RouteSelectionScreen() {
       </View>
 
       {/* Sticky Bottom Actions */}
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: insets.bottom > 0 ? insets.bottom : 16 }]}>
         <TouchableOpacity
           style={[styles.nextButton, !isFormComplete && styles.nextButtonDisabled]}
           onPress={handleProceedToCargo}

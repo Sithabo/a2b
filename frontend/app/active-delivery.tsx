@@ -7,6 +7,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -27,6 +28,7 @@ export default function ActiveDeliveryScreen() {
   const { trackingId } = useLocalSearchParams<{ trackingId: string }>();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+  const insets = useSafeAreaInsets();
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -47,7 +49,7 @@ export default function ActiveDeliveryScreen() {
       </View>
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Driver Information */}
@@ -219,7 +221,7 @@ export default function ActiveDeliveryScreen() {
       </ScrollView>
 
       {/* Action Bottom */}
-      <View style={styles.confirmActionContainer}>
+      <View style={[styles.confirmActionContainer, { bottom: insets.bottom > 0 ? insets.bottom : 20 }]}>
         <TouchableOpacity
           style={styles.confirmButton}
           activeOpacity={0.8}

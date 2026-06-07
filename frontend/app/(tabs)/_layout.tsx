@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Home, Plus, User } from "lucide-react-native";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // ─── Tab Config ───────────────────────────────────────────────────────────────
 
@@ -22,9 +23,11 @@ const TAB_ROUTES = [
 
 function CustomTabBar({ state, navigation }: BottomTabBarProps) {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const bottomInset = insets.bottom > 0 ? insets.bottom : 16;
 
   return (
-    <View style={styles.floatingBarWrapper} pointerEvents="box-none">
+    <View style={[styles.floatingBarWrapper, { bottom: bottomInset }]} pointerEvents="box-none">
       <View style={styles.floatingBar}>
         {TAB_ROUTES.map((tab, index) => {
           const routeIndex = state.routes.findIndex((r) => r.name === tab.name);
@@ -80,12 +83,9 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
 
 // ─── Styles ────────────────────────────────────────────────────────────────────
 
-const BOTTOM_PADDING = Platform.OS === "ios" ? 36 : 20;
-
 const styles = StyleSheet.create({
   floatingBarWrapper: {
     position: "absolute",
-    bottom: BOTTOM_PADDING,
     left: 0,
     right: 0,
     alignItems: "center",

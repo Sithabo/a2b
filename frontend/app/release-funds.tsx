@@ -2,10 +2,11 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { ArrowLeft, Clock } from "lucide-react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ReleaseFundsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   return (
     <View style={styles.container}>
@@ -56,7 +57,7 @@ export default function ReleaseFundsScreen() {
       </View>
 
       {/* Bottom Actions */}
-      <View style={styles.actionSection}>
+      <View style={[styles.actionSection, { paddingBottom: insets.bottom > 0 ? insets.bottom : 20 }]}>
         <TouchableOpacity
           style={styles.primaryButton}
           activeOpacity={0.8}

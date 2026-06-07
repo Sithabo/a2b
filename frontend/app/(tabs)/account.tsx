@@ -16,7 +16,7 @@ import {
 import { useRouter } from "expo-router";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuthStore } from "@/store/useAuthStore";
 import {
   ArrowLeft,
@@ -40,6 +40,7 @@ import {
 export default function AccountScreen() {
   const router = useRouter();
   const { userProfile, logout, updateProfile } = useAuthStore();
+  const insets = useSafeAreaInsets();
   
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [editCompany, setEditCompany] = useState("");
@@ -122,7 +123,7 @@ export default function AccountScreen() {
       </View>
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Warning Banner */}
