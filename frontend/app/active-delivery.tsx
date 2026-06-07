@@ -225,7 +225,7 @@ export default function ActiveDeliveryScreen() {
         <TouchableOpacity
           style={styles.confirmButton}
           activeOpacity={0.8}
-          onPress={() => router.push("/confirm-delivery")}
+          onPress={() => router.push({ pathname: "/confirm-delivery", params: { trackingId } })}
         >
           <Text style={styles.confirmButtonText}>Confirm Delivery</Text>
         </TouchableOpacity>

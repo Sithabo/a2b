@@ -8,8 +8,6 @@ export default function Index() {
 
   // Ensure Zustand is hydrated before redirecting
   useEffect(() => {
-    // Temporarily reset onboarding so you can see it again
-    useAuthStore.setState({ hasCompletedOnboarding: false });
     setMounted(true);
   }, []);
 

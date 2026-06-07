@@ -1,11 +1,22 @@
 import React from "react";
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { ArrowLeft, Check, FileText, Share2 } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useShipmentStore } from "@/store/useShipmentStore";
 
 export default function OfficialReceiptScreen() {
   const router = useRouter();
+  const { trackingId } = useLocalSearchParams<{ trackingId: string }>();
+  const idToFind = trackingId ? trackingId.replace("#", "") : "";
+  const shipments = useShipmentStore((state) => state.shipments);
+  const shipment = shipments.find((s) => s.id === idToFind) || shipments[0];
+
+  const formatCurrency = (val?: string) => {
+    if (!val) return "0 GYD";
+    const num = parseFloat(val);
+    return isNaN(num) ? `${val} GYD` : `${num.toLocaleString("en-US")} GYD`;
+  };
 
   return (
     <View style={styles.container}>
@@ -44,19 +55,19 @@ export default function OfficialReceiptScreen() {
             <View style={styles.metadataSection}>
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Transaction ID:</Text>
-                <Text style={styles.metaValue}>#A2B-TXN-882</Text>
+                <Text style={styles.metaValue}>#A2B-TXN-{shipment.id}</Text>
               </View>
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Driver:</Text>
-                <Text style={styles.metaValue}>John Mukasa</Text>
+                <Text style={styles.metaValue}>{shipment.driverName || "John Mukasa"}</Text>
               </View>
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Pickup:</Text>
-                <Text style={styles.metaValue}>Kampala, Central</Text>
+                <Text style={styles.metaValue} numberOfLines={2}>{shipment.pickup}</Text>
               </View>
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Delivery:</Text>
-                <Text style={styles.metaValue}>Jinja, Industrial Area</Text>
+                <Text style={styles.metaValue} numberOfLines={2}>{shipment.delivery}</Text>
               </View>
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Vehicle:</Text>
@@ -64,7 +75,7 @@ export default function OfficialReceiptScreen() {
               </View>
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Load Type:</Text>
-                <Text style={styles.metaValue}>General Cargo (Sacks)</Text>
+                <Text style={styles.metaValue}>{shipment.cargoType}</Text>
               </View>
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Payment Method:</Text>
@@ -82,7 +93,7 @@ export default function OfficialReceiptScreen() {
             {/* Price Footer */}
             <View style={styles.priceSection}>
               <Text style={styles.priceLabel}>Amount Paid:</Text>
-              <Text style={styles.priceValue}>150,000 UGX</Text>
+              <Text style={styles.priceValue}>{formatCurrency(shipment.offerPrice)}</Text>
             </View>
 
           </View>
@@ -103,7 +114,7 @@ export default function OfficialReceiptScreen() {
           <TouchableOpacity
             style={styles.primaryButton}
             activeOpacity={0.8}
-            onPress={() => router.push("/")}
+            onPress={() => router.replace("/(tabs)")}
           >
             <Text style={styles.primaryButtonText}>Back to Home</Text>
           </TouchableOpacity>

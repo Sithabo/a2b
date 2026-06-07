@@ -1,12 +1,15 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { ArrowLeft, Clock } from "lucide-react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { useShipmentStore } from "@/store/useShipmentStore";
 
 export default function ReleaseFundsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { trackingId } = useLocalSearchParams<{ trackingId: string }>();
+  const updateShipmentStatus = useShipmentStore((state) => state.updateShipmentStatus);
 
   return (
     <View style={styles.container}>
@@ -40,7 +43,13 @@ export default function ReleaseFundsScreen() {
         <TouchableOpacity
           style={styles.demoButton}
           activeOpacity={0.8}
-          onPress={() => router.push("/official-receipt")}
+          onPress={() => {
+            const idToFind = trackingId ? trackingId.replace("#", "") : "";
+            if (idToFind) {
+              updateShipmentStatus(idToFind, "COMPLETED");
+            }
+            router.replace({ pathname: "/official-receipt", params: { trackingId } });
+          }}
         >
           <Text style={styles.demoButtonText}>[Demo: Simulate Driver Entering Code]</Text>
         </TouchableOpacity>

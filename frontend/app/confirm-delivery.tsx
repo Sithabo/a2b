@@ -1,12 +1,13 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { Image } from "expo-image";
 import { ArrowLeft, Shield } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ConfirmDeliveryScreen() {
   const router = useRouter();
+  const { trackingId } = useLocalSearchParams<{ trackingId: string }>();
 
   return (
     <View style={styles.container}>
@@ -44,7 +45,7 @@ export default function ConfirmDeliveryScreen() {
           <TouchableOpacity
             style={styles.primaryButton}
             activeOpacity={0.8}
-            onPress={() => router.push("/release-funds")}
+            onPress={() => router.push({ pathname: "/release-funds", params: { trackingId } })}
           >
             <Text style={styles.primaryButtonText}>Yes, I have received them</Text>
           </TouchableOpacity>
