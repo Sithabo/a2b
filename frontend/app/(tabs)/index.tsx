@@ -8,7 +8,7 @@ import {
   TextInput,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { Image } from "expo-image";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -83,7 +83,8 @@ export default function HomeScreen() {
           {/* Header Integrated into Body */}
           <View style={styles.headerContainer}>
             <View style={styles.headerLeft}>
-              <View style={[styles.avatarContainer, userProfile?.profileImage && { borderWidth: 0 }]}>
+              <Link href={"/(tabs)/account"}>
+                <View style={[styles.avatarContainer, userProfile?.profileImage && { borderWidth: 0 }]}>
                 {userProfile?.profileImage ? (
                   <Image
                     source={{ uri: userProfile.profileImage }}
@@ -94,6 +95,7 @@ export default function HomeScreen() {
                   <User color="#FFFFFF" size={24} />
                 )}
               </View>
+              </Link>
               <View>
                 <Text style={styles.headerTitle}>
                   Hey {userProfile?.name?.split(" ")[0] || "Musa"}
@@ -104,9 +106,11 @@ export default function HomeScreen() {
                 </View>
               </View>
             </View>
+            <Link href={"/account/notifications"} asChild>
             <TouchableOpacity style={styles.headerNotificationButton}>
               <Bell color="#FFFFFF" size={20} />
             </TouchableOpacity>
+            </Link>
           </View>
 
           {/* Search Bar */}

@@ -5,6 +5,8 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
+  Linking,
+  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -29,6 +31,23 @@ export default function ActiveDeliveryScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
+
+  const handleCallDriver = () => {
+    Linking.openURL("tel:+5926000101").catch((err) =>
+      console.error("Failed to open dialer:", err)
+    );
+  };
+
+  const handleMessageDriver = () => {
+    const message = `Hi John, regarding shipment ${trackingId || "#V99MZLQ"}`;
+    const url = Platform.select({
+      ios: `sms:+5926000101&body=${encodeURIComponent(message)}`,
+      default: `sms:+5926000101?body=${encodeURIComponent(message)}`,
+    });
+    Linking.openURL(url).catch((err) =>
+      console.error("Failed to open messaging app:", err)
+    );
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -97,11 +116,19 @@ export default function ActiveDeliveryScreen() {
           </View>
 
           <View style={styles.contactActions}>
-            <TouchableOpacity style={styles.callButton} activeOpacity={0.8}>
+            <TouchableOpacity
+              style={styles.callButton}
+              activeOpacity={0.8}
+              onPress={handleCallDriver}
+            >
               <PhoneCall color="white" size={16} />
               <Text style={styles.callText}>Call Driver</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.messageButton} activeOpacity={0.7}>
+            <TouchableOpacity
+              style={styles.messageButton}
+              activeOpacity={0.7}
+              onPress={handleMessageDriver}
+            >
               <MessageSquare color="#374151" size={16} />
               <Text style={styles.messageText}>Message</Text>
             </TouchableOpacity>
