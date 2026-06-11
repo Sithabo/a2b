@@ -7,13 +7,16 @@ import {
   StyleSheet,
   Linking,
   Platform,
+  Clipboard,
+  Alert,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
+  ArrowLeft,
   Truck,
   Clock,
   User,
@@ -21,8 +24,11 @@ import {
   PhoneCall,
   MessageSquare,
   Package,
+  Copy,
+  Check,
+  Compass,
 } from "lucide-react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useShipmentStore } from "@/store/useShipmentStore";
 import { ScreenHeader } from "@/components/ScreenHeader";
 
 export default function ActiveDeliveryScreen() {
@@ -32,6 +38,19 @@ export default function ActiveDeliveryScreen() {
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
 
+  const idToFind = trackingId ? trackingId.replace("#", "") : "";
+  const shipments = useShipmentStore((state) => state.shipments);
+  const editShipment = useShipmentStore((state) => state.editShipment);
+
+  // Find dynamic shipment or fallback to default
+  const shipment =
+    shipments.find((s) => s.id === idToFind) ||
+    shipments.find((s) => s.status === "ACTIVE") ||
+    shipments[0];
+
+  const currentMilestoneIndex = shipment?.milestoneIndex ?? 2;
+  const isImport = shipment?.is_import ?? false;
+
   const handleCallDriver = () => {
     Linking.openURL("tel:+5926000101").catch((err) =>
       console.error("Failed to open dialer:", err)
@@ -39,7 +58,7 @@ export default function ActiveDeliveryScreen() {
   };
 
   const handleMessageDriver = () => {
-    const message = `Hi John, regarding shipment ${trackingId || "#V99MZLQ"}`;
+    const message = `Hi John, regarding shipment #${shipment?.id || "A2B-9874"}`;
     const url = Platform.select({
       ios: `sms:+5926000101&body=${encodeURIComponent(message)}`,
       default: `sms:+5926000101?body=${encodeURIComponent(message)}`,
@@ -49,79 +68,333 @@ export default function ActiveDeliveryScreen() {
     );
   };
 
+  const copyToClipboard = () => {
+    if (shipment?.id) {
+      Clipboard.setString(shipment.id);
+      Alert.alert("Copied", `Tracking ID #${shipment.id} copied to clipboard!`);
+    }
+  };
+
+  const handleAdvanceMilestone = () => {
+    if (shipment && currentMilestoneIndex < 6) {
+      const nextIndex = currentMilestoneIndex + 1;
+      editShipment(shipment.id, {
+        milestoneIndex: nextIndex,
+        // If we reach the last milestone, update status to DELIVERED
+        status: nextIndex === 6 ? "DELIVERED" : shipment.status,
+      });
+    }
+  };
+
+  const handleResetMilestones = () => {
+    if (shipment) {
+      editShipment(shipment.id, {
+        milestoneIndex: 0,
+        status: "ACTIVE",
+      });
+    }
+  };
+
+  // Helper to format timestamps relative to shipment.createdAt
+  const baseDate = new Date(shipment?.createdAt || Date.now());
+  const getFormattedTime = (date: Date) => {
+    let hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    const strMinutes = minutes < 10 ? "0" + minutes : minutes;
+    return `${hours}:${strMinutes} ${ampm}`;
+  };
+
+  const getMilestoneTime = (index: number) => {
+    const d = new Date(baseDate.getTime() + index * 90 * 60 * 1000); // 1.5h intervals
+    return getFormattedTime(d);
+  };
+
+  const pickupName = shipment?.pickup || "Kampala, Makindye";
+  const deliveryName = shipment?.delivery || "Jinja, Industrial Area";
+
+  // 7 milestones mapping
+  const milestones = [
+    {
+      key: "DISPATCHED",
+      title: "Driver Dispatched",
+      location: isImport ? "Georgetown Logistics Hub" : "Kampala Logistics Depot",
+      verification: "Contract Locked & Dispatched",
+    },
+    {
+      key: "ARRIVED_AT_PICKUP",
+      title: "Gate-In / Arrival at Origin",
+      location: isImport ? "Georgetown Port Terminal" : pickupName,
+      verification: "Gate-In Recorded",
+    },
+    {
+      key: "DEPARTED_ORIGIN",
+      title: "Loaded & Cleared Customs",
+      location: isImport ? "GRA Customs Gate" : pickupName + " Exit Gate",
+      verification: isImport ? "Cargo Loaded & Customs Cleared" : "Cargo Loaded & Strapped",
+    },
+    {
+      key: "CHOKE_POINT_CLEARED",
+      title: "Major Infrastructure Nodes",
+      location: isImport ? "Linden Weighbridge" : "Mukono Weighbridge",
+      verification: "PASSED (Axle Weight OK)",
+    },
+    {
+      key: "PROXIMITY_ALERT",
+      title: "The Proximity Buffer",
+      location: isImport ? "Wismar Hub Outskirts" : "Lugazi Outskirts",
+      verification: "Proximity Alert (Est: 45 mins)",
+    },
+    {
+      key: "ARRIVED_AT_DELIVERY",
+      title: "Arrival at Destination",
+      location: deliveryName,
+      verification: "Backed into Unloading Dock",
+    },
+    {
+      key: "DELIVERED",
+      title: "Cargo Signed & Confirmed",
+      location: deliveryName + " Receiving",
+      verification: "Proof of Delivery Uploaded",
+    },
+  ];
+
+  const getMilestoneStatusText = (index: number) => {
+    switch (index) {
+      case 0:
+        return "Driver Dispatched";
+      case 1:
+        return "Arrived at Pickup";
+      case 2:
+        return "Departed Origin";
+      case 3:
+        return "In Transit (Bottleneck Cleared)";
+      case 4:
+        return "In Transit (Near Destination)";
+      case 5:
+        return "Arrived at Delivery Point";
+      case 6:
+        return "Delivered & Signed";
+      default:
+        return "In Transit";
+    }
+  };
+
+  const getCargoName = () => {
+    if (!shipment) return "General Cargo";
+    if (shipment.cargo?.type) {
+      return shipment.cargo.type
+        .split("_")
+        .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
+        .join(" ");
+    }
+    return shipment.cargoType || "General Cargo";
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Header */}
       <ScreenHeader
         title="Active Delivery"
-        subtitle="En route to pickup"
+        subtitle={getMilestoneStatusText(currentMilestoneIndex)}
         onBackPress={() => router.back()}
       />
 
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 90 }]}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + 110 },
+        ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Driver Information */}
-        <View style={styles.card}>
-          <View style={styles.iconCircle}>
-            <Truck color="#0F3D26" size={24} />
+        {/* Top Header Card (emulates screenshot) */}
+        <View style={styles.topCard}>
+          <View style={styles.topAvatarContainer}>
+            <Package color="#D97706" size={32} />
           </View>
-          <Text style={styles.jobActiveTitle}>Job Active</Text>
-          <Text style={styles.jobActiveSubtitle}>
-            Your driver is on the way
-          </Text>
-
-          <View style={styles.arrivalBox}>
-            <View style={styles.arrivalColLeft}>
-              <Clock color="#6B7280" size={16} />
-              <Text style={styles.arrivalLabel}>Expected Arrival</Text>
-            </View>
-            <Text style={styles.arrivalValue}>35 minutes</Text>
-          </View>
-
-          <View style={styles.cardHeader}>
-            <User color="#6B7280" size={14} />
-            <Text style={styles.cardTitle}>Driver Information</Text>
-          </View>
-
-          <View style={styles.driverRow}>
-            <View style={styles.driverAvatarContainer}>
-              <View style={styles.driverAvatar}>
-                <Text style={styles.driverAvatarInitials}>JM</Text>
-              </View>
-              <View style={styles.onlineBadge} />
-            </View>
-
-            <View style={styles.driverMeta}>
-              <Text style={styles.driverName}>John Mukasa</Text>
-              <View style={styles.driverStats}>
-                <View style={styles.starRow}>
-                  <Star color="#EAB308" size={14} fill="#EAB308" />
-                  <Text style={styles.ratingText}>4.8</Text>
-                </View>
-                <Text style={styles.separator}>|</Text>
-                <Text style={styles.tripsText}>156 Trips</Text>
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.contactActions}>
+          <Text style={styles.topTitle}>{getCargoName()}</Text>
+          <View style={styles.trackingRow}>
+            <Text style={styles.trackingIdText}>
+              #Tracking ID: {shipment?.id || "A2B-9874"}
+            </Text>
             <TouchableOpacity
-              style={styles.callButton}
-              activeOpacity={0.8}
-              onPress={handleCallDriver}
+              onPress={copyToClipboard}
+              style={styles.copyBtn}
+              activeOpacity={0.6}
             >
-              <PhoneCall color="white" size={16} />
-              <Text style={styles.callText}>Call Driver</Text>
+              <Copy color="#6B7280" size={14} />
             </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Specs Details Card (emulates screenshot grey card) */}
+        <View style={styles.specsCard}>
+          <View style={styles.specsRow}>
+            <Text style={styles.specsLabel}>From:</Text>
+            <Text style={styles.specsValue} numberOfLines={1}>
+              {pickupName}
+            </Text>
+          </View>
+          <View style={styles.specsRow}>
+            <Text style={styles.specsLabel}>Destination:</Text>
+            <Text style={styles.specsValue} numberOfLines={1}>
+              {deliveryName}
+            </Text>
+          </View>
+          <View style={styles.specsRow}>
+            <Text style={styles.specsLabel}>Driver:</Text>
+            <Text style={styles.specsValue}>
+              {shipment?.driverName || "John Mukasa"}
+            </Text>
+          </View>
+          <View style={styles.specsRow}>
+            <Text style={styles.specsLabel}>Weight:</Text>
+            <Text style={styles.specsValue}>
+              {shipment?.weight || "250"} KG
+            </Text>
+          </View>
+          <View style={[styles.specsRow, styles.specsRowLast]}>
+            <Text style={styles.specsLabel}>Status:</Text>
+            <Text style={[styles.specsValue, { color: "#0F3D26" }]}>
+              {getMilestoneStatusText(currentMilestoneIndex)}
+            </Text>
+          </View>
+        </View>
+
+        {/* Contact Actions (Wired tel: and sms:) */}
+        <View style={styles.contactActions}>
+          <TouchableOpacity
+            style={styles.callButton}
+            activeOpacity={0.8}
+            onPress={handleCallDriver}
+          >
+            <PhoneCall color="white" size={16} />
+            <Text style={styles.callText}>Call Driver</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.messageButton}
+            activeOpacity={0.7}
+            onPress={handleMessageDriver}
+          >
+            <MessageSquare color="#374151" size={16} />
+            <Text style={styles.messageText}>Message</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Vertical Stepper Timeline Component (replacing live map) */}
+        <View style={styles.card}>
+          <View style={styles.timelineHeader}>
+            <Compass color="#0F3D26" size={18} />
+            <Text style={styles.cardSectionTitle}>Milestone Tracking Timeline</Text>
+          </View>
+
+          <View style={styles.timelineContainer}>
+            {milestones.map((item, index) => {
+              const isCompleted = index < currentMilestoneIndex;
+              const isActive = index === currentMilestoneIndex;
+              const isPending = index > currentMilestoneIndex;
+
+              return (
+                <View key={item.key} style={styles.timelineItem}>
+                  {/* Left Column: Dot & Line */}
+                  <View style={styles.indicatorContainer}>
+                    <View
+                      style={[
+                        styles.timelineDot,
+                        isCompleted && styles.dotCompleted,
+                        isActive && styles.dotActive,
+                        isPending && styles.dotPending,
+                      ]}
+                    >
+                      {isActive && <View style={styles.dotActiveInner} />}
+                    </View>
+                    {index < milestones.length - 1 && (
+                      <View
+                        style={[
+                          styles.timelineLine,
+                          index < currentMilestoneIndex
+                            ? styles.lineCompleted
+                            : styles.linePending,
+                        ]}
+                      />
+                    )}
+                  </View>
+
+                  {/* Right Column: Milestone Info */}
+                  <View style={styles.timelineContent}>
+                    <View style={styles.timelineHeaderRow}>
+                      <Text
+                        style={[
+                          styles.timelineTitle,
+                          index <= currentMilestoneIndex
+                            ? styles.textCompleted
+                            : styles.textPending,
+                        ]}
+                      >
+                        {item.title}
+                      </Text>
+                      {isCompleted && (
+                        <Check color="#10B981" size={16} style={styles.checkIcon} />
+                      )}
+                      {isActive && (
+                        <View style={styles.activePill}>
+                          <Text style={styles.activePillText}>ACTIVE</Text>
+                        </View>
+                      )}
+                    </View>
+
+                    <Text style={styles.timelineMetaText}>
+                      {isPending ? "--:--" : getMilestoneTime(index)} • {item.location}
+                    </Text>
+
+                    <Text
+                      style={[
+                        styles.timelineVerificationText,
+                        index < currentMilestoneIndex
+                          ? styles.verificationCompleted
+                          : index === currentMilestoneIndex
+                          ? styles.verificationActive
+                          : styles.verificationPending,
+                      ]}
+                    >
+                      {isPending ? "Pending" : item.verification}
+                    </Text>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        </View>
+
+        {/* Milestone Simulator Card */}
+        <View style={styles.simulatorCard}>
+          <View style={styles.simulatorHeader}>
+            <Text style={styles.simulatorTitle}>Milestone Simulator</Text>
+            <Text style={styles.simulatorSubtitle}>
+              Simulate geofenced updates and driver manifest approvals.
+            </Text>
+          </View>
+          <View style={styles.simulatorActions}>
             <TouchableOpacity
-              style={styles.messageButton}
-              activeOpacity={0.7}
-              onPress={handleMessageDriver}
+              style={[
+                styles.simButton,
+                currentMilestoneIndex >= 6 && styles.simButtonDisabled,
+              ]}
+              onPress={handleAdvanceMilestone}
+              disabled={currentMilestoneIndex >= 6}
+              activeOpacity={0.8}
             >
-              <MessageSquare color="#374151" size={16} />
-              <Text style={styles.messageText}>Message</Text>
+              <Text style={styles.simButtonText}>Advance Milestone</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.simResetButton}
+              onPress={handleResetMilestones}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.simResetButtonText}>Reset Progress</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -157,95 +430,30 @@ export default function ActiveDeliveryScreen() {
             </View>
           </View>
         </View>
-
-        {/* Shipment Details */}
-        <View style={styles.modernCard}>
-          <View style={styles.modernSubheadingRow}>
-            <Package color="#9CA3AF" size={14} />
-            <Text style={styles.modernSubheading}>PICKUP DETAILS</Text>
-          </View>
-          <View style={styles.modernTopRow}>
-            <Text style={styles.modernOrderId}>{trackingId || "#V99MZLQ"}</Text>
-            <Text style={styles.modernPriceText}>150,000 UGX</Text>
-          </View>
-
-          <View style={styles.timelineWrapper}>
-            <View style={styles.timelineDashedLine} />
-
-            {/* Pickup */}
-            <View style={styles.timelineStep}>
-              <View style={styles.dotContainer}>
-                <View style={[styles.dot, styles.dotBlack]} />
-              </View>
-              <View style={styles.stepTextContainer}>
-                <Text style={styles.stepLabel}>PICKUP</Text>
-                <Text style={styles.stepValue} numberOfLines={2}>
-                  Kampala, Makindye
-                </Text>
-              </View>
-            </View>
-
-            {/* Delivery */}
-            <View style={styles.timelineStep}>
-              <View style={styles.dotContainer}>
-                <View style={[styles.dot, styles.dotDarkGreen]} />
-              </View>
-              <View style={[styles.stepTextContainer, { paddingBottom: 0 }]}>
-                <Text style={styles.stepLabel}>DELIVERY</Text>
-                <Text style={styles.stepValue} numberOfLines={2}>
-                  Jinja, Industrial Area
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Cargo specifics unique to this page */}
-          <View style={styles.modernCargoList}>
-            <View style={styles.cargoItem}>
-              <Image
-                source={require("@/assets/images/cargo_box.png")}
-                style={styles.cargoItemImg}
-                contentFit="cover"
-              />
-              <View style={styles.cargoItemDetails}>
-                <Text style={styles.cargoItemTitle}>Fragile Cargo</Text>
-                <Text style={styles.cargoItemMeta}>40x40x50 cm • 15 kg</Text>
-              </View>
-            </View>
-            <View style={styles.cargoItem}>
-              <Image
-                source={require("@/assets/images/cargo_box.png")}
-                style={styles.cargoItemImg}
-                contentFit="cover"
-              />
-              <View style={styles.cargoItemDetails}>
-                <Text style={styles.cargoItemTitle}>Bulk Cargo</Text>
-                <Text style={styles.cargoItemMeta}>120x80x100 cm • 200 kg</Text>
-              </View>
-            </View>
-            <View style={styles.cargoItem}>
-              <Image
-                source={require("@/assets/images/cargo_box.png")}
-                style={styles.cargoItemImg}
-                contentFit="cover"
-              />
-              <View style={styles.cargoItemDetails}>
-                <Text style={styles.cargoItemTitle}>General Cargo</Text>
-                <Text style={styles.cargoItemMeta}>60x40x40 cm • 25 kg</Text>
-              </View>
-            </View>
-          </View>
-        </View>
       </ScrollView>
 
       {/* Action Bottom */}
-      <View style={[styles.confirmActionContainer, { bottom: insets.bottom > 0 ? insets.bottom : 20 }]}>
+      <View
+        style={[
+          styles.confirmActionContainer,
+          { bottom: insets.bottom > 0 ? insets.bottom : 20 },
+        ]}
+      >
         <TouchableOpacity
           style={styles.confirmButton}
           activeOpacity={0.8}
-          onPress={() => router.push({ pathname: "/confirm-delivery", params: { trackingId } })}
+          onPress={() =>
+            router.push({
+              pathname: "/confirm-delivery",
+              params: { trackingId: shipment?.id },
+            })
+          }
         >
-          <Text style={styles.confirmButtonText}>Confirm Delivery</Text>
+          <Text style={styles.confirmButtonText}>
+            {currentMilestoneIndex === 6
+              ? "Confirm & Release Funds"
+              : "Confirm Delivery"}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -256,10 +464,120 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  header: {
+    backgroundColor: "#0F3D26",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingTop: 56, // For safe area
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,
+    zIndex: 10,
+  },
+  backButton: {
+    padding: 8,
+    marginLeft: -8,
+  },
+  headerTitleContainer: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  headerTitle: {
+    color: "#FFFFFF",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  headerSubtitle: {
+    color: "#A7F3D0",
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  placeholderIcon: {
+    width: 40,
+  },
   scrollContent: {
     padding: 16,
-    paddingBottom: 120, // ample padding so content isn't hidden under floating button
     gap: 16,
+  },
+  topCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 20,
+    alignItems: "center",
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  topAvatarContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "#FFFBEB",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#FEF3C7",
+  },
+  topTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#111827",
+    textAlign: "center",
+  },
+  trackingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 6,
+  },
+  trackingIdText: {
+    fontSize: 14,
+    color: "#6B7280",
+    fontWeight: "500",
+  },
+  copyBtn: {
+    padding: 4,
+  },
+  specsCard: {
+    backgroundColor: "#F3F4F6",
+    borderRadius: 16,
+    padding: 16,
+    width: "100%",
+  },
+  specsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+  },
+  specsRowLast: {
+    borderBottomWidth: 0,
+    paddingBottom: 4,
+  },
+  specsLabel: {
+    fontSize: 14,
+    color: "#6B7280",
+    fontWeight: "500",
+  },
+  specsValue: {
+    fontSize: 14,
+    color: "#111827",
+    fontWeight: "600",
+    textAlign: "right",
+    flex: 1,
+    paddingLeft: 16,
   },
   card: {
     backgroundColor: "#FFFFFF",
@@ -272,68 +590,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
-    alignItems: "center",
-  },
-  iconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#E6F4EA",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 8,
-  },
-  jobActiveTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#111827",
-  },
-  jobActiveSubtitle: {
-    fontSize: 14,
-    color: "#6B7280",
-    marginBottom: 12,
-  },
-  arrivalBox: {
-    width: "100%",
-    backgroundColor: "#F9FAFB",
-    borderRadius: 8,
-    padding: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderWidth: 1,
-    borderColor: "#F3F4F6",
-    marginBottom: 16,
-  },
-  arrivalColLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  arrivalLabel: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#4B5563",
-  },
-  arrivalValue: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#0F3D26",
-  },
-  confirmButton: {
-    width: "100%",
-    backgroundColor: "#0F3D26",
-    paddingVertical: 14,
-    borderRadius: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  confirmText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 14,
   },
   cardHeader: {
     width: "100%",
@@ -341,7 +597,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
     marginBottom: 16,
-    marginTop: 16,
   },
   cardTitle: {
     fontSize: 12,
@@ -350,78 +605,10 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
-  driverRow: {
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  driverAvatarContainer: {
-    position: "relative",
-  },
-  driverAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#E5E7EB",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "#FFFFFF",
-  },
-  driverAvatarInitials: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#4B5563",
-  },
-  onlineBadge: {
-    position: "absolute",
-    bottom: -2,
-    right: -2,
-    width: 14,
-    height: 14,
-    backgroundColor: "#22C55E",
-    borderRadius: 7,
-    borderWidth: 2,
-    borderColor: "#FFFFFF",
-  },
-  driverMeta: {
-    flex: 1,
-  },
-  driverName: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#111827",
-  },
-  driverStats: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginTop: 4,
-  },
-  starRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 2,
-  },
-  ratingText: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "#374151",
-  },
-  separator: {
-    fontSize: 12,
-    color: "#9CA3AF",
-  },
-  tripsText: {
-    fontSize: 12,
-    color: "#6B7280",
-  },
   contactActions: {
     width: "100%",
     flexDirection: "row",
     gap: 12,
-    marginTop: 20,
   },
   callButton: {
     flex: 1,
@@ -429,9 +616,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 10,
-    borderRadius: 8,
+    paddingVertical: 12,
+    borderRadius: 12,
     gap: 8,
+    shadowColor: "#0F3D26",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   callText: {
     color: "white",
@@ -446,14 +638,193 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 10,
-    borderRadius: 8,
+    paddingVertical: 12,
+    borderRadius: 12,
     gap: 8,
   },
   messageText: {
     color: "#374151",
     fontWeight: "600",
     fontSize: 14,
+  },
+  timelineHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+    paddingBottom: 12,
+  },
+  cardSectionTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#0F3D26",
+  },
+  timelineContainer: {
+    width: "100%",
+    paddingLeft: 4,
+  },
+  timelineItem: {
+    flexDirection: "row",
+    minHeight: 88,
+  },
+  indicatorContainer: {
+    alignItems: "center",
+    width: 16,
+    marginRight: 16,
+    position: "relative",
+  },
+  timelineDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    marginTop: 4,
+    zIndex: 10,
+  },
+  dotCompleted: {
+    backgroundColor: "#111827",
+  },
+  dotActive: {
+    backgroundColor: "#111827",
+    borderWidth: 3,
+    borderColor: "#10B981",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  dotActiveInner: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#FFFFFF",
+  },
+  dotPending: {
+    backgroundColor: "#E5E7EB",
+  },
+  timelineLine: {
+    position: "absolute",
+    top: 18,
+    bottom: -12,
+    left: 6,
+    width: 2,
+    zIndex: 1,
+  },
+  lineCompleted: {
+    backgroundColor: "#111827",
+  },
+  linePending: {
+    backgroundColor: "#E5E7EB",
+  },
+  timelineContent: {
+    flex: 1,
+    paddingBottom: 16,
+  },
+  timelineHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+  timelineTitle: {
+    fontSize: 15,
+    fontWeight: "bold",
+  },
+  textCompleted: {
+    color: "#111827",
+  },
+  textActive: {
+    color: "#111827",
+  },
+  textPending: {
+    color: "#9CA3AF",
+  },
+  checkIcon: {
+    marginRight: 4,
+  },
+  activePill: {
+    backgroundColor: "#E6F4EA",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  activePillText: {
+    fontSize: 10,
+    fontWeight: "bold",
+    color: "#0F3D26",
+  },
+  timelineMetaText: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 2,
+    fontWeight: "500",
+  },
+  timelineVerificationText: {
+    fontSize: 11,
+    fontWeight: "600",
+    marginTop: 4,
+  },
+  verificationCompleted: {
+    color: "#0F3D26",
+  },
+  verificationActive: {
+    color: "#D97706",
+  },
+  verificationPending: {
+    color: "#9CA3AF",
+  },
+  simulatorCard: {
+    backgroundColor: "#FFFBEB",
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#FDE68A",
+  },
+  simulatorHeader: {
+    marginBottom: 12,
+  },
+  simulatorTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#B45309",
+  },
+  simulatorSubtitle: {
+    fontSize: 12,
+    color: "#78350F",
+    marginTop: 2,
+  },
+  simulatorActions: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  simButton: {
+    flex: 1,
+    backgroundColor: "#D97706",
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  simButtonDisabled: {
+    backgroundColor: "#FCD34D",
+    opacity: 0.6,
+  },
+  simButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontSize: 12,
+  },
+  simResetButton: {
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "#D97706",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  simResetButtonText: {
+    color: "#D97706",
+    fontWeight: "bold",
+    fontSize: 12,
   },
   vehicleGrid: {
     width: "100%",
@@ -498,141 +869,21 @@ const styles = StyleSheet.create({
     fontFamily: "monospace",
     color: "#1F2937",
   },
-  modernCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 10,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: "#F3F4F6",
-  },
-  modernSubheadingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginBottom: 12,
-  },
-  modernSubheading: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "#9CA3AF", // gray-400 for a suitably grayed out look
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  modernTopRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 20,
-  },
-  modernOrderId: {
-    fontSize: 18,
-    fontWeight: "900",
-    color: "#1C1917", // near black
-  },
-  modernPriceText: {
-    fontSize: 18,
-    fontWeight: "900",
-    color: "#1C1917",
-  },
-  timelineWrapper: {
-    position: "relative",
-    width: "100%",
-  },
-  timelineDashedLine: {
-    position: "absolute",
-    left: 7, // centered under dot -> 14px width dot -> center is 7
-    top: 14, // below top dot
-    bottom: 24, // stop above bottom dot bounding box
-    width: 0,
-    borderLeftWidth: 2,
-    borderColor: "#0F3D26",
-    borderStyle: "dashed",
-    zIndex: 1,
-    opacity: 0.8,
-  },
-  timelineStep: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-  },
-  dotContainer: {
-    alignItems: "center",
-    width: 14, // strictly dot width
-    marginRight: 16,
-  },
-  dot: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    marginTop: 2,
-    zIndex: 2,
-  },
-  dotBlack: {
-    backgroundColor: "#1F2937",
-  },
-  dotDarkGreen: {
-    backgroundColor: "#0F3D26", // brand-forest
-  },
-  stepTextContainer: {
-    flex: 1,
-    paddingBottom: 22,
-  },
-  stepLabel: {
-    fontSize: 11,
-    color: "#6B7280",
-    marginBottom: 2,
-    fontWeight: "600",
-    letterSpacing: 0.5,
-  },
-  stepValue: {
-    fontSize: 15,
-    fontWeight: "bold",
-    color: "#111827",
-    lineHeight: 20,
-  },
-  modernCargoList: {
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#F3F4F6",
-    gap: 16,
-  },
-  cargoItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  cargoItemImg: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
-    backgroundColor: "#F9FAFB",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-  },
-  cargoItemDetails: {
-    flex: 1,
-  },
-  cargoItemTitle: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#111827",
-  },
-  cargoItemMeta: {
-    fontSize: 12,
-    color: "#6B7280",
-    marginTop: 2,
-  },
   confirmActionContainer: {
     position: "absolute",
-    bottom: 32, // standard hover height
     left: 0,
     right: 0,
     paddingHorizontal: 20,
+  },
+  confirmButton: {
+    width: "100%",
+    backgroundColor: "#0F3D26",
+    paddingVertical: 14,
+    borderRadius: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
   },
   confirmButtonText: {
     color: "#FFFFFF",

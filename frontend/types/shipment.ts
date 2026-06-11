@@ -74,4 +74,5 @@ export interface Shipment {
     goInvestLetter?: boolean;
   };
   documents?: { [key: string]: { name: string; size: string } };
+  milestoneIndex?: number;
 }

@@ -60,6 +60,7 @@ const initialShipments: Shipment[] = [
     is_import: false,
     pickupLocation: null,
     dropoffLocation: null,
+    milestoneIndex: 2,
   },
   {
     id: "P2AL01Z89",
