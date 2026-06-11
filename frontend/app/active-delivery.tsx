@@ -14,7 +14,6 @@ import { Image } from "expo-image";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
-  ArrowLeft,
   Truck,
   Clock,
   User,
@@ -24,6 +23,7 @@ import {
   Package,
 } from "lucide-react-native";
 import { useLocalSearchParams } from "expo-router";
+import { ScreenHeader } from "@/components/ScreenHeader";
 
 export default function ActiveDeliveryScreen() {
   const router = useRouter();
@@ -52,20 +52,11 @@ export default function ActiveDeliveryScreen() {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-          activeOpacity={0.7}
-        >
-          <ArrowLeft color="white" size={24} />
-        </TouchableOpacity>
-        <View style={styles.headerTitleContainer}>
-          <Text style={styles.headerTitle}>Active Delivery</Text>
-          <Text style={styles.headerSubtitle}>En route to pickup</Text>
-        </View>
-        <View style={styles.placeholderIcon} />
-      </View>
+      <ScreenHeader
+        title="Active Delivery"
+        subtitle="En route to pickup"
+        onBackPress={() => router.back()}
+      />
 
       <ScrollView
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 90 }]}
@@ -264,42 +255,6 @@ export default function ActiveDeliveryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    backgroundColor: "#0F3D26",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingTop: 56, // For safe area
-    paddingBottom: 16,
-    paddingHorizontal: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
-    zIndex: 10,
-  },
-  backButton: {
-    padding: 8,
-    marginLeft: -8,
-  },
-  headerTitleContainer: {
-    flex: 1,
-    paddingHorizontal: 16,
-  },
-  headerTitle: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  headerSubtitle: {
-    color: "#A7F3D0",
-    fontSize: 12,
-    fontWeight: "500",
-  },
-  placeholderIcon: {
-    width: 40,
   },
   scrollContent: {
     padding: 16,
