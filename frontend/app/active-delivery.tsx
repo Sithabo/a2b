@@ -53,7 +53,7 @@ export default function ActiveDeliveryScreen() {
 
   const handleCallDriver = () => {
     Linking.openURL("tel:+5926000101").catch((err) =>
-      console.error("Failed to open dialer:", err)
+      console.error("Failed to open dialer:", err),
     );
   };
 
@@ -64,7 +64,7 @@ export default function ActiveDeliveryScreen() {
       default: `sms:+5926000101?body=${encodeURIComponent(message)}`,
     });
     Linking.openURL(url).catch((err) =>
-      console.error("Failed to open messaging app:", err)
+      console.error("Failed to open messaging app:", err),
     );
   };
 
@@ -120,7 +120,9 @@ export default function ActiveDeliveryScreen() {
     {
       key: "DISPATCHED",
       title: "Driver Dispatched",
-      location: isImport ? "Georgetown Logistics Hub" : "Kampala Logistics Depot",
+      location: isImport
+        ? "Georgetown Logistics Hub"
+        : "Kampala Logistics Depot",
       verification: "Contract Locked & Dispatched",
     },
     {
@@ -133,7 +135,9 @@ export default function ActiveDeliveryScreen() {
       key: "DEPARTED_ORIGIN",
       title: "Loaded & Cleared Customs",
       location: isImport ? "GRA Customs Gate" : pickupName + " Exit Gate",
-      verification: isImport ? "Cargo Loaded & Customs Cleared" : "Cargo Loaded & Strapped",
+      verification: isImport
+        ? "Cargo Loaded & Customs Cleared"
+        : "Cargo Loaded & Strapped",
     },
     {
       key: "CHOKE_POINT_CLEARED",
@@ -194,11 +198,11 @@ export default function ActiveDeliveryScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.whiteAsh }]}>
       {/* Header */}
       <ScreenHeader
         title="Active Delivery"
-        subtitle={getMilestoneStatusText(currentMilestoneIndex)}
+        // subtitle={getMilestoneStatusText(currentMilestoneIndex)}
         onBackPress={() => router.back()}
       />
 
@@ -214,18 +218,20 @@ export default function ActiveDeliveryScreen() {
           <View style={styles.topAvatarContainer}>
             <Package color="#D97706" size={32} />
           </View>
-          <Text style={styles.topTitle}>{getCargoName()}</Text>
-          <View style={styles.trackingRow}>
-            <Text style={styles.trackingIdText}>
-              #Tracking ID: {shipment?.id || "A2B-9874"}
-            </Text>
-            <TouchableOpacity
-              onPress={copyToClipboard}
-              style={styles.copyBtn}
-              activeOpacity={0.6}
-            >
-              <Copy color="#6B7280" size={14} />
-            </TouchableOpacity>
+          <View>
+            <Text style={styles.topTitle}>{getCargoName()}</Text>
+            <View style={styles.trackingRow}>
+              <Text style={styles.trackingIdText}>
+                #Tracking ID: {shipment?.id || "A2B-9874"}
+              </Text>
+              <TouchableOpacity
+                onPress={copyToClipboard}
+                style={styles.copyBtn}
+                activeOpacity={0.6}
+              >
+                <Copy color="#6B7280" size={14} />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
@@ -287,7 +293,9 @@ export default function ActiveDeliveryScreen() {
         <View style={styles.card}>
           <View style={styles.timelineHeader}>
             <Compass color="#0F3D26" size={18} />
-            <Text style={styles.cardSectionTitle}>Milestone Tracking Timeline</Text>
+            <Text style={styles.cardSectionTitle}>
+              Milestone Tracking Timeline
+            </Text>
           </View>
 
           <View style={styles.timelineContainer}>
@@ -336,7 +344,11 @@ export default function ActiveDeliveryScreen() {
                         {item.title}
                       </Text>
                       {isCompleted && (
-                        <Check color="#10B981" size={16} style={styles.checkIcon} />
+                        <Check
+                          color="#10B981"
+                          size={16}
+                          style={styles.checkIcon}
+                        />
                       )}
                       {isActive && (
                         <View style={styles.activePill}>
@@ -346,7 +358,8 @@ export default function ActiveDeliveryScreen() {
                     </View>
 
                     <Text style={styles.timelineMetaText}>
-                      {isPending ? "--:--" : getMilestoneTime(index)} • {item.location}
+                      {isPending ? "--:--" : getMilestoneTime(index)} •{" "}
+                      {item.location}
                     </Text>
 
                     <Text
@@ -355,8 +368,8 @@ export default function ActiveDeliveryScreen() {
                         index < currentMilestoneIndex
                           ? styles.verificationCompleted
                           : index === currentMilestoneIndex
-                          ? styles.verificationActive
-                          : styles.verificationPending,
+                            ? styles.verificationActive
+                            : styles.verificationPending,
                       ]}
                     >
                       {isPending ? "Pending" : item.verification}
@@ -505,18 +518,21 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   topCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
+    // backgroundColor: "#FFFFFF",
+    // borderRadius: 20,
     padding: 20,
     alignItems: "center",
     width: "100%",
-    borderWidth: 1,
-    borderColor: "#F3F4F6",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    display: "flex",
+    flexDirection: "row",
+    gap: 24,
+    // borderWidth: 1,
+    // borderColor: "#F3F4F6",
+    // shadowColor: "#000",
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.05,
+    // shadowRadius: 8,
+    // elevation: 2,
   },
   topAvatarContainer: {
     width: 64,
@@ -533,11 +549,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "800",
     color: "#111827",
-    textAlign: "center",
+    // textAlign: "center",
   },
   trackingRow: {
     flexDirection: "row",
-    alignItems: "center",
+    // alignItems: "center",
     gap: 6,
     marginTop: 6,
   },
