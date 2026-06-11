@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from "react-native";
-import { ArrowLeft } from "lucide-react-native";
+import { ArrowLeft, X } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 interface ScreenHeaderProps {
@@ -42,8 +42,12 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
         {rightElement ? (
           rightElement
         ) : onCancelPress ? (
-          <TouchableOpacity onPress={onCancelPress} activeOpacity={0.7}>
-            <Text style={styles.cancelText}>Cancel</Text>
+          <TouchableOpacity
+            style={styles.cancelButton}
+            onPress={onCancelPress}
+            activeOpacity={0.7}
+          >
+            <X color="#0F3D26" size={20} />
           </TouchableOpacity>
         ) : (
           <View style={styles.placeholder} />
@@ -95,10 +99,15 @@ const styles = StyleSheet.create({
     marginTop: 2,
     textAlign: "center",
   },
-  cancelText: {
-    fontSize: 14,
-    color: "#EF4444",
-    fontWeight: "bold",
+  cancelButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
   },
   placeholder: {
     width: 40,
