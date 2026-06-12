@@ -11,15 +11,17 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { Image } from "expo-image";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { ArrowLeft, Clock, CheckCircle } from "lucide-react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Clock, CheckCircle } from "lucide-react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useShipmentStore } from "@/store/useShipmentStore";
+import { ScreenHeader } from "@/components/ScreenHeader";
 
 export default function PendingDeliveryScreen() {
   const router = useRouter();
   const { trackingId } = useLocalSearchParams<{ trackingId: string }>();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+  const insets = useSafeAreaInsets();
 
   const idToFind = trackingId ? trackingId.replace("#", "") : "";
   const shipments = useShipmentStore((state) => state.shipments);
@@ -79,25 +81,18 @@ export default function PendingDeliveryScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.whiteAsh }]}>
       {/* Header */}
-      <View style={styles.header}>
-        <SafeAreaView edges={["top"]} />
-        <View style={styles.headerRow}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={styles.backButton}
-            activeOpacity={0.7}
-          >
-            <ArrowLeft color="#FFFFFF" size={24} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Order Details</Text>
-          <View style={{ width: 40 }} />
-        </View>
-      </View>
+      <ScreenHeader
+        title="Order Details"
+        onBackPress={() => router.back()}
+      />
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + 100 },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         {/* Waiting Pill */}
@@ -126,9 +121,9 @@ export default function PendingDeliveryScreen() {
 
             {/* Visual Divider with Cutouts */}
             <View style={styles.dividerRow}>
-              <View style={styles.cutoutLeft} />
+              <View style={[styles.cutoutLeft, { backgroundColor: theme.whiteAsh }]} />
               <View style={styles.dashedLineHorizontal} />
-              <View style={styles.cutoutRight} />
+              <View style={[styles.cutoutRight, { backgroundColor: theme.whiteAsh }]} />
             </View>
 
             {/* Order Details Metadata */}
@@ -175,25 +170,31 @@ export default function PendingDeliveryScreen() {
               </View>
             </View>
 
-            {/* Tip Box */}
             <View style={styles.tipBox}>
               <Text style={styles.tipText}>
                 <Text style={styles.tipBold}>Tip:</Text> Your offer is within
                 the fair market range for this route.
               </Text>
             </View>
-
-            {/* Cancel Order Button */}
-            <TouchableOpacity
-              style={styles.cancelButton}
-              activeOpacity={0.8}
-              onPress={handleCancelOrder}
-            >
-              <Text style={styles.cancelButtonText}>Cancel Order</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
+
+      {/* Sticky Bottom Cancel Action */}
+      <View
+        style={[
+          styles.cancelActionContainer,
+          { bottom: insets.bottom > 0 ? insets.bottom : 20 },
+        ]}
+      >
+        <TouchableOpacity
+          style={styles.stickyCancelButton}
+          activeOpacity={0.8}
+          onPress={handleCancelOrder}
+        >
+          <Text style={styles.stickyCancelButtonText}>Cancel Order</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -201,28 +202,6 @@ export default function PendingDeliveryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5E9",
-  },
-  header: {
-    backgroundColor: "#0F3D26",
-    paddingBottom: 16,
-    zIndex: 10,
-  },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingTop: 16,
-  },
-  backButton: {
-    padding: 8,
-    marginLeft: -8,
-  },
-  headerTitle: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "bold",
   },
   scrollContent: {
     paddingBottom: 40,
@@ -310,7 +289,6 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: "#F5F5E9",
     zIndex: 2,
   },
   cutoutRight: {
@@ -320,7 +298,6 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: "#F5F5E9",
     zIndex: 2,
   },
   metadataSection: {
@@ -416,17 +393,28 @@ const styles = StyleSheet.create({
   tipBold: {
     fontWeight: "bold",
   },
-  cancelButton: {
-    marginHorizontal: 24,
-    marginTop: 24,
+  cancelActionContainer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    paddingHorizontal: 20,
+  },
+  stickyCancelButton: {
+    width: "100%",
     backgroundColor: "#FEF2F2",
     borderRadius: 12,
-    paddingVertical: 16,
+    paddingVertical: 14,
     alignItems: "center",
+    justifyContent: "center",
     borderWidth: 1,
     borderColor: "#FEE2E2",
+    shadowColor: "#EF4444",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
   },
-  cancelButtonText: {
+  stickyCancelButtonText: {
     color: "#EF4444",
     fontSize: 16,
     fontWeight: "bold",
