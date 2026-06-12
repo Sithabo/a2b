@@ -9,6 +9,8 @@ import {
   Platform,
   Clipboard,
   Alert,
+  Modal,
+  Pressable,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -27,9 +29,13 @@ import {
   Copy,
   Check,
   Compass,
+  Phone,
+  Mail,
+  X,
 } from "lucide-react-native";
 import { useShipmentStore } from "@/store/useShipmentStore";
 import { ScreenHeader } from "@/components/ScreenHeader";
+import { DriverContactCard } from "@/components/DriverContactCard";
 
 export default function ActiveDeliveryScreen() {
   const router = useRouter();
@@ -37,6 +43,8 @@ export default function ActiveDeliveryScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
+
+  const [vehicleModalVisible, setVehicleModalVisible] = React.useState(false);
 
   const idToFind = trackingId ? trackingId.replace("#", "") : "";
   const shipments = useShipmentStore((state) => state.shipments);
@@ -269,25 +277,13 @@ export default function ActiveDeliveryScreen() {
           </View>
         </View>
 
-        {/* Contact Actions (Wired tel: and sms:) */}
-        <View style={styles.contactActions}>
-          <TouchableOpacity
-            style={styles.callButton}
-            activeOpacity={0.8}
-            onPress={handleCallDriver}
-          >
-            <PhoneCall color="white" size={16} />
-            <Text style={styles.callText}>Call Driver</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.messageButton}
-            activeOpacity={0.7}
-            onPress={handleMessageDriver}
-          >
-            <MessageSquare color="#374151" size={16} />
-            <Text style={styles.messageText}>Message</Text>
-          </TouchableOpacity>
-        </View>
+        {/* Driver Contact Card (Clickable to show Vehicle Modal) */}
+        <DriverContactCard
+          driverName={shipment?.driverName || "Guy Hawkins"}
+          onPressCard={() => setVehicleModalVisible(true)}
+          onCallPress={handleCallDriver}
+          onMessagePress={handleMessageDriver}
+        />
 
         {/* Vertical Stepper Timeline Component (replacing live map) */}
         <View style={styles.card}>
@@ -469,6 +465,109 @@ export default function ActiveDeliveryScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Vehicle Info Modal */}
+      <Modal
+        visible={vehicleModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setVehicleModalVisible(false)}
+      >
+        <Pressable 
+          style={styles.modalOverlay}
+          onPress={() => setVehicleModalVisible(false)}
+        >
+          <Pressable 
+            style={styles.modalContent}
+            onPress={(e) => e.stopPropagation()}
+          >
+            {/* Handle/Indicator */}
+            <View style={styles.modalHandle} />
+
+            {/* Header */}
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Driver & Vehicle Info</Text>
+              <TouchableOpacity
+                onPress={() => setVehicleModalVisible(false)}
+                style={styles.modalCloseBtn}
+                activeOpacity={0.6}
+              >
+                <X color="#374151" size={20} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Driver Profile Summary */}
+            <View style={styles.modalDriverSummary}>
+              <Image
+                source={require("@/assets/images/driver_avatar.png")}
+                style={styles.modalDriverAvatar}
+                contentFit="cover"
+              />
+              <View style={styles.modalDriverText}>
+                <Text style={styles.modalDriverName}>
+                  {shipment?.driverName || "Guy Hawkins"}
+                </Text>
+                <Text style={styles.modalDriverRole}>Delivery Partner • Verified</Text>
+                <View style={styles.modalRatingRow}>
+                  <Star color="#D97706" size={14} fill="#D97706" />
+                  <Text style={styles.modalRatingText}>4.9 (124 deliveries)</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Divider */}
+            <View style={styles.modalDivider} />
+
+            {/* Vehicle Details Title */}
+            <View style={styles.modalSectionHeader}>
+              <Truck color="#0F3D26" size={18} />
+              <Text style={styles.modalSectionTitle}>Vehicle Details</Text>
+            </View>
+
+            {/* Vehicle Details Grid */}
+            <View style={styles.modalGrid}>
+              <View style={styles.modalGridItem}>
+                <Text style={styles.modalGridLabel}>Vehicle Type</Text>
+                <Text style={styles.modalGridValue}>Lorry (Medium)</Text>
+              </View>
+              <View style={styles.modalGridItem}>
+                <Text style={styles.modalGridLabel}>Capacity</Text>
+                <Text style={styles.modalGridValue}>5 Tons (5,000 KG)</Text>
+              </View>
+              <View style={styles.modalGridItem}>
+                <Text style={styles.modalGridLabel}>Make & Model</Text>
+                <Text style={styles.modalGridValue}>Isuzu FRR</Text>
+              </View>
+              <View style={styles.modalGridItem}>
+                <Text style={styles.modalGridLabel}>Number Plate</Text>
+                <View style={styles.modalPlateBox}>
+                  <Text style={styles.modalPlateText}>UAM 456K</Text>
+                </View>
+              </View>
+              <View style={styles.modalGridItem}>
+                <Text style={styles.modalGridLabel}>Cargo Area</Text>
+                <Text style={styles.modalGridValue}>5.4m x 2.2m x 2.1m</Text>
+              </View>
+              <View style={styles.modalGridItem}>
+                <Text style={styles.modalGridLabel}>Compliance Status</Text>
+                <View style={styles.complianceBadge}>
+                  <View style={styles.complianceDot} />
+                  <Text style={styles.complianceText}>Active & Insured</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Close Button */}
+            <TouchableOpacity
+              style={styles.modalButton}
+              activeOpacity={0.8}
+              onPress={() => setVehicleModalVisible(false)}
+            >
+              <Text style={styles.modalButtonText}>Got It</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -575,8 +674,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    // borderBottomWidth: 1,
+    // borderBottomColor: "#E5E7EB",
   },
   specsRowLast: {
     borderBottomWidth: 0,
@@ -905,5 +1004,170 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    padding: 24,
+    paddingBottom: 40,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  modalHandle: {
+    width: 36,
+    height: 4,
+    backgroundColor: "#E5E7EB",
+    borderRadius: 2,
+    alignSelf: "center",
+    marginBottom: 16,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#111827",
+  },
+  modalCloseBtn: {
+    padding: 4,
+  },
+  modalDriverSummary: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  modalDriverAvatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#F3F4F6",
+  },
+  modalDriverText: {
+    marginLeft: 16,
+    flex: 1,
+  },
+  modalDriverName: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#111827",
+  },
+  modalDriverRole: {
+    fontSize: 13,
+    color: "#6B7280",
+    marginTop: 2,
+  },
+  modalRatingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 4,
+    gap: 4,
+  },
+  modalRatingText: {
+    fontSize: 12,
+    color: "#4B5563",
+    fontWeight: "600",
+  },
+  modalDivider: {
+    height: 1,
+    backgroundColor: "#F3F4F6",
+    marginVertical: 16,
+  },
+  modalSectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 16,
+  },
+  modalSectionTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#0F3D26",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  modalGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    rowGap: 16,
+    columnGap: 16,
+    marginBottom: 24,
+  },
+  modalGridItem: {
+    width: "47%",
+  },
+  modalGridLabel: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#9CA3AF",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  modalGridValue: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#1F2937",
+  },
+  modalPlateBox: {
+    backgroundColor: "#F3F4F6",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    alignSelf: "flex-start",
+  },
+  modalPlateText: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "#1F2937",
+  },
+  complianceBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ECFDF5",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    alignSelf: "flex-start",
+  },
+  complianceDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#10B981",
+    marginRight: 6,
+  },
+  complianceText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#047857",
+  },
+  modalButton: {
+    width: "100%",
+    backgroundColor: "#0F3D26",
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 8,
+  },
+  modalButtonText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "700",
   },
 });
