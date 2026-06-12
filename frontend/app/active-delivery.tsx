@@ -291,22 +291,22 @@ export default function ActiveDeliveryScreen() {
         />
 
         {/* Vertical Stepper Timeline Component (replacing live map) */}
-        <View style={styles.card}>
-          <View style={styles.timelineHeader}>
-            <Compass color="#0F3D26" size={18} />
-            <Text style={styles.cardSectionTitle}>
-              Milestone Tracking Timeline
-            </Text>
-          </View>
+        {/* <View style={styles.card}> */}
+        {/* <View style={styles.timelineHeader}>
+          <Compass color="#0F3D26" size={18} />
+          <Text style={styles.cardSectionTitle}>
+            Milestone Tracking Timeline
+          </Text>
+        </View> */}
 
-          <View style={styles.timelineContainer}>
-            <MilestoneTimeline
-              milestones={milestones}
-              currentMilestoneIndex={currentMilestoneIndex}
-              getMilestoneTime={getMilestoneTime}
-            />
-          </View>
+        <View style={styles.timelineContainer}>
+          <MilestoneTimeline
+            milestones={milestones}
+            currentMilestoneIndex={currentMilestoneIndex}
+            getMilestoneTime={getMilestoneTime}
+          />
         </View>
+        {/* </View> */}
 
         {/* Milestone Simulator Card */}
         <View style={styles.simulatorCard}>
@@ -404,11 +404,11 @@ export default function ActiveDeliveryScreen() {
         animationType="slide"
         onRequestClose={() => setVehicleModalVisible(false)}
       >
-        <Pressable 
+        <Pressable
           style={styles.modalOverlay}
           onPress={() => setVehicleModalVisible(false)}
         >
-          <Pressable 
+          <Pressable
             style={styles.modalContent}
             onPress={(e) => e.stopPropagation()}
           >
@@ -438,10 +438,14 @@ export default function ActiveDeliveryScreen() {
                 <Text style={styles.modalDriverName}>
                   {shipment?.driverName || "Guy Hawkins"}
                 </Text>
-                <Text style={styles.modalDriverRole}>Delivery Partner • Verified</Text>
+                <Text style={styles.modalDriverRole}>
+                  Delivery Partner • Verified
+                </Text>
                 <View style={styles.modalRatingRow}>
                   <Star color="#D97706" size={14} fill="#D97706" />
-                  <Text style={styles.modalRatingText}>4.9 (124 deliveries)</Text>
+                  <Text style={styles.modalRatingText}>
+                    4.9 (124 deliveries)
+                  </Text>
                 </View>
               </View>
             </View>
@@ -709,7 +713,8 @@ const styles = StyleSheet.create({
   },
   timelineContainer: {
     width: "100%",
-    paddingLeft: 4,
+    paddingHorizontal: 25,
+    paddingVertical: 20,
   },
 
   simulatorCard: {
