@@ -69,7 +69,12 @@ export default function CargoDetailsScreen() {
   const [storageEnvironment, setStorageEnvironment] = useState<'AMBIENT' | 'CHILLED' | 'FROZEN'>('AMBIENT');
 
   // Date/Time States
-  const [pickupDate, setPickupDate] = useState<Date | null>(null);
+  const [pickupDate, setPickupDate] = useState<Date | null>(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d;
+  });
+  const [pickupWindow, setPickupWindow] = useState<"EARLY_MORNING" | "MID_DAY" | "AFTERNOON" | null>(null);
   const [deliveryDate, setDeliveryDate] = useState<Date | null>(null);
   const [time, setTime] = useState<Date | null>(null);
 
@@ -148,6 +153,20 @@ export default function CargoDetailsScreen() {
       }
       if (draftShipment.deliveryDate) {
         setDeliveryDate(new Date(draftShipment.deliveryDate));
+      }
+      if (draftShipment.readyAt) {
+        const rDate = new Date(draftShipment.readyAt);
+        setPickupDate(rDate);
+        if (!isImportFlow) {
+          const hours = rDate.getHours();
+          if (hours === 6) setPickupWindow("EARLY_MORNING");
+          else if (hours === 10) setPickupWindow("MID_DAY");
+          else if (hours === 14) setPickupWindow("AFTERNOON");
+        }
+      }
+      if (draftShipment.deadlineAt) {
+        setDeliveryDate(new Date(draftShipment.deadlineAt));
+        setTime(new Date(draftShipment.deadlineAt));
       }
     }
   }, [draftShipment]);
@@ -233,6 +252,16 @@ export default function CargoDetailsScreen() {
     };
 
     if (isImportFlow) {
+      const readyDate = new Date(pickupDate!);
+      readyDate.setHours(8, 0, 0, 0);
+
+      const deadlineDate = new Date(deliveryDate!);
+      if (time) {
+        deadlineDate.setHours(time.getHours(), time.getMinutes(), 0, 0);
+      } else {
+        deadlineDate.setHours(17, 0, 0, 0);
+      }
+
       setDraftShipment({
         pickup: pickupLocation?.name || "Georgetown Port",
         delivery: dropoffLocation?.name || "",
@@ -244,6 +273,8 @@ export default function CargoDetailsScreen() {
         dropoffLocation,
         cargo: cargoDetails,
         deliveryDate: deliveryDate ? deliveryDate.toISOString() : undefined,
+        readyAt: readyDate.toISOString(),
+        deadlineAt: deadlineDate.toISOString(),
       });
 
       setCurrentStep(3);
@@ -288,6 +319,17 @@ export default function CargoDetailsScreen() {
       chemicalContainer: selectedType === 'CHEMICALS_PHARMA' ? (chemicalContainer || undefined) : undefined,
     };
 
+    const readyDate = new Date(pickupDate!);
+    const hour = pickupWindow === "EARLY_MORNING" ? 6 : pickupWindow === "MID_DAY" ? 10 : 14;
+    readyDate.setHours(hour, 0, 0, 0);
+
+    const deadlineDate = new Date(deliveryDate!);
+    if (time) {
+      deadlineDate.setHours(time.getHours(), time.getMinutes(), 0, 0);
+    } else {
+      deadlineDate.setHours(17, 0, 0, 0);
+    }
+
     addShipment({
       pickup: pickupLocation?.name || "Houston, TX",
       delivery: dropoffLocation?.name || "",
@@ -301,6 +343,8 @@ export default function CargoDetailsScreen() {
       pickupLocation,
       dropoffLocation,
       cargo: cargoDetails,
+      readyAt: readyDate.toISOString(),
+      deadlineAt: deadlineDate.toISOString(),
     });
 
     setIsReviewModalOpen(false);
@@ -639,10 +683,13 @@ export default function CargoDetailsScreen() {
             <DateTimePickerSection
               pickupDate={pickupDate}
               setPickupDate={setPickupDate}
+              pickupWindow={pickupWindow}
+              setPickupWindow={setPickupWindow}
               deliveryDate={deliveryDate}
               setDeliveryDate={setDeliveryDate}
               time={time}
               setTime={setTime}
+              isImportFlow={isImportFlow}
             />
 
             {/* Back action */}
@@ -702,13 +749,13 @@ export default function CargoDetailsScreen() {
               setSubStep(3);
               scrollViewRef.current?.scrollTo({ y: 0, animated: false });
             }}
-            disabled={!isFormValid || !pickupDate || !deliveryDate || !time}
+            disabled={!isFormValid || !pickupDate || !deliveryDate || !time || (!isImportFlow && !pickupWindow)}
           />
         ) : (
           <PrimaryButton
             title={isImportFlow ? "NEXT: DOCUMENT VAULT" : "REQUEST PICKUP"}
             onPress={handleNextStep}
-            disabled={!isFormValid || !pickupDate || !deliveryDate || !time}
+            disabled={!isFormValid || !pickupDate || !deliveryDate || !time || (!isImportFlow && !pickupWindow)}
           />
         )}
       </View>

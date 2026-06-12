@@ -75,4 +75,6 @@ export interface Shipment {
   };
   documents?: { [key: string]: { name: string; size: string } };
   milestoneIndex?: number;
+  readyAt?: string;
+  deadlineAt?: string;
 }
