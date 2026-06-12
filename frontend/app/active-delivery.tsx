@@ -340,7 +340,7 @@ export default function ActiveDeliveryScreen() {
         </View>
 
         {/* Vehicle Information */}
-        <View style={styles.card}>
+        {/* <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Truck color="#6B7280" size={14} />
             <Text style={styles.cardTitle}>Vehicle Information</Text>
@@ -369,7 +369,7 @@ export default function ActiveDeliveryScreen() {
               </View>
             </View>
           </View>
-        </View>
+        </View> */}
       </ScrollView>
 
       {/* Action Bottom */}
