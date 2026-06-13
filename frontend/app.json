@@ -39,7 +39,13 @@
           "backgroundColor": "#F5F5E9"
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Allow A2B to access your camera to scan import bills and customs documents."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

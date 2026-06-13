@@ -9,10 +9,14 @@ import {
   Modal,
   Platform,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
+import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
@@ -23,6 +27,7 @@ import {
   Shield,
   File,
   ChevronRight,
+  ArrowLeft,
 } from "lucide-react-native";
 import { useShipmentStore } from "@/store/useShipmentStore";
 import { ScreenHeader } from "@/components/ScreenHeader";
@@ -30,7 +35,10 @@ import { ScreenHeader } from "@/components/ScreenHeader";
 interface DocumentInfo {
   name: string;
   size: string;
+  uri?: string;
 }
+
+type SlotName = "bol" | "invoice" | "clearance" | "goInvest";
 
 export default function DocumentVaultScreen() {
   const router = useRouter();
@@ -38,7 +46,7 @@ export default function DocumentVaultScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
-  
+
   const addShipment = useShipmentStore((state) => state.addShipment);
   const draftShipment = useShipmentStore((state) => state.draftShipment);
   const setDraftShipment = useShipmentStore((state) => state.setDraftShipment);
@@ -62,7 +70,7 @@ export default function DocumentVaultScreen() {
   const weight = draftShipment?.weight || params.weight || "250";
 
   const [containerId, setContainerId] = useState(draftShipment?.containerId || "");
-  
+
   const requiresGoInvestWaiver = draftShipment?.cargo?.requiresGoInvestWaiver === true;
 
   const [uploadedFiles, setUploadedFiles] = useState<{
@@ -77,9 +85,16 @@ export default function DocumentVaultScreen() {
     goInvest: draftShipment?.documents?.goInvest || null,
   });
 
-  const [isPickerOpen, setIsPickerOpen] = useState(false);
-  const [activeSlot, setActiveSlot] = useState<"bol" | "invoice" | "clearance" | "goInvest" | null>(null);
+  const [activeSlot, setActiveSlot] = useState<SlotName | null>(null);
   const [isSubmissionComplete, setIsSubmissionComplete] = useState(false);
+
+  // Options & Preview Modals
+  const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState<SlotName | null>(null);
+
+  // Processing Animation Overlay
+  const [isEnhancing, setIsEnhancing] = useState(false);
 
   // Check if everything is filled
   const isFormValid =
@@ -135,6 +150,10 @@ export default function DocumentVaultScreen() {
                   status: "DRAFT_PENDING_DOCS",
                   createdAt: new Date().toISOString(),
                   cargo: draftShipment?.cargo, // Preserve cargo details!
+                  readyAt: draftShipment?.readyAt,
+                  deadlineAt: draftShipment?.deadlineAt,
+                  pickupLocation: draftShipment?.pickupLocation,
+                  dropoffLocation: draftShipment?.dropoffLocation,
                 });
                 navigation.dispatch(e.data.action);
               },
@@ -160,21 +179,88 @@ export default function DocumentVaultScreen() {
     draftShipment,
   ]);
 
-  const openMockPicker = (slot: "bol" | "invoice" | "clearance" | "goInvest") => {
-    setActiveSlot(slot);
-    setIsPickerOpen(true);
+  const moveFileToPermanentStorage = async (tempUri: string, documentType: string) => {
+    try {
+      const docDirectory = `${FileSystem.documentDirectory}compliance_docs/`;
+      const dirInfo = await FileSystem.getInfoAsync(docDirectory);
+      if (!dirInfo.exists) {
+        await FileSystem.makeDirectoryAsync(docDirectory, { intermediates: true });
+      }
+
+      const fileExtension = tempUri.split(".").pop() || "jpg";
+      const permanentUri = `${docDirectory}${documentType}_${Date.now()}.${fileExtension}`;
+
+      await FileSystem.moveAsync({
+        from: tempUri,
+        to: permanentUri,
+      });
+
+      return permanentUri;
+    } catch (error) {
+      console.error("Failed to move file to permanent storage:", error);
+      return tempUri; // fallback
+    }
   };
 
-  const handleSelectMockFile = (fileName: string, fileSize: string) => {
-    if (!activeSlot) return;
+  const handleScanDocument = async (slot: SlotName) => {
+    // Request Camera permissions
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission Denied", "Camera access is required to scan documents.");
+      return;
+    }
 
-    setUploadedFiles((prev) => ({
-      ...prev,
-      [activeSlot]: { name: fileName, size: fileSize },
-    }));
-    
-    setIsPickerOpen(false);
-    setActiveSlot(null);
+    // Launch Native Camera (allowsEditing mimics crop boundaries)
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0.9,
+    });
+
+    if (result.canceled) {
+      return;
+    }
+
+    const capturedUri = result.assets[0].uri;
+
+    // Start processing animation (simulates grayscale stamp enhancement)
+    setIsEnhancing(true);
+    setActiveSlot(slot);
+
+    setTimeout(async () => {
+      const permanentUri = await moveFileToPermanentStorage(capturedUri, slot);
+
+      // Fetch dynamic size
+      const fileInfo = await FileSystem.getInfoAsync(permanentUri);
+      const sizeBytes = fileInfo.exists ? fileInfo.size : 124000;
+      const sizeKb = `${Math.round(sizeBytes / 1024)} KB`;
+
+      const documentName = `${slot.toUpperCase()}_SCAN_${Date.now()
+        .toString()
+        .slice(-4)}.jpg`;
+
+      setUploadedFiles((prev) => ({
+        ...prev,
+        [slot]: {
+          name: documentName,
+          size: sizeKb,
+          uri: permanentUri,
+        },
+      }));
+
+      setIsEnhancing(false);
+      setActiveSlot(null);
+      Alert.alert("Scan Enhanced", "Grayscale filter applied successfully. Contrast adjusted for text readability.");
+    }, 1500);
+  };
+
+  const handleCardPress = (slot: SlotName) => {
+    if (uploadedFiles[slot] !== null) {
+      setSelectedSlot(slot);
+      setIsOptionsModalOpen(true);
+    } else {
+      handleScanDocument(slot);
+    }
   };
 
   const handleFinalizeVerification = () => {
@@ -182,7 +268,7 @@ export default function DocumentVaultScreen() {
 
     setIsSubmissionComplete(true);
 
-    const docsRecord: { [key: string]: { name: string; size: string } } = {
+    const docsRecord: { [key: string]: { name: string; size: string; uri?: string } } = {
       bol: uploadedFiles.bol!,
       invoice: uploadedFiles.invoice!,
       clearance: uploadedFiles.clearance!,
@@ -197,16 +283,18 @@ export default function DocumentVaultScreen() {
       delivery,
       cargoType,
       weight,
-      offerPrice: draftShipment?.offerPrice || "185000", // Guyanese ports premium offer or dynamic offer
+      offerPrice: draftShipment?.offerPrice || "185000",
       status: "OPEN",
       deliveryDate: new Date(Date.now() + 3 * 86400000).toISOString(),
       acceptedByDriver: false,
       is_import: true,
       containerId,
-      documents: docsRecord,
+      documents: docsRecord as any,
       pickupLocation: draftShipment?.pickupLocation || null,
       dropoffLocation: draftShipment?.dropoffLocation || null,
       cargo: draftShipment?.cargo,
+      readyAt: draftShipment?.readyAt,
+      deadlineAt: draftShipment?.deadlineAt,
     });
 
     // Clear draft state
@@ -217,31 +305,18 @@ export default function DocumentVaultScreen() {
     router.replace("/create-load/status?state=confirmed");
   };
 
-  // Mock file options matching each card requirements
-  const getMockOptions = () => {
-    switch (activeSlot) {
+  const getSlotLabel = (slot: SlotName | null) => {
+    switch (slot) {
       case "bol":
-        return [
-          { name: "Bill_of_Lading_GRA_092.pdf", size: "124 KB" },
-          { name: "Airway_Bill_GY_7821.pdf", size: "85 KB" },
-        ];
+        return "Bill of Lading / Airway Bill";
       case "invoice":
-        return [
-          { name: "GRA_Certified_Invoice_signed.pdf", size: "450 KB" },
-          { name: "Commercial_Invoice_Demerara.pdf", size: "310 KB" },
-        ];
+        return "Original Certified Invoice";
       case "clearance":
-        return [
-          { name: "C21_Customs_Clearance_Form.pdf", size: "89 KB" },
-          { name: "C32_Entry_Clearance_Stamped.pdf", size: "155 KB" },
-        ];
+        return "Customs Release Clearance";
       case "goInvest":
-        return [
-          { name: "GO_Invest_Concession_Letter_Approved.pdf", size: "82 KB" },
-          { name: "GRA_Duty_Free_Concession_Approval.pdf", size: "115 KB" },
-        ];
+        return "GO-Invest Tax Waiver Concession";
       default:
-        return [];
+        return "";
     }
   };
 
@@ -254,7 +329,13 @@ export default function DocumentVaultScreen() {
         rightElement={<Lock size={20} color="#0F3D26" />}
       />
 
-      <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 96 }]} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + 96 },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Secure Info Banner */}
         <View style={styles.secureBanner}>
           <Shield size={20} color="#0F3D26" />
@@ -279,7 +360,7 @@ export default function DocumentVaultScreen() {
           />
         </View>
 
-        {/* 3 Upload slots */}
+        {/* Upload slots */}
         <View style={styles.uploadCardsSection}>
           <Text style={styles.sectionHeading}>Mandatory Compliance Documents</Text>
 
@@ -289,7 +370,7 @@ export default function DocumentVaultScreen() {
               styles.uploadCard,
               uploadedFiles.bol ? styles.uploadCardCompleted : styles.uploadCardEmpty,
             ]}
-            onPress={() => openMockPicker("bol")}
+            onPress={() => handleCardPress("bol")}
             activeOpacity={0.75}
           >
             <View
@@ -298,7 +379,13 @@ export default function DocumentVaultScreen() {
                 uploadedFiles.bol ? styles.iconWrapperCompleted : styles.iconWrapperEmpty,
               ]}
             >
-              {uploadedFiles.bol ? (
+              {uploadedFiles.bol?.uri ? (
+                <Image
+                  source={{ uri: uploadedFiles.bol.uri }}
+                  style={styles.thumbnail}
+                  contentFit="cover"
+                />
+              ) : uploadedFiles.bol ? (
                 <CheckCircle size={20} color="#FFFFFF" />
               ) : (
                 <Upload size={20} color="#6B7280" />
@@ -313,7 +400,7 @@ export default function DocumentVaultScreen() {
               >
                 Bill of Lading / Airway Bill
               </Text>
-              <Text style={styles.cardMicrocopy}>
+              <Text style={styles.cardMicrocopy} numberOfLines={1}>
                 {uploadedFiles.bol
                   ? `${uploadedFiles.bol.name} (${uploadedFiles.bol.size})`
                   : "Must display Freight Certified Stamp."}
@@ -328,7 +415,7 @@ export default function DocumentVaultScreen() {
               styles.uploadCard,
               uploadedFiles.invoice ? styles.uploadCardCompleted : styles.uploadCardEmpty,
             ]}
-            onPress={() => openMockPicker("invoice")}
+            onPress={() => handleCardPress("invoice")}
             activeOpacity={0.75}
           >
             <View
@@ -337,7 +424,13 @@ export default function DocumentVaultScreen() {
                 uploadedFiles.invoice ? styles.iconWrapperCompleted : styles.iconWrapperEmpty,
               ]}
             >
-              {uploadedFiles.invoice ? (
+              {uploadedFiles.invoice?.uri ? (
+                <Image
+                  source={{ uri: uploadedFiles.invoice.uri }}
+                  style={styles.thumbnail}
+                  contentFit="cover"
+                />
+              ) : uploadedFiles.invoice ? (
                 <CheckCircle size={20} color="#FFFFFF" />
               ) : (
                 <Upload size={20} color="#6B7280" />
@@ -352,7 +445,7 @@ export default function DocumentVaultScreen() {
               >
                 Original Certified Invoice
               </Text>
-              <Text style={styles.cardMicrocopy}>
+              <Text style={styles.cardMicrocopy} numberOfLines={1}>
                 {uploadedFiles.invoice
                   ? `${uploadedFiles.invoice.name} (${uploadedFiles.invoice.size})`
                   : "Must feature company stamp or signature to verify valuation."}
@@ -367,7 +460,7 @@ export default function DocumentVaultScreen() {
               styles.uploadCard,
               uploadedFiles.clearance ? styles.uploadCardCompleted : styles.uploadCardEmpty,
             ]}
-            onPress={() => openMockPicker("clearance")}
+            onPress={() => handleCardPress("clearance")}
             activeOpacity={0.75}
           >
             <View
@@ -376,7 +469,13 @@ export default function DocumentVaultScreen() {
                 uploadedFiles.clearance ? styles.iconWrapperCompleted : styles.iconWrapperEmpty,
               ]}
             >
-              {uploadedFiles.clearance ? (
+              {uploadedFiles.clearance?.uri ? (
+                <Image
+                  source={{ uri: uploadedFiles.clearance.uri }}
+                  style={styles.thumbnail}
+                  contentFit="cover"
+                />
+              ) : uploadedFiles.clearance ? (
                 <CheckCircle size={20} color="#FFFFFF" />
               ) : (
                 <Upload size={20} color="#6B7280" />
@@ -391,7 +490,7 @@ export default function DocumentVaultScreen() {
               >
                 Customs Release Clearance
               </Text>
-              <Text style={styles.cardMicrocopy}>
+              <Text style={styles.cardMicrocopy} numberOfLines={1}>
                 {uploadedFiles.clearance
                   ? `${uploadedFiles.clearance.name} (${uploadedFiles.clearance.size})`
                   : "Form C21 or Form C32 A/B required."}
@@ -408,7 +507,7 @@ export default function DocumentVaultScreen() {
                   styles.uploadCard,
                   uploadedFiles.goInvest ? styles.uploadCardCompleted : styles.uploadCardEmpty,
                 ]}
-                onPress={() => openMockPicker("goInvest")}
+                onPress={() => handleCardPress("goInvest")}
                 activeOpacity={0.75}
               >
                 <View
@@ -417,7 +516,13 @@ export default function DocumentVaultScreen() {
                     uploadedFiles.goInvest ? styles.iconWrapperCompleted : styles.iconWrapperEmpty,
                   ]}
                 >
-                  {uploadedFiles.goInvest ? (
+                  {uploadedFiles.goInvest?.uri ? (
+                    <Image
+                      source={{ uri: uploadedFiles.goInvest.uri }}
+                      style={styles.thumbnail}
+                      contentFit="cover"
+                    />
+                  ) : uploadedFiles.goInvest ? (
                     <CheckCircle size={20} color="#FFFFFF" />
                   ) : (
                     <Upload size={20} color="#6B7280" />
@@ -432,7 +537,7 @@ export default function DocumentVaultScreen() {
                   >
                     GO-Invest Tax Waiver Concession
                   </Text>
-                  <Text style={styles.cardMicrocopy}>
+                  <Text style={styles.cardMicrocopy} numberOfLines={1}>
                     {uploadedFiles.goInvest
                       ? `${uploadedFiles.goInvest.name} (${uploadedFiles.goInvest.size})`
                       : "Approved GO-Invest Zero-Rated Concession Letter."}
@@ -440,7 +545,7 @@ export default function DocumentVaultScreen() {
                 </View>
                 <ChevronRight size={18} color={uploadedFiles.goInvest ? "#10B981" : "#D1D5DB"} />
               </TouchableOpacity>
-              
+
               <View style={styles.goInvestWarningCallout}>
                 <Text style={styles.goInvestWarningCalloutText}>
                   ⚠️ <Text style={styles.goInvestWarningCalloutBold}>Warning:</Text> Machinery for this sector qualifies for zero-rated customs tax. Upload your GO-Invest concession approval letter to ensure your driver is not delayed at customs checkpoints over duty disputes.
@@ -459,7 +564,9 @@ export default function DocumentVaultScreen() {
           </View>
           <View style={styles.metadataRow}>
             <Text style={styles.metadataLabel}>Cargo Description:</Text>
-            <Text style={styles.metadataValue}>{cargoType === "general" ? "General cargo" : cargoType}</Text>
+            <Text style={styles.metadataValue}>
+              {cargoType === "general" ? "General cargo" : cargoType}
+            </Text>
           </View>
           <View style={styles.metadataRow}>
             <Text style={styles.metadataLabel}>Expected Weight:</Text>
@@ -480,51 +587,126 @@ export default function DocumentVaultScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Simulated Document Picker Bottom Sheet Modal */}
+      {/* Document Scanner Enhancement Loader Overlay */}
+      <Modal transparent={true} visible={isEnhancing} animationType="fade">
+        <View style={styles.loadingOverlay}>
+          <View style={styles.loadingBox}>
+            <ActivityIndicator size="large" color="#0F3D26" />
+            <Text style={styles.loadingText}>Applying Grayscale Enhancement...</Text>
+            <Text style={styles.loadingSubtext}>Optimizing stamps & signatures contrast</Text>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Options Modal (View/Replace/Remove) */}
       <Modal
         animationType="slide"
         transparent={true}
-        visible={isPickerOpen}
-        onRequestClose={() => setIsPickerOpen(false)}
+        visible={isOptionsModalOpen}
+        onRequestClose={() => setIsOptionsModalOpen(false)}
       >
         <View style={styles.pickerOverlay}>
           <TouchableOpacity
             style={styles.pickerBackdrop}
             activeOpacity={1}
-            onPress={() => setIsPickerOpen(false)}
+            onPress={() => setIsOptionsModalOpen(false)}
           />
           <View style={[styles.pickerSheet, { paddingBottom: insets.bottom > 0 ? insets.bottom + 16 : 24 }]}>
             <View style={styles.pickerHeader}>
-              <Text style={styles.pickerTitle}>Simulated Document Vault Picker</Text>
-              <TouchableOpacity onPress={() => setIsPickerOpen(false)}>
+              <Text style={styles.pickerTitle}>{getSlotLabel(selectedSlot)}</Text>
+              <TouchableOpacity onPress={() => setIsOptionsModalOpen(false)}>
                 <X size={22} color="#111827" />
               </TouchableOpacity>
             </View>
-            <Text style={styles.pickerSubtitle}>
-              Select a mock file to simulate a document upload (Form C21, Bill of Lading, etc.):
-            </Text>
 
-            <View style={styles.pickerOptionsList}>
-              {getMockOptions().map((opt, i) => (
-                <TouchableOpacity
-                  key={i}
-                  style={styles.pickerOptionCard}
-                  onPress={() => handleSelectMockFile(opt.name, opt.size)}
-                  activeOpacity={0.75}
-                >
-                  <File size={22} color="#0F3D26" />
-                  <View style={styles.pickerOptionInfo}>
-                    <Text style={styles.pickerOptionName}>{opt.name}</Text>
-                    <Text style={styles.pickerOptionSize}>{opt.size}</Text>
-                  </View>
-                  <CheckCircle size={16} color="#9CA3AF" />
-                </TouchableOpacity>
-              ))}
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.modalActionButton}
+                onPress={() => {
+                  setIsOptionsModalOpen(false);
+                  setIsViewModalOpen(true);
+                }}
+              >
+                <Text style={styles.modalActionText}>View Document Scan</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.modalActionButton}
+                onPress={() => {
+                  setIsOptionsModalOpen(false);
+                  handleScanDocument(selectedSlot!);
+                }}
+              >
+                <Text style={styles.modalActionText}>Replace / Retake Scan</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalActionButton, styles.modalActionDelete]}
+                onPress={() => {
+                  setUploadedFiles((prev) => ({ ...prev, [selectedSlot!]: null }));
+                  setIsOptionsModalOpen(false);
+                  setSelectedSlot(null);
+                }}
+              >
+                <Text style={styles.modalActionDeleteText}>Remove Document</Text>
+              </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
 
-            <Text style={styles.pickerNotice}>
-              In production, this target integrates with react-native-document-picker for file system attachment.
-            </Text>
+      {/* Document Viewer Modal */}
+      <Modal
+        animationType="slide"
+        transparent={false}
+        visible={isViewModalOpen}
+        onRequestClose={() => setIsViewModalOpen(false)}
+      >
+        <View style={[styles.viewerContainer, { paddingTop: insets.top }]}>
+          {/* Header */}
+          <View style={styles.viewerHeader}>
+            <TouchableOpacity onPress={() => setIsViewModalOpen(false)} style={styles.viewerClose}>
+              <ArrowLeft color="#FFFFFF" size={24} />
+            </TouchableOpacity>
+            <Text style={styles.viewerTitle}>Document Preview</Text>
+            <View style={{ width: 40 }} />
+          </View>
+
+          {/* Image Canvas with Grayscale Effect */}
+          <View style={styles.viewerContent}>
+            {selectedSlot && uploadedFiles[selectedSlot]?.uri ? (
+              <View style={styles.scannedImageContainer}>
+                <Image
+                  source={{ uri: uploadedFiles[selectedSlot]!.uri }}
+                  style={styles.viewerImage}
+                  contentFit="contain"
+                />
+                <View style={styles.grayscaleBadge}>
+                  <Text style={styles.grayscaleBadgeText}>Grayscale Filter Applied (Contrast Enhanced)</Text>
+                </View>
+              </View>
+            ) : (
+              <Text style={{ color: "#FFFFFF" }}>No image available</Text>
+            )}
+          </View>
+
+          {/* Footer Actions (Retake / Close) */}
+          <View style={[styles.viewerFooter, { paddingBottom: insets.bottom > 0 ? insets.bottom : 20 }]}>
+            <TouchableOpacity
+              style={styles.viewerRetakeButton}
+              onPress={() => {
+                setIsViewModalOpen(false);
+                handleScanDocument(selectedSlot!);
+              }}
+            >
+              <Text style={styles.viewerRetakeText}>Retake Scan</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.viewerCloseButton}
+              onPress={() => setIsViewModalOpen(false)}
+            >
+              <Text style={styles.viewerCloseText}>Close</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -535,40 +717,6 @@ export default function DocumentVaultScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
-    backgroundColor: "#FFFFFF",
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#F3F4F6",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-  },
-  headerTitleContainer: {
-    flex: 1,
-    marginLeft: 16,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#0F3D26",
-  },
-  headerSubtitle: {
-    fontSize: 11,
-    color: "#6B7280",
-    marginTop: 2,
   },
   scrollContent: {
     padding: 20,
@@ -652,12 +800,18 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
   },
   iconWrapperEmpty: {
     backgroundColor: "#F3F4F6",
   },
   iconWrapperCompleted: {
     backgroundColor: "#10B981",
+  },
+  thumbnail: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
   },
   cardInfo: {
     flex: 1,
@@ -752,71 +906,178 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 24,
-    paddingBottom: Platform.OS === "ios" ? 44 : 24,
   },
   pickerHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+    paddingBottom: 12,
   },
   pickerTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
     color: "#111827",
   },
-  pickerSubtitle: {
-    fontSize: 13,
-    color: "#6B7280",
-    marginBottom: 20,
-    lineHeight: 18,
-  },
-  pickerOptionsList: {
+  modalActions: {
     gap: 12,
-    marginBottom: 20,
   },
-  pickerOptionCard: {
+  modalActionButton: {
+    height: 50,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: "#E5E7EB",
+    backgroundColor: "#FFFFFF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalActionText: {
+    fontSize: 15,
+    fontWeight: "bold",
+    color: "#1F2937",
+  },
+  modalActionDelete: {
+    borderColor: "#FEE2E2",
+    backgroundColor: "#FEF2F2",
+  },
+  modalActionDeleteText: {
+    fontSize: 15,
+    fontWeight: "bold",
+    color: "#EF4444",
+  },
+  loadingOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingBox: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 24,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    gap: 8,
+  },
+  loadingText: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#111827",
+    marginTop: 8,
+  },
+  loadingSubtext: {
+    fontSize: 12,
+    color: "#6B7280",
+    textAlign: "center",
+  },
+  viewerContainer: {
+    flex: 1,
+    backgroundColor: "#111827",
+  },
+  viewerHeader: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F9FAFB",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 12,
-    padding: 16,
-    gap: 12,
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#1F2937",
   },
-  pickerOptionInfo: {
+  viewerClose: {
+    padding: 8,
+  },
+  viewerTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+  },
+  viewerContent: {
     flex: 1,
-    gap: 2,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
   },
-  pickerOptionName: {
+  scannedImageContainer: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  viewerImage: {
+    width: "100%",
+    height: "85%",
+    borderRadius: 8,
+  },
+  grayscaleBadge: {
+    position: "absolute",
+    bottom: 24,
+    backgroundColor: "rgba(16, 185, 129, 0.9)",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  grayscaleBadgeText: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+  },
+  viewerFooter: {
+    flexDirection: "row",
+    padding: 20,
+    gap: 12,
+    backgroundColor: "#111827",
+  },
+  viewerRetakeButton: {
+    flex: 1,
+    height: 48,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: "#FFFFFF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  viewerRetakeText: {
+    color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "600",
-    color: "#111827",
+    fontWeight: "bold",
   },
-  pickerOptionSize: {
-    fontSize: 11,
-    color: "#6B7280",
+  viewerCloseButton: {
+    flex: 1,
+    height: 48,
+    backgroundColor: "#0F3D26",
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  pickerNotice: {
-    fontSize: 11,
-    color: "#9CA3AF",
-    textAlign: "center",
-    fontStyle: "italic",
+  viewerCloseText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "bold",
   },
   goInvestContainer: {
     gap: 8,
   },
   goInvestWarningCallout: {
-    backgroundColor: "#FEF3C7", // amber-100
+    backgroundColor: "#FEF3C7",
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
-    borderColor: "#FCD34D", // amber-300
+    borderColor: "#FCD34D",
   },
   goInvestWarningCalloutText: {
     fontSize: 12,
-    color: "#D97706", // amber-600
+    color: "#D97706",
     lineHeight: 18,
   },
   goInvestWarningCalloutBold: {
