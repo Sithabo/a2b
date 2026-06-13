@@ -171,7 +171,7 @@ export default function AccountScreen() {
           <Text style={styles.sectionTitle}>General</Text>
           <View style={styles.card}>
             {/* Business Details */}
-            <TouchableOpacity style={styles.rowItem} activeOpacity={0.7} onPress={openEditModal}>
+            {/* <TouchableOpacity style={styles.rowItem} activeOpacity={0.7} onPress={openEditModal}>
               <View style={styles.rowLeft}>
                 <View style={styles.iconBoxGreen}>
                   <Building2 color="#0F3D26" size={20} />
@@ -181,7 +181,7 @@ export default function AccountScreen() {
               <ChevronRight color="#9CA3AF" size={20} />
             </TouchableOpacity>
 
-            <View style={styles.divider} />
+            <View style={styles.divider} /> */}
 
             {/* Payment Methods */}
             <TouchableOpacity 

@@ -6,11 +6,15 @@ import { ReceiptCard, ReceiptDivider, ReceiptRow } from "@/components/ReceiptCar
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { Colors } from "@/constants/theme";
+import { useShipmentStore } from "@/store/useShipmentStore";
 
 export default function StatusScreen() {
   const router = useRouter();
   const { state } = useLocalSearchParams<{ state: "confirmed" | "unconfirmed" }>();
   
+  const shipments = useShipmentStore((state) => state.shipments);
+  const latestShipment = shipments[shipments.length - 1];
+
   // Default to confirmed if not explicitly failed (for safety/demo)
   const isSuccess = state !== "unconfirmed";
 
@@ -19,12 +23,16 @@ export default function StatusScreen() {
     ? "Your offer is now live for drivers"
     : "We couldn't securely place your funds in escrow.";
 
-  const today = new Date().toLocaleDateString("en-GB", {
+  const dateObj = latestShipment?.createdAt ? new Date(latestShipment.createdAt) : new Date();
+  const today = dateObj.toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
-  const loadId = "#A2B-" + Math.floor(1000 + Math.random() * 9000);
+  
+  const loadId = latestShipment?.id ? `#${latestShipment.id}` : ("#A2B-" + Math.floor(1000 + Math.random() * 9000));
+  const rawPrice = latestShipment?.offerPrice ? parseFloat(latestShipment.offerPrice) : 150000;
+  const formattedPrice = isNaN(rawPrice) ? "150,000" : rawPrice.toLocaleString("en-US");
 
   return (
     <View style={styles.container}>
@@ -57,13 +65,13 @@ export default function StatusScreen() {
           <View style={styles.offerRow}>
             <Text style={styles.offerLabel}>Your Offer:</Text>
             <Text style={[styles.offerValue, !isSuccess && { color: "#EF4444" }]}>
-              150,000 UGX
+              {formattedPrice} UGX
             </Text>
           </View>
 
           <ReceiptDivider />
 
-          <ReceiptRow label="Total" value="150,000 UGX" isBoldValue />
+          <ReceiptRow label="Total" value={`${formattedPrice} UGX`} isBoldValue />
         </ReceiptCard>
       </ScrollView>
 
