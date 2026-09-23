@@ -45,7 +45,9 @@
         {
           "cameraPermission": "Allow A2B to access your camera to scan import bills and customs documents."
         }
-      ]
+      ],
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

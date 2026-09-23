@@ -56,11 +56,11 @@ const initialShipments: Shipment[] = [
     deliveryDate: twoDaysFromNow.toISOString(),
     acceptedByDriver: true,
     driverId: "drv_001",
-    driverName: "Guy Hawkins",
+    driverName: "John Mukasa", // 3. Add driver Name
     is_import: false,
     pickupLocation: null,
     dropoffLocation: null,
-    milestoneIndex: 2,
+    milestoneIndex: 0,
   },
   {
     id: "P2AL01Z89",
@@ -76,7 +76,7 @@ const initialShipments: Shipment[] = [
     is_import: false,
     pickupLocation: null,
     dropoffLocation: null,
-  }
+  },
 ];
 
 export const useShipmentStore = create<ShipmentState>()(
@@ -155,6 +155,29 @@ export const useShipmentStore = create<ShipmentState>()(
     {
       name: 'shipment-storage',
       storage: createJSONStorage(() => AsyncStorage),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          // Sync existing initial shipments with the latest values from code (like status and milestoneIndex)
+          let syncedShipments = state.shipments.map(s => {
+            const initial = initialShipments.find(i => i.id === s.id);
+            return initial ? { ...s, ...initial } : s;
+          });
+          
+          // Add any initial shipments that don't exist in local storage yet
+          for (const initial of initialShipments) {
+            if (!syncedShipments.some(s => s.id === initial.id)) {
+              syncedShipments.push(initial);
+            }
+          }
+
+          // Deduplicate all shipments by ID to resolve any duplicate key errors from previous states
+          const uniqueMap = new Map();
+          for (const s of syncedShipments) {
+            uniqueMap.set(s.id, s);
+          }
+          state.shipments = Array.from(uniqueMap.values());
+        }
+      }
     }
   )
 );
