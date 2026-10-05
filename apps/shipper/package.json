@@ -1,5 +1,5 @@
 {
-  "name": "a2b",
+  "name": "@a2b/shipper",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
@@ -8,9 +8,12 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web --port 8081",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@a2b/core": "*",
+    "@a2b/ui": "*",
     "@expo/metro-runtime": "~6.1.2",
     "@expo/vector-icons": "^15.0.3",
     "@react-native-async-storage/async-storage": "2.2.0",
