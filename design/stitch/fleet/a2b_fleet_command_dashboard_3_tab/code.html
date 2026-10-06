@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "surface-container": "#f0eded", "on-error": "#ffffff", "tertiary-fixed-dim": "#c7c7bc", "inverse-on-surface": "#f3f0ef", "secondary-fixed-dim": "#f6be39", "on-secondary": "#ffffff", "inverse-primary": "#a2d1b1", "secondary": "#795900", "secondary-container": "#ffc641", "on-tertiary": "#ffffff", "on-error-container": "#93000a", "on-surface-variant": "#414943", "primary-fixed": "#bdeecc", "surface-bright": "#fcf9f8", "surface-container-lowest": "#ffffff", "secondary-fixed": "#ffdfa0", "tertiary-fixed": "#e3e3d7", "on-tertiary-fixed": "#1a1c15", "surface-container-highest": "#e5e2e1", "tertiary": "#1f2119", "surface-variant": "#e5e2e1", "surface-container-high": "#eae7e7", "outline-variant": "#c1c9c0", "on-primary-container": "#7aa88a", "on-tertiary-fixed-variant": "#46483f", "tertiary-container": "#34362e", "on-secondary-fixed": "#261a00", "primary-fixed-dim": "#a2d1b1", "on-surface": "#1c1b1b", "on-secondary-fixed-variant": "#5c4300", "inverse-surface": "#313030", "outline": "#717972", "surface-dim": "#dcd9d9", "error-container": "#ffdad6", "surface": "#fcf9f8", "on-primary-fixed-variant": "#234f37", "on-primary": "#ffffff", "primary-container": "#0f3d26", "on-tertiary-container": "#9e9f94", "error": "#ba1a1a", "on-secondary-container": "#715300", "background": "#fcf9f8", "surface-tint": "#3b674d", "primary": "#002614", "on-primary-fixed": "#002111", "on-background": "#1c1b1b", "surface-container-low": "#f6f3f2" }, borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, spacing: { "gutter": "16px", "base": "8px", "stack-lg": "24px", "touch-target-lg": "56px", "stack-sm": "4px", "margin-edge": "20px", "stack-md": "12px", "touch-target-min": "48px" }, fontFamily: { "h1": ["Inter"], "display": ["Inter"], "body-md": ["Inter"], "body-lg": ["Inter"], "label-caps": ["Inter"], "button": ["Inter"], "h2": ["Inter"] }, fontSize: { "h1": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" }], "display": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "body-lg": ["18px", { "lineHeight": "26px", "fontWeight": "400" }], "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }], "button": ["16px", { "lineHeight": "20px", "fontWeight": "600" }], "h2": ["20px", { "lineHeight": "28px", "fontWeight": "600" }] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-margin-edge flex items-center justify-between gap-base"><div class="flex items-center gap-stack-md"><div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[22px]">local_shipping</span></div><div class="flex flex-col"><span class="font-h2 text-h2 text-primary leading-tight">A2B Fleet Ops</span><div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-secondary"></span><span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Corridor Active</span></div></div></div><div class="flex items-center gap-stack-sm"><button aria-label="Notifications" class="min-w-touch-target-min min-h-touch-target-min flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[24px]">notifications</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex flex-col relative w-full pt-16 pb-24 bg-surface min-h-screen"><div class="flex flex-col w-full pb-6">
+<!-- Sub-Header / Company Profile Pill & Live Status Banner -->
+<div class="px-margin-edge pt-stack-md flex flex-col gap-stack-md">
+<div class="flex items-center justify-between">
+<div class="inline-flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full shadow-sm">
+<span class="w-2 h-2 rounded-full bg-secondary-container animate-pulse"></span>
+<span class="font-label-caps text-label-caps text-on-surface uppercase tracking-wider font-semibold">Apex Logistics Hub</span>
+<span class="material-symbols-outlined text-[16px] text-secondary">verified</span>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-container-low px-2.5 py-1 rounded-full text-on-surface-variant">
+<span class="material-symbols-outlined text-[15px] text-primary">hub</span>
+<span class="font-label-caps text-label-caps">Kampala Dispatch</span>
+</div>
+</div>
+</div>
+<!-- Fleet Health & Revenue Bento Widget -->
+<div class="px-margin-edge mt-stack-md">
+<div class="bg-primary text-on-primary rounded-xl p-5 shadow-md relative overflow-hidden">
+<!-- Subtle tactile background decor -->
+<div class="absolute -right-8 -bottom-8 w-36 h-36 rounded-full bg-primary-container opacity-40 blur-2xl pointer-events-none"></div>
+<div class="flex flex-col gap-stack-md relative z-10">
+<!-- Top row: Revenue with growth pill -->
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-caps text-label-caps text-on-primary-container uppercase tracking-wider block">Weekly Gross Invoiced</span>
+<div class="flex items-baseline gap-2 mt-0.5">
+<span class="font-display text-display font-bold text-on-primary tracking-tight">UGX 18.4M</span>
+</div>
+</div>
+<div class="inline-flex items-center gap-1 bg-primary-container px-2.5 py-1 rounded-full text-on-primary text-xs font-semibold">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed">trending_up</span>
+<span class="font-label-caps text-label-caps text-primary-fixed">+16%</span>
+</div>
+</div>
+<!-- Meter Section -->
+<div class="bg-primary-container/80 rounded-lg p-3.5 flex flex-col gap-2">
+<div class="flex justify-between items-center text-xs">
+<span class="font-body-md text-label-caps text-on-primary font-semibold flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed">local_shipping</span>
+              Active Utilization Meter
+            </span>
+<span class="font-label-caps text-label-caps text-primary-fixed font-bold">4 of 5 Trucks (80%)</span>
+</div>
+<!-- Tactile Gauge Bar -->
+<div class="w-full h-2.5 bg-primary/60 rounded-full overflow-hidden p-0.5 flex items-center">
+<div class="h-full bg-primary-fixed rounded-full transition-all duration-500 ease-out" style="width: 80%;"></div>
+</div>
+<div class="flex justify-between items-center text-[11px] text-on-primary-container pt-0.5 font-label-caps text-label-caps">
+<span>Fleet Load: Optimum</span>
+<span>Target: 75%</span>
+</div>
+</div>
+<!-- Quick KPI Badges -->
+<div class="grid grid-cols-3 gap-2 pt-1">
+<div class="bg-primary-container/50 rounded-lg p-2 flex flex-col items-center justify-center text-center">
+<span class="font-h2 text-h2 font-bold text-on-primary">4</span>
+<span class="font-label-caps text-label-caps text-primary-fixed-dim uppercase text-[10px] mt-0.5">In Transit</span>
+</div>
+<div class="bg-primary-container/50 rounded-lg p-2 flex flex-col items-center justify-center text-center">
+<span class="font-h2 text-h2 font-bold text-secondary-fixed">1</span>
+<span class="font-label-caps text-label-caps text-primary-fixed-dim uppercase text-[10px] mt-0.5">Idle Yard</span>
+</div>
+<div class="bg-primary-container/50 rounded-lg p-2 flex flex-col items-center justify-center text-center">
+<span class="font-h2 text-h2 font-bold text-on-primary">0</span>
+<span class="font-label-caps text-label-caps text-primary-fixed-dim uppercase text-[10px] mt-0.5">Maintenance</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Corridor Quick Glance Strip -->
+<div class="px-margin-edge mt-stack-md">
+<div class="bg-surface-container rounded-xl p-3 flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">alt_route</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface font-semibold">Northern Corridor Flow</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant text-[11px]">Busia - Malaba clearance normal</span>
+</div>
+</div>
+<span class="font-label-caps text-label-caps text-secondary font-bold bg-secondary-fixed px-2 py-0.5 rounded">Smooth</span>
+</div>
+</div>
+<!-- Truck Operations Section Header -->
+<div class="px-margin-edge mt-stack-lg flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="font-h2 text-h2 text-on-surface font-bold tracking-tight">Active Roster</span>
+<span class="bg-surface-container text-on-surface-variant font-label-caps text-label-caps px-2 py-0.5 rounded-full">5 Units</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<button class="flex items-center gap-1 font-label-caps text-label-caps bg-surface-container px-2.5 py-1.5 rounded-lg active:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[16px]">filter_list</span>
+<span>Filter</span>
+</button>
+</div>
+</div>
+<!-- Truck Cards Stack -->
+<div class="px-margin-edge mt-stack-md flex flex-col gap-stack-md">
+<!-- Card 1: Fuso Fighter (10 Ton) -->
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col gap-stack-md transition-all active:scale-[0.99]">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary shrink-0 relative overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Rugged medium commercial cargo truck cabin in clean industrial setting with green brand highlights, close angle" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCA68GMrlkmIBMhaf9VN2oEwgzPtvrRDRc_mayFlJC-wnuDtEp989CibxPtwBqWhChCK1z3yfoLrvmGBK71UeOrxBf9gGmZpEZxdCeK1iGrbtTyQFuCf5HN53Xt5DFAGdHCOiPlmj99Ww-JMfc3I3Em-HyFifLhBBw_AjGAG4s-5O-KfkqPYxJYksnGSewGK893libaTB1_co29B42FmCP2JtYckxRBLxZix38et0zEEWfx_C8ZKeVHuQ"/>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-h2 text-h2 text-on-surface font-bold truncate">UAM 456K</span>
+<span class="font-label-caps text-label-caps bg-surface-container-high text-on-surface-variant px-1.5 py-0.5 rounded text-[10px]">10 Ton</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface-variant text-[13px] leading-tight">Fuso Fighter</span>
+</div>
+</div>
+<!-- Live Status Pill: Blue -->
+<div class="inline-flex items-center gap-1.5 bg-surface-container px-2.5 py-1 rounded-full">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="font-label-caps text-label-caps text-primary font-bold text-[11px]">En Route Jinja</span>
+</div>
+</div>
+<!-- Route Tracking Preview Line -->
+<div class="bg-surface-container-low rounded-lg p-3 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary">account_circle</span>
+<span class="font-body-md text-body-md text-on-surface font-semibold text-[14px]">John Mukasa</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant text-[12px] flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-secondary">speed</span>
+            64 km/h
+          </span>
+</div>
+<div class="flex items-center justify-between pt-1 text-on-surface-variant text-[12px]">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-secondary">inventory_2</span>
+            Tororo Cement
+          </span>
+<span class="font-button text-button text-primary font-bold">UGX 450,000</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-0.5">
+<span class="font-label-caps text-label-caps text-on-surface-variant text-[11px]">ETA: 1h 45m • Nile Bridge Crossing</span>
+<button class="min-h-touch-target-min px-3 rounded-lg bg-surface-container text-primary flex items-center gap-1 text-xs font-semibold active:bg-surface-container-high transition-colors">
+<span>Telemetry</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Card 2: Isuzu FRR (7 Ton) -->
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col gap-stack-md transition-all active:scale-[0.99]">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary shrink-0 relative overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Modern refrigerated box truck parked on clean road daylight urban logistics delivery perspective" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2vlnycQZEkVBadz4x0i5QODQXNNFfGMKWOxWucyLpxVVz6Qe8jIGldnT2jlaup_nFgZIo9Usaxz5yG7D0bVVSlQ2yqp0hP4qyhVZWQu7y5VWMByiBJRujqJi8KkHLQR6A-SjSFeRIhpvFhnMtTHmb78-Tg4qmML7VmsW75b4ZLKyWhFSk6GIC-wJPh-gBlfFc1Y3SSZUVDR7ZMofHk1yzC03HVO1kMDr0t3yLD3cGW_SPpqiVKCnaqg"/>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-h2 text-h2 text-on-surface font-bold truncate">UBH 892T</span>
+<span class="font-label-caps text-label-caps bg-surface-container-high text-on-surface-variant px-1.5 py-0.5 rounded text-[10px]">7 Ton</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface-variant text-[13px] leading-tight">Isuzu FRR Refrigerator</span>
+</div>
+</div>
+<!-- Live Status Pill: Blue -->
+<div class="inline-flex items-center gap-1.5 bg-surface-container px-2.5 py-1 rounded-full">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="font-label-caps text-label-caps text-primary font-bold text-[11px]">Delivering KLA</span>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-lg p-3 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary">account_circle</span>
+<span class="font-body-md text-body-md text-on-surface font-semibold text-[14px]">Sarah Nakato</span>
+</div>
+<span class="font-label-caps text-label-caps text-primary font-semibold text-[11px] bg-primary-fixed px-2 py-0.5 rounded">
+            Temp: 4.1°C
+          </span>
+</div>
+<div class="flex items-center justify-between pt-1 text-on-surface-variant text-[12px]">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-secondary">ac_unit</span>
+            Dairy &amp; Cold Store
+          </span>
+<span class="font-button text-button text-primary font-bold">UGX 320,000</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-0.5">
+<span class="font-label-caps text-label-caps text-on-surface-variant text-[11px]">Drop-off 2 of 3 • Bugolobi Central</span>
+<button class="min-h-touch-target-min px-3 rounded-lg bg-surface-container text-primary flex items-center gap-1 text-xs font-semibold active:bg-surface-container-high transition-colors">
+<span>Live Waybill</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Card 3: Tata Prima Flatbed (28 Ton) -->
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col gap-stack-md transition-all active:scale-[0.99]">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary shrink-0 relative overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Heavy articulated flatbed freight truck haulage vehicle parked in customs depot freight logistics border crossing" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjJdn8FT3NlPTclsXE7Iy93IPJJT8wkQGg0Cx58llSAA4oeiPbsbMJ010h2Z0xaR8HvSf5YyYSkknQVlcFPnquQp_XkITe9MHbyoQ6tu-nF0OoOM-JbxAuCCQZknaWV46v8xjKHpjAQqa-hyrSLQyxWlswQdVeVp-HFvVvXRs0riOkQq-NsOnxbnsZTJcv_fCSl29MotDRNvC7ze9Fui8c5tR_OgSozpTUYhBnzXbUL7BGB284j5tTlg"/>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-h2 text-h2 text-on-surface font-bold truncate">UBA 123X</span>
+<span class="font-label-caps text-label-caps bg-surface-container-high text-on-surface-variant px-1.5 py-0.5 rounded text-[10px]">28 Ton</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface-variant text-[13px] leading-tight">Tata Prima Flatbed</span>
+</div>
+</div>
+<!-- Live Status Pill: Orange Customs -->
+<div class="inline-flex items-center gap-1.5 bg-secondary-fixed px-2.5 py-1 rounded-full">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-label-caps text-label-caps text-on-secondary-fixed font-bold text-[11px]">Customs (Malaba)</span>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-lg p-3 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary">account_circle</span>
+<span class="font-body-md text-body-md text-on-surface font-semibold text-[14px]">David Omondi</span>
+</div>
+<span class="inline-flex items-center gap-1 font-label-caps text-label-caps text-secondary font-bold text-[11px]">
+<span class="material-symbols-outlined text-[14px]">shield</span>
+            Verified Bonded
+          </span>
+</div>
+<div class="flex items-center justify-between pt-1 text-on-surface-variant text-[12px]">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-secondary">assignment_turned_in</span>
+            T1 Transit Sealed (Mombasa Corridor)
+          </span>
+<span class="font-button text-button text-primary font-bold">UGX 2.8M</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-0.5">
+<span class="font-label-caps text-label-caps text-secondary font-semibold text-[11px]">Customs Desk Clearance: Queue Pos #3</span>
+<button class="min-h-touch-target-min px-3 rounded-lg bg-surface-container text-primary flex items-center gap-1 text-xs font-semibold active:bg-surface-container-high transition-colors">
+<span>Docs</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Card 4: Mitsubishi Canter (3.5 Ton) - Available / Yard Idle -->
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col gap-stack-md transition-all active:scale-[0.99]">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary shrink-0 relative overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Light duty commercial box truck vehicle parked in transport yard sunshine clean fleet vehicle" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqE5jtuJXnrxt2-yKpRO0I-LAuQULdHzAN-K0886ZYABA2dNKBvGlIBVPzOgL_Ef62qZP8R0lFIcjfZ41a5Dmcqh5qzX-kQe2k-0_7CxYCLtkMNIIjTmuh_BURZsU9UVQitMkOLAegKgocltGP6nZUZehhNJNNWWez9aVqQYKFkxpDP8xzm4B5f22NGkD0sbpp23kjid_P96IvbeFBFpANXlxYP1uoaDlC7jhQxAvzYLRk4T8cN8rB0w"/>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-h2 text-h2 text-on-surface font-bold truncate">UBF 774P</span>
+<span class="font-label-caps text-label-caps bg-surface-container-high text-on-surface-variant px-1.5 py-0.5 rounded text-[10px]">3.5 Ton</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface-variant text-[13px] leading-tight">Mitsubishi Canter</span>
+</div>
+</div>
+<!-- Live Status Pill: Green Available -->
+<div class="inline-flex items-center gap-1.5 bg-primary-fixed px-2.5 py-1 rounded-full">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="font-label-caps text-label-caps text-on-primary-fixed font-bold text-[11px]">Ready (Namanve)</span>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-lg p-3 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-body-md text-body-md text-on-surface-variant text-[13px] flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px] text-outline">person_off</span>
+            Driver Unassigned
+          </span>
+<button class="bg-primary text-on-primary font-label-caps text-label-caps px-3 py-1.5 rounded-lg active:bg-primary-container transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">person_add</span>
+            Assign Driver
+          </button>
+</div>
+<div class="flex items-center justify-between pt-1 text-on-surface-variant text-[12px]">
+<span>Fuel: 92% • Inspection Valid</span>
+<span class="font-label-caps text-label-caps text-on-surface font-semibold">Immediate Dispatch</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-0.5">
+<span class="font-label-caps text-label-caps text-on-surface-variant text-[11px]">Idle Duration: 3h 12m</span>
+<button class="min-h-touch-target-min px-3 rounded-lg bg-surface-container text-primary flex items-center gap-1 text-xs font-semibold active:bg-surface-container-high transition-colors">
+<span>Match Load</span>
+<span class="material-symbols-outlined text-[16px]">bolt</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Docked Action Button Section -->
+<div class="px-margin-edge mt-stack-lg mb-4">
+<button class="w-full min-h-touch-target-lg bg-primary text-on-primary font-button text-button rounded-xl flex items-center justify-center gap-2 shadow-md active:bg-primary-container transition-all">
+<span class="material-symbols-outlined text-[22px]">add_circle</span>
+<span>Add New Truck</span>
+</button>
+</div>
+</div>
+<script>
+  // Micro-interaction for quick visual feedback on fleet actions
+  document.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      // gentle tactile press pulse
+      this.classList.add('scale-[0.98]');
+      setTimeout(() => this.classList.remove('scale-[0.98]'), 120);
+    });
+  });
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/95 backdrop-blur-xl shadow-[0_-2px_12px_rgba(0,0,0,0.05)]" data-active-classes="text-primary font-bold"><div class="flex justify-around items-center h-16 px-gutter"><a aria-current="page" class="min-w-touch-target-min min-h-touch-target-min flex flex-col items-center justify-center gap-1 transition-colors flex-1 text-primary font-bold" data-path="fleet-dashboard" href="#"><span class="material-symbols-outlined text-[24px]">dashboard</span><span class="font-label-caps text-label-caps">Dashboard</span></a><a class="min-w-touch-target-min min-h-touch-target-min flex flex-col items-center justify-center gap-1 text-on-surface-variant hover:text-on-surface transition-colors flex-1" data-path="drivers-and-chat" href="#"><span class="material-symbols-outlined text-[24px]">forum</span><span class="font-label-caps text-label-caps">Drivers &amp; Chat</span></a><a class="min-w-touch-target-min min-h-touch-target-min flex flex-col items-center justify-center gap-1 text-on-surface-variant hover:text-on-surface transition-colors flex-1" data-path="fleet-account" href="#"><span class="material-symbols-outlined text-[24px]">settings</span><span class="font-label-caps text-label-caps">Account</span></a></div></nav></body></html>

@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "shipper-web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "web", "-w", "@a2b/shipper"],
+      "port": 8081
+    }
+  ]
+}
