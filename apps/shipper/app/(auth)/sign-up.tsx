@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { ArrowLeft, CheckSquare, Square } from "lucide-react-native";
 import CountryPicker, { CountryCode, Country } from 'react-native-country-picker-modal';
+import { MARKET_CODES } from "@a2b/core";
 import { parsePhoneNumberFromString } from 'libphonenumber-js/min';
 import { palette, Text, Button } from "@a2b/ui";
 
@@ -89,6 +90,7 @@ export default function SignUpScreen() {
               <View style={[styles.inputWrapper, error ? styles.inputError : null]}>
                 <View style={styles.countryCodePicker}>
                   <CountryPicker
+                    countryCodes={MARKET_CODES}
                     withFilter
                     withFlag
                     withCallingCode

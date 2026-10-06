@@ -3,40 +3,26 @@ import { View, Text, StyleSheet } from "react-native";
 import Slider from "@react-native-community/slider";
 import { Lightbulb } from "lucide-react-native";
 import { colors, palette } from "@a2b/ui";
-
-interface SurchargeItem {
-  label: string;
-  amount: number;
-}
+import { formatMoney, type Market, type OfferRecommendation } from "@a2b/core";
 
 interface OfferSliderProps {
   value: number;
   onChange: (val: number) => void;
-  surcharges: SurchargeItem[];
-  baseRate?: number;
+  offer: OfferRecommendation;
+  market: Market;
 }
 
-export const OfferSlider: React.FC<OfferSliderProps> = ({
-  value,
-  onChange,
-  surcharges,
-  baseRate = 150000,
-}) => {
-  const totalSurcharge = surcharges.reduce((sum, item) => sum + item.amount, 0);
-  const recommendedPrice = baseRate + totalSurcharge;
+export const OfferSlider: React.FC<OfferSliderProps> = ({ value, onChange, offer, market }) => {
+  const { base: baseRate, surcharges, recommended: recommendedPrice, min: minPrice, max: maxPrice } = offer;
+  const totalSurcharge = recommendedPrice - baseRate;
+  const currency = market.currency.code;
 
   // Sync recommended price when surcharges change
   useEffect(() => {
     onChange(recommendedPrice);
-  }, [totalSurcharge, baseRate, onChange, recommendedPrice]);
+  }, [onChange, recommendedPrice]);
 
-  const minPrice = recommendedPrice - 20000;
-  const maxPrice = recommendedPrice + 30000;
-
-  // Format number with commas
-  const formatValue = (val: number) => {
-    return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
+  const formatValue = (val: number) => formatMoney(val, market, { code: false });
 
   const formatK = (val: number) => {
     return `${Math.round(val / 1000)}k`;
@@ -44,14 +30,14 @@ export const OfferSlider: React.FC<OfferSliderProps> = ({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.sectionTitle}>Recommended Offer (GYD)</Text>
+      <Text style={styles.sectionTitle}>Recommended Offer ({currency})</Text>
 
       <View style={styles.card}>
         {/* Dynamic Big Number Display */}
         <View style={styles.header}>
           <Text style={styles.subtitle}>Your Offer</Text>
           <Text style={styles.amount}>
-            {formatValue(value)} <Text style={styles.currency}>GYD</Text>
+            {formatValue(value)} <Text style={styles.currency}>{currency}</Text>
           </Text>
         </View>
 
@@ -92,17 +78,17 @@ export const OfferSlider: React.FC<OfferSliderProps> = ({
             <Text style={styles.breakdownTitle}>Surcharge Breakdown</Text>
             <View style={styles.breakdownRow}>
               <Text style={styles.breakdownLabel}>Base Rate</Text>
-              <Text style={styles.breakdownValue}>{formatValue(baseRate)} GYD</Text>
+              <Text style={styles.breakdownValue}>{formatValue(baseRate)} {currency}</Text>
             </View>
-            {surcharges.map((item, idx) => (
-              <View key={idx} style={styles.breakdownRow}>
+            {surcharges.map((item) => (
+              <View key={item.id} style={styles.breakdownRow}>
                 <Text style={styles.breakdownLabel}>{item.label}</Text>
-                <Text style={styles.breakdownValue}>+{formatValue(item.amount)} GYD</Text>
+                <Text style={styles.breakdownValue}>+{formatValue(item.amount)} {currency}</Text>
               </View>
             ))}
             <View style={[styles.breakdownRow, styles.breakdownTotalRow]}>
               <Text style={styles.breakdownTotalLabel}>Total Recommended</Text>
-              <Text style={styles.breakdownTotalValue}>{formatValue(recommendedPrice)} GYD</Text>
+              <Text style={styles.breakdownTotalValue}>{formatValue(recommendedPrice)} {currency}</Text>
             </View>
           </View>
         )}
@@ -111,7 +97,7 @@ export const OfferSlider: React.FC<OfferSliderProps> = ({
         <View style={styles.tipsContainer}>
           <Lightbulb size={24} color={colors.primary} fill={colors.primary} />
           <Text style={styles.tipsText}>
-            <Text style={styles.tipsBold}>Tips:</Text> Offers above {formatValue(recommendedPrice + 15000)} GYD are 3x more likely to be accepted within an hour.
+            <Text style={styles.tipsBold}>Tips:</Text> Offers above {formatValue(recommendedPrice + 15000)} {currency} are 3x more likely to be accepted within an hour.
           </Text>
         </View>
       </View>

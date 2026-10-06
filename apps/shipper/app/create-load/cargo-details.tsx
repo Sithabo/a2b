@@ -25,9 +25,12 @@ import { OfferSlider } from "@/components/OfferSlider";
 import { OrderSummary } from "@/components/OrderSummary";
 import { useShipmentStore, CargoType, CargoDetails } from "@/store/useShipmentStore";
 import { colors, palette, ScreenHeader, BottomSheet, Button } from "@a2b/ui";
+import { recommendOffer } from "@a2b/core";
+import { useMarket } from "@/store/useMarket";
 
 export default function CargoDetailsScreen() {
   const router = useRouter();
+  const market = useMarket();
   const insets = useSafeAreaInsets();
 
   const pickupLocation = useShipmentStore((state) => state.pickupLocation);
@@ -193,30 +196,10 @@ export default function CargoDetailsScreen() {
 
   const cargoTypeStr = loadTypes.find((t) => t.id === selectedType)?.label || "General Cargo";
 
-  const getSurchargeBreakdown = (): { label: string; amount: number }[] => {
-    const list: { label: string; amount: number }[] = [];
-    if (selectedType === "GENERAL_CARGO") {
-      list.push({ label: "📄 Import License Surcharge", amount: 10000 });
-    } else if (selectedType === "HEAVY_MACHINERY") {
-      list.push({ label: "🏗️ Capital Equipment Concession", amount: 30000 });
-      if (requiresFlatbedLowboy) {
-        list.push({ label: "🚛 Route Clearance Surcharge", amount: 15000 });
-      }
-      if (requiresHydraulicTipper) {
-        list.push({ label: "⚖️ Tipper Gate Fee", amount: 10000 });
-      }
-    } else if (selectedType === "CHEMICALS_PHARMA") {
-      list.push({ label: "🧪 PTCCD Hazard Clearance", amount: 45000 });
-    } else if (selectedType === "FOOD_BEVERAGE") {
-      const storageLabel = storageEnvironment === "FROZEN" ? "Frozen" : (storageEnvironment === "CHILLED" ? "Chilled" : "Ambient");
-      const icon = storageEnvironment === "FROZEN" ? "❄️" : (storageEnvironment === "CHILLED" ? "🌡️" : "📦");
-      list.push({
-        label: `${icon} GA-FDD Safe-Handling (${storageLabel})`,
-        amount: storageEnvironment === "FROZEN" ? 35000 : (storageEnvironment === "CHILLED" ? 25000 : 15000)
-      });
-    }
-    return list;
-  };
+  const offer = recommendOffer(
+    { type: selectedType, requiresFlatbedLowboy, requiresHydraulicTipper, storageEnvironment },
+    market
+  );
 
   const handleNextStep = () => {
     if (!isFormValid) return;
@@ -330,6 +313,7 @@ export default function CargoDetailsScreen() {
       cargoType: cargoTypeStr,
       weight: totalWeight + (selectedType === 'GENERAL_CARGO' ? " kg" : ""),
       offerPrice: offerPrice.toString(),
+      market: market.code,
       status: "OPEN",
       deliveryDate: deliveryDate ? deliveryDate.toISOString() : new Date(Date.now() + 2 * 86400000).toISOString(),
       acceptedByDriver: false,
@@ -706,8 +690,8 @@ export default function CargoDetailsScreen() {
             <OfferSlider
               value={offerPrice}
               onChange={setOfferPrice}
-              surcharges={getSurchargeBreakdown()}
-              baseRate={150000}
+              offer={offer}
+              market={market}
             />
 
             {/* Back action */}

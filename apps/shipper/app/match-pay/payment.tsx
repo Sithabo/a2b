@@ -3,12 +3,15 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-nati
 import { useRouter } from 'expo-router';
 import { ChevronRight, Lock, CreditCard } from 'lucide-react-native';
 import { colors, palette, partnerColors } from "@a2b/ui";
+import { useMarket } from "@/store/useMarket";
+import { formatMoney } from "@a2b/core";
 
-type PaymentMethod = 'mtn' | 'airtel' | 'card' | null;
+type PaymentMethod = 'mtn' | 'airtel' | 'mmg' | 'card' | null;
 
 // Source: 6.html — "Choose Payment Method"
 export default function PaymentMethodScreen() {
   const router = useRouter();
+  const market = useMarket();
   const [selected, setSelected] = useState<PaymentMethod>(null);
 
   const handleSelect = (method: PaymentMethod) => {
@@ -19,7 +22,15 @@ export default function PaymentMethodScreen() {
     }, 300);
   };
 
-  const methods = [
+  const allMethods = [
+    {
+      id: 'mmg' as PaymentMethod,
+      label: 'MMG Mobile Money',
+      subtitle: 'Fast and secure',
+      logoBg: palette.gray[800],
+      logoText: 'MMG',
+      logoTextColor: palette.white,
+    },
     {
       id: 'mtn' as PaymentMethod,
       label: 'MTN Mobile Money',
@@ -47,6 +58,10 @@ export default function PaymentMethodScreen() {
       logoIcon: true,
     },
   ];
+  // Mobile money rails available in this market, plus cards everywhere.
+  const methods = allMethods.filter(
+    (m) => m.id === 'card' || market.mobileMoney.some((p) => p.id === m.id)
+  );
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -60,8 +75,8 @@ export default function PaymentMethodScreen() {
         {/* Amount Card */}
         <View style={styles.amountCard}>
           <Text style={styles.amountLabel}>Amount to Pay Driver</Text>
-          <Text style={styles.amountValue}>150,000</Text>
-          <Text style={styles.amountCurrency}>UGX</Text>
+          <Text style={styles.amountValue}>{formatMoney(150000, market, { code: false })}</Text>
+          <Text style={styles.amountCurrency}>{market.currency.code}</Text>
         </View>
 
         {/* Payment Method Rows */}

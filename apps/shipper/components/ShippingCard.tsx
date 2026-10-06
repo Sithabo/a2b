@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, Image, ViewStyle, ImageSourcePropType, TouchableOpacity } from "react-native";
 import { Package } from "lucide-react-native";
 import { Shipment } from "@/store/useShipmentStore";
+import { statusMeta } from "@a2b/core";
 import { colors, palette } from "@a2b/ui";
 
 export interface ShippingCardProps {
@@ -49,25 +50,7 @@ export const ShippingCard: React.FC<ShippingCardProps> = ({
   const pickupDate = formatDateOnly(shipment.createdAt);
   const deliveryDate = formatDateOnly(shipment.deliveryDate);
 
-  // Translate status text into clean English labels
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "ACTIVE":
-        return "In Transit";
-      case "MATCHED":
-        return "Driver Found";
-      case "SECURED":
-        return "Secured";
-      case "COMPLETED":
-      case "DELIVERED":
-        return "Delivered";
-      case "OPEN":
-      default:
-        return "Pending";
-    }
-  };
-
-  const statusLabel = getStatusLabel(shipment.status);
+  const statusLabel = statusMeta[shipment.status].label;
   const formattedTrackingId = shipment.id.startsWith("#") ? shipment.id : `#${shipment.id}`;
 
   return (

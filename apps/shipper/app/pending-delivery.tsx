@@ -13,6 +13,8 @@ import { Clock, CheckCircle } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useShipmentStore } from "@/store/useShipmentStore";
 import { colors, palette, ScreenHeader } from "@a2b/ui";
+import { useMarket } from "@/store/useMarket";
+import { formatMoney } from "@a2b/core";
 
 export default function PendingDeliveryScreen() {
   const router = useRouter();
@@ -26,11 +28,8 @@ export default function PendingDeliveryScreen() {
   // Find dynamic shipment or fallback to default
   const shipment = shipments.find((s) => s.id === idToFind) || shipments[1];
 
-  const formatCurrency = (val?: string) => {
-    if (!val) return "0 GYD";
-    const num = parseFloat(val);
-    return isNaN(num) ? `${val} GYD` : `${num.toLocaleString("en-US")} GYD`;
-  };
+  const market = useMarket();
+  const formatCurrency = (val?: string) => formatMoney(val, market);
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return "--";

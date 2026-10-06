@@ -5,6 +5,8 @@ import { AlignLeft } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Circle } from "react-native-svg";
 import { colors, palette } from "@a2b/ui";
+import { estimateTrip, formatMoney, vehicleClasses, type VehicleClass } from "@a2b/core";
+import { useMarket } from "@/store/useMarket";
 
 export default function CalculatorResultsScreen() {
   const router = useRouter();
@@ -13,26 +15,17 @@ export default function CalculatorResultsScreen() {
   const distance = Number(params.distance) || 0;
   const weight = Number(params.weight) || 0;
   const urgency = Number(params.urgency) || 0;
-  const truckType = (params.truckType as string) || "Canter";
+  const truckType = (
+    (params.truckType as string) in vehicleClasses ? params.truckType : "CANTER"
+  ) as VehicleClass;
 
-  // Calculations
-  const baseRatePerKm = 1500;
-  const weightSurchargePerTonKm = 100;
+  const market = useMarket();
+  const { distanceCost, weightCost, vehicleFee, urgencyPremium, total: totalCost } = estimateTrip(
+    { distanceKm: distance, weightTons: weight, vehicleClass: truckType, urgencyPercent: urgency },
+    market
+  );
 
-  let vehicleFee = 100000;
-  if (truckType === "Pickup") vehicleFee = 50000;
-  if (truckType === "Fuso") vehicleFee = 200000;
-  if (truckType === "Trailer") vehicleFee = 400000;
-
-  const distanceCost = distance * baseRatePerKm;
-  const weightCost = distance * weight * weightSurchargePerTonKm;
-  const subtotal = distanceCost + weightCost + vehicleFee;
-  const urgencyPremium = subtotal * (urgency / 100);
-  const totalCost = subtotal + urgencyPremium;
-
-  const formatCurrency = (val: number) => {
-    return val.toLocaleString("en-US", { maximumFractionDigits: 0 });
-  };
+  const formatCurrency = (val: number) => formatMoney(val, market, { code: false });
 
   return (
     <View style={styles.container}>
@@ -80,7 +73,7 @@ export default function CalculatorResultsScreen() {
             />
           </Svg>
           <View style={styles.chartCenterTextContainer}>
-            <Text style={styles.chartCurrency}>UGX</Text>
+            <Text style={styles.chartCurrency}>{market.currency.code}</Text>
             <Text style={styles.chartTotal}>{formatCurrency(totalCost)}</Text>
           </View>
         </View>

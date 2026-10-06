@@ -13,6 +13,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { ArrowLeft, Building2, MapPin } from "lucide-react-native";
 import { useAuthStore } from "@/store/useAuthStore";
 import CountryPicker, { Country, CountryCode } from "react-native-country-picker-modal";
+import { isMarketCode, MARKET_CODES } from "@a2b/core";
 import { colors, palette, Text, Button } from "@a2b/ui";
 
 export default function BusinessDetailsScreen() {
@@ -37,6 +38,7 @@ export default function BusinessDetailsScreen() {
         phone: (params.phone as string) || "",
         company: companyName,
         region: region,
+        market: isMarketCode(countryCode) ? countryCode : undefined,
         role: (params.role as string) || "shipper",
       });
       router.replace("/(tabs)");
@@ -105,6 +107,7 @@ export default function BusinessDetailsScreen() {
                 </Text>
                 <View style={{ width: 0, height: 0, opacity: 0 }}>
                   <CountryPicker
+                    countryCodes={MARKET_CODES}
                     withFilter
                     withFlag
                     countryCode={countryCode}

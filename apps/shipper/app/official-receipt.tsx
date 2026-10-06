@@ -5,6 +5,8 @@ import { ArrowLeft, Check, FileText, Share2 } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useShipmentStore } from "@/store/useShipmentStore";
 import { colors, palette } from "@a2b/ui";
+import { useMarket } from "@/store/useMarket";
+import { formatMoney } from "@a2b/core";
 
 export default function OfficialReceiptScreen() {
   const router = useRouter();
@@ -13,11 +15,8 @@ export default function OfficialReceiptScreen() {
   const shipments = useShipmentStore((state) => state.shipments);
   const shipment = shipments.find((s) => s.id === idToFind) || shipments[0];
 
-  const formatCurrency = (val?: string) => {
-    if (!val) return "0 GYD";
-    const num = parseFloat(val);
-    return isNaN(num) ? `${val} GYD` : `${num.toLocaleString("en-US")} GYD`;
-  };
+  const market = useMarket();
+  const formatCurrency = (val?: string) => formatMoney(val, market);
 
   return (
     <View style={styles.container}>

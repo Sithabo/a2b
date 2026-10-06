@@ -12,16 +12,17 @@ import { useRouter } from "expo-router";
 import { AlignLeft } from "lucide-react-native";
 import Slider from "@react-native-community/slider";
 import { colors, palette } from "@a2b/ui";
+import { vehicleClasses, type VehicleClass } from "@a2b/core";
 
 export default function CalculatorInputScreen() {
   const router = useRouter();
 
   const [distance, setDistance] = useState(150); // km
   const [weight, setWeight] = useState(10); // tons
-  const [truckType, setTruckType] = useState("Canter"); // Pickup, Canter, Fuso, Trailer
+  const [truckType, setTruckType] = useState<VehicleClass>("CANTER");
   const [urgency, setUrgency] = useState(0); // %
 
-  const truckOptions = ["Pickup", "Canter", "Fuso", "Trailer"];
+  const truckOptions = Object.keys(vehicleClasses) as VehicleClass[];
 
   const handleCalculate = () => {
     // Phase 4 will connect this logic, for now we navigate to results with params
@@ -129,7 +130,7 @@ export default function CalculatorInputScreen() {
                       : styles.pillTextInactive,
                   ]}
                 >
-                  {type}
+                  {vehicleClasses[type].label}
                 </Text>
               </TouchableOpacity>
             ))}

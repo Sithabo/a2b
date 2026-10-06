@@ -3,10 +3,16 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-nati
 import { useRouter } from 'expo-router';
 import { Truck, AlertCircle, ShieldCheck, ArrowRight } from 'lucide-react-native';
 import { colors, palette } from "@a2b/ui";
+import { useMarket } from "@/store/useMarket";
+import { formatMoney } from "@a2b/core";
+
+// Placeholder until the matched load's agreed price is passed in.
+const DEPOSIT = 150000;
 
 // Source: 5.html — "Driver Accepted & Deposit"
 export default function DriverFoundScreen() {
   const router = useRouter();
+  const market = useMarket();
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -40,8 +46,8 @@ export default function DriverFoundScreen() {
           {/* Amount to Deposit */}
           <View style={styles.amountBox}>
             <Text style={styles.amountLabel}>Amount to Deposit</Text>
-            <Text style={styles.amountValue}>150,000</Text>
-            <Text style={styles.amountCurrency}>UGX</Text>
+            <Text style={styles.amountValue}>{formatMoney(DEPOSIT, market, { code: false })}</Text>
+            <Text style={styles.amountCurrency}>{market.currency.code}</Text>
           </View>
 
           {/* Escrow Note */}
@@ -59,7 +65,7 @@ export default function DriverFoundScreen() {
             onPress={() => router.push('/match-pay/payment')}
             activeOpacity={0.85}
           >
-            <Text style={styles.depositButtonText}>Deposit 150,000 UGX to Unlock Driver</Text>
+            <Text style={styles.depositButtonText}>Deposit {formatMoney(DEPOSIT, market)} to Unlock Driver</Text>
           </TouchableOpacity>
 
           {/* Secondary cancel link */}

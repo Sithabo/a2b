@@ -50,7 +50,7 @@ export default function ActiveDeliveryScreen() {
   // Find dynamic shipment or fallback to default
   const shipment =
     shipments.find((s) => s.id === idToFind) ||
-    shipments.find((s) => s.status === "ACTIVE") ||
+    shipments.find((s) => s.status === "IN_TRANSIT") ||
     shipments[0];
 
   const currentMilestoneIndex = shipment?.milestoneIndex ?? 2;
@@ -95,7 +95,7 @@ export default function ActiveDeliveryScreen() {
     if (shipment) {
       editShipment(shipment.id, {
         milestoneIndex: 0,
-        status: "ACTIVE",
+        status: "IN_TRANSIT",
       });
     }
   };
