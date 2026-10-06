@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { Image } from "expo-image";
 import { Phone, Mail, MailIcon, PhoneIcon } from "lucide-react-native";
-import { Colors } from "@/constants/theme";
+import { colors, palette } from "@a2b/ui";
 
 interface DriverContactCardProps {
   driverName: string;
@@ -76,14 +76,14 @@ export const DriverContactCard: React.FC<DriverContactCardProps> = ({
 
 const styles = StyleSheet.create({
   driverCard: {
-    backgroundColor: "#0F3D26", // Forest Green App Theme
+    backgroundColor: colors.primary, // Forest Green App Theme
     borderRadius: 35,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingVertical: 13,
     paddingHorizontal: 16,
-    // shadowColor: "#000",
+    // shadowColor: palette.black,
     // shadowOffset: { width: 0, height: 4 },
     // shadowOpacity: 0.15,
     // shadowRadius: 8,
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     width: 55,
     height: 55,
     borderRadius: 99,
-    backgroundColor: "#1F4E35",
+    backgroundColor: palette.forest[800],
     borderWidth: 1.5,
     borderColor: "transparent",
   },
@@ -109,12 +109,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   driverNameText: {
-    color: "#FFFFFF",
+    color: palette.white,
     fontSize: 15,
     fontWeight: "700",
   },
   driverRoleText: {
-    color: "#A7F3D0", // Soft Mint Green for premium secondary text
+    color: palette.emerald[200], // Soft Mint Green for premium secondary text
     fontSize: 12,
     marginTop: 1,
   },
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     alignItems: "center",
     justifyContent: "center",
   },

@@ -14,6 +14,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Anchor, MapPin, Search, X, ArrowLeft } from "lucide-react-native";
 import { LocationData } from "@/store/useShipmentStore";
+import { colors, palette } from "@a2b/ui";
 
 interface LocationSearchModalProps {
   isVisible: boolean;
@@ -137,7 +138,7 @@ export const LocationSearchModal = ({
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity onPress={onClose} style={styles.backBtn} activeOpacity={0.7}>
-              <ArrowLeft size={22} color="#0F3D26" />
+              <ArrowLeft size={22} color={colors.primary} />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>{title}</Text>
             <View style={{ width: 24 }} />
@@ -146,9 +147,9 @@ export const LocationSearchModal = ({
           {/* Search Input Box */}
           <View style={styles.searchBar}>
             {isLoading ? (
-              <ActivityIndicator size="small" color="#0F3D26" style={styles.searchIcon} />
+              <ActivityIndicator size="small" color={colors.primary} style={styles.searchIcon} />
             ) : (
-              <Search size={18} color="#9CA3AF" style={styles.searchIcon} />
+              <Search size={18} color={palette.gray[400]} style={styles.searchIcon} />
             )}
             <TextInput
               ref={inputRef}
@@ -156,14 +157,14 @@ export const LocationSearchModal = ({
               value={query}
               onChangeText={setQuery}
               placeholder={placeholder}
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={palette.gray[400]}
               autoCorrect={false}
               autoCapitalize="none"
               clearButtonMode="while-editing"
             />
             {query.length > 0 && (
               <TouchableOpacity onPress={() => setQuery("")} style={styles.clearBtn}>
-                <X size={16} color="#9CA3AF" />
+                <X size={16} color={palette.gray[400]} />
               </TouchableOpacity>
             )}
           </View>
@@ -185,7 +186,7 @@ export const LocationSearchModal = ({
                     onPress={() => onSelectLocation(port)}
                     activeOpacity={0.7}
                   >
-                    <Anchor size={16} color="#0F3D26" style={{ marginRight: 10 }} />
+                    <Anchor size={16} color={colors.primary} style={{ marginRight: 10 }} />
                     <Text style={styles.suggestionText}>{port.name}</Text>
                     <View style={styles.portBadge}>
                       <Text style={styles.portBadgeText}>PORT NODE</Text>
@@ -199,7 +200,7 @@ export const LocationSearchModal = ({
                     onPress={() => onSelectLocation(addr)}
                     activeOpacity={0.7}
                   >
-                    <MapPin size={16} color="#6B7280" style={{ marginRight: 10 }} />
+                    <MapPin size={16} color={palette.gray[500]} style={{ marginRight: 10 }} />
                     <Text style={styles.suggestionText}>{addr.name}</Text>
                   </TouchableOpacity>
                 ))}
@@ -228,11 +229,11 @@ export const LocationSearchModal = ({
                     <View style={styles.resultLeft}>
                       {location.is_port ? (
                         <View style={styles.anchorWrapper}>
-                          <Anchor size={18} color="#0F3D26" />
+                          <Anchor size={18} color={colors.primary} />
                         </View>
                       ) : (
                         <View style={styles.pinWrapper}>
-                          <MapPin size={18} color="#6B7280" />
+                          <MapPin size={18} color={palette.gray[500]} />
                         </View>
                       )}
                       <Text style={[styles.resultName, location.is_port && styles.resultNamePort]}>
@@ -259,11 +260,11 @@ export const LocationSearchModal = ({
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
-    backgroundColor: "#F5F5E9",
+    backgroundColor: palette.ivory[200],
   },
   innerContainer: {
     flex: 1,
-    backgroundColor: "#F5F5E9",
+    backgroundColor: palette.ivory[200],
   },
   header: {
     flexDirection: "row",
@@ -278,17 +279,17 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
   },
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 12,
     marginHorizontal: 16,
     marginBottom: 16,
     borderWidth: 1.5,
-    borderColor: "#E5E7EB",
+    borderColor: palette.gray[200],
     height: 48,
     paddingHorizontal: 12,
   },
@@ -298,7 +299,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: "#111827",
+    color: palette.gray[900],
     paddingVertical: 8,
   },
   clearBtn: {
@@ -315,7 +316,7 @@ const styles = StyleSheet.create({
   sectionHeader: {
     fontSize: 11,
     fontWeight: "bold",
-    color: "#9CA3AF", // subtle gray
+    color: palette.gray[400], // subtle gray
     letterSpacing: 0.8,
     marginTop: 20,
     marginBottom: 8,
@@ -325,12 +326,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     padding: 16,
     borderRadius: 12,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: "#F3F4F6",
+    borderColor: palette.gray[100],
   },
   resultLeft: {
     flexDirection: "row",
@@ -345,17 +346,17 @@ const styles = StyleSheet.create({
   },
   resultName: {
     fontSize: 15,
-    color: "#374151",
+    color: palette.gray[700],
     fontWeight: "500",
   },
   resultNamePort: {
     fontWeight: "600",
-    color: "#0F3D26",
+    color: colors.primary,
   },
   portBadge: {
-    backgroundColor: "#E6F4EA",
+    backgroundColor: palette.forest[50],
     borderWidth: 1,
-    borderColor: "#A7F3D0",
+    borderColor: palette.emerald[200],
     borderRadius: 6,
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -363,7 +364,7 @@ const styles = StyleSheet.create({
   portBadgeText: {
     fontSize: 9,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
   },
   emptyContainer: {
     padding: 32,
@@ -372,12 +373,12 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#374151",
+    color: palette.gray[700],
     textAlign: "center",
   },
   emptySubText: {
     fontSize: 12,
-    color: "#6B7280",
+    color: palette.gray[500],
     textAlign: "center",
     marginTop: 8,
     lineHeight: 18,
@@ -388,7 +389,7 @@ const styles = StyleSheet.create({
   introHeader: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
     marginBottom: 12,
     marginTop: 8,
   },
@@ -398,15 +399,15 @@ const styles = StyleSheet.create({
   suggestionItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     padding: 14,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#F3F4F6",
+    borderColor: palette.gray[100],
   },
   suggestionText: {
     fontSize: 14,
-    color: "#374151",
+    color: palette.gray[700],
     flex: 1,
   },
 });

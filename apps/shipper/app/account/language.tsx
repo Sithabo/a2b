@@ -2,14 +2,10 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { Check } from "lucide-react-native";
-import { ScreenHeader } from "@/components/ScreenHeader";
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { colors, palette, ScreenHeader } from "@a2b/ui";
 
 export default function LanguageScreen() {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
   const [selectedLanguage, setSelectedLanguage] = useState("en");
 
   const languages = [
@@ -19,7 +15,7 @@ export default function LanguageScreen() {
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.whiteAsh || "#F9FAFB" }]}>
+    <View style={[styles.container, { backgroundColor: colors.background || palette.gray[50] }]}>
       <ScreenHeader
         title="Language"
         subtitle="Select your preferred language"
@@ -44,7 +40,7 @@ export default function LanguageScreen() {
                     <Text style={styles.langName}>{lang.name}</Text>
                     <Text style={styles.nativeName}>({lang.nativeName})</Text>
                   </View>
-                  {isSelected && <Check size={20} color="#0F3D26" strokeWidth={3} />}
+                  {isSelected && <Check size={20} color={colors.primary} strokeWidth={3} />}
                 </TouchableOpacity>
               </View>
             );
@@ -63,10 +59,10 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 20,
     padding: 8,
-    shadowColor: "#000000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -90,15 +86,15 @@ const styles = StyleSheet.create({
   langName: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#111827",
+    color: palette.gray[900],
   },
   nativeName: {
     fontSize: 14,
-    color: "#6B7280",
+    color: palette.gray[500],
   },
   divider: {
     height: 1,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: palette.gray[100],
     marginHorizontal: 16,
   },
 });

@@ -4,6 +4,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { ArrowLeft, Clock } from "lucide-react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useShipmentStore } from "@/store/useShipmentStore";
+import { colors, palette } from "@a2b/ui";
 
 export default function ReleaseFundsScreen() {
   const router = useRouter();
@@ -22,7 +23,7 @@ export default function ReleaseFundsScreen() {
             style={styles.backButton}
             activeOpacity={0.7}
           >
-            <ArrowLeft color="#111827" size={24} />
+            <ArrowLeft color={palette.gray[900]} size={24} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Release Funds</Text>
           <View style={{ width: 40 }} />
@@ -56,7 +57,7 @@ export default function ReleaseFundsScreen() {
 
         {/* Expiration Timer */}
         <View style={styles.timerRow}>
-          <Clock color="#D97706" size={16} />
+          <Clock color={palette.amber[600]} size={16} />
           <Text style={styles.timerText}>Expires in 09:52</Text>
         </View>
 
@@ -89,10 +90,10 @@ export default function ReleaseFundsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5E9",
+    backgroundColor: palette.ivory[200],
   },
   header: {
-    backgroundColor: "#F5F5E9",
+    backgroundColor: palette.ivory[200],
     zIndex: 10,
   },
   headerRow: {
@@ -108,7 +109,7 @@ const styles = StyleSheet.create({
     marginLeft: -8,
   },
   headerTitle: {
-    color: "#111827",
+    color: palette.gray[900],
     fontSize: 18,
     fontWeight: "bold",
   },
@@ -120,17 +121,17 @@ const styles = StyleSheet.create({
   },
   instructionText: {
     fontSize: 16,
-    color: "#111827",
+    color: palette.gray[900],
     textAlign: "center",
     lineHeight: 24,
     marginBottom: 32,
   },
   codeCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 16,
     paddingVertical: 32,
     paddingHorizontal: 40,
-    shadowColor: "#000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 12,
@@ -142,18 +143,18 @@ const styles = StyleSheet.create({
   codeText: {
     fontSize: 48,
     fontWeight: "900",
-    color: "#0F3D26",
+    color: colors.primary,
     letterSpacing: 2,
   },
   demoButton: {
-    backgroundColor: "#FEF3C7",
+    backgroundColor: palette.amber[100],
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
     marginBottom: 32,
   },
   demoButtonText: {
-    color: "#D97706",
+    color: palette.amber[600],
     fontSize: 12,
     fontWeight: "bold",
   },
@@ -164,13 +165,13 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   timerText: {
-    color: "#D97706",
+    color: palette.amber[600],
     fontSize: 14,
     fontWeight: "bold",
   },
   warningText: {
     fontSize: 14,
-    color: "#4B5563",
+    color: palette.gray[600],
     textAlign: "center",
     lineHeight: 20,
   },
@@ -180,13 +181,13 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   primaryButton: {
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
     borderRadius: 9999,
     paddingVertical: 18,
     alignItems: "center",
   },
   primaryButtonText: {
-    color: "#FFFFFF",
+    color: palette.white,
     fontSize: 16,
     fontWeight: "bold",
   },
@@ -195,7 +196,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   textButtonText: {
-    color: "#0F3D26",
+    color: colors.primary,
     fontSize: 16,
     fontWeight: "bold",
   },

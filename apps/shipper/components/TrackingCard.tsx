@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, ViewStyle, TouchableOpacity } from "react-native";
 import { Package, Wrench, FlaskConical, Apple, QrCode } from "lucide-react-native";
 import { Shipment } from "@/store/useShipmentStore";
+import { colors, palette } from "@a2b/ui";
 
 export interface TrackingCardProps {
   shipment: Shipment;
@@ -118,7 +119,7 @@ export const TrackingCard: React.FC<TrackingCardProps> = ({
             <View style={[styles.lineFill, { width: `${progress}%` }]} />
             <View style={styles.startDot} />
             <View style={[styles.indicatorCircle, { left: `${progress}%` }]}>
-              <Package size={16} color="#0F3D26" strokeWidth={2.5} />
+              <Package size={16} color={colors.primary} strokeWidth={2.5} />
             </View>
             <View style={styles.endDot} />
           </View>
@@ -134,7 +135,7 @@ export const TrackingCard: React.FC<TrackingCardProps> = ({
       {/* Bottom Section: Icon card and Forest Green details card */}
       <View style={styles.bottomSection}>
         <View style={styles.iconBlock}>
-          <CargoIcon size={28} color="#0F3D26" strokeWidth={2.5} />
+          <CargoIcon size={28} color={colors.primary} strokeWidth={2.5} />
         </View>
 
         <View style={styles.greenBlock}>
@@ -146,7 +147,7 @@ export const TrackingCard: React.FC<TrackingCardProps> = ({
           </View>
 
           <View style={styles.qrCircle}>
-            <QrCode size={18} color="#0F3D26" strokeWidth={2.5} />
+            <QrCode size={18} color={colors.primary} strokeWidth={2.5} />
           </View>
         </View>
       </View>
@@ -156,16 +157,16 @@ export const TrackingCard: React.FC<TrackingCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 24,
     padding: 20,
-    shadowColor: "#000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 2,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: palette.gray[200],
   },
   topSection: {
     flexDirection: "row",
@@ -184,13 +185,13 @@ const styles = StyleSheet.create({
   locationName: {
     fontSize: 24,
     fontWeight: "semibold",
-    color: "#111827",
+    color: palette.gray[900],
     marginBottom: 4,
   },
   dateTimeText: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#6B7280",
+    color: palette.gray[500],
     marginTop: 2,
   },
   lineWrapper: {
@@ -201,14 +202,14 @@ const styles = StyleSheet.create({
   },
   lineBackground: {
     height: 3,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: palette.gray[200],
     width: "100%",
     position: "relative",
     justifyContent: "center",
   },
   lineFill: {
     height: 3,
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
     position: "absolute",
     left: 0,
   },
@@ -216,7 +217,7 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
     position: "absolute",
     left: 0,
   },
@@ -224,7 +225,7 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#9CA3AF",
+    backgroundColor: palette.gray[400],
     position: "absolute",
     right: 0,
   },
@@ -233,13 +234,13 @@ const styles = StyleSheet.create({
     height: 32,
     borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: "#E5E7EB",
-    backgroundColor: "#FFFFFF",
+    borderColor: palette.gray[200],
+    backgroundColor: palette.white,
     alignItems: "center",
     justifyContent: "center",
     position: "absolute",
     transform: [{ translateX: -16 }],
-    shadowColor: "#000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 3,
@@ -256,8 +257,8 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-    backgroundColor: "#F9FAFB",
+    borderColor: palette.gray[200],
+    backgroundColor: palette.gray[50],
     alignItems: "center",
     justifyContent: "center",
   },
@@ -265,7 +266,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 80,
     borderRadius: 16,
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
     padding: 14,
     flexDirection: "row",
     alignItems: "center",
@@ -283,14 +284,14 @@ const styles = StyleSheet.create({
   trackingCode: {
     fontSize: 18,
     fontWeight: "semibold",
-    color: "#FFFFFF",
+    color: palette.white,
     marginTop: 4,
   },
   qrCircle: {
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     alignItems: "center",
     justifyContent: "center",
   },

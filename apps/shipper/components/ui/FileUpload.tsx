@@ -1,8 +1,7 @@
 import React from "react";
 import { View, TouchableOpacity, StyleSheet, ViewStyle } from "react-native";
 import { Upload, CheckCircle } from "lucide-react-native";
-import { Colors } from "@/constants/theme";
-import { ThemedText } from "@/components/ThemedText";
+import { colors, palette, Text } from "@a2b/ui";
 
 interface FileUploadProps {
   label: string;
@@ -40,22 +39,22 @@ export const FileUpload = ({
         ]}
       >
         {isCompleted ? (
-          <CheckCircle size={20} color="#FFFFFF" />
+          <CheckCircle size={20} color={palette.white} />
         ) : (
-          <Upload size={20} color={Colors.light.gray[500]} />
+          <Upload size={20} color={palette.gray[500]} />
         )}
       </View>
 
       <View style={styles.textContainer}>
-        <ThemedText
+        <Text tone="primary"
           style={[styles.label, isCompleted && styles.completedLabel]}
         >
           {label}
-        </ThemedText>
+        </Text>
         {description && (
-          <ThemedText type="caption" style={styles.description}>
+          <Text variant="caption" tone="secondary" style={styles.description}>
             {description}
-          </ThemedText>
+          </Text>
         )}
       </View>
     </TouchableOpacity>
@@ -73,12 +72,12 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   defaultContainer: {
-    backgroundColor: "#FFFFFF",
-    borderColor: Colors.light.gray[300],
+    backgroundColor: palette.white,
+    borderColor: palette.gray[300],
   },
   completedContainer: {
     backgroundColor: "rgba(15, 61, 38, 0.05)", // Forest with opacity
-    borderColor: Colors.light.primary,
+    borderColor: colors.primary,
     borderStyle: "solid",
   },
   iconContainer: {
@@ -89,10 +88,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   defaultIconContainer: {
-    backgroundColor: Colors.light.gray[100],
+    backgroundColor: palette.gray[100],
   },
   completedIconContainer: {
-    backgroundColor: Colors.light.primary,
+    backgroundColor: colors.primary,
   },
   textContainer: {
     flex: 1,
@@ -101,12 +100,12 @@ const styles = StyleSheet.create({
   label: {
     fontWeight: "600",
     fontSize: 16,
-    color: Colors.light.gray[900],
+    color: palette.gray[900],
   },
   completedLabel: {
-    color: Colors.light.primary,
+    color: colors.primary,
   },
   description: {
-    color: Colors.light.gray[400],
+    color: palette.gray[400],
   },
 });

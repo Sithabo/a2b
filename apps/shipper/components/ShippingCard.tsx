@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, Image, ViewStyle, ImageSourcePropType, TouchableOpacity } from "react-native";
 import { Package } from "lucide-react-native";
 import { Shipment } from "@/store/useShipmentStore";
+import { colors, palette } from "@a2b/ui";
 
 export interface ShippingCardProps {
   shipment: Shipment;
@@ -77,7 +78,7 @@ export const ShippingCard: React.FC<ShippingCardProps> = ({
             {imageSource ? (
               <Image source={imageSource} style={styles.cargoImage} resizeMode="cover" />
             ) : (
-              <Package size={24} color="#0F3D26" strokeWidth={2} />
+              <Package size={24} color={colors.primary} strokeWidth={2} />
             )}
           </View>
           <View style={styles.metaInfo}>
@@ -106,7 +107,7 @@ export const ShippingCard: React.FC<ShippingCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 24,
     padding: 16,
   },
@@ -124,11 +125,11 @@ const styles = StyleSheet.create({
     width: 54,
     height: 54,
     borderRadius: 16, // Squircle - slightly less rounded than fully circular image container
-    backgroundColor: "#F3F4F6",
+    backgroundColor: palette.gray[100],
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: palette.gray[200],
     overflow: "hidden",
   },
   cargoImage: {
@@ -141,21 +142,21 @@ const styles = StyleSheet.create({
   trackingId: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#111827",
+    color: palette.gray[900],
   },
   cargoType: {
     fontSize: 13,
-    color: "#6B7280",
+    color: palette.gray[500],
     marginTop: 2,
   },
   statusPill: {
-    backgroundColor: "#0F3D26", // Forest Green status pill
+    backgroundColor: colors.primary, // Forest Green status pill
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
   },
   statusPillText: {
-    color: "#FFFFFF",
+    color: palette.white,
     fontSize: 11,
     fontWeight: "bold",
   },
@@ -173,16 +174,16 @@ const styles = StyleSheet.create({
   },
   locLabel: {
     fontSize: 13,
-    color: "#6B7280",
+    color: palette.gray[500],
   },
   locLabelRight: {
     fontSize: 13,
-    color: "#6B7280",
+    color: palette.gray[500],
     textAlign: "right",
   },
   locDate: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#111827",
+    color: palette.gray[900],
   },
 });

@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { AlignLeft } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Circle } from "react-native-svg";
+import { colors, palette } from "@a2b/ui";
 
 export default function CalculatorResultsScreen() {
   const router = useRouter();
@@ -46,7 +47,7 @@ export default function CalculatorResultsScreen() {
             style={styles.menuButton}
             activeOpacity={0.7}
           >
-            <AlignLeft color="#FFFFFF" size={24} />
+            <AlignLeft color={palette.white} size={24} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Suggested{"\n"}Offer</Text>
         </View>
@@ -68,7 +69,7 @@ export default function CalculatorResultsScreen() {
               cx="120"
               cy="120"
               r="100"
-              stroke="#A78BFA" // Purple
+              stroke={palette.violet[400]} // Purple
               strokeWidth="12"
               fill="none"
               strokeDasharray="628" // 2 * PI * r
@@ -91,7 +92,7 @@ export default function CalculatorResultsScreen() {
           {/* Row 1 */}
           <View style={styles.breakdownRow}>
             <View style={styles.breakdownLeft}>
-              <View style={[styles.dot, { backgroundColor: "#A78BFA" }]} />
+              <View style={[styles.dot, { backgroundColor: palette.violet[400] }]} />
               <Text style={styles.breakdownLabel}>Distance Cost</Text>
             </View>
             <Text style={styles.breakdownValue}>{formatCurrency(distanceCost)}</Text>
@@ -102,7 +103,7 @@ export default function CalculatorResultsScreen() {
           {/* Row 2 */}
           <View style={styles.breakdownRow}>
             <View style={styles.breakdownLeft}>
-              <View style={[styles.dot, { backgroundColor: "#34D399" }]} />
+              <View style={[styles.dot, { backgroundColor: palette.emerald[400] }]} />
               <Text style={styles.breakdownLabel}>Weight Surcharge</Text>
             </View>
             <Text style={styles.breakdownValue}>+ {formatCurrency(weightCost)}</Text>
@@ -113,7 +114,7 @@ export default function CalculatorResultsScreen() {
           {/* Row 3 */}
           <View style={styles.breakdownRow}>
             <View style={styles.breakdownLeft}>
-              <View style={[styles.dot, { backgroundColor: "#FBBF24" }]} />
+              <View style={[styles.dot, { backgroundColor: palette.amber[400] }]} />
               <Text style={styles.breakdownLabel}>Vehicle Premium</Text>
             </View>
             <Text style={styles.breakdownValue}>+ {formatCurrency(vehicleFee)}</Text>
@@ -124,7 +125,7 @@ export default function CalculatorResultsScreen() {
           {/* Row 4 */}
           <View style={styles.breakdownRow}>
             <View style={styles.breakdownLeft}>
-              <View style={[styles.dot, { backgroundColor: "#F87171" }]} />
+              <View style={[styles.dot, { backgroundColor: palette.red[400] }]} />
               <Text style={styles.breakdownLabel}>Urgency / Demand</Text>
             </View>
             <Text style={styles.breakdownValue}>+ {formatCurrency(urgencyPremium)}</Text>
@@ -146,11 +147,11 @@ export default function CalculatorResultsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0F3D26", // Forest Green top half
+    backgroundColor: colors.primary, // Forest Green top half
   },
   topSection: {
     flex: 1, // takes up available space above card
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
     paddingBottom: 40,
   },
   header: {
@@ -166,7 +167,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: "900",
-    color: "#FFFFFF",
+    color: palette.white,
     lineHeight: 34,
   },
   chartContainer: {
@@ -188,11 +189,11 @@ const styles = StyleSheet.create({
   chartTotal: {
     fontSize: 32,
     fontWeight: "900",
-    color: "#FFFFFF",
+    color: palette.white,
     marginTop: 4,
   },
   bottomCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     padding: 32,
@@ -219,28 +220,28 @@ const styles = StyleSheet.create({
   },
   breakdownLabel: {
     fontSize: 14,
-    color: "#4B5563",
+    color: palette.gray[600],
     fontWeight: "500",
   },
   breakdownValue: {
     fontSize: 16,
-    color: "#1F2937",
+    color: palette.gray[800],
     fontWeight: "600",
   },
   divider: {
     height: 1,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: palette.gray[100],
     width: "100%",
   },
   recalculateButton: {
-    backgroundColor: "#1F2937",
+    backgroundColor: palette.gray[800],
     borderRadius: 16,
     paddingVertical: 20,
     alignItems: "center",
     justifyContent: "center",
   },
   recalculateButtonText: {
-    color: "#FFFFFF",
+    color: palette.white,
     fontSize: 16,
     fontWeight: "bold",
   },

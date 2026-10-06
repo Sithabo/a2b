@@ -4,6 +4,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { ArrowLeft, Check, FileText, Share2 } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useShipmentStore } from "@/store/useShipmentStore";
+import { colors, palette } from "@a2b/ui";
 
 export default function OfficialReceiptScreen() {
   const router = useRouter();
@@ -29,7 +30,7 @@ export default function OfficialReceiptScreen() {
             style={styles.backButton}
             activeOpacity={0.7}
           >
-            <ArrowLeft color="#111827" size={24} />
+            <ArrowLeft color={palette.gray[900]} size={24} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Official Receipt</Text>
           <View style={{ width: 40 }} />
@@ -40,7 +41,7 @@ export default function OfficialReceiptScreen() {
         {/* Success Icon */}
         <View style={styles.successIconContainer}>
           <View style={styles.successCircle}>
-            <Check color="#FFFFFF" size={48} strokeWidth={3} />
+            <Check color={palette.white} size={48} strokeWidth={3} />
           </View>
         </View>
 
@@ -102,12 +103,12 @@ export default function OfficialReceiptScreen() {
         {/* Actions */}
         <View style={styles.actionsContainer}>
           <TouchableOpacity style={styles.outlineButton} activeOpacity={0.7}>
-            <FileText color="#0F3D26" size={18} />
+            <FileText color={colors.primary} size={18} />
             <Text style={styles.outlineButtonText}>Download PDF</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.outlineButton} activeOpacity={0.7}>
-            <Share2 color="#0F3D26" size={18} />
+            <Share2 color={colors.primary} size={18} />
             <Text style={styles.outlineButtonText}>Share via WhatsApp</Text>
           </TouchableOpacity>
 
@@ -128,10 +129,10 @@ export default function OfficialReceiptScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5E9",
+    backgroundColor: palette.ivory[200],
   },
   header: {
-    backgroundColor: "#F5F5E9",
+    backgroundColor: palette.ivory[200],
     zIndex: 10,
   },
   headerRow: {
@@ -147,7 +148,7 @@ const styles = StyleSheet.create({
     marginLeft: -8,
   },
   headerTitle: {
-    color: "#111827",
+    color: palette.gray[900],
     fontSize: 18,
     fontWeight: "bold",
   },
@@ -164,10 +165,10 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#0F3D26",
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.2,
     shadowRadius: 12,
@@ -176,7 +177,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
     marginBottom: 32,
   },
   receiptWrapper: {
@@ -186,7 +187,7 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   receiptCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 24,
     paddingVertical: 32,
     position: "relative",
@@ -202,14 +203,14 @@ const styles = StyleSheet.create({
   },
   metaLabel: {
     fontSize: 14,
-    color: "#4B5563",
+    color: palette.gray[600],
     fontWeight: "500",
     flex: 1,
   },
   metaValue: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "#111827",
+    color: palette.gray[900],
     flex: 1,
     textAlign: "right",
   },
@@ -225,7 +226,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 1,
     borderBottomWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: palette.gray[200],
     borderStyle: "dashed",
     marginHorizontal: 15,
   },
@@ -236,7 +237,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: "#F5F5E9",
+    backgroundColor: palette.ivory[200],
     zIndex: 2,
   },
   cutoutRight: {
@@ -246,7 +247,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: "#F5F5E9",
+    backgroundColor: palette.ivory[200],
     zIndex: 2,
   },
   priceSection: {
@@ -258,13 +259,13 @@ const styles = StyleSheet.create({
   },
   priceLabel: {
     fontSize: 18,
-    color: "#0F3D26",
+    color: colors.primary,
     fontWeight: "600",
   },
   priceValue: {
     fontSize: 20,
     fontWeight: "900",
-    color: "#0F3D26",
+    color: colors.primary,
   },
   actionsContainer: {
     width: "100%",
@@ -278,24 +279,24 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#0F3D26",
+    borderColor: colors.primary,
     paddingVertical: 16,
     gap: 8,
   },
   outlineButtonText: {
-    color: "#0F3D26",
+    color: colors.primary,
     fontSize: 15,
     fontWeight: "bold",
   },
   primaryButton: {
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 18,
     alignItems: "center",
     marginTop: 8,
   },
   primaryButtonText: {
-    color: "#FFFFFF",
+    color: palette.white,
     fontSize: 16,
     fontWeight: "bold",
   },

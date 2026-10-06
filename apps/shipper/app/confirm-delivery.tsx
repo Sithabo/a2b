@@ -4,6 +4,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { Image } from "expo-image";
 import { ArrowLeft, Shield } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { colors, palette } from "@a2b/ui";
 
 export default function ConfirmDeliveryScreen() {
   const router = useRouter();
@@ -20,7 +21,7 @@ export default function ConfirmDeliveryScreen() {
             style={styles.backButton}
             activeOpacity={0.7}
           >
-            <ArrowLeft color="#111827" size={24} />
+            <ArrowLeft color={palette.gray[900]} size={24} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Confirm Delivery</Text>
           <View style={{ width: 40 }} />
@@ -62,7 +63,7 @@ export default function ConfirmDeliveryScreen() {
         {/* Escrow Footer Info */}
         <View style={styles.footerInfo}>
           <View style={styles.shieldIconContainer}>
-            <Shield color="#FFFFFF" size={16} fill="#D97706" />
+            <Shield color={palette.white} size={16} fill={palette.amber[600]} />
           </View>
           <Text style={styles.footerText}>
             Funds are only released after{"\n"}confirmation.
@@ -76,10 +77,10 @@ export default function ConfirmDeliveryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5E9",
+    backgroundColor: palette.ivory[200],
   },
   header: {
-    backgroundColor: "#F5F5E9",
+    backgroundColor: palette.ivory[200],
     zIndex: 10,
   },
   headerRow: {
@@ -95,7 +96,7 @@ const styles = StyleSheet.create({
     marginLeft: -8,
   },
   headerTitle: {
-    color: "#111827",
+    color: palette.gray[900],
     fontSize: 18,
     fontWeight: "bold",
   },
@@ -116,7 +117,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "900",
-    color: "#0F3D26",
+    color: colors.primary,
     textAlign: "center",
     lineHeight: 40,
     marginBottom: 60,
@@ -126,13 +127,13 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   primaryButton: {
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
     borderRadius: 9999,
     paddingVertical: 18,
     alignItems: "center",
   },
   primaryButtonText: {
-    color: "#FFFFFF",
+    color: palette.white,
     fontSize: 16,
     fontWeight: "bold",
   },
@@ -142,10 +143,10 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#111827",
+    borderColor: palette.gray[900],
   },
   secondaryButtonText: {
-    color: "#111827",
+    color: palette.gray[900],
     fontSize: 16,
     fontWeight: "bold",
   },
@@ -162,7 +163,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   footerText: {
-    color: "#D97706",
+    color: palette.amber[600],
     fontSize: 14,
     fontWeight: "500",
     lineHeight: 20,

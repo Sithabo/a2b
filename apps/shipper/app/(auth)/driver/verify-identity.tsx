@@ -3,10 +3,8 @@ import { View, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { ArrowLeft, Shield } from "lucide-react-native";
-import { Button } from "@/components/ui/Button";
 import { FileUpload } from "@/components/ui/FileUpload";
-import { ThemedText } from "@/components/ThemedText";
-import { Colors } from "@/constants/theme";
+import { colors, palette, Text, Button } from "@a2b/ui";
 
 export default function VerifyIdentityScreen() {
   const router = useRouter();
@@ -48,21 +46,21 @@ export default function VerifyIdentityScreen() {
           onPress={() => router.back()}
           style={styles.backButton}
         >
-          <ArrowLeft size={20} color={Colors.light.gray[900]} />
+          <ArrowLeft size={20} color={palette.gray[900]} />
         </TouchableOpacity>
 
         <View style={styles.headerContainer}>
-          <ThemedText type="title" style={styles.headerTitle}>
+          <Text variant="display" tone="primary" style={styles.headerTitle}>
             Verify Your Identity
-          </ThemedText>
-          <ThemedText style={styles.headerSubtitle}>
+          </Text>
+          <Text tone="primary" style={styles.headerSubtitle}>
             Upload the following documents to get started.
-          </ThemedText>
+          </Text>
         </View>
 
         <View style={styles.formContainer}>
           <View style={styles.section}>
-            <ThemedText style={styles.sectionTitle}>Identity</ThemedText>
+            <Text tone="primary" style={styles.sectionTitle}>Identity</Text>
             <FileUpload
               label="National ID"
               description="Front and Back"
@@ -78,7 +76,7 @@ export default function VerifyIdentityScreen() {
           </View>
 
           <View style={styles.section}>
-            <ThemedText style={styles.sectionTitle}>Vehicle</ThemedText>
+            <Text tone="primary" style={styles.sectionTitle}>Vehicle</Text>
             <FileUpload
               label="Vehicle Photo"
               description="Show license plate clearly"
@@ -89,15 +87,15 @@ export default function VerifyIdentityScreen() {
         </View>
 
         <View style={styles.securityNote}>
-          <Shield size={24} color={Colors.light.primary} />
+          <Shield size={24} color={colors.primary} />
           <View style={styles.securityTextContainer}>
-            <ThemedText style={styles.securityTitle}>
+            <Text tone="primary" style={styles.securityTitle}>
               Secure Verification
-            </ThemedText>
-            <ThemedText type="caption" style={styles.securityDescription}>
+            </Text>
+            <Text variant="caption" tone="secondary" style={styles.securityDescription}>
               Your documents are encrypted and only used for verification
               purposes.
-            </ThemedText>
+            </Text>
           </View>
         </View>
 
@@ -105,9 +103,9 @@ export default function VerifyIdentityScreen() {
           title="Submit Documents"
           size="lg"
           onPress={handleSubmit}
-          isLoading={isLoading}
+          loading={isLoading}
           disabled={!isFormValid}
-          style={styles.submitButton}
+          fullWidth
         />
       </ScrollView>
     </SafeAreaView>
@@ -117,7 +115,7 @@ export default function VerifyIdentityScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.light.ivory,
+    backgroundColor: palette.ivory[200],
   },
   scrollContent: {
     padding: 16,
@@ -127,11 +125,11 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: Colors.light.gray[200],
+    borderColor: palette.gray[200],
     marginBottom: 24,
   },
   headerContainer: {
@@ -139,12 +137,12 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   headerTitle: {
-    color: Colors.light.primary,
+    color: colors.primary,
     fontSize: 28,
   },
   headerSubtitle: {
     fontSize: 18,
-    color: Colors.light.gray[500],
+    color: palette.gray[500],
   },
   formContainer: {
     gap: 40,
@@ -155,7 +153,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontWeight: "bold",
-    color: Colors.light.primary,
+    color: colors.primary,
     fontSize: 12,
     textTransform: "uppercase",
     letterSpacing: 1,
@@ -177,14 +175,11 @@ const styles = StyleSheet.create({
   },
   securityTitle: {
     fontWeight: "bold",
-    color: Colors.light.primary,
+    color: colors.primary,
     fontSize: 14,
     marginBottom: 2,
   },
   securityDescription: {
-    color: Colors.light.gray[500],
-  },
-  submitButton: {
-    width: "100%",
+    color: palette.gray[500],
   },
 });

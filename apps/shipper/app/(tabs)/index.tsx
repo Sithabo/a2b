@@ -10,8 +10,6 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Link, useRouter } from "expo-router";
 import { Image } from "expo-image";
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
   Bell,
   Truck,
@@ -29,10 +27,10 @@ import { ShippingCard } from "@/components/ShippingCard";
 import { ToolCard } from "@/components/ToolCard";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useShipmentStore } from "@/store/useShipmentStore";
+import { colors, palette } from "@a2b/ui";
 
 export default function HomeScreen() {
   const router = useRouter();
-  const colorScheme = useColorScheme();
   const userProfile = useAuthStore((state) => state.userProfile);
   const draftShipment = useShipmentStore((state) => state.draftShipment);
   const shipments = useShipmentStore((state) => state.shipments);
@@ -70,13 +68,13 @@ export default function HomeScreen() {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: "#f5f6ff" }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }]}
         showsVerticalScrollIndicator={false}
       >
         <LinearGradient
-          colors={["#0F3D26", "#f5f6ff"]}
+          colors={[colors.primary, colors.background]}
           locations={[0, 0.85]}
           style={[styles.gradientHeader, { paddingTop: insets.top }]}
         >
@@ -92,7 +90,7 @@ export default function HomeScreen() {
                     contentFit="cover"
                   />
                 ) : (
-                  <User color="#FFFFFF" size={24} />
+                  <User color={palette.white} size={24} />
                 )}
               </View>
               </Link>
@@ -108,18 +106,18 @@ export default function HomeScreen() {
             </View>
             <Link href={"/account/notifications"} asChild>
             <TouchableOpacity style={styles.headerNotificationButton}>
-              <Bell color="#FFFFFF" size={20} />
+              <Bell color={palette.white} size={20} />
             </TouchableOpacity>
             </Link>
           </View>
 
           {/* Search Bar */}
           <View style={styles.searchContainer}>
-            <Search color="#9CA3AF" size={20} style={styles.searchIcon} />
+            <Search color={palette.gray[400]} size={20} style={styles.searchIcon} />
             <TextInput
               style={styles.searchInput}
               placeholder="Search Shipping"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={palette.gray[400]}
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
@@ -172,7 +170,7 @@ export default function HomeScreen() {
                 onPress={() => router.push("/create-load/document-vault")}
               >
                 <View style={styles.alertCardHeader}>
-                  <AlertTriangle color="#D97706" size={20} />
+                  <AlertTriangle color={palette.amber[600]} size={20} />
                   <Text style={styles.alertCardTitle}>⚠️ Unfinished Import Shipment Detected</Text>
                 </View>
                 <Text style={styles.alertCardText}>
@@ -180,7 +178,7 @@ export default function HomeScreen() {
                 </Text>
                 <View style={styles.alertCardFooter}>
                   <Text style={styles.alertCardBtnText}>Complete Document Vault Uploads</Text>
-                  <ChevronRight color="#D97706" size={16} />
+                  <ChevronRight color={palette.amber[600]} size={16} />
                 </View>
               </TouchableOpacity>
             )}
@@ -226,7 +224,7 @@ export default function HomeScreen() {
           {/* Search Empty State */}
           {filteredShipments.length === 0 && (
             <View style={styles.emptyContainer}>
-              <Package color="#9CA3AF" size={48} />
+              <Package color={palette.gray[400]} size={48} />
               <Text style={styles.emptyTitle}>No Shipments Found</Text>
               <Text style={styles.emptySubtitle}>
                 {"We couldn't find any shipments matching \"" + searchQuery + "\""}
@@ -283,12 +281,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   avatarText: {
-    color: "#FFFFFF",
+    color: palette.white,
     fontSize: 20,
     fontWeight: "bold",
   },
   headerTitle: {
-    color: "#FFFFFF",
+    color: palette.white,
     fontSize: 20,
     fontWeight: "600",
     lineHeight: 24,
@@ -325,13 +323,13 @@ const styles = StyleSheet.create({
   searchInput: {
     width: "100%",
     height: 56,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 28,
     paddingLeft: 52,
     paddingRight: 16,
     fontSize: 16,
-    color: "#1C1917", // stone-900
-    shadowColor: "#000",
+    color: palette.stone[900], // stone-900
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
@@ -347,10 +345,10 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   trackingCard: {
-    backgroundColor: "#FFD700", // brand-gold
+    backgroundColor: palette.gold[400], // brand-gold
     borderRadius: 24, // 3xl
     padding: 24,
-    shadowColor: "#000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 10,
@@ -373,7 +371,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   trackingId: {
-    color: "#0F3D26",
+    color: colors.primary,
     fontSize: 24,
     fontWeight: "900", // black
   },
@@ -383,14 +381,14 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   trackingValue: {
-    color: "#0F3D26",
+    color: colors.primary,
     fontWeight: "bold",
     fontSize: 14,
   },
   statusDot: {
     width: 8,
     height: 8,
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
     borderRadius: 4,
     marginRight: 4,
   },
@@ -408,7 +406,7 @@ const styles = StyleSheet.create({
     left: 0,
     height: "100%",
     width: "66%",
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
     borderRadius: 2,
   },
   progressIconContainer: {
@@ -418,10 +416,10 @@ const styles = StyleSheet.create({
     transform: [{ translateY: -16 }, { translateX: -16 }],
     width: 32,
     height: 32,
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
     borderRadius: 16,
     borderWidth: 4,
-    borderColor: "#FFD700",
+    borderColor: palette.gold[400],
     alignItems: "center",
     justifyContent: "center",
   },
@@ -431,13 +429,13 @@ const styles = StyleSheet.create({
     right: 16,
     width: 48,
     height: 48,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     alignItems: "center",
     justifyContent: "center",
     transform: [{ rotate: "-12deg" }],
     borderRadius: 24, // Make it a circle since we don't have SVG star
     zIndex: 20,
-    shadowColor: "#000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -446,7 +444,7 @@ const styles = StyleSheet.create({
   fastBadgeText: {
     fontSize: 10,
     fontWeight: "900",
-    color: "#0F3D26",
+    color: colors.primary,
     textTransform: "uppercase",
   },
   packageImageContainer: {
@@ -463,27 +461,27 @@ const styles = StyleSheet.create({
   sectionHeading: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#1C1917", // stone-900
+    color: palette.stone[900], // stone-900
   },
   recentCard: {
-    backgroundColor: "#FFFFFF", // stone-50/50
+    backgroundColor: palette.white, // stone-50/50
     borderRadius: 24, // 3xl
     padding: 20,
     borderWidth: 1,
-    borderColor: "#F5F5F4", // stone-100
+    borderColor: palette.stone[100], // stone-100
   },
   recentHeader: {
     alignItems: "flex-start",
     marginBottom: 16,
   },
   inTransitPill: {
-    backgroundColor: "#FFD700",
+    backgroundColor: palette.gold[400],
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 16,
   },
   inTransitPillText: {
-    color: "#0F3D26",
+    color: colors.primary,
     fontSize: 10,
     fontWeight: "bold",
     textTransform: "uppercase",
@@ -500,17 +498,17 @@ const styles = StyleSheet.create({
   recentId: {
     fontSize: 18,
     fontWeight: "900",
-    color: "#0F3D26",
+    color: colors.primary,
     marginBottom: 4,
   },
   recentDateLabel: {
-    color: "#A8A29E", // stone-400
+    color: palette.stone[400], // stone-400
     fontSize: 12,
     fontWeight: "bold",
     textTransform: "uppercase",
   },
   recentDateValue: {
-    color: "#1C1917",
+    color: palette.stone[900],
     fontWeight: "bold",
     fontSize: 14,
   },
@@ -523,7 +521,7 @@ const styles = StyleSheet.create({
   smallProgressTrack: {
     height: 4,
     width: "100%",
-    backgroundColor: "#E7E5E4", // stone-200
+    backgroundColor: palette.stone[200], // stone-200
     borderRadius: 2,
     marginTop: 16,
     position: "relative",
@@ -534,7 +532,7 @@ const styles = StyleSheet.create({
     left: 0,
     height: "100%",
     width: "50%",
-    backgroundColor: "#FFD700",
+    backgroundColor: palette.gold[400],
     borderRadius: 2,
   },
   smallProgressIconContainer: {
@@ -544,22 +542,22 @@ const styles = StyleSheet.create({
     transform: [{ translateY: -12 }, { translateX: -12 }],
     width: 24,
     height: 24,
-    backgroundColor: "#FFD700",
+    backgroundColor: palette.gold[400],
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: "#FFFFFF",
+    borderColor: palette.white,
     alignItems: "center",
     justifyContent: "center",
   },
   calculateButton: {
     width: "100%",
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
     padding: 20,
     borderRadius: 24,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    shadowColor: "#000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -577,17 +575,17 @@ const styles = StyleSheet.create({
   },
   calculateText: {
     fontWeight: "bold",
-    color: "#FFFFFF",
+    color: palette.white,
     fontSize: 16,
   },
   alertCard: {
-    backgroundColor: "#FFFBEB",
+    backgroundColor: palette.amber[50],
     borderWidth: 1.5,
-    borderColor: "#F59E0B",
+    borderColor: palette.amber[500],
     borderRadius: 20,
     padding: 16,
     gap: 8,
-    shadowColor: "#F59E0B",
+    shadowColor: palette.amber[500],
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
@@ -601,11 +599,11 @@ const styles = StyleSheet.create({
   alertCardTitle: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "#B45309",
+    color: palette.amber[700],
   },
   alertCardText: {
     fontSize: 12,
-    color: "#78350F",
+    color: palette.amber[900],
     lineHeight: 18,
   },
   alertCardFooter: {
@@ -613,34 +611,34 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderTopWidth: 1,
-    borderTopColor: "#FEF3C7",
+    borderTopColor: palette.amber[100],
     paddingTop: 10,
     marginTop: 4,
   },
   alertCardBtnText: {
     fontSize: 12,
     fontWeight: "bold",
-    color: "#B45309",
+    color: palette.amber[700],
   },
   emptyContainer: {
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 40,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: palette.gray[200],
     gap: 12,
     marginTop: 10,
   },
   emptyTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
   },
   emptySubtitle: {
     fontSize: 14,
-    color: "#6B7280",
+    color: palette.gray[500],
     textAlign: "center",
     paddingHorizontal: 20,
   },
@@ -662,9 +660,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   pillButtonActive: {
-    backgroundColor: "#FFFFFF",
-    borderColor: "#FFFFFF",
-    shadowColor: "#000",
+    backgroundColor: palette.white,
+    borderColor: palette.white,
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -673,10 +671,10 @@ const styles = StyleSheet.create({
   pillText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: palette.white,
   },
   pillTextActive: {
-    color: "#0F3D26",
+    color: colors.primary,
     fontWeight: "bold",
   },
 });

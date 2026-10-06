@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Image } from "expo-image";
+import { palette } from "@a2b/ui";
 
 export interface OrderData {
   id: string;
@@ -66,7 +67,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ data }) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 24,
     padding: 16,
     gap: 20,
@@ -78,7 +79,7 @@ const styles = StyleSheet.create({
   imageContainer: {
     width: 80,
     height: 80,
-    backgroundColor: "#F7F6ED", // matches the beige background
+    backgroundColor: palette.ivory[100], // matches the beige background
     borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
@@ -95,28 +96,28 @@ const styles = StyleSheet.create({
   },
   orderId: {
     fontSize: 14,
-    color: "#57534E", // stone-600
+    color: palette.stone[600], // stone-600
   },
   orderTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#1C1917", // stone-900
+    color: palette.stone[900], // stone-900
     marginBottom: 4,
   },
   statusBadge: {
-    backgroundColor: "#7C3AED", // violet-600 approx
+    backgroundColor: palette.violet[600], // violet-600 approx
     alignSelf: "flex-start",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 9999,
   },
   statusText: {
-    color: "#FFFFFF",
+    color: palette.white,
     fontSize: 12,
     fontWeight: "bold",
   },
   detailsBox: {
-    backgroundColor: "#E2E8F0", // slate-200 / slate-100 hybrid matching grey
+    backgroundColor: palette.slate[200], // slate-200 / slate-100 hybrid matching grey
     borderRadius: 16,
     padding: 20,
     gap: 16,
@@ -128,10 +129,10 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: 15,
-    color: "#3F3F46", // zinc-700
+    color: palette.zinc[700], // zinc-700
   },
   detailValue: {
     fontSize: 15,
-    color: "#1C1917", // stone-900
+    color: palette.stone[900], // stone-900
   },
 });

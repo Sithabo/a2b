@@ -1,17 +1,13 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
-import { ScreenHeader } from "@/components/ScreenHeader";
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { colors, palette, ScreenHeader } from "@a2b/ui";
 
 export default function PrivacyScreen() {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.whiteAsh || "#F9FAFB" }]}>
+    <View style={[styles.container, { backgroundColor: colors.background || palette.gray[50] }]}>
       <ScreenHeader
         title="Privacy Policy"
         subtitle="Review our privacy terms"
@@ -65,12 +61,12 @@ const styles = StyleSheet.create({
   introHeading: {
     fontSize: 22,
     fontWeight: "900",
-    color: "#0F3D26",
+    color: colors.primary,
     marginBottom: 4,
   },
   lastUpdated: {
     fontSize: 12,
-    color: "#6B7280",
+    color: palette.gray[500],
     marginBottom: 24,
   },
   termsSection: {
@@ -79,11 +75,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#111827",
+    color: palette.gray[900],
   },
   sectionBody: {
     fontSize: 13,
-    color: "#4B5563",
+    color: palette.gray[600],
     lineHeight: 20,
   },
 });

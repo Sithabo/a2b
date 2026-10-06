@@ -1,6 +1,7 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { Check, X, Sparkle } from "lucide-react-native";
+import { colors, palette } from "@a2b/ui";
 
 export interface StatusHeroProps {
   state: "confirmed" | "unconfirmed";
@@ -10,7 +11,7 @@ export const StatusHero: React.FC<StatusHeroProps> = ({ state }) => {
   const isSuccess = state === "confirmed";
 
   // Brand Forest Green or Red
-  const coreColor = isSuccess ? "#0F3D26" : "#EF4444";
+  const coreColor = isSuccess ? colors.primary : palette.red[500];
   const ripple1Color = isSuccess ? "rgba(15, 61, 38, 0.2)" : "rgba(239, 68, 68, 0.2)";
   const ripple2Color = isSuccess ? "rgba(15, 61, 38, 0.08)" : "rgba(239, 68, 68, 0.08)";
 
@@ -20,16 +21,16 @@ export const StatusHero: React.FC<StatusHeroProps> = ({ state }) => {
       {isSuccess && (
         <>
           <View style={[styles.sparkle, { top: "10%", left: "15%" }]}>
-            <Sparkle size={20} color="#D97706" fill="#D97706" />
+            <Sparkle size={20} color={palette.amber[600]} fill={palette.amber[600]} />
           </View>
           <View style={[styles.sparkle, { top: "5%", right: "20%" }]}>
-            <Sparkle size={32} color="#F59E0B" fill="#F59E0B" />
+            <Sparkle size={32} color={palette.amber[500]} fill={palette.amber[500]} />
           </View>
           <View style={[styles.sparkle, { bottom: "15%", left: "12%" }]}>
-            <Sparkle size={24} color="#FBBF24" fill="#FBBF24" />
+            <Sparkle size={24} color={palette.amber[400]} fill={palette.amber[400]} />
           </View>
           <View style={[styles.sparkle, { bottom: "25%", right: "15%" }]}>
-            <Sparkle size={16} color="#D97706" fill="#D97706" />
+            <Sparkle size={16} color={palette.amber[600]} fill={palette.amber[600]} />
           </View>
         </>
       )}
@@ -39,9 +40,9 @@ export const StatusHero: React.FC<StatusHeroProps> = ({ state }) => {
         <View style={[styles.rippleMedium, { backgroundColor: ripple1Color }]}>
           <View style={[styles.coreCircle, { backgroundColor: coreColor }]}>
             {isSuccess ? (
-              <Check size={64} color="#FFFFFF" strokeWidth={4} />
+              <Check size={64} color={palette.white} strokeWidth={4} />
             ) : (
-              <X size={64} color="#FFFFFF" strokeWidth={4} />
+              <X size={64} color={palette.white} strokeWidth={4} />
             )}
           </View>
         </View>
@@ -82,7 +83,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     // Base shadow directly on core
-    shadowColor: "#000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,

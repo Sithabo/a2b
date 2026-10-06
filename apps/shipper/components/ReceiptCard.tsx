@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, ViewStyle } from "react-native";
+import { palette } from "@a2b/ui";
 
 export interface ReceiptRowProps {
   label: string;
@@ -50,12 +51,12 @@ export const ReceiptDivider = () => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 24,
     width: "100%",
     paddingTop: 24,
     paddingBottom: 24,
-    shadowColor: "#000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 10,
@@ -72,11 +73,11 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     fontSize: 16,
-    color: "#292524", // stone-800
+    color: palette.stone[800], // stone-800
   },
   rowValue: {
     fontSize: 16,
-    color: "#1C1917", // stone-900
+    color: palette.stone[900], // stone-900
   },
   boldText: {
     fontWeight: "bold",
@@ -92,7 +93,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 1,
     borderWidth: 1,
-    borderColor: "#D1D5DB", // stone-300
+    borderColor: palette.gray[300], // stone-300
     borderStyle: "dashed",
     marginHorizontal: 12, // Gap for cutouts to sit cleanly
   },
@@ -100,7 +101,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#F7F6ED", // Beige background from layout!
+    backgroundColor: palette.ivory[100], // Beige background from layout!
     position: "absolute",
     zIndex: 10,
   },

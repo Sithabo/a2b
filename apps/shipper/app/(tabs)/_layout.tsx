@@ -10,6 +10,7 @@ import {
 import { Home, Plus, User } from "lucide-react-native";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { palette } from "@a2b/ui";
 
 // ─── Tab Config ───────────────────────────────────────────────────────────────
 
@@ -58,7 +59,7 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
                 activeOpacity={0.85}
                 style={styles.activePill}
               >
-                <Icon size={20} color="#111111" strokeWidth={2.2} />
+                <Icon size={20} color={palette.gray[900]} strokeWidth={2.2} />
                 <Text style={styles.activeLabel}>{tab.label}</Text>
               </TouchableOpacity>
             );
@@ -72,7 +73,7 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
               activeOpacity={0.75}
               style={styles.inactivePill}
             >
-              <Icon size={22} color="#FFFFFF" strokeWidth={2} />
+              <Icon size={22} color={palette.white} strokeWidth={2} />
             </TouchableOpacity>
           );
         })}
@@ -93,12 +94,12 @@ const styles = StyleSheet.create({
   floatingBar: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#111111",
+    backgroundColor: palette.gray[900],
     borderRadius: 40,
     paddingHorizontal: 8,
     paddingVertical: 8,
     gap: 8,
-    shadowColor: "#000000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.35,
     shadowRadius: 20,
@@ -107,14 +108,14 @@ const styles = StyleSheet.create({
   activePill: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 28,
     paddingHorizontal: 18,
     paddingVertical: 12,
     gap: 8,
   },
   activeLabel: {
-    color: "#111111",
+    color: palette.gray[900],
     fontSize: 14,
     fontWeight: "700",
     letterSpacing: 0.2,
@@ -123,7 +124,7 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 20,
-    backgroundColor: "#27272A",
+    backgroundColor: palette.zinc[800],
     alignItems: "center",
     justifyContent: "center",
   },

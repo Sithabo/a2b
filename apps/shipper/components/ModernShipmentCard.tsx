@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import { Shipment } from "@/store/useShipmentStore";
 import { MessageSquare, Phone } from "lucide-react-native";
+import { colors, palette } from "@a2b/ui";
 
 interface ModernShipmentCardProps {
   shipment: Shipment | any;
@@ -53,10 +54,10 @@ export const ModernShipmentCard: React.FC<ModernShipmentCardProps> = ({
 
           <View style={styles.driverActionsCapsule}>
             <TouchableOpacity style={styles.actionBtnWhite} activeOpacity={0.7}>
-              <MessageSquare size={14} color="#111827" fill="#111827" />
+              <MessageSquare size={14} color={palette.gray[900]} fill={palette.gray[900]} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.actionBtnYellow} activeOpacity={0.7}>
-              <Phone size={14} color="#111827" fill="#111827" />
+              <Phone size={14} color={palette.gray[900]} fill={palette.gray[900]} />
             </TouchableOpacity>
           </View>
         </View>
@@ -122,17 +123,17 @@ export const ModernShipmentCard: React.FC<ModernShipmentCardProps> = ({
 
 const styles = StyleSheet.create({
   cardContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 20,
     padding: 20,
-    shadowColor: "#000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.04,
     shadowRadius: 10,
     elevation: 2,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: "#F3F4F6",
+    borderColor: palette.gray[100],
   },
   // Driver Header
   driverHeader: {
@@ -150,36 +151,36 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: palette.gray[100],
   },
   driverName: {
     fontSize: 15,
     fontWeight: "bold",
-    color: "#111827",
+    color: palette.gray[900],
   },
   driverRole: {
     fontSize: 12,
-    color: "#6B7280",
+    color: palette.gray[500],
     marginTop: 2,
   },
   driverActionsCapsule: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F9FAFB",
+    backgroundColor: palette.gray[50],
     borderRadius: 9999,
     padding: 4,
     gap: 6,
     borderWidth: 1,
-    borderColor: "#F3F4F6", // gentle bound for visibility
+    borderColor: palette.gray[100], // gentle bound for visibility
   },
   actionBtnWhite: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
@@ -189,7 +190,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#FDE047",
+    backgroundColor: palette.yellow[300],
     alignItems: "center",
     justifyContent: "center",
   },
@@ -214,12 +215,12 @@ const styles = StyleSheet.create({
   orderId: {
     fontSize: 18,
     fontWeight: "900",
-    color: "#1C1917", // near black
+    color: palette.stone[900], // near black
   },
   priceText: {
     fontSize: 18,
     fontWeight: "900",
-    color: "#1C1917",
+    color: palette.stone[900],
   },
 
   // Timeline
@@ -234,7 +235,7 @@ const styles = StyleSheet.create({
     bottom: 24, // stop above bottom dot bounding box
     width: 0,
     borderLeftWidth: 2,
-    borderColor: "#0F3D26", // Dark green mapping to the mockup line color
+    borderColor: colors.primary, // Dark green mapping to the mockup line color
     borderStyle: "dashed",
     zIndex: 1,
     opacity: 0.8,
@@ -256,10 +257,10 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   dotBlack: {
-    backgroundColor: "#1F2937",
+    backgroundColor: palette.gray[800],
   },
   dotDarkGreen: {
-    backgroundColor: "#0F3D26", // brand-forest
+    backgroundColor: colors.primary, // brand-forest
   },
   stepTextContainer: {
     flex: 1,
@@ -267,7 +268,7 @@ const styles = StyleSheet.create({
   },
   stepLabel: {
     fontSize: 11,
-    color: "#6B7280", // gray-500
+    color: palette.gray[500], // gray-500
     marginBottom: 2,
     fontWeight: "600",
     letterSpacing: 0.5,
@@ -275,7 +276,7 @@ const styles = StyleSheet.create({
   stepValue: {
     fontSize: 15,
     fontWeight: "bold",
-    color: "#111827",
+    color: palette.gray[900],
     lineHeight: 20,
   },
 
@@ -283,7 +284,7 @@ const styles = StyleSheet.create({
   postedText: {
     marginTop: 12,
     fontSize: 13,
-    color: "#6B7280", // gray-500
+    color: palette.gray[500], // gray-500
     fontWeight: "500",
   },
 });

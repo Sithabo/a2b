@@ -9,14 +9,10 @@ import {
   Navigation,
   CheckCircle,
 } from "lucide-react-native";
-import { ScreenHeader } from "@/components/ScreenHeader";
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { colors, palette, ScreenHeader } from "@a2b/ui";
 
 export default function HowItWorksScreen() {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
 
   const steps = [
     {
@@ -52,7 +48,7 @@ export default function HowItWorksScreen() {
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.whiteAsh || "#F9FAFB" }]}>
+    <View style={[styles.container, { backgroundColor: colors.background || palette.gray[50] }]}>
       <ScreenHeader
         title="How A2B Works"
         subtitle="Step-by-step freight shipping guide"
@@ -72,7 +68,7 @@ export default function HowItWorksScreen() {
             return (
               <View key={index} style={styles.stepCard}>
                 <View style={styles.iconContainer}>
-                  <Icon color="#0F3D26" size={24} />
+                  <Icon color={colors.primary} size={24} />
                 </View>
                 <View style={styles.stepContent}>
                   <Text style={styles.stepTitle}>{step.title}</Text>
@@ -98,12 +94,12 @@ const styles = StyleSheet.create({
   introHeading: {
     fontSize: 22,
     fontWeight: "900",
-    color: "#0F3D26",
+    color: colors.primary,
     marginBottom: 8,
   },
   introSub: {
     fontSize: 14,
-    color: "#4B5563",
+    color: palette.gray[600],
     lineHeight: 22,
     marginBottom: 24,
   },
@@ -112,23 +108,23 @@ const styles = StyleSheet.create({
   },
   stepCard: {
     flexDirection: "row",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 20,
     padding: 20,
     gap: 16,
-    shadowColor: "#000000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
     shadowRadius: 8,
     elevation: 2,
     borderWidth: 1,
-    borderColor: "#F3F4F6",
+    borderColor: palette.gray[100],
   },
   iconContainer: {
     width: 48,
     height: 48,
     borderRadius: 16,
-    backgroundColor: "#E6F4EA",
+    backgroundColor: palette.forest[50],
     alignItems: "center",
     justifyContent: "center",
   },
@@ -139,11 +135,11 @@ const styles = StyleSheet.create({
   stepTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#111827",
+    color: palette.gray[900],
   },
   stepDesc: {
     fontSize: 13,
-    color: "#6B7280",
+    color: palette.gray[500],
     lineHeight: 20,
   },
 });

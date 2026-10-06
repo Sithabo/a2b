@@ -13,9 +13,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
 import CountryPicker, { CountryCode, Country } from 'react-native-country-picker-modal';
 import { parsePhoneNumberFromString } from 'libphonenumber-js/min';
-import { Button } from "@/components/ui/Button";
-import { ThemedText } from "@/components/ThemedText";
-import { Colors } from "@/constants/theme";
+import { colors, palette, partnerColors, Text, Button } from "@a2b/ui";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -70,27 +68,27 @@ export default function LoginScreen() {
             onPress={() => router.back()}
             style={styles.backButton}
           >
-            <ArrowLeft size={20} color={Colors.light.gray[900]} />
+            <ArrowLeft size={20} color={palette.gray[900]} />
           </TouchableOpacity>
 
           <View style={styles.headerContainer}>
-            <ThemedText type="title" style={styles.headerTitle}>
+            <Text variant="display" tone="primary" style={styles.headerTitle}>
               Enter Your Phone
-            </ThemedText>
-            <ThemedText style={styles.headerSubtitle}>
+            </Text>
+            <Text tone="primary" style={styles.headerSubtitle}>
               Verify with SMS to continue as a{" "}
-              <ThemedText style={{ fontWeight: "bold", fontSize: 18 }}>
+              <Text tone="primary" style={{ fontWeight: "bold", fontSize: 18 }}>
                 {params.role || "user"}
-              </ThemedText>
+              </Text>
               .
-            </ThemedText>
+            </Text>
           </View>
 
           {/* Form */}
           <View style={styles.formContainer}>
             {/* Phone Input */}
             <View style={styles.inputGroup}>
-              <ThemedText style={styles.inputLabel}>Phone Number</ThemedText>
+              <Text tone="primary" style={styles.inputLabel}>Phone Number</Text>
               <View style={[styles.inputWrapper, error ? styles.inputError : null]}>
                 <View style={styles.countryCodePicker}>
                   <CountryPicker
@@ -108,7 +106,7 @@ export default function LoginScreen() {
                 </View>
                 <TextInput
                   placeholder="700 000 000"
-                  placeholderTextColor={Colors.light.gray[400]}
+                  placeholderTextColor={palette.gray[400]}
                   style={styles.textInput}
                   keyboardType="phone-pad"
                   value={phoneNumber}
@@ -116,7 +114,7 @@ export default function LoginScreen() {
                   maxLength={15}
                 />
               </View>
-              {error ? <ThemedText style={styles.errorText}>{error}</ThemedText> : null}
+              {error ? <Text tone="primary" style={styles.errorText}>{error}</Text> : null}
             </View>
 
             <View style={styles.buttonGroup}>
@@ -125,9 +123,8 @@ export default function LoginScreen() {
                 title="MTN MoMo"
                 size="lg"
                 onPress={() => handleLogin("momo")}
-                isLoading={isLoading}
+                loading={isLoading}
                 style={styles.momoButton}
-                textStyle={styles.momoButtonText}
               /> */}
 
               <Button
@@ -135,17 +132,15 @@ export default function LoginScreen() {
                 variant="primary"
                 size="lg"
                 onPress={() => handleLogin("sms")}
-                isLoading={isLoading}
-                style={styles.smsButton}
-                textStyle={styles.smsButtonText}
+                loading={isLoading}
               />
             </View>
           </View>
 
           <View style={styles.footerContainer}>
-            <ThemedText type="caption" style={styles.footerText}>
+            <Text variant="caption" tone="secondary" style={styles.footerText}>
               By continuing, you agree to our Terms of Service & Privacy Policy
-            </ThemedText>
+            </Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -156,7 +151,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.light.ivory,
+    backgroundColor: palette.ivory[200],
   },
   keyboardView: {
     flex: 1,
@@ -169,11 +164,11 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: Colors.light.gray[200],
+    borderColor: palette.gray[200],
     marginBottom: 32,
   },
   headerContainer: {
@@ -181,12 +176,12 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   headerTitle: {
-    color: Colors.light.primary, // Forest
+    color: colors.primary, // Forest
     fontSize: 28,
   },
   headerSubtitle: {
     fontSize: 18,
-    color: Colors.light.gray[500],
+    color: palette.gray[500],
   },
   formContainer: {
     gap: 24,
@@ -196,15 +191,15 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontWeight: "600",
-    color: Colors.light.primary,
+    color: colors.primary,
     marginLeft: 4,
   },
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderWidth: 1,
-    borderColor: Colors.light.gray[200],
+    borderColor: palette.gray[200],
     borderRadius: 12,
     overflow: "hidden",
     height: 56,
@@ -214,7 +209,7 @@ const styles = StyleSheet.create({
     borderColor: "red",
   },
   countryCodePicker: {
-    backgroundColor: Colors.light.gray[100],
+    backgroundColor: palette.gray[100],
     height: "100%",
     flexShrink: 0,
     minWidth: 96,
@@ -223,7 +218,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
     marginLeft: -16, // to touch the edge
     borderRightWidth: 1,
-    borderRightColor: Colors.light.gray[200],
+    borderRightColor: palette.gray[200],
   },
   pickerButton: {
     flexDirection: "row",
@@ -234,7 +229,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
     fontSize: 18,
-    color: Colors.light.gray[900],
+    color: palette.gray[900],
     fontWeight: "500",
     paddingVertical: 0,
     textAlignVertical: "center",
@@ -248,19 +243,12 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   momoButton: {
-    backgroundColor: "#FFCC00", // MTN Yellow
-    borderColor: "#FFCC00",
+    backgroundColor: partnerColors.mtn, // MTN Yellow
+    borderColor: partnerColors.mtn,
   },
   momoButtonText: {
-    color: "#000000",
+    color: palette.black,
     fontWeight: "bold",
-  },
-  smsButton: {
-    backgroundColor: Colors.light.gray[600],
-    borderColor: Colors.light.gray[600],
-  },
-  smsButtonText: {
-    color: "#FFFFFF",
   },
   footerContainer: {
     flex: 1,
@@ -272,7 +260,7 @@ const styles = StyleSheet.create({
   },
   footerText: {
     textAlign: "center",
-    color: Colors.light.gray[400],
+    color: palette.gray[400],
     paddingHorizontal: 40,
     fontSize: 12,
   },

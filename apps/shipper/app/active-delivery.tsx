@@ -15,8 +15,6 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
   ArrowLeft,
   Truck,
@@ -34,15 +32,13 @@ import {
   X,
 } from "lucide-react-native";
 import { useShipmentStore } from "@/store/useShipmentStore";
-import { ScreenHeader } from "@/components/ScreenHeader";
 import { DriverContactCard } from "@/components/DriverContactCard";
 import { MilestoneTimeline } from "@/components/MilestoneTimeline";
+import { colors, palette, ScreenHeader } from "@a2b/ui";
 
 export default function ActiveDeliveryScreen() {
   const router = useRouter();
   const { trackingId } = useLocalSearchParams<{ trackingId: string }>();
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
 
   const [vehicleModalVisible, setVehicleModalVisible] = React.useState(false);
@@ -211,7 +207,7 @@ export default function ActiveDeliveryScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.whiteAsh }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <ScreenHeader
         title="Active Delivery"
@@ -229,7 +225,7 @@ export default function ActiveDeliveryScreen() {
         {/* Top Header Card (emulates screenshot) */}
         <View style={styles.topCard}>
           <View style={styles.topAvatarContainer}>
-            <Package color="#D97706" size={32} />
+            <Package color={palette.amber[600]} size={32} />
           </View>
           <View>
             <Text style={styles.topTitle}>{getCargoName()}</Text>
@@ -242,7 +238,7 @@ export default function ActiveDeliveryScreen() {
                 style={styles.copyBtn}
                 activeOpacity={0.6}
               >
-                <Copy color="#6B7280" size={14} />
+                <Copy color={palette.gray[500]} size={14} />
               </TouchableOpacity>
             </View>
           </View>
@@ -276,7 +272,7 @@ export default function ActiveDeliveryScreen() {
           </View>
           <View style={[styles.specsRow, styles.specsRowLast]}>
             <Text style={styles.specsLabel}>Status:</Text>
-            <Text style={[styles.specsValue, { color: "#0F3D26" }]}>
+            <Text style={[styles.specsValue, { color: colors.primary }]}>
               {getMilestoneStatusText(currentMilestoneIndex)}
             </Text>
           </View>
@@ -293,7 +289,7 @@ export default function ActiveDeliveryScreen() {
         {/* Vertical Stepper Timeline Component (replacing live map) */}
         {/* <View style={styles.card}> */}
         {/* <View style={styles.timelineHeader}>
-          <Compass color="#0F3D26" size={18} />
+          <Compass color={colors.primary} size={18} />
           <Text style={styles.cardSectionTitle}>
             Milestone Tracking Timeline
           </Text>
@@ -342,7 +338,7 @@ export default function ActiveDeliveryScreen() {
         {/* Vehicle Information */}
         {/* <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Truck color="#6B7280" size={14} />
+            <Truck color={palette.gray[500]} size={14} />
             <Text style={styles.cardTitle}>Vehicle Information</Text>
           </View>
 
@@ -423,7 +419,7 @@ export default function ActiveDeliveryScreen() {
                 style={styles.modalCloseBtn}
                 activeOpacity={0.6}
               >
-                <X color="#374151" size={20} />
+                <X color={palette.gray[700]} size={20} />
               </TouchableOpacity>
             </View>
 
@@ -442,7 +438,7 @@ export default function ActiveDeliveryScreen() {
                   Delivery Partner • Verified
                 </Text>
                 <View style={styles.modalRatingRow}>
-                  <Star color="#D97706" size={14} fill="#D97706" />
+                  <Star color={palette.amber[600]} size={14} fill={palette.amber[600]} />
                   <Text style={styles.modalRatingText}>
                     4.9 (124 deliveries)
                   </Text>
@@ -455,7 +451,7 @@ export default function ActiveDeliveryScreen() {
 
             {/* Vehicle Details Title */}
             <View style={styles.modalSectionHeader}>
-              <Truck color="#0F3D26" size={18} />
+              <Truck color={colors.primary} size={18} />
               <Text style={styles.modalSectionTitle}>Vehicle Details</Text>
             </View>
 
@@ -512,14 +508,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingTop: 56, // For safe area
     paddingBottom: 16,
     paddingHorizontal: 16,
-    shadowColor: "#000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
@@ -535,12 +531,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   headerTitle: {
-    color: "#FFFFFF",
+    color: palette.white,
     fontSize: 18,
     fontWeight: "bold",
   },
   headerSubtitle: {
-    color: "#A7F3D0",
+    color: palette.emerald[200],
     fontSize: 12,
     fontWeight: "500",
   },
@@ -552,7 +548,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   topCard: {
-    // backgroundColor: "#FFFFFF",
+    // backgroundColor: palette.white,
     // borderRadius: 20,
     padding: 20,
     alignItems: "center",
@@ -561,8 +557,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 24,
     // borderWidth: 1,
-    // borderColor: "#F3F4F6",
-    // shadowColor: "#000",
+    // borderColor: palette.gray[100],
+    // shadowColor: palette.black,
     // shadowOffset: { width: 0, height: 2 },
     // shadowOpacity: 0.05,
     // shadowRadius: 8,
@@ -572,17 +568,17 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: "#FFFBEB",
+    backgroundColor: palette.amber[50],
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: "#FEF3C7",
+    borderColor: palette.amber[100],
   },
   topTitle: {
     fontSize: 20,
     fontWeight: "800",
-    color: "#111827",
+    color: palette.gray[900],
     // textAlign: "center",
   },
   trackingRow: {
@@ -593,14 +589,14 @@ const styles = StyleSheet.create({
   },
   trackingIdText: {
     fontSize: 14,
-    color: "#6B7280",
+    color: palette.gray[500],
     fontWeight: "500",
   },
   copyBtn: {
     padding: 4,
   },
   specsCard: {
-    backgroundColor: "#F3F4F6",
+    backgroundColor: palette.gray[100],
     borderRadius: 16,
     padding: 16,
     width: "100%",
@@ -610,7 +606,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingVertical: 10,
     // borderBottomWidth: 1,
-    // borderBottomColor: "#E5E7EB",
+    // borderBottomColor: palette.gray[200],
   },
   specsRowLast: {
     borderBottomWidth: 0,
@@ -618,24 +614,24 @@ const styles = StyleSheet.create({
   },
   specsLabel: {
     fontSize: 14,
-    color: "#6B7280",
+    color: palette.gray[500],
     fontWeight: "500",
   },
   specsValue: {
     fontSize: 14,
-    color: "#111827",
+    color: palette.gray[900],
     fontWeight: "600",
     textAlign: "right",
     flex: 1,
     paddingLeft: 16,
   },
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 16,
     padding: 20,
     borderWidth: 1,
-    borderColor: "#F3F4F6",
-    shadowColor: "#000",
+    borderColor: palette.gray[100],
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -651,7 +647,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 12,
     fontWeight: "bold",
-    color: "#6B7280",
+    color: palette.gray[500],
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
@@ -662,14 +658,14 @@ const styles = StyleSheet.create({
   },
   callButton: {
     flex: 1,
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 12,
     borderRadius: 12,
     gap: 8,
-    shadowColor: "#0F3D26",
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -682,9 +678,9 @@ const styles = StyleSheet.create({
   },
   messageButton: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: palette.gray[200],
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -693,7 +689,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   messageText: {
-    color: "#374151",
+    color: palette.gray[700],
     fontWeight: "600",
     fontSize: 14,
   },
@@ -703,13 +699,13 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: palette.gray[100],
     paddingBottom: 12,
   },
   cardSectionTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
   },
   timelineContainer: {
     width: "100%",
@@ -718,11 +714,11 @@ const styles = StyleSheet.create({
   },
 
   simulatorCard: {
-    backgroundColor: "#FFFBEB",
+    backgroundColor: palette.amber[50],
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: "#FDE68A",
+    borderColor: palette.amber[200],
   },
   simulatorHeader: {
     marginBottom: 12,
@@ -730,11 +726,11 @@ const styles = StyleSheet.create({
   simulatorTitle: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "#B45309",
+    color: palette.amber[700],
   },
   simulatorSubtitle: {
     fontSize: 12,
-    color: "#78350F",
+    color: palette.amber[900],
     marginTop: 2,
   },
   simulatorActions: {
@@ -743,31 +739,31 @@ const styles = StyleSheet.create({
   },
   simButton: {
     flex: 1,
-    backgroundColor: "#D97706",
+    backgroundColor: palette.amber[600],
     paddingVertical: 10,
     borderRadius: 8,
     alignItems: "center",
   },
   simButtonDisabled: {
-    backgroundColor: "#FCD34D",
+    backgroundColor: palette.amber[300],
     opacity: 0.6,
   },
   simButtonText: {
-    color: "#FFFFFF",
+    color: palette.white,
     fontWeight: "bold",
     fontSize: 12,
   },
   simResetButton: {
     backgroundColor: "transparent",
     borderWidth: 1,
-    borderColor: "#D97706",
+    borderColor: palette.amber[600],
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 8,
     alignItems: "center",
   },
   simResetButtonText: {
-    color: "#D97706",
+    color: palette.amber[600],
     fontWeight: "bold",
     fontSize: 12,
   },
@@ -783,7 +779,7 @@ const styles = StyleSheet.create({
   gridLabel: {
     fontSize: 10,
     fontWeight: "600",
-    color: "#9CA3AF",
+    color: palette.gray[400],
     textTransform: "uppercase",
     letterSpacing: 0.5,
     marginBottom: 2,
@@ -791,28 +787,28 @@ const styles = StyleSheet.create({
   gridValue: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#1F2937",
+    color: palette.gray[800],
   },
   divider: {
     width: "100%",
     height: 1,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: palette.gray[100],
     marginVertical: 4,
   },
   plateBox: {
-    backgroundColor: "#F3F4F6",
+    backgroundColor: palette.gray[100],
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: palette.gray[200],
     marginTop: 4,
   },
   plateText: {
     fontSize: 12,
     fontWeight: "bold",
     fontFamily: "monospace",
-    color: "#1F2937",
+    color: palette.gray[800],
   },
   confirmActionContainer: {
     position: "absolute",
@@ -822,7 +818,7 @@ const styles = StyleSheet.create({
   },
   confirmButton: {
     width: "100%",
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
     paddingVertical: 14,
     borderRadius: 12,
     flexDirection: "row",
@@ -831,7 +827,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   confirmButtonText: {
-    color: "#FFFFFF",
+    color: palette.white,
     fontSize: 16,
     fontWeight: "bold",
   },
@@ -841,12 +837,12 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     padding: 24,
     paddingBottom: 40,
-    shadowColor: "#000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
@@ -855,7 +851,7 @@ const styles = StyleSheet.create({
   modalHandle: {
     width: 36,
     height: 4,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: palette.gray[200],
     borderRadius: 2,
     alignSelf: "center",
     marginBottom: 16,
@@ -869,7 +865,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#111827",
+    color: palette.gray[900],
   },
   modalCloseBtn: {
     padding: 4,
@@ -883,7 +879,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: palette.gray[100],
   },
   modalDriverText: {
     marginLeft: 16,
@@ -892,11 +888,11 @@ const styles = StyleSheet.create({
   modalDriverName: {
     fontSize: 16,
     fontWeight: "800",
-    color: "#111827",
+    color: palette.gray[900],
   },
   modalDriverRole: {
     fontSize: 13,
-    color: "#6B7280",
+    color: palette.gray[500],
     marginTop: 2,
   },
   modalRatingRow: {
@@ -907,12 +903,12 @@ const styles = StyleSheet.create({
   },
   modalRatingText: {
     fontSize: 12,
-    color: "#4B5563",
+    color: palette.gray[600],
     fontWeight: "600",
   },
   modalDivider: {
     height: 1,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: palette.gray[100],
     marginVertical: 16,
   },
   modalSectionHeader: {
@@ -924,7 +920,7 @@ const styles = StyleSheet.create({
   modalSectionTitle: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#0F3D26",
+    color: colors.primary,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
@@ -941,7 +937,7 @@ const styles = StyleSheet.create({
   modalGridLabel: {
     fontSize: 11,
     fontWeight: "600",
-    color: "#9CA3AF",
+    color: palette.gray[400],
     textTransform: "uppercase",
     letterSpacing: 0.5,
     marginBottom: 4,
@@ -949,26 +945,26 @@ const styles = StyleSheet.create({
   modalGridValue: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#1F2937",
+    color: palette.gray[800],
   },
   modalPlateBox: {
-    backgroundColor: "#F3F4F6",
+    backgroundColor: palette.gray[100],
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: palette.gray[200],
     alignSelf: "flex-start",
   },
   modalPlateText: {
     fontSize: 12,
     fontWeight: "bold",
-    color: "#1F2937",
+    color: palette.gray[800],
   },
   complianceBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#ECFDF5",
+    backgroundColor: palette.emerald[50],
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
@@ -978,17 +974,17 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#10B981",
+    backgroundColor: palette.emerald[500],
     marginRight: 6,
   },
   complianceText: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#047857",
+    color: palette.emerald[700],
   },
   modalButton: {
     width: "100%",
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: "center",
@@ -996,7 +992,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   modalButtonText: {
-    color: "#FFFFFF",
+    color: palette.white,
     fontSize: 15,
     fontWeight: "700",
   },

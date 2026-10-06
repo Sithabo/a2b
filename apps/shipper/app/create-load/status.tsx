@@ -3,10 +3,8 @@ import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from "react-nati
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusHero } from "@/components/StatusHero";
 import { ReceiptCard, ReceiptDivider, ReceiptRow } from "@/components/ReceiptCard";
-import { PrimaryButton } from "@/components/PrimaryButton";
-import { ScreenHeader } from "@/components/ScreenHeader";
-import { Colors } from "@/constants/theme";
 import { useShipmentStore } from "@/store/useShipmentStore";
+import { colors, palette, ScreenHeader, Button } from "@a2b/ui";
 
 export default function StatusScreen() {
   const router = useRouter();
@@ -48,7 +46,7 @@ export default function StatusScreen() {
         <StatusHero state={isSuccess ? "confirmed" : "unconfirmed"} />
 
         <View style={styles.textCenter}>
-          <Text style={[styles.mainHeading, !isSuccess && { color: "#EF4444" }]}>
+          <Text style={[styles.mainHeading, !isSuccess && { color: palette.red[500] }]}>
             {title}
           </Text>
           <Text style={styles.subHeading}>{subtitle}</Text>
@@ -64,7 +62,7 @@ export default function StatusScreen() {
           
           <View style={styles.offerRow}>
             <Text style={styles.offerLabel}>Your Offer:</Text>
-            <Text style={[styles.offerValue, !isSuccess && { color: "#EF4444" }]}>
+            <Text style={[styles.offerValue, !isSuccess && { color: palette.red[500] }]}>
               {formattedPrice} UGX
             </Text>
           </View>
@@ -77,7 +75,7 @@ export default function StatusScreen() {
 
       {/* Persistent Bottom Action */}
       <View style={styles.footer}>
-        <PrimaryButton
+        <Button
           title="Back to Home"
           onPress={() => router.replace("/(tabs)")}
         />
@@ -89,7 +87,7 @@ export default function StatusScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light.whiteAsh, // Beige background matching the image
+    backgroundColor: colors.background, // Beige background matching the image
   },
   navBar: {
     flexDirection: "row",
@@ -101,7 +99,7 @@ const styles = StyleSheet.create({
   navTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#0F3D26", // brand-forest
+    color: colors.primary, // brand-forest
   },
   scrollContent: {
     paddingHorizontal: 24,
@@ -116,12 +114,12 @@ const styles = StyleSheet.create({
   mainHeading: {
     fontSize: 26,
     fontWeight: "900", // black
-    color: "#0F3D26",
+    color: colors.primary,
     textAlign: "center",
   },
   subHeading: {
     fontSize: 16,
-    color: "#57534E", // stone-600
+    color: palette.stone[600], // stone-600
     textAlign: "center",
   },
   receiptCard: {
@@ -138,17 +136,17 @@ const styles = StyleSheet.create({
   offerLabel: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
   },
   offerValue: {
     fontSize: 22,
     fontWeight: "900", // black
-    color: "#0F3D26",
+    color: colors.primary,
   },
   footer: {
     paddingHorizontal: 24,
     paddingTop: 16,
     paddingBottom: 32, // safe area padding
-    backgroundColor: "#F7F6ED",
+    backgroundColor: palette.ivory[100],
   },
 });

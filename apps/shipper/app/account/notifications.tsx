@@ -2,17 +2,13 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { BellOff } from "lucide-react-native";
-import { ScreenHeader } from "@/components/ScreenHeader";
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { colors, palette, ScreenHeader } from "@a2b/ui";
 
 export default function NotificationsScreen() {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.whiteAsh || "#F9FAFB" }]}>
+    <View style={[styles.container, { backgroundColor: colors.background || palette.gray[50] }]}>
       <ScreenHeader
         title="Notifications"
         subtitle="Manage your alerts and notifications"
@@ -23,7 +19,7 @@ export default function NotificationsScreen() {
       <View style={styles.content}>
         <View style={styles.emptyContainer}>
           <View style={styles.iconCircle}>
-            <BellOff color="#0F3D26" size={36} />
+            <BellOff color={colors.primary} size={36} />
           </View>
           <Text style={styles.emptyTitle}>All caught up!</Text>
           <Text style={styles.emptyText}>
@@ -54,10 +50,10 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "#E6F4EA",
+    backgroundColor: palette.forest[50],
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#0F3D26",
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 10,
@@ -66,12 +62,12 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
     marginTop: 8,
   },
   emptyText: {
     fontSize: 14,
-    color: "#6B7280",
+    color: palette.gray[500],
     textAlign: "center",
     lineHeight: 22,
   },

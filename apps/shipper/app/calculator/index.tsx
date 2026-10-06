@@ -11,6 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { AlignLeft } from "lucide-react-native";
 import Slider from "@react-native-community/slider";
+import { colors, palette } from "@a2b/ui";
 
 export default function CalculatorInputScreen() {
   const router = useRouter();
@@ -41,7 +42,7 @@ export default function CalculatorInputScreen() {
           style={styles.menuButton}
           activeOpacity={0.7}
         >
-          <AlignLeft color="#1F2937" size={24} />
+          <AlignLeft color={palette.gray[800]} size={24} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Calculate{"\n"}Fair Price</Text>
       </View>
@@ -70,9 +71,9 @@ export default function CalculatorInputScreen() {
               step={1}
               value={distance}
               onValueChange={setDistance}
-              minimumTrackTintColor="#0F3D26"
-              maximumTrackTintColor="#E5E7EB"
-              thumbTintColor="#0F3D26"
+              minimumTrackTintColor={colors.primary}
+              maximumTrackTintColor={palette.gray[200]}
+              thumbTintColor={colors.primary}
             />
           </View>
         </View>
@@ -97,9 +98,9 @@ export default function CalculatorInputScreen() {
               step={0.5}
               value={weight}
               onValueChange={setWeight}
-              minimumTrackTintColor="#0F3D26"
-              maximumTrackTintColor="#E5E7EB"
-              thumbTintColor="#0F3D26"
+              minimumTrackTintColor={colors.primary}
+              maximumTrackTintColor={palette.gray[200]}
+              thumbTintColor={colors.primary}
             />
           </View>
         </View>
@@ -157,9 +158,9 @@ export default function CalculatorInputScreen() {
               step={1}
               value={urgency}
               onValueChange={setUrgency}
-              minimumTrackTintColor="#0F3D26"
-              maximumTrackTintColor="#E5E7EB"
-              thumbTintColor="#0F3D26"
+              minimumTrackTintColor={colors.primary}
+              maximumTrackTintColor={palette.gray[200]}
+              thumbTintColor={colors.primary}
             />
           </View>
         </View>
@@ -180,7 +181,7 @@ export default function CalculatorInputScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5E9", // brand off-white
+    backgroundColor: palette.ivory[200], // brand off-white
   },
   header: {
     flexDirection: "row",
@@ -196,7 +197,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: "900",
-    color: "#1F2937",
+    color: palette.gray[800],
     lineHeight: 34,
   },
   content: {
@@ -216,27 +217,27 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#9CA3AF",
+    color: palette.gray[400],
     marginBottom: 8,
   },
   fieldUnit: {
     fontSize: 14,
-    color: "#9CA3AF",
+    color: palette.gray[400],
     fontWeight: "500",
   },
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: palette.gray[200],
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
   },
   prefix: {
     fontSize: 16,
-    color: "#9CA3AF",
+    color: palette.gray[400],
     fontWeight: "500",
     marginRight: 8,
   },
@@ -244,7 +245,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 18,
     fontWeight: "bold",
-    color: "#1F2937",
+    color: palette.gray[800],
   },
   sliderContainer: {
     marginTop: -12, // Pull slider up to overlap the input box bottom border
@@ -268,23 +269,23 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   pillActive: {
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
   },
   pillInactive: {
-    backgroundColor: "#F3F4F6", // light gray
+    backgroundColor: palette.gray[100], // light gray
   },
   pillText: {
     fontSize: 14,
     fontWeight: "bold",
   },
   pillTextActive: {
-    color: "#FFFFFF",
+    color: palette.white,
   },
   pillTextInactive: {
-    color: "#6B7280",
+    color: palette.gray[500],
   },
   calculateButton: {
-    backgroundColor: "#1F2937", // Dark color from the mockup, though we can use 0F3D26
+    backgroundColor: palette.gray[800], // Dark color from the mockup, though we can use 0F3D26
     borderRadius: 16,
     paddingVertical: 20,
     alignItems: "center",
@@ -292,7 +293,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   calculateButtonText: {
-    color: "#FFFFFF",
+    color: palette.white,
     fontSize: 16,
     fontWeight: "bold",
   },

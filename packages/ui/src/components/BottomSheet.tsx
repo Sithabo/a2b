@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Modal, View, Text, StyleSheet, Pressable, Dimensions } from 'react-native';
+import { Modal, View, StyleSheet, Pressable, Dimensions } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { 
     useSharedValue, 
@@ -7,6 +7,9 @@ import Animated, {
     withTiming,
     runOnJS 
 } from 'react-native-reanimated';
+import { colors, palette } from '../tokens/colors';
+import { radius, spacing } from '../tokens/layout';
+import { Text } from './Text';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -80,10 +83,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ isVisible, onClose, ti
             
             {title && (
               <View style={styles.header}>
-                <Text style={styles.title}>{title}</Text>
-                <View style={styles.headerDots}>
-                  <Text style={styles.dotsText}>•••</Text>
-                </View>
+                <Text variant="h2">{title}</Text>
               </View>
             )}
             
@@ -100,7 +100,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ isVisible, onClose, ti
 const styles = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: colors.overlay,
     zIndex: 1,
   },
   backdropPressable: {
@@ -111,46 +111,29 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#F7F6ED', // Match beige tone of screenshot exactly
-    borderTopLeftRadius: 36,
-    borderTopRightRadius: 36,
-    paddingTop: 16,
+    backgroundColor: palette.ivory[100],
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
+    paddingTop: spacing.lg,
     paddingBottom: 48,
-    paddingHorizontal: 24,
+    paddingHorizontal: spacing['2xl'],
     zIndex: 2,
     minHeight: 250,
   },
   dragPillContainer: {
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: spacing['2xl'],
   },
   dragPill: {
     width: 44,
     height: 5,
     borderRadius: 3,
-    backgroundColor: '#D1D5DB', // stone-300
+    backgroundColor: colors.borderStrong,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1C1917', // stone-900
-  },
-  headerDots: {
-    padding: 4,
-  },
-  dotsText: {
-    fontSize: 24,
-    color: '#0F3D26', // Forest green
-    fontWeight: 'bold',
-    lineHeight: 24,
+    marginBottom: spacing.xl,
   },
   content: {
-    gap: 16,
-  }
+    gap: spacing.lg,
+  },
 });

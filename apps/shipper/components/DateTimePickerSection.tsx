@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { CalendarDays, Clock, Lock, Info } from "lucide-react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { colors, palette } from "@a2b/ui";
 
 interface DateTimePickerSectionProps {
   pickupDate: Date | null;
@@ -74,7 +75,7 @@ export const DateTimePickerSection: React.FC<DateTimePickerSectionProps> = ({
       {/* 1. Pickup Section (Ready for Pickup) */}
       <View style={styles.sectionCard}>
         <View style={styles.cardHeader}>
-          <CalendarDays size={18} color="#0F3D26" />
+          <CalendarDays size={18} color={colors.primary} />
           <Text style={styles.cardSectionTitle}>Ready for Pickup</Text>
         </View>
 
@@ -90,7 +91,7 @@ export const DateTimePickerSection: React.FC<DateTimePickerSectionProps> = ({
               {formatDate(pickupDate)}
             </Text>
           </View>
-          <CalendarDays size={18} color="#9CA3AF" />
+          <CalendarDays size={18} color={palette.gray[400]} />
         </TouchableOpacity>
 
         {/* Time Window Selector */}
@@ -99,7 +100,7 @@ export const DateTimePickerSection: React.FC<DateTimePickerSectionProps> = ({
           
           {isImportFlow ? (
             <View style={styles.disabledWindowBox}>
-              <Lock size={16} color="#4B5563" />
+              <Lock size={16} color={palette.gray[600]} />
               <Text style={styles.disabledWindowText}>
                 Port Standard Hours: 08:00 - 17:00
               </Text>
@@ -141,7 +142,7 @@ export const DateTimePickerSection: React.FC<DateTimePickerSectionProps> = ({
         {/* Import Warning Banner */}
         {isImportFlow && (
           <View style={styles.warningBanner}>
-            <Info size={16} color="#B45309" />
+            <Info size={16} color={palette.amber[700]} />
             <Text style={styles.warningText}>
               Note: Port terminal operating hours may differ. Ensure your pickup window aligns with official port gate hours to avoid detention fees.
             </Text>
@@ -152,7 +153,7 @@ export const DateTimePickerSection: React.FC<DateTimePickerSectionProps> = ({
       {/* 2. Delivery Section (Delivery Deadline) */}
       <View style={styles.sectionCard}>
         <View style={styles.cardHeader}>
-          <Clock size={18} color="#0F3D26" />
+          <Clock size={18} color={colors.primary} />
           <Text style={styles.cardSectionTitle}>Delivery Deadline</Text>
         </View>
 
@@ -168,7 +169,7 @@ export const DateTimePickerSection: React.FC<DateTimePickerSectionProps> = ({
               {formatDate(deliveryDate)}
             </Text>
           </View>
-          <CalendarDays size={18} color="#9CA3AF" />
+          <CalendarDays size={18} color={palette.gray[400]} />
         </TouchableOpacity>
 
         {/* Time Not Later Than Selector */}
@@ -183,7 +184,7 @@ export const DateTimePickerSection: React.FC<DateTimePickerSectionProps> = ({
               {formatTime(time)}
             </Text>
           </View>
-          <Clock size={18} color="#9CA3AF" />
+          <Clock size={18} color={palette.gray[400]} />
         </TouchableOpacity>
 
         {/* Micro-copy */}
@@ -230,17 +231,17 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
     marginBottom: -8,
   },
   sectionCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 20,
     padding: 20,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: palette.gray[200],
     gap: 16,
-    shadowColor: "#000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 6,
@@ -251,20 +252,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: palette.gray[100],
     paddingBottom: 12,
   },
   cardSectionTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
   },
   inputRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: palette.gray[100],
     paddingVertical: 10,
   },
   inputContent: {
@@ -274,17 +275,17 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 11,
     fontWeight: "bold",
-    color: "#9CA3AF",
+    color: palette.gray[400],
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   inputValue: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
   },
   placeholder: {
-    color: "#9CA3AF",
+    color: palette.gray[400],
   },
   timeWindowContainer: {
     gap: 10,
@@ -294,16 +295,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: palette.gray[100],
     borderWidth: 1.5,
-    borderColor: "#E5E7EB",
+    borderColor: palette.gray[200],
     borderRadius: 12,
     paddingHorizontal: 16,
     height: 52,
   },
   disabledWindowText: {
     fontSize: 14,
-    color: "#4B5563",
+    color: palette.gray[600],
     fontWeight: "600",
   },
   windowGrid: {
@@ -318,42 +319,42 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   windowInactive: {
-    backgroundColor: "#FFFFFF",
-    borderColor: "#E5E7EB",
+    backgroundColor: palette.white,
+    borderColor: palette.gray[200],
   },
   windowActive: {
-    backgroundColor: "#E6F4EA",
-    borderColor: "#0F3D26",
+    backgroundColor: palette.forest[50],
+    borderColor: colors.primary,
   },
   windowButtonText: {
     fontSize: 14,
     fontWeight: "bold",
   },
   windowTextActive: {
-    color: "#0F3D26",
+    color: colors.primary,
   },
   windowTextInactive: {
-    color: "#4B5563",
+    color: palette.gray[600],
   },
   microCopy: {
     fontSize: 12,
-    color: "#6B7280",
+    color: palette.gray[500],
     lineHeight: 18,
     fontStyle: "italic",
   },
   warningBanner: {
     flexDirection: "row",
     gap: 8,
-    backgroundColor: "#FFFBEB",
+    backgroundColor: palette.amber[50],
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
-    borderColor: "#FEF3C7",
+    borderColor: palette.amber[100],
     alignItems: "flex-start",
   },
   warningText: {
     fontSize: 11,
-    color: "#B45309",
+    color: palette.amber[700],
     flex: 1,
     lineHeight: 16,
     fontWeight: "500",

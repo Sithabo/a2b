@@ -1,18 +1,15 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Check, Phone, Package } from 'lucide-react-native';
+import { colors, palette } from "@a2b/ui";
 
 // Source: 7.html — "Payment Confirmed!"
 export default function PaymentConfirmedScreen() {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? 'light'];
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -60,7 +57,7 @@ export default function PaymentConfirmedScreen() {
               onPress={() => router.replace('/receipts')}
               activeOpacity={0.85}
             >
-              <Package color="#0F3D26" size={20} />
+              <Package color={colors.primary} size={20} />
               <Text style={styles.shipmentsButtonText}>See Pending Shipments</Text>
             </TouchableOpacity>
           </View>
@@ -82,12 +79,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: palette.white,
     borderRadius: 24,
     padding: 24,
     alignItems: 'center',
     gap: 20,
-    shadowColor: '#0F3D26',
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.08,
     shadowRadius: 30,
@@ -97,10 +94,10 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#0F3D26',
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#0F3D26',
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -110,20 +107,20 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#0F3D26',
+    color: colors.primary,
     letterSpacing: -0.5,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 14,
-    color: '#6B7280',
+    color: palette.gray[500],
     fontWeight: '500',
     textAlign: 'center',
     marginTop: -8,
   },
   amountBox: {
     width: '100%',
-    backgroundColor: '#F0F0E6',
+    backgroundColor: palette.ivory[400],
     borderRadius: 12,
     padding: 24,
     alignItems: 'center',
@@ -131,7 +128,7 @@ const styles = StyleSheet.create({
   amountLabel: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#6B7280',
+    color: palette.gray[500],
     textTransform: 'uppercase',
     letterSpacing: 0.8,
     marginBottom: 8,
@@ -139,7 +136,7 @@ const styles = StyleSheet.create({
   amountValue: {
     fontSize: 36,
     fontWeight: '800',
-    color: '#0F3D26',
+    color: colors.primary,
     marginBottom: 4,
   },
   paymentViaRow: {
@@ -150,20 +147,20 @@ const styles = StyleSheet.create({
   },
   paymentViaText: {
     fontSize: 12,
-    color: '#6B7280',
+    color: palette.gray[500],
     fontWeight: '500',
   },
   infoBox: {
     width: '100%',
-    backgroundColor: '#FFFBF0',
+    backgroundColor: palette.ivory[50],
     borderWidth: 1,
-    borderColor: '#FDE6C8',
+    borderColor: palette.orange[100],
     borderRadius: 12,
     padding: 16,
   },
   infoText: {
     fontSize: 12,
-    color: '#374151',
+    color: palette.gray[700],
     lineHeight: 20,
     textAlign: 'center',
   },
@@ -173,7 +170,7 @@ const styles = StyleSheet.create({
   },
   callButton: {
     width: '100%',
-    backgroundColor: '#0F3D26',
+    backgroundColor: colors.primary,
     paddingVertical: 16,
     paddingHorizontal: 24,
     borderRadius: 12,
@@ -181,7 +178,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
-    shadowColor: '#0F3D26',
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -196,7 +193,7 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: 'transparent',
     borderWidth: 2,
-    borderColor: '#0F3D26',
+    borderColor: colors.primary,
     paddingVertical: 16,
     paddingHorizontal: 24,
     borderRadius: 12,
@@ -206,7 +203,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   shipmentsButtonText: {
-    color: '#0F3D26',
+    color: colors.primary,
     fontWeight: 'bold',
     fontSize: 16,
   },

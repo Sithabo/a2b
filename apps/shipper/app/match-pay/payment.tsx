@@ -1,17 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { ChevronRight, Lock, CreditCard } from 'lucide-react-native';
+import { colors, palette, partnerColors } from "@a2b/ui";
 
 type PaymentMethod = 'mtn' | 'airtel' | 'card' | null;
 
 // Source: 6.html — "Choose Payment Method"
 export default function PaymentMethodScreen() {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? 'light'];
   const [selected, setSelected] = useState<PaymentMethod>(null);
 
   const handleSelect = (method: PaymentMethod) => {
@@ -27,32 +24,32 @@ export default function PaymentMethodScreen() {
       id: 'mtn' as PaymentMethod,
       label: 'MTN Mobile Money',
       subtitle: 'Fast and secure',
-      logoBg: '#FFCC00',
+      logoBg: partnerColors.mtn,
       logoText: 'MTN',
-      logoTextColor: '#000000',
+      logoTextColor: palette.black,
     },
     {
       id: 'airtel' as PaymentMethod,
       label: 'Airtel Money',
       subtitle: 'Quick transactions',
       logoText: 'Airtel',
-      logoTextColor: '#FFFFFF',
+      logoTextColor: palette.white,
       logoTextFontSize: 11,
       logoTextFontWeight: 'bold' as const,
-      logoBg: '#FF0000',
+      logoBg: partnerColors.airtel,
     },
     {
       id: 'card' as PaymentMethod,
       label: 'Debit/Credit Card',
       subtitle: 'Visa, Mastercard',
-      logoBg: '#1F2937',
+      logoBg: palette.gray[800],
       logoText: null,
       logoIcon: true,
     },
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Choose Payment Method</Text>
@@ -100,7 +97,7 @@ export default function PaymentMethodScreen() {
                   <Text style={styles.methodSubtitle}>{method.subtitle}</Text>
                 </View>
 
-                <ChevronRight color="#9CA3AF" size={20} />
+                <ChevronRight color={palette.gray[400]} size={20} />
               </TouchableOpacity>
             );
           })}
@@ -108,7 +105,7 @@ export default function PaymentMethodScreen() {
 
         {/* Escrow Footer Note */}
         <View style={styles.escrowNote}>
-          <Lock color="#0F3D26" size={14} />
+          <Lock color={colors.primary} size={14} />
           <Text style={styles.escrowNoteText}>Payments are secured by Escrow Protection</Text>
         </View>
       </ScrollView>
@@ -128,12 +125,12 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#0F3D26',
+    color: colors.primary,
     marginBottom: 8,
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#6B7280',
+    color: palette.gray[500],
   },
   scrollContent: {
     paddingHorizontal: 24,
@@ -141,13 +138,13 @@ const styles = StyleSheet.create({
     gap: 24,
   },
   amountCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: palette.white,
     borderRadius: 16,
     padding: 24,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#F3F4F6',
-    shadowColor: '#000',
+    borderColor: palette.gray[100],
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 20,
@@ -156,19 +153,19 @@ const styles = StyleSheet.create({
   amountLabel: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#6B7280',
+    color: palette.gray[500],
     marginBottom: 8,
   },
   amountValue: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: '#0F3D26',
+    color: colors.primary,
     letterSpacing: -0.5,
   },
   amountCurrency: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#6B7280',
+    color: palette.gray[500],
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginTop: 4,
@@ -178,21 +175,21 @@ const styles = StyleSheet.create({
   },
   methodRow: {
     width: '100%',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: palette.white,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: palette.gray[200],
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 4,
     elevation: 1,
   },
   methodRowSelected: {
-    borderColor: '#0F3D26',
+    borderColor: colors.primary,
     borderWidth: 2,
   },
   methodLogo: {
@@ -202,7 +199,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
-    shadowColor: '#000',
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 3,
@@ -217,12 +214,12 @@ const styles = StyleSheet.create({
   methodLabel: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: palette.gray[800],
     marginBottom: 2,
   },
   methodSubtitle: {
     fontSize: 12,
-    color: '#6B7280',
+    color: palette.gray[500],
   },
   escrowNote: {
     flexDirection: 'row',
@@ -233,6 +230,6 @@ const styles = StyleSheet.create({
   },
   escrowNoteText: {
     fontSize: 12,
-    color: '#6B7280',
+    color: palette.gray[500],
   },
 });

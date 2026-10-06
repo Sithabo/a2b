@@ -14,11 +14,9 @@ import Animated, {
   runOnJS,
 } from "react-native-reanimated";
 import { ChevronRight } from "lucide-react-native";
-import { Button } from "@/components/ui/Button";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Colors } from "@/constants/theme";
-import { ThemedText } from "@/components/ThemedText";
 import { useAuthStore } from "@/store/useAuthStore";
+import { colors, palette, Text, Button } from "@a2b/ui";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -29,7 +27,7 @@ const SLIDES = [
     description:
       "Connect with trusted drivers and shippers for seamless transport solutions across the country.",
     icon: require("../../assets/logo/a2b.png"),
-    color: "#0F3D26", // Forest
+    color: colors.primary, // Forest
   },
   {
     id: 2,
@@ -37,7 +35,7 @@ const SLIDES = [
     description:
       "Experience peace of mind with our integrated mobile money and secure payment systems.",
     icon: require("../../assets/logo/a2b.png"),
-    color: "#D97706", // Amber
+    color: palette.amber[600], // Amber
   },
   {
     id: 3,
@@ -45,7 +43,7 @@ const SLIDES = [
     description:
       "Monitor your cargo in real-time with our advanced GPS tracking features.",
     icon: require("../../assets/logo/a2b.png"),
-    color: "#0F3D26", // Forest
+    color: colors.primary, // Forest
   },
 ];
 
@@ -125,13 +123,13 @@ export default function OnboardingScreen() {
 
                 {/* Content */}
                 <View style={styles.contentContainer}>
-                  <ThemedText type="title" style={styles.title}>
+                  <Text variant="display" tone="primary" style={styles.title}>
                     {item.title}
-                  </ThemedText>
+                  </Text>
 
-                  <ThemedText style={styles.description}>
+                  <Text tone="primary" style={styles.description}>
                     {item.description}
-                  </ThemedText>
+                  </Text>
                 </View>
               </View>
             ))}
@@ -149,8 +147,8 @@ export default function OnboardingScreen() {
                 {
                   backgroundColor:
                     currentIndex === index
-                      ? Colors.light.primary
-                      : Colors.light.gray[300],
+                      ? colors.primary
+                      : palette.gray[300],
                 },
               ]}
             />
@@ -163,14 +161,9 @@ export default function OnboardingScreen() {
           <Button
             title={currentIndex === SLIDES.length - 1 ? "Get Started" : "Next"}
             onPress={handleNext}
-            size="lg"
-            style={styles.fullWidth}
-            icon={
-              currentIndex !== SLIDES.length - 1 ? (
-                <ChevronRight size={20} color={Colors.light.gray[900]} />
-              ) : undefined
-            }
-            iconRight
+            fullWidth
+            icon={currentIndex !== SLIDES.length - 1 ? ChevronRight : undefined}
+            iconPosition="right"
           />
 
           {/* Skip Button */}
@@ -178,8 +171,7 @@ export default function OnboardingScreen() {
             title="Skip"
             variant="ghost"
             onPress={handleSkip}
-            style={styles.skipButton}
-            textStyle={styles.skipText}
+            fullWidth
           />
         </View>
       </View>
@@ -190,7 +182,7 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
   },
   container: {
     flex: 1,
@@ -237,7 +229,7 @@ const styles = StyleSheet.create({
   description: {
     textAlign: "center",
     paddingHorizontal: 16,
-    color: Colors.light.gray[600],
+    color: palette.gray[600],
   },
   dotsContainer: {
     flexDirection: "row",
@@ -257,17 +249,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     gap: 24,
     marginBottom: 16,
-  },
-  fullWidth: {
-    width: "100%",
-    borderRadius: 12, // rounded-xl
-  },
-  skipButton: {
-    width: "100%",
-    paddingVertical: 8,
-  },
-  skipText: {
-    color: Colors.light.gray[600],
-    fontWeight: "500",
   },
 });

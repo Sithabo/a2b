@@ -14,7 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { ArrowLeft, Plus, MapPin, CheckCircle2, Circle, X, Trash2 } from "lucide-react-native";
 import { useBillingStore, BusinessAddress } from "@/store/useBillingStore";
-import { PrimaryButton } from "@/components/PrimaryButton";
+import { palette, Button } from "@a2b/ui";
 
 export default function AddressesScreen() {
   const router = useRouter();
@@ -62,7 +62,7 @@ export default function AddressesScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.headerButton} onPress={() => router.back()} activeOpacity={0.7}>
-          <ArrowLeft color="#111827" size={20} />
+          <ArrowLeft color={palette.gray[900]} size={20} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Business Addresses</Text>
         <View style={{ width: 44 }} />
@@ -82,7 +82,7 @@ export default function AddressesScreen() {
               >
                 <View style={styles.cardRowLeft}>
                   <View style={styles.iconBox}>
-                    <MapPin color="#111827" size={20} />
+                    <MapPin color={palette.gray[900]} size={20} />
                   </View>
                   <View>
                     <Text style={styles.cardName}>{addr.title}</Text>
@@ -91,9 +91,9 @@ export default function AddressesScreen() {
                 </View>
                 <TouchableOpacity onPress={() => setDefaultAddress(addr.id)}>
                   {addr.isDefault ? (
-                    <CheckCircle2 color="#111827" size={24} fill="#111827" />
+                    <CheckCircle2 color={palette.gray[900]} size={24} fill={palette.gray[900]} />
                   ) : (
-                    <Circle color="#D1D5DB" size={24} />
+                    <Circle color={palette.gray[300]} size={24} />
                   )}
                 </TouchableOpacity>
               </TouchableOpacity>
@@ -101,7 +101,7 @@ export default function AddressesScreen() {
           )}
 
           <TouchableOpacity style={styles.addButton} activeOpacity={0.7} onPress={openAddModal}>
-            <Plus color="#111827" size={20} />
+            <Plus color={palette.gray[900]} size={20} />
             <Text style={styles.addText}>Add New Address</Text>
           </TouchableOpacity>
         </View>
@@ -122,7 +122,7 @@ export default function AddressesScreen() {
             <View style={styles.sheetHeader}>
               <Text style={styles.sheetTitle}>{editingId ? "Edit Address" : "Add Address"}</Text>
               <TouchableOpacity onPress={() => setIsModalVisible(false)}>
-                <X color="#111827" size={24} />
+                <X color={palette.gray[900]} size={24} />
               </TouchableOpacity>
             </View>
 
@@ -150,10 +150,10 @@ export default function AddressesScreen() {
             <View style={styles.buttonRow}>
               {editingId && (
                 <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-                  <Trash2 color="#EF4444" size={20} />
+                  <Trash2 color={palette.red[500]} size={20} />
                 </TouchableOpacity>
               )}
-              <PrimaryButton 
+              <Button 
                 title="Save Address" 
                 onPress={handleSave} 
                 disabled={!title || !addressLine}
@@ -170,7 +170,7 @@ export default function AddressesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: palette.gray[50],
   },
   header: {
     flexDirection: "row",
@@ -183,16 +183,16 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#F3F4F6",
+    borderColor: palette.gray[100],
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#111827",
+    color: palette.gray[900],
   },
   scrollContent: {
     paddingHorizontal: 20,
@@ -200,14 +200,14 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   sectionCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 24,
     padding: 16,
     gap: 8,
   },
   emptyText: {
     textAlign: "center",
-    color: "#6B7280",
+    color: palette.gray[500],
     paddingVertical: 24,
   },
   cardRow: {
@@ -227,27 +227,27 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: palette.gray[50],
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#F3F4F6",
+    borderColor: palette.gray[100],
   },
   cardName: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#111827",
+    color: palette.gray[900],
     marginBottom: 4,
   },
   cardNumber: {
     fontSize: 14,
-    color: "#6B7280",
+    color: palette.gray[500],
   },
   addButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F9FAFB",
+    backgroundColor: palette.gray[50],
     borderRadius: 16,
     paddingVertical: 16,
     marginTop: 8,
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   addText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#111827",
+    color: palette.gray[900],
   },
   modalOverlay: {
     flex: 1,
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.4)",
   },
   bottomSheet: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 24,
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
   sheetTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#111827",
+    color: palette.gray[900],
   },
   formGroup: {
     marginBottom: 16,
@@ -290,18 +290,18 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#374151",
+    color: palette.gray[700],
     marginBottom: 8,
   },
   input: {
-    backgroundColor: "#F9FAFB",
+    backgroundColor: palette.gray[50],
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: palette.gray[200],
     borderRadius: 12,
     paddingHorizontal: 16,
     height: 56,
     fontSize: 16,
-    color: "#111827",
+    color: palette.gray[900],
   },
   buttonRow: {
     flexDirection: "row",
@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 12,
-    backgroundColor: "#FEF2F2",
+    backgroundColor: palette.red[50],
     alignItems: "center",
     justifyContent: "center",
   },

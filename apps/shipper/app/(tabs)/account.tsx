@@ -36,6 +36,7 @@ import {
   X,
   CheckCircle,
 } from "lucide-react-native";
+import { colors, palette } from "@a2b/ui";
 
 export default function AccountScreen() {
   const router = useRouter();
@@ -116,7 +117,7 @@ export default function AccountScreen() {
           onPress={() => router.back()}
           activeOpacity={0.7}
         >
-          <ArrowLeft color="#0F3D26" size={20} />
+          <ArrowLeft color={colors.primary} size={20} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Account</Text>
         <View style={{ width: 40 }} />
@@ -129,7 +130,7 @@ export default function AccountScreen() {
         {/* Warning Banner */}
         {!userProfile?.email && (
           <View style={styles.warningBanner}>
-            <AlertCircle color="#B45309" size={20} />
+            <AlertCircle color={palette.amber[700]} size={20} />
             <Text style={styles.warningText}>
               Please add your email address to secure your account.
             </Text>
@@ -147,7 +148,7 @@ export default function AccountScreen() {
               />
             ) : (
               <View style={[styles.avatarImage, { alignItems: "center", justifyContent: "center" }]}>
-                <User color="#9CA3AF" size={32} />
+                <User color={palette.gray[400]} size={32} />
               </View>
             )}
             <View style={styles.profileInfo}>
@@ -157,12 +158,12 @@ export default function AccountScreen() {
               {userProfile?.email ? (
                 <Text style={styles.profileEmail}>{userProfile.email}</Text>
               ) : (
-                <Text style={[styles.profileEmail, { color: "#EF4444" }]}>No Email Added</Text>
+                <Text style={[styles.profileEmail, { color: palette.red[500] }]}>No Email Added</Text>
               )}
             </View>
           </View>
           <TouchableOpacity style={styles.editButton} activeOpacity={0.7} onPress={openEditModal}>
-            <Pencil color="#0F3D26" size={20} />
+            <Pencil color={colors.primary} size={20} />
           </TouchableOpacity>
         </View>
 
@@ -174,11 +175,11 @@ export default function AccountScreen() {
             {/* <TouchableOpacity style={styles.rowItem} activeOpacity={0.7} onPress={openEditModal}>
               <View style={styles.rowLeft}>
                 <View style={styles.iconBoxGreen}>
-                  <Building2 color="#0F3D26" size={20} />
+                  <Building2 color={colors.primary} size={20} />
                 </View>
                 <Text style={styles.rowText}>Business Details</Text>
               </View>
-              <ChevronRight color="#9CA3AF" size={20} />
+              <ChevronRight color={palette.gray[400]} size={20} />
             </TouchableOpacity>
 
             <View style={styles.divider} /> */}
@@ -191,11 +192,11 @@ export default function AccountScreen() {
             >
               <View style={styles.rowLeft}>
                 <View style={styles.iconBoxGreen}>
-                  <CreditCard color="#0F3D26" size={20} />
+                  <CreditCard color={colors.primary} size={20} />
                 </View>
                 <Text style={styles.rowText}>Payment Methods</Text>
               </View>
-              <ChevronRight color="#9CA3AF" size={20} />
+              <ChevronRight color={palette.gray[400]} size={20} />
             </TouchableOpacity>
 
             <View style={styles.divider} />
@@ -208,11 +209,11 @@ export default function AccountScreen() {
             >
               <View style={styles.rowLeft}>
                 <View style={styles.iconBoxGreen}>
-                  <Globe color="#0F3D26" size={20} />
+                  <Globe color={colors.primary} size={20} />
                 </View>
                 <Text style={styles.rowText}>Language</Text>
               </View>
-              <ChevronRight color="#9CA3AF" size={20} />
+              <ChevronRight color={palette.gray[400]} size={20} />
             </TouchableOpacity>
 
             <View style={styles.divider} />
@@ -225,11 +226,11 @@ export default function AccountScreen() {
             >
               <View style={styles.rowLeft}>
                 <View style={styles.iconBoxGreen}>
-                  <Bell color="#0F3D26" size={20} />
+                  <Bell color={colors.primary} size={20} />
                 </View>
                 <Text style={styles.rowText}>Notifications</Text>
               </View>
-              <ChevronRight color="#9CA3AF" size={20} />
+              <ChevronRight color={palette.gray[400]} size={20} />
             </TouchableOpacity>
           </View>
         </View>
@@ -245,10 +246,10 @@ export default function AccountScreen() {
               onPress={() => router.push("/account/how-it-works")}
             >
               <View style={styles.rowLeft}>
-                <HelpCircle color="#111827" size={20} />
+                <HelpCircle color={palette.gray[900]} size={20} />
                 <Text style={styles.rowText}>How A2B Works</Text>
               </View>
-              <ChevronRight color="#9CA3AF" size={20} />
+              <ChevronRight color={palette.gray[400]} size={20} />
             </TouchableOpacity>
 
             <View style={styles.divider} />
@@ -260,10 +261,10 @@ export default function AccountScreen() {
               onPress={() => router.push("/account/chat")}
             >
               <View style={styles.rowLeft}>
-                <MessageCircle color="#111827" size={20} />
+                <MessageCircle color={palette.gray[900]} size={20} />
                 <Text style={styles.rowText}>{"Need help? Let's chat"}</Text>
               </View>
-              <ChevronRight color="#9CA3AF" size={20} />
+              <ChevronRight color={palette.gray[400]} size={20} />
             </TouchableOpacity>
 
             <View style={styles.divider} />
@@ -275,15 +276,15 @@ export default function AccountScreen() {
               onPress={() => router.push("/account/privacy")}
             >
               <View style={styles.rowLeft}>
-                <Info color="#111827" size={20} />
+                <Info color={palette.gray[900]} size={20} />
                 <Text style={styles.rowText}>Privacy Policy</Text>
               </View>
-              <ChevronRight color="#9CA3AF" size={20} />
+              <ChevronRight color={palette.gray[400]} size={20} />
             </TouchableOpacity>
 
             {/* Call Support Button */}
             <TouchableOpacity style={styles.callButton} activeOpacity={0.85}>
-              <PhoneCall color="#FFFFFF" size={20} />
+              <PhoneCall color={palette.white} size={20} />
               <Text style={styles.callButtonText}>Call A2B Support</Text>
             </TouchableOpacity>
           </View>
@@ -295,7 +296,7 @@ export default function AccountScreen() {
           onPress={handleLogout}
           activeOpacity={0.7}
         >
-          <LogOut color="#EF4444" size={20} />
+          <LogOut color={palette.red[500]} size={20} />
           <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -320,7 +321,7 @@ export default function AccountScreen() {
             <View style={styles.sheetHeader}>
               <Text style={styles.sheetTitle}>Edit Business Details</Text>
               <TouchableOpacity onPress={() => !isSaving && setIsEditModalVisible(false)}>
-                <X color="#111827" size={24} />
+                <X color={palette.gray[900]} size={24} />
               </TouchableOpacity>
             </View>
 
@@ -334,11 +335,11 @@ export default function AccountScreen() {
                   />
                 ) : (
                   <View style={[styles.uploadAvatar, { alignItems: "center", justifyContent: "center" }]}>
-                    <User color="#9CA3AF" size={40} />
+                    <User color={palette.gray[400]} size={40} />
                   </View>
                 )}
                 <View style={styles.uploadOverlay}>
-                  <Pencil color="#FFFFFF" size={16} />
+                  <Pencil color={palette.white} size={16} />
                 </View>
               </TouchableOpacity>
 
@@ -349,7 +350,7 @@ export default function AccountScreen() {
                   value={editCompany}
                   onChangeText={setEditCompany}
                   placeholder="Acme Logistics"
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor={palette.gray[400]}
                 />
               </View>
 
@@ -360,7 +361,7 @@ export default function AccountScreen() {
                   value={editRegion}
                   onChangeText={setEditRegion}
                   placeholder="e.g. Kampala Hub"
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor={palette.gray[400]}
                 />
               </View>
 
@@ -371,7 +372,7 @@ export default function AccountScreen() {
                   value={editEmail}
                   onChangeText={setEditEmail}
                   placeholder="your@email.com"
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor={palette.gray[400]}
                   keyboardType="email-address"
                   autoCapitalize="none"
                 />
@@ -394,8 +395,8 @@ export default function AccountScreen() {
                         setTinError("");
                       }
                     }}
-                    trackColor={{ false: "#D1D5DB", true: "#E6F4EA" }}
-                    thumbColor={editIsImporter ? "#0F3D26" : "#F4F3F0"}
+                    trackColor={{ false: palette.gray[300], true: palette.forest[50] }}
+                    thumbColor={editIsImporter ? colors.primary : palette.ivory[300]}
                   />
                 </View>
 
@@ -404,8 +405,8 @@ export default function AccountScreen() {
                     <Text style={styles.inputLabel}>GRA Tax Identification Number (TIN)</Text>
                     <View style={[
                       styles.tinInputWrapper,
-                      editTin.length > 0 && !/^\d{9}$/.test(editTin) ? { borderColor: "#CC0000", borderWidth: 1.5 } : null,
-                      /^\d{9}$/.test(editTin) ? { borderColor: "#10B981", borderWidth: 1.5 } : null,
+                      editTin.length > 0 && !/^\d{9}$/.test(editTin) ? { borderColor: palette.red[700], borderWidth: 1.5 } : null,
+                      /^\d{9}$/.test(editTin) ? { borderColor: palette.emerald[500], borderWidth: 1.5 } : null,
                     ]}>
                       <TextInput
                         style={styles.tinInput}
@@ -420,13 +421,13 @@ export default function AccountScreen() {
                           }
                         }}
                         placeholder="e.g. 123456789"
-                        placeholderTextColor="#9CA3AF"
+                        placeholderTextColor={palette.gray[400]}
                         keyboardType="numeric"
                         maxLength={9}
                       />
                       {/^\d{9}$/.test(editTin) && (
                         <View style={styles.emeraldCheck}>
-                          <CheckCircle size={18} color="#10B981" fill="#FFFFFF" />
+                          <CheckCircle size={18} color={palette.emerald[500]} fill={palette.white} />
                         </View>
                       )}
                     </View>
@@ -443,7 +444,7 @@ export default function AccountScreen() {
                 disabled={isSaving}
               >
                 {isSaving ? (
-                  <ActivityIndicator color="#FFFFFF" />
+                  <ActivityIndicator color={palette.white} />
                 ) : (
                   <Text style={styles.saveButtonText}>Save Details</Text>
                 )}
@@ -459,7 +460,7 @@ export default function AccountScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5E9",
+    backgroundColor: palette.ivory[200],
   },
   header: {
     flexDirection: "row",
@@ -472,16 +473,16 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: palette.gray[200],
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
   },
   scrollContent: {
     paddingHorizontal: 20,
@@ -491,21 +492,21 @@ const styles = StyleSheet.create({
   warningBanner: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FEF3C7", // Amber-100
+    backgroundColor: palette.amber[100], // Amber-100
     padding: 16,
     borderRadius: 12,
     gap: 12,
     borderWidth: 1,
-    borderColor: "#FDE68A", // Amber-200
+    borderColor: palette.amber[200], // Amber-200
   },
   warningText: {
     flex: 1,
-    color: "#92400E", // Amber-700
+    color: palette.amber[800], // Amber-700
     fontSize: 14,
     fontWeight: "500",
   },
   profileCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 20,
     padding: 20,
     flexDirection: "row",
@@ -521,7 +522,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: palette.gray[100],
   },
   profileInfo: {
     justifyContent: "center",
@@ -529,12 +530,12 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
     marginBottom: 4,
   },
   profileEmail: {
     fontSize: 14,
-    color: "#6B7280",
+    color: palette.gray[500],
   },
   editButton: {
     padding: 8,
@@ -545,11 +546,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
     marginLeft: 4,
   },
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 20,
     padding: 20,
   },
@@ -568,32 +569,32 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: "#E6F4EA",
+    backgroundColor: palette.forest[50],
     alignItems: "center",
     justifyContent: "center",
   },
   rowText: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#111827",
+    color: palette.gray[900],
   },
   divider: {
     height: 1,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: palette.gray[100],
     width: "100%",
   },
   callButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 16,
     marginTop: 24,
     gap: 12,
   },
   callButtonText: {
-    color: "#FFFFFF",
+    color: palette.white,
     fontSize: 16,
     fontWeight: "bold",
   },
@@ -601,14 +602,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 20,
     paddingVertical: 18,
     gap: 12,
     marginBottom: 70,
   },
   logoutText: {
-    color: "#EF4444",
+    color: palette.red[500],
     fontSize: 16,
     fontWeight: "bold",
   },
@@ -621,12 +622,12 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.4)",
   },
   bottomSheet: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 24,
     paddingBottom: Platform.OS === 'ios' ? 40 : 24,
-    shadowColor: "#000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.1,
     shadowRadius: 10,
@@ -641,7 +642,7 @@ const styles = StyleSheet.create({
   sheetTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#111827",
+    color: palette.gray[900],
   },
   sheetContent: {
     gap: 16,
@@ -655,20 +656,20 @@ const styles = StyleSheet.create({
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: palette.gray[100],
   },
   uploadOverlay: {
     position: "absolute",
     bottom: 0,
     right: 0,
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
     width: 32,
     height: 32,
     borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 3,
-    borderColor: "#FFFFFF",
+    borderColor: palette.white,
   },
   inputGroup: {
     gap: 8,
@@ -676,21 +677,21 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#374151",
+    color: palette.gray[700],
     marginLeft: 4,
   },
   textInput: {
-    backgroundColor: "#F9FAFB",
+    backgroundColor: palette.gray[50],
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: palette.gray[200],
     borderRadius: 12,
     paddingHorizontal: 16,
     height: 56,
     fontSize: 16,
-    color: "#111827",
+    color: palette.gray[900],
   },
   saveButton: {
-    backgroundColor: "#000000",
+    backgroundColor: palette.black,
     borderRadius: 12,
     height: 56,
     alignItems: "center",
@@ -698,15 +699,15 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   saveButtonText: {
-    color: "#FFFFFF",
+    color: palette.white,
     fontSize: 16,
     fontWeight: "bold",
   },
   importCard: {
-    backgroundColor: "#F9FAFB",
+    backgroundColor: palette.gray[50],
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: palette.gray[200],
     padding: 16,
     marginTop: 8,
     gap: 16,
@@ -723,25 +724,25 @@ const styles = StyleSheet.create({
   importCardTitle: {
     fontSize: 15,
     fontWeight: "600",
-    color: "#111827",
+    color: palette.gray[900],
   },
   importCardSub: {
     fontSize: 12,
-    color: "#6B7280",
+    color: palette.gray[500],
     marginTop: 2,
   },
   tinContainer: {
     gap: 8,
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
+    borderTopColor: palette.gray[200],
     paddingTop: 16,
   },
   tinInputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: palette.gray[200],
     borderRadius: 8,
     height: 48,
     paddingHorizontal: 12,
@@ -749,7 +750,7 @@ const styles = StyleSheet.create({
   tinInput: {
     flex: 1,
     fontSize: 15,
-    color: "#111827",
+    color: palette.gray[900],
     padding: 0,
   },
   emeraldCheck: {
@@ -757,7 +758,7 @@ const styles = StyleSheet.create({
   },
   tinErrorText: {
     fontSize: 12,
-    color: "#CC0000",
+    color: palette.red[700],
     marginLeft: 4,
   },
 });

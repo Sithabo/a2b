@@ -17,8 +17,6 @@ import { useNavigation } from "@react-navigation/native";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system/legacy";
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
   Lock,
   Upload,
@@ -30,7 +28,7 @@ import {
   ArrowLeft,
 } from "lucide-react-native";
 import { useShipmentStore } from "@/store/useShipmentStore";
-import { ScreenHeader } from "@/components/ScreenHeader";
+import { colors, palette, ScreenHeader } from "@a2b/ui";
 
 interface DocumentInfo {
   name: string;
@@ -43,8 +41,6 @@ type SlotName = "bol" | "invoice" | "clearance" | "goInvest";
 export default function DocumentVaultScreen() {
   const router = useRouter();
   const navigation = useNavigation();
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
 
   const addShipment = useShipmentStore((state) => state.addShipment);
@@ -321,12 +317,12 @@ export default function DocumentVaultScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.whiteAsh }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScreenHeader
         title="Compliance Vault"
         subtitle="Step 3 of 3: Document Uploads"
         onBackPress={() => router.back()}
-        rightElement={<Lock size={20} color="#0F3D26" />}
+        rightElement={<Lock size={20} color={colors.primary} />}
       />
 
       <ScrollView
@@ -338,7 +334,7 @@ export default function DocumentVaultScreen() {
       >
         {/* Secure Info Banner */}
         <View style={styles.secureBanner}>
-          <Shield size={20} color="#0F3D26" />
+          <Shield size={20} color={colors.primary} />
           <View style={styles.secureBannerTextContainer}>
             <Text style={styles.secureBannerTitle}>Institutional Level Security</Text>
             <Text style={styles.secureBannerSub}>
@@ -355,7 +351,7 @@ export default function DocumentVaultScreen() {
             value={containerId}
             onChangeText={setContainerId}
             placeholder="e.g. CON-GY-82195"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={palette.gray[400]}
             autoCapitalize="characters"
           />
         </View>
@@ -386,9 +382,9 @@ export default function DocumentVaultScreen() {
                   contentFit="cover"
                 />
               ) : uploadedFiles.bol ? (
-                <CheckCircle size={20} color="#FFFFFF" />
+                <CheckCircle size={20} color={palette.white} />
               ) : (
-                <Upload size={20} color="#6B7280" />
+                <Upload size={20} color={palette.gray[500]} />
               )}
             </View>
             <View style={styles.cardInfo}>
@@ -406,7 +402,7 @@ export default function DocumentVaultScreen() {
                   : "Must display Freight Certified Stamp."}
               </Text>
             </View>
-            <ChevronRight size={18} color={uploadedFiles.bol ? "#10B981" : "#D1D5DB"} />
+            <ChevronRight size={18} color={uploadedFiles.bol ? palette.emerald[500] : palette.gray[300]} />
           </TouchableOpacity>
 
           {/* Slot 2: Certified Invoice */}
@@ -431,9 +427,9 @@ export default function DocumentVaultScreen() {
                   contentFit="cover"
                 />
               ) : uploadedFiles.invoice ? (
-                <CheckCircle size={20} color="#FFFFFF" />
+                <CheckCircle size={20} color={palette.white} />
               ) : (
-                <Upload size={20} color="#6B7280" />
+                <Upload size={20} color={palette.gray[500]} />
               )}
             </View>
             <View style={styles.cardInfo}>
@@ -451,7 +447,7 @@ export default function DocumentVaultScreen() {
                   : "Must feature company stamp or signature to verify valuation."}
               </Text>
             </View>
-            <ChevronRight size={18} color={uploadedFiles.invoice ? "#10B981" : "#D1D5DB"} />
+            <ChevronRight size={18} color={uploadedFiles.invoice ? palette.emerald[500] : palette.gray[300]} />
           </TouchableOpacity>
 
           {/* Slot 3: Customs Clearance */}
@@ -476,9 +472,9 @@ export default function DocumentVaultScreen() {
                   contentFit="cover"
                 />
               ) : uploadedFiles.clearance ? (
-                <CheckCircle size={20} color="#FFFFFF" />
+                <CheckCircle size={20} color={palette.white} />
               ) : (
-                <Upload size={20} color="#6B7280" />
+                <Upload size={20} color={palette.gray[500]} />
               )}
             </View>
             <View style={styles.cardInfo}>
@@ -496,7 +492,7 @@ export default function DocumentVaultScreen() {
                   : "Form C21 or Form C32 A/B required."}
               </Text>
             </View>
-            <ChevronRight size={18} color={uploadedFiles.clearance ? "#10B981" : "#D1D5DB"} />
+            <ChevronRight size={18} color={uploadedFiles.clearance ? palette.emerald[500] : palette.gray[300]} />
           </TouchableOpacity>
 
           {/* Slot 4: GO-Invest Tax Waiver Letter (Conditional) */}
@@ -523,9 +519,9 @@ export default function DocumentVaultScreen() {
                       contentFit="cover"
                     />
                   ) : uploadedFiles.goInvest ? (
-                    <CheckCircle size={20} color="#FFFFFF" />
+                    <CheckCircle size={20} color={palette.white} />
                   ) : (
-                    <Upload size={20} color="#6B7280" />
+                    <Upload size={20} color={palette.gray[500]} />
                   )}
                 </View>
                 <View style={styles.cardInfo}>
@@ -543,7 +539,7 @@ export default function DocumentVaultScreen() {
                       : "Approved GO-Invest Zero-Rated Concession Letter."}
                   </Text>
                 </View>
-                <ChevronRight size={18} color={uploadedFiles.goInvest ? "#10B981" : "#D1D5DB"} />
+                <ChevronRight size={18} color={uploadedFiles.goInvest ? palette.emerald[500] : palette.gray[300]} />
               </TouchableOpacity>
 
               <View style={styles.goInvestWarningCallout}>
@@ -591,7 +587,7 @@ export default function DocumentVaultScreen() {
       <Modal transparent={true} visible={isEnhancing} animationType="fade">
         <View style={styles.loadingOverlay}>
           <View style={styles.loadingBox}>
-            <ActivityIndicator size="large" color="#0F3D26" />
+            <ActivityIndicator size="large" color={colors.primary} />
             <Text style={styles.loadingText}>Applying Grayscale Enhancement...</Text>
             <Text style={styles.loadingSubtext}>Optimizing stamps & signatures contrast</Text>
           </View>
@@ -615,7 +611,7 @@ export default function DocumentVaultScreen() {
             <View style={styles.pickerHeader}>
               <Text style={styles.pickerTitle}>{getSlotLabel(selectedSlot)}</Text>
               <TouchableOpacity onPress={() => setIsOptionsModalOpen(false)}>
-                <X size={22} color="#111827" />
+                <X size={22} color={palette.gray[900]} />
               </TouchableOpacity>
             </View>
 
@@ -666,7 +662,7 @@ export default function DocumentVaultScreen() {
           {/* Header */}
           <View style={styles.viewerHeader}>
             <TouchableOpacity onPress={() => setIsViewModalOpen(false)} style={styles.viewerClose}>
-              <ArrowLeft color="#FFFFFF" size={24} />
+              <ArrowLeft color={palette.white} size={24} />
             </TouchableOpacity>
             <Text style={styles.viewerTitle}>Document Preview</Text>
             <View style={{ width: 40 }} />
@@ -686,7 +682,7 @@ export default function DocumentVaultScreen() {
                 </View>
               </View>
             ) : (
-              <Text style={{ color: "#FFFFFF" }}>No image available</Text>
+              <Text style={{ color: palette.white }}>No image available</Text>
             )}
           </View>
 
@@ -726,9 +722,9 @@ const styles = StyleSheet.create({
   secureBanner: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#E6F4EA",
+    backgroundColor: palette.forest[50],
     borderWidth: 1,
-    borderColor: "#A7F3D0",
+    borderColor: palette.emerald[200],
     borderRadius: 12,
     padding: 16,
     gap: 12,
@@ -739,11 +735,11 @@ const styles = StyleSheet.create({
   secureBannerTitle: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
   },
   secureBannerSub: {
     fontSize: 11,
-    color: "#0F3D26",
+    color: colors.primary,
     opacity: 0.8,
     lineHeight: 16,
     marginTop: 2,
@@ -754,18 +750,18 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#374151",
+    color: palette.gray[700],
     marginLeft: 2,
   },
   textInput: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderWidth: 1.5,
-    borderColor: "#E5E7EB",
+    borderColor: palette.gray[200],
     borderRadius: 12,
     paddingHorizontal: 16,
     height: 52,
     fontSize: 15,
-    color: "#111827",
+    color: palette.gray[900],
   },
   uploadCardsSection: {
     gap: 12,
@@ -773,7 +769,7 @@ const styles = StyleSheet.create({
   sectionHeading: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#111827",
+    color: palette.gray[900],
     marginBottom: 4,
   },
   uploadCard: {
@@ -786,13 +782,13 @@ const styles = StyleSheet.create({
   },
   uploadCardEmpty: {
     borderStyle: "dashed",
-    backgroundColor: "#FFFFFF",
-    borderColor: "#D1D5DB",
+    backgroundColor: palette.white,
+    borderColor: palette.gray[300],
   },
   uploadCardCompleted: {
     borderStyle: "solid",
     backgroundColor: "rgba(16, 185, 129, 0.04)",
-    borderColor: "#10B981",
+    borderColor: palette.emerald[500],
   },
   iconWrapper: {
     width: 44,
@@ -803,10 +799,10 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   iconWrapperEmpty: {
-    backgroundColor: "#F3F4F6",
+    backgroundColor: palette.gray[100],
   },
   iconWrapperCompleted: {
-    backgroundColor: "#10B981",
+    backgroundColor: palette.emerald[500],
   },
   thumbnail: {
     width: 44,
@@ -822,20 +818,20 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   cardLabelEmpty: {
-    color: "#1F2937",
+    color: palette.gray[800],
   },
   cardLabelCompleted: {
-    color: "#10B981",
+    color: palette.emerald[500],
   },
   cardMicrocopy: {
     fontSize: 12,
-    color: "#6B7280",
+    color: palette.gray[500],
     lineHeight: 16,
   },
   metadataInfoCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: palette.gray[200],
     borderRadius: 12,
     padding: 16,
     gap: 10,
@@ -843,9 +839,9 @@ const styles = StyleSheet.create({
   metadataTitle: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "#111827",
+    color: palette.gray[900],
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: palette.gray[100],
     paddingBottom: 8,
   },
   metadataRow: {
@@ -854,12 +850,12 @@ const styles = StyleSheet.create({
   },
   metadataLabel: {
     fontSize: 12,
-    color: "#6B7280",
+    color: palette.gray[500],
   },
   metadataValue: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#111827",
+    color: palette.gray[900],
   },
   footer: {
     position: "absolute",
@@ -867,29 +863,29 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 16,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
+    borderTopColor: palette.gray[200],
     paddingBottom: Platform.OS === "ios" ? 34 : 20,
   },
   submitButton: {
     height: 52,
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
   },
   submitButtonDisabled: {
-    backgroundColor: "#9CA3AF",
+    backgroundColor: palette.gray[400],
     opacity: 0.65,
   },
   submitButtonText: {
-    color: "#FFFFFF",
+    color: palette.white,
     fontSize: 16,
     fontWeight: "bold",
   },
@@ -902,7 +898,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.4)",
   },
   pickerSheet: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 24,
@@ -913,13 +909,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: palette.gray[100],
     paddingBottom: 12,
   },
   pickerTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#111827",
+    color: palette.gray[900],
   },
   modalActions: {
     gap: 12,
@@ -928,24 +924,24 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 10,
     borderWidth: 1.5,
-    borderColor: "#E5E7EB",
-    backgroundColor: "#FFFFFF",
+    borderColor: palette.gray[200],
+    backgroundColor: palette.white,
     justifyContent: "center",
     alignItems: "center",
   },
   modalActionText: {
     fontSize: 15,
     fontWeight: "bold",
-    color: "#1F2937",
+    color: palette.gray[800],
   },
   modalActionDelete: {
-    borderColor: "#FEE2E2",
-    backgroundColor: "#FEF2F2",
+    borderColor: palette.red[100],
+    backgroundColor: palette.red[50],
   },
   modalActionDeleteText: {
     fontSize: 15,
     fontWeight: "bold",
-    color: "#EF4444",
+    color: palette.red[500],
   },
   loadingOverlay: {
     flex: 1,
@@ -954,11 +950,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   loadingBox: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 16,
     padding: 24,
     alignItems: "center",
-    shadowColor: "#000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -968,17 +964,17 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "#111827",
+    color: palette.gray[900],
     marginTop: 8,
   },
   loadingSubtext: {
     fontSize: 12,
-    color: "#6B7280",
+    color: palette.gray[500],
     textAlign: "center",
   },
   viewerContainer: {
     flex: 1,
-    backgroundColor: "#111827",
+    backgroundColor: palette.gray[900],
   },
   viewerHeader: {
     flexDirection: "row",
@@ -987,7 +983,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#1F2937",
+    borderBottomColor: palette.gray[800],
   },
   viewerClose: {
     padding: 8,
@@ -995,7 +991,7 @@ const styles = StyleSheet.create({
   viewerTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#FFFFFF",
+    color: palette.white,
   },
   viewerContent: {
     flex: 1,
@@ -1021,7 +1017,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    shadowColor: "#000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -1030,38 +1026,38 @@ const styles = StyleSheet.create({
   grayscaleBadgeText: {
     fontSize: 12,
     fontWeight: "bold",
-    color: "#FFFFFF",
+    color: palette.white,
   },
   viewerFooter: {
     flexDirection: "row",
     padding: 20,
     gap: 12,
-    backgroundColor: "#111827",
+    backgroundColor: palette.gray[900],
   },
   viewerRetakeButton: {
     flex: 1,
     height: 48,
     borderRadius: 10,
     borderWidth: 1.5,
-    borderColor: "#FFFFFF",
+    borderColor: palette.white,
     justifyContent: "center",
     alignItems: "center",
   },
   viewerRetakeText: {
-    color: "#FFFFFF",
+    color: palette.white,
     fontSize: 14,
     fontWeight: "bold",
   },
   viewerCloseButton: {
     flex: 1,
     height: 48,
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
   },
   viewerCloseText: {
-    color: "#FFFFFF",
+    color: palette.white,
     fontSize: 14,
     fontWeight: "bold",
   },
@@ -1069,15 +1065,15 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   goInvestWarningCallout: {
-    backgroundColor: "#FEF3C7",
+    backgroundColor: palette.amber[100],
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
-    borderColor: "#FCD34D",
+    borderColor: palette.amber[300],
   },
   goInvestWarningCalloutText: {
     fontSize: 12,
-    color: "#D97706",
+    color: palette.amber[600],
     lineHeight: 18,
   },
   goInvestWarningCalloutBold: {

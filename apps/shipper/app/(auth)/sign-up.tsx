@@ -13,9 +13,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { ArrowLeft, CheckSquare, Square } from "lucide-react-native";
 import CountryPicker, { CountryCode, Country } from 'react-native-country-picker-modal';
 import { parsePhoneNumberFromString } from 'libphonenumber-js/min';
-import { Button } from "@/components/ui/Button";
-import { ThemedText } from "@/components/ThemedText";
-import { Colors } from "@/constants/theme";
+import { palette, Text, Button } from "@a2b/ui";
 
 export default function SignUpScreen() {
   const router = useRouter();
@@ -72,22 +70,22 @@ export default function SignUpScreen() {
             onPress={() => router.back()}
             style={styles.backButton}
           >
-            <ArrowLeft size={20} color={Colors.light.gray[900]} />
+            <ArrowLeft size={20} color={palette.gray[900]} />
           </TouchableOpacity>
 
           <View style={styles.headerContainer}>
-            <ThemedText type="title" style={styles.headerTitle}>
+            <Text variant="display" tone="primary" style={styles.headerTitle}>
               Sign Up
-            </ThemedText>
-            <ThemedText style={styles.headerSubtitle}>
+            </Text>
+            <Text tone="primary" style={styles.headerSubtitle}>
               Just a few quick things to get started
-            </ThemedText>
+            </Text>
           </View>
 
           <View style={styles.formContainer}>
             {/* Phone */}
             <View style={styles.inputGroup}>
-              <ThemedText style={styles.inputLabel}>Mobile Number</ThemedText>
+              <Text tone="primary" style={styles.inputLabel}>Mobile Number</Text>
               <View style={[styles.inputWrapper, error ? styles.inputError : null]}>
                 <View style={styles.countryCodePicker}>
                   <CountryPicker
@@ -105,7 +103,7 @@ export default function SignUpScreen() {
                 </View>
                 <TextInput
                   placeholder="700 000 000"
-                  placeholderTextColor={Colors.light.gray[400]}
+                  placeholderTextColor={palette.gray[400]}
                   style={styles.textInput}
                   keyboardType="phone-pad"
                   value={phoneNumber}
@@ -113,7 +111,7 @@ export default function SignUpScreen() {
                   maxLength={15}
                 />
               </View>
-              {error ? <ThemedText style={styles.errorText}>{error}</ThemedText> : null}
+              {error ? <Text tone="primary" style={styles.errorText}>{error}</Text> : null}
             </View>
 
             {/* Terms Checkbox */}
@@ -123,33 +121,32 @@ export default function SignUpScreen() {
               activeOpacity={0.7}
             >
               {agreed ? (
-                <CheckSquare size={20} color="#000000" /> 
+                <CheckSquare size={20} color={palette.black} /> 
               ) : (
-                <Square size={20} color={Colors.light.gray[400]} />
+                <Square size={20} color={palette.gray[400]} />
               )}
-              <ThemedText style={styles.checkboxLabel}>
+              <Text tone="primary" style={styles.checkboxLabel}>
                 I Agree With The Terms And Conditions
-              </ThemedText>
+              </Text>
             </TouchableOpacity>
 
             <Button
               title="Sign Up"
               size="lg"
               onPress={handleSignUp}
-              isLoading={isLoading}
+              loading={isLoading}
               disabled={!agreed || !phoneNumber}
               style={styles.createButton}
-              textStyle={styles.createButtonText}
             />
           </View>
 
           <View style={styles.footerContainer}>
             <View style={styles.loginRow}>
-              <ThemedText style={styles.footerText}>
+              <Text tone="primary" style={styles.footerText}>
                 Already have an account?
-              </ThemedText>
+              </Text>
               <TouchableOpacity onPress={() => router.push("/(auth)/login")}>
-                <ThemedText style={styles.loginLink}>Sign In</ThemedText>
+                <Text tone="primary" style={styles.loginLink}>Sign In</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -162,7 +159,7 @@ export default function SignUpScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.light.ivory,
+    backgroundColor: palette.ivory[200],
   },
   keyboardView: {
     flex: 1,
@@ -175,11 +172,11 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: Colors.light.gray[200],
+    borderColor: palette.gray[200],
     marginBottom: 24,
   },
   headerContainer: {
@@ -187,13 +184,13 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   headerTitle: {
-    color: "#000000",
+    color: palette.black,
     fontSize: 28,
     fontWeight: "bold",
   },
   headerSubtitle: {
     fontSize: 16,
-    color: Colors.light.gray[600],
+    color: palette.gray[600],
   },
   formContainer: {
     gap: 20,
@@ -203,15 +200,15 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontWeight: "600",
-    color: "#000000",
+    color: palette.black,
     marginLeft: 4,
   },
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderWidth: 1,
-    borderColor: Colors.light.gray[200],
+    borderColor: palette.gray[200],
     borderRadius: 12,
     height: 56,
     paddingHorizontal: 16,
@@ -222,7 +219,7 @@ const styles = StyleSheet.create({
   countryCodePicker: {
     marginRight: 8,
     borderRightWidth: 1,
-    borderRightColor: Colors.light.gray[200],
+    borderRightColor: palette.gray[200],
     paddingRight: 8,
     flexShrink: 0,
     minWidth: 96,
@@ -237,7 +234,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
     fontSize: 16,
-    color: Colors.light.gray[900],
+    color: palette.gray[900],
     paddingVertical: 0,
     textAlignVertical: "center",
   },
@@ -253,17 +250,11 @@ const styles = StyleSheet.create({
   },
   checkboxLabel: {
     fontSize: 14,
-    color: "#000000",
+    color: palette.black,
     fontWeight: "500",
   },
   createButton: {
     marginTop: 24,
-    backgroundColor: "#000000",
-    borderRadius: 12,
-  },
-  createButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "bold",
   },
   footerContainer: {
     flex: 1,
@@ -277,11 +268,11 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   footerText: {
-    color: Colors.light.gray[500],
+    color: palette.gray[500],
   },
   loginLink: {
     fontWeight: "bold",
-    color: "#000000",
+    color: palette.black,
     textDecorationLine: "underline",
   },
 });

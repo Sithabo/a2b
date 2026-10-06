@@ -9,18 +9,14 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Image } from "expo-image";
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Clock, CheckCircle } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useShipmentStore } from "@/store/useShipmentStore";
-import { ScreenHeader } from "@/components/ScreenHeader";
+import { colors, palette, ScreenHeader } from "@a2b/ui";
 
 export default function PendingDeliveryScreen() {
   const router = useRouter();
   const { trackingId } = useLocalSearchParams<{ trackingId: string }>();
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
 
   const idToFind = trackingId ? trackingId.replace("#", "") : "";
@@ -81,7 +77,7 @@ export default function PendingDeliveryScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.whiteAsh }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <ScreenHeader
         title="Order Details"
@@ -98,7 +94,7 @@ export default function PendingDeliveryScreen() {
         {/* Waiting Pill */}
         <View style={styles.statusPillContainer}>
           <View style={styles.statusPill}>
-            <Clock color="#FFFFFF" size={16} />
+            <Clock color={palette.white} size={16} />
             <Text style={styles.statusPillText}>Waiting for Driver</Text>
           </View>
         </View>
@@ -121,9 +117,9 @@ export default function PendingDeliveryScreen() {
 
             {/* Visual Divider with Cutouts */}
             <View style={styles.dividerRow}>
-              <View style={[styles.cutoutLeft, { backgroundColor: theme.whiteAsh }]} />
+              <View style={[styles.cutoutLeft, { backgroundColor: colors.background }]} />
               <View style={styles.dashedLineHorizontal} />
-              <View style={[styles.cutoutRight, { backgroundColor: theme.whiteAsh }]} />
+              <View style={[styles.cutoutRight, { backgroundColor: colors.background }]} />
             </View>
 
             {/* Order Details Metadata */}
@@ -140,7 +136,7 @@ export default function PendingDeliveryScreen() {
                 <Text style={styles.metaLabel}>Payment Status:</Text>
                 <View style={styles.escrowBadge}>
                   <Text style={styles.escrowText}>Escrow Secured</Text>
-                  <CheckCircle color="#fff" size={16} fill="#059669" />
+                  <CheckCircle color={palette.white} size={16} fill={palette.emerald[600]} />
                 </View>
               </View>
             </View>
@@ -214,7 +210,7 @@ const styles = StyleSheet.create({
     paddingTop: 24,
   },
   statusPill: {
-    backgroundColor: "#D97706",
+    backgroundColor: palette.amber[600],
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -222,14 +218,14 @@ const styles = StyleSheet.create({
     borderRadius: 9999,
     width: "100%",
     gap: 8,
-    shadowColor: "#000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
   statusPillText: {
-    color: "#FFFFFF",
+    color: palette.white,
     fontWeight: "bold",
     fontSize: 15,
   },
@@ -239,7 +235,7 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   receiptCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 24,
     paddingVertical: 32,
     position: "relative",
@@ -251,7 +247,7 @@ const styles = StyleSheet.create({
   cargoBoxContainer: {
     width: 140,
     height: 140,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: palette.gray[50],
     borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
@@ -264,7 +260,7 @@ const styles = StyleSheet.create({
   priceText: {
     fontSize: 32,
     fontWeight: "900",
-    color: "#0F3D26",
+    color: colors.primary,
     marginBottom: 24,
   },
   dividerRow: {
@@ -278,7 +274,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 1,
     borderBottomWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: palette.gray[200],
     borderStyle: "dashed",
     marginHorizontal: 15,
   },
@@ -312,13 +308,13 @@ const styles = StyleSheet.create({
   },
   metaLabel: {
     fontSize: 15,
-    color: "#4B5563",
+    color: palette.gray[600],
     fontWeight: "500",
   },
   metaValue: {
     fontSize: 15,
     fontWeight: "bold",
-    color: "#111827",
+    color: palette.gray[900],
   },
   escrowBadge: {
     flexDirection: "row",
@@ -328,11 +324,11 @@ const styles = StyleSheet.create({
   escrowText: {
     fontSize: 15,
     fontWeight: "bold",
-    color: "#059669",
+    color: palette.emerald[600],
   },
   solidDivider: {
     height: 1,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: palette.gray[100],
     marginHorizontal: 24,
     marginVertical: 24,
   },
@@ -346,7 +342,7 @@ const styles = StyleSheet.create({
     top: 10,
     bottom: 24,
     width: 2,
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
   },
   timelineRow: {
     flexDirection: "row",
@@ -356,7 +352,7 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
     marginTop: 2,
     marginRight: 16,
   },
@@ -366,28 +362,28 @@ const styles = StyleSheet.create({
   timelineSubLabel: {
     fontSize: 11,
     fontWeight: "bold",
-    color: "#6B7280",
+    color: palette.gray[500],
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   timelineLocation: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#111827",
+    color: palette.gray[900],
     marginTop: 4,
   },
   tipBox: {
     marginHorizontal: 24,
     marginTop: 32,
-    backgroundColor: "#ECFDF5",
+    backgroundColor: palette.emerald[50],
     borderWidth: 1,
-    borderColor: "#A7F3D0",
+    borderColor: palette.emerald[200],
     borderRadius: 8,
     padding: 16,
   },
   tipText: {
     fontSize: 14,
-    color: "#065F46",
+    color: palette.emerald[800],
     lineHeight: 20,
   },
   tipBold: {
@@ -401,21 +397,21 @@ const styles = StyleSheet.create({
   },
   stickyCancelButton: {
     width: "100%",
-    backgroundColor: "#FEF2F2",
+    backgroundColor: palette.red[50],
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#FEE2E2",
-    shadowColor: "#EF4444",
+    borderColor: palette.red[100],
+    shadowColor: palette.red[500],
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 1,
   },
   stickyCancelButtonText: {
-    color: "#EF4444",
+    color: palette.red[500],
     fontSize: 16,
     fontWeight: "bold",
   },

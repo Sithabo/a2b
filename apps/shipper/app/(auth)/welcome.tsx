@@ -1,10 +1,8 @@
 import React from "react";
 import { View, Image, StyleSheet, Dimensions, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
-import { Button } from "@/components/ui/Button";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ThemedText } from "@/components/ThemedText";
-import { Colors } from "@/constants/theme";
+import { colors, palette, Text, Button } from "@a2b/ui";
 
 const { width, height } = Dimensions.get("window");
 const isSmallDevice = width < 375;
@@ -26,7 +24,7 @@ export default function WelcomeScreen() {
             source={require("../../assets/logo/a2b.png")}
             style={styles.headerLogo}
           />
-          <ThemedText style={styles.headerText}>A2B</ThemedText>
+          <Text tone="primary" style={styles.headerText}>A2B</Text>
         </View>
 
         {/* Middle: Illustration */}
@@ -47,13 +45,13 @@ export default function WelcomeScreen() {
           </View> */}
 
           <View style={styles.textContainer}>
-            <ThemedText type="title" style={styles.title}>
+            <Text variant="display" tone="primary" style={styles.title}>
               Choose Your Role
-            </ThemedText>
-            <ThemedText style={styles.description}>
+            </Text>
+            <Text tone="primary" style={styles.description}>
               Are you sending goods across Uganda or delivering them? Select
               your role to get started with A2B.
-            </ThemedText>
+            </Text>
           </View>
 
           <View style={styles.buttonContainer}>
@@ -66,8 +64,7 @@ export default function WelcomeScreen() {
                   params: { role: "shipper" },
                 })
               }
-              style={styles.shipperButton}
-              textStyle={styles.shipperButtonText}
+              fullWidth
             />
 
             {/* Driver Button */}
@@ -79,9 +76,8 @@ export default function WelcomeScreen() {
                   params: { role: "driver" },
                 })
               }
-              variant="outline"
-              style={styles.driverButton}
-              textStyle={styles.driverButtonText}
+              variant="secondary"
+              fullWidth
             />
           </View>
 
@@ -98,7 +94,7 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
   },
   scrollContainer: {
     flexGrow: 1,
@@ -121,7 +117,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 24,
     fontWeight: "bold",
-    color: Colors.light.primary, // Forest
+    color: colors.primary, // Forest
   },
   centerImageContainer: {
     alignItems: "center",
@@ -157,13 +153,13 @@ const styles = StyleSheet.create({
     width: 32,
     height: 4,
     borderRadius: 2,
-    backgroundColor: Colors.light.primary,
+    backgroundColor: colors.primary,
   },
   bottomIndicator: {
     width: 128,
     height: 4,
     borderRadius: 2,
-    backgroundColor: Colors.light.primary,
+    backgroundColor: colors.primary,
     marginTop: isShortDevice ? 16 : 24,
   },
   textContainer: {
@@ -173,13 +169,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: isSmallDevice ? 28 : 32,
     fontWeight: "bold",
-    color: Colors.light.primary,
+    color: colors.primary,
     marginBottom: 12,
     textAlign: "center",
   },
   description: {
     fontSize: isSmallDevice ? 14 : 16,
-    color: Colors.light.gray[600],
+    color: palette.gray[600],
     lineHeight: isSmallDevice ? 20 : 24,
     textAlign: "center",
     paddingHorizontal: 16,
@@ -187,30 +183,5 @@ const styles = StyleSheet.create({
   buttonContainer: {
     gap: 16,
     width: "100%",
-  },
-  shipperButton: {
-    width: "100%",
-    backgroundColor: Colors.light.lime, // Lime Green
-    borderColor: Colors.light.lime,
-    borderRadius: 12, // rounded-xl
-    paddingVertical: isShortDevice ? 12 : 16,
-  },
-  shipperButtonText: {
-    color: Colors.light.gray[900],
-    fontWeight: "bold",
-    fontSize: 18,
-  },
-  driverButton: {
-    width: "100%",
-    backgroundColor: "#FFFFFF",
-    borderColor: Colors.light.primary,
-    borderWidth: 2,
-    borderRadius: 12,
-    paddingVertical: isShortDevice ? 12 : 16,
-  },
-  driverButtonText: {
-    color: Colors.light.primary,
-    fontWeight: "bold",
-    fontSize: 18,
   },
 });

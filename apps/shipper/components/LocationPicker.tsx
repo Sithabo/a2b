@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ViewStyle } from "react-native";
 import { MapPin, Circle, ArrowDownUp, Plus } from "lucide-react-native";
-import { Card } from "./Card"; // Assuming Card is in the same directory, if not fix path later
+import { colors, palette } from "@a2b/ui";
 
 export interface LocationPickerProps {
   startLocation: string;
@@ -31,9 +31,9 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
       <View style={styles.contentWrapper}>
         {/* Left Column: Timeline Icons */}
         <View style={styles.timelineColumn}>
-          <Circle size={16} color="#0F3D26" fill="#0F3D26" />
+          <Circle size={16} color={colors.primary} fill={colors.primary} />
           <View style={styles.dottedLine} />
-          <MapPin size={16} color="#D1D5DB" fill="#D1D5DB" />
+          <MapPin size={16} color={palette.gray[300]} fill={palette.gray[300]} />
         </View>
 
         {/* Right Column: Inputs */}
@@ -58,7 +58,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
                 value={startLocation}
                 onChangeText={onChangeStart}
                 placeholder="e.g. GeorgeTown, Guyana"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={palette.gray[400]}
               />
             </View>
           )}
@@ -83,7 +83,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
                 value={endLocation}
                 onChangeText={onChangeEnd}
                 placeholder="e.g. San Antonio, TX"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={palette.gray[400]}
               />
             </View>
           )}
@@ -91,12 +91,12 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
 
         {/* Floating Swap Button */}
         <TouchableOpacity style={styles.swapButton} activeOpacity={0.8} onPress={onSwap}>
-          <ArrowDownUp size={18} color="#0F3D26" />
+          <ArrowDownUp size={18} color={colors.primary} />
         </TouchableOpacity>
 
         {/* Floating Add Button */}
         <TouchableOpacity style={styles.addButton} activeOpacity={0.7} onPress={onAddStop}>
-          <Plus size={20} color="#9CA3AF" />
+          <Plus size={20} color={palette.gray[400]} />
         </TouchableOpacity>
       </View>
     </View>
@@ -105,16 +105,16 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 24,
     padding: 24,
-    shadowColor: "#000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
     borderWidth: 1,
-    borderColor: "#F5F5F4", // stone-100
+    borderColor: palette.stone[100], // stone-100
   },
   contentWrapper: {
     flexDirection: "row",
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     width: 2,
     height: 48,
     borderLeftWidth: 2,
-    borderColor: "#D1D5DB", // stone-300
+    borderColor: palette.gray[300], // stone-300
     borderStyle: "dashed",
     marginVertical: 4,
   },
@@ -149,18 +149,18 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 10,
     fontWeight: "bold",
-    color: "#A8A29E", // stone-400
+    color: palette.stone[400], // stone-400
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   input: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
     padding: 0, // Remove default Android padding
   },
   placeholderText: {
-    color: "#9CA3AF",
+    color: palette.gray[400],
     fontWeight: "normal",
   },
   swapButton: {
@@ -171,9 +171,9 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#FAFAF9", // stone-50
+    backgroundColor: palette.stone[50], // stone-50
     borderWidth: 1,
-    borderColor: "#F5F5F4", // stone-100
+    borderColor: palette.stone[100], // stone-100
     alignItems: "center",
     justifyContent: "center",
     zIndex: 10,

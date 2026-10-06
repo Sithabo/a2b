@@ -10,8 +10,6 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
   Package,
   Plus,
@@ -20,20 +18,16 @@ import {
   FlaskConical,
   CheckCircle,
 } from "lucide-react-native";
-import { PrimaryButton } from "@/components/PrimaryButton";
 import { LoadTypeSelector } from "@/components/LoadTypeSelector";
 import { PackageForm, PackageData } from "@/components/PackageForm";
 import { DateTimePickerSection } from "@/components/DateTimePickerSection";
 import { OfferSlider } from "@/components/OfferSlider";
-import { BottomSheet } from "@/components/BottomSheet";
 import { OrderSummary } from "@/components/OrderSummary";
 import { useShipmentStore, CargoType, CargoDetails } from "@/store/useShipmentStore";
-import { ScreenHeader } from "@/components/ScreenHeader";
+import { colors, palette, ScreenHeader, BottomSheet, Button } from "@a2b/ui";
 
 export default function CargoDetailsScreen() {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
 
   const pickupLocation = useShipmentStore((state) => state.pickupLocation);
@@ -353,7 +347,7 @@ export default function CargoDetailsScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.whiteAsh }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScreenHeader
         title="Post a Load"
         subtitle={`Step 2: Cargo Details (Part ${subStep} of 3)`}
@@ -396,7 +390,7 @@ export default function CargoDetailsScreen() {
                       onChangeText={setMachineryWeightTons}
                       keyboardType="numeric"
                       placeholder="20"
-                      placeholderTextColor="#9CA3AF"
+                      placeholderTextColor={palette.gray[400]}
                     />
                     <Text style={styles.inputSuffix}>Tons</Text>
                   </View>
@@ -413,7 +407,7 @@ export default function CargoDetailsScreen() {
                         onChangeText={setMachineryWidthMeters}
                         keyboardType="numeric"
                         placeholder="e.g. 3.2"
-                        placeholderTextColor="#9CA3AF"
+                        placeholderTextColor={palette.gray[400]}
                       />
                       <Text style={styles.inputSuffix}>m</Text>
                     </View>
@@ -428,7 +422,7 @@ export default function CargoDetailsScreen() {
                         onChangeText={setMachineryHeightMeters}
                         keyboardType="numeric"
                         placeholder="e.g. 4.1"
-                        placeholderTextColor="#9CA3AF"
+                        placeholderTextColor={palette.gray[400]}
                       />
                       <Text style={styles.inputSuffix}>m</Text>
                     </View>
@@ -444,7 +438,7 @@ export default function CargoDetailsScreen() {
                   >
                     <View style={styles.checkbox}>
                       {requiresFlatbedLowboy ? (
-                        <CheckCircle size={20} color="#0F3D26" />
+                        <CheckCircle size={20} color={colors.primary} />
                       ) : (
                         <View style={styles.checkboxOutline} />
                       )}
@@ -459,7 +453,7 @@ export default function CargoDetailsScreen() {
                   >
                     <View style={styles.checkbox}>
                       {requiresHydraulicTipper ? (
-                        <CheckCircle size={20} color="#0F3D26" />
+                        <CheckCircle size={20} color={colors.primary} />
                       ) : (
                         <View style={styles.checkboxOutline} />
                       )}
@@ -493,7 +487,7 @@ export default function CargoDetailsScreen() {
                         onChangeText={setChemicalsWeightTons}
                         keyboardType="numeric"
                         placeholder="20"
-                        placeholderTextColor="#9CA3AF"
+                        placeholderTextColor={palette.gray[400]}
                       />
                       <Text style={styles.inputSuffix}>Tons</Text>
                     </View>
@@ -508,7 +502,7 @@ export default function CargoDetailsScreen() {
                         onChangeText={setChemicalsVolume}
                         keyboardType="numeric"
                         placeholder="15"
-                        placeholderTextColor="#9CA3AF"
+                        placeholderTextColor={palette.gray[400]}
                       />
                       <Text style={styles.inputSuffix}>m³</Text>
                     </View>
@@ -575,7 +569,7 @@ export default function CargoDetailsScreen() {
                         onChangeText={setFoodWeightTons}
                         keyboardType="numeric"
                         placeholder="20"
-                        placeholderTextColor="#9CA3AF"
+                        placeholderTextColor={palette.gray[400]}
                       />
                       <Text style={styles.inputSuffix}>Tons</Text>
                     </View>
@@ -590,7 +584,7 @@ export default function CargoDetailsScreen() {
                         onChangeText={setFoodVolume}
                         keyboardType="numeric"
                         placeholder="15"
-                        placeholderTextColor="#9CA3AF"
+                        placeholderTextColor={palette.gray[400]}
                       />
                       <Text style={styles.inputSuffix}>m³</Text>
                     </View>
@@ -669,7 +663,7 @@ export default function CargoDetailsScreen() {
                     ]);
                   }}
                 >
-                  <Plus size={18} color="#0F3D26" />
+                  <Plus size={18} color={colors.primary} />
                   <Text style={styles.addPackageText}>Add package</Text>
                 </TouchableOpacity>
               </View>
@@ -734,8 +728,8 @@ export default function CargoDetailsScreen() {
       {/* Sticky Bottom Next/Finalize Button */}
       <View style={[styles.footer, { paddingBottom: insets.bottom > 0 ? insets.bottom : 16 }]}>
         {subStep === 1 ? (
-          <PrimaryButton
-            title="NEXT: BOOKING SCHEDULE"
+          <Button
+            title="Next: Booking schedule"
             onPress={() => {
               setSubStep(2);
               scrollViewRef.current?.scrollTo({ y: 0, animated: false });
@@ -743,8 +737,8 @@ export default function CargoDetailsScreen() {
             disabled={!isFormValid}
           />
         ) : subStep === 2 ? (
-          <PrimaryButton
-            title="NEXT: SET OFFER"
+          <Button
+            title="Next: Set offer"
             onPress={() => {
               setSubStep(3);
               scrollViewRef.current?.scrollTo({ y: 0, animated: false });
@@ -752,8 +746,8 @@ export default function CargoDetailsScreen() {
             disabled={!isFormValid || !pickupDate || !deliveryDate || !time || (!isImportFlow && !pickupWindow)}
           />
         ) : (
-          <PrimaryButton
-            title={isImportFlow ? "NEXT: DOCUMENT VAULT" : "REQUEST PICKUP"}
+          <Button
+            title={isImportFlow ? "Next: Document vault" : "Request pickup"}
             onPress={handleNextStep}
             disabled={!isFormValid || !pickupDate || !deliveryDate || !time || (!isImportFlow && !pickupWindow)}
           />
@@ -795,7 +789,7 @@ export default function CargoDetailsScreen() {
         />
 
         <View style={{ marginTop: 8 }}>
-          <PrimaryButton
+          <Button
             title="Finalize order"
             onPress={handleFinalizeDomesticOrder}
             disabled={!isFormValid}
@@ -817,18 +811,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
-    backgroundColor: "#FFFFFF",
+    borderBottomColor: palette.gray[200],
+    backgroundColor: palette.white,
   },
   backButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: palette.gray[100],
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: palette.gray[200],
   },
   headerTitleContainer: {
     flex: 1,
@@ -837,16 +831,16 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
   },
   headerSubtitle: {
     fontSize: 11,
-    color: "#6B7280",
+    color: palette.gray[500],
     marginTop: 2,
   },
   cancelText: {
     fontSize: 14,
-    color: "#EF4444",
+    color: palette.red[500],
     fontWeight: "bold",
   },
   scrollContent: {
@@ -860,7 +854,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
   },
   packagesList: {
     gap: 16,
@@ -874,7 +868,7 @@ const styles = StyleSheet.create({
   addPackageText: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
   },
   footer: {
     position: "absolute",
@@ -882,23 +876,23 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 16,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
+    borderTopColor: palette.gray[200],
     paddingBottom: Platform.OS === "ios" ? 34 : 20,
   },
   detailsCard: {
-    backgroundColor: "#F9FAFB",
+    backgroundColor: palette.gray[50],
     borderRadius: 20,
     padding: 20,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: palette.gray[200],
     gap: 16,
   },
   detailsTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
     marginBottom: 4,
   },
   inputContainer: {
@@ -907,14 +901,14 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#374151",
+    color: palette.gray[700],
   },
   inputWithSuffix: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderWidth: 1.5,
-    borderColor: "#E5E7EB",
+    borderColor: palette.gray[200],
     borderRadius: 12,
     paddingHorizontal: 16,
     height: 52,
@@ -922,13 +916,13 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     fontSize: 16,
-    color: "#111827",
+    color: palette.gray[900],
     padding: 0,
   },
   inputSuffix: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "#6B7280",
+    color: palette.gray[500],
     marginLeft: 8,
   },
   checkboxesRow: {
@@ -952,57 +946,57 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: "#9CA3AF",
+    borderColor: palette.gray[400],
   },
   checkboxLabel: {
     flex: 1,
     fontSize: 13,
-    color: "#374151",
+    color: palette.gray[700],
     fontWeight: "500",
   },
   amberNotificationCard: {
-    backgroundColor: "#FFFBEB",
+    backgroundColor: palette.amber[50],
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
-    borderColor: "#FEF3C7",
+    borderColor: palette.amber[100],
     marginTop: 4,
   },
   amberNotificationText: {
     fontSize: 12,
-    color: "#B45309",
+    color: palette.amber[700],
     lineHeight: 18,
   },
   amberNotificationBold: {
     fontWeight: "bold",
   },
   redWarningBanner: {
-    backgroundColor: "#FEF2F2",
+    backgroundColor: palette.red[50],
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
-    borderColor: "#FEE2E2",
+    borderColor: palette.red[100],
     marginTop: 4,
   },
   redWarningText: {
     fontSize: 12,
-    color: "#B91C1C",
+    color: palette.red[700],
     lineHeight: 18,
   },
   redWarningBold: {
     fontWeight: "bold",
   },
   blueInfoBlock: {
-    backgroundColor: "#EFF6FF",
+    backgroundColor: palette.blue[50],
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
-    borderColor: "#DBEAFE",
+    borderColor: palette.blue[100],
     marginTop: 4,
   },
   blueInfoText: {
     fontSize: 12,
-    color: "#1D4ED8",
+    color: palette.blue[700],
     lineHeight: 18,
   },
   blueInfoBold: {
@@ -1021,7 +1015,7 @@ const styles = StyleSheet.create({
   },
   segmentedControl: {
     flexDirection: "row",
-    backgroundColor: "#E5E7EB",
+    backgroundColor: palette.gray[200],
     borderRadius: 12,
     padding: 4,
     width: "100%",
@@ -1034,7 +1028,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   segmentActive: {
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
   },
   segmentInactive: {
     backgroundColor: "transparent",
@@ -1044,10 +1038,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   segmentTextActive: {
-    color: "#FFFFFF",
+    color: palette.white,
   },
   segmentTextInactive: {
-    color: "#4B5563",
+    color: palette.gray[600],
   },
   containerSelectionSection: {
     gap: 8,
@@ -1067,22 +1061,22 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
   },
   containerActive: {
-    backgroundColor: "#E6F4EA",
-    borderColor: "#0F3D26",
+    backgroundColor: palette.forest[50],
+    borderColor: colors.primary,
   },
   containerInactive: {
-    backgroundColor: "#FFFFFF",
-    borderColor: "#E5E7EB",
+    backgroundColor: palette.white,
+    borderColor: palette.gray[200],
   },
   containerText: {
     fontSize: 13,
     fontWeight: "bold",
   },
   containerTextActive: {
-    color: "#0F3D26",
+    color: colors.primary,
   },
   containerTextInactive: {
-    color: "#4B5563",
+    color: palette.gray[600],
   },
   backLinkButton: {
     alignItems: "center",
@@ -1092,7 +1086,7 @@ const styles = StyleSheet.create({
   },
   backLinkText: {
     fontSize: 14,
-    color: "#6B7280",
+    color: palette.gray[500],
     fontWeight: "bold",
   },
 });

@@ -24,7 +24,7 @@ import {
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useBillingStore, CreditCard } from "@/store/useBillingStore";
 import { CreditCardInput, CreditCardView, LiteCreditCardInput } from "react-native-credit-card-input";
-import { PrimaryButton } from "@/components/PrimaryButton";
+import { colors, palette, partnerColors, Button } from "@a2b/ui";
 
 export default function PaymentMethodsScreen() {
   const router = useRouter();
@@ -94,16 +94,16 @@ export default function PaymentMethodsScreen() {
     switch (type) {
       case "master-card":
       case "mastercard":
-        return <FontAwesome5 name="cc-mastercard" size={24} color="#EB001B" />;
+        return <FontAwesome5 name="cc-mastercard" size={24} color={partnerColors.mastercard} />;
       case "visa":
-        return <FontAwesome5 name="cc-visa" size={24} color="#1A1F71" />;
+        return <FontAwesome5 name="cc-visa" size={24} color={partnerColors.visa} />;
       case "american-express":
       case "amex":
-        return <FontAwesome5 name="cc-amex" size={24} color="#002663" />;
+        return <FontAwesome5 name="cc-amex" size={24} color={partnerColors.amex} />;
       case "discover":
-        return <FontAwesome5 name="cc-discover" size={24} color="#FF6000" />;
+        return <FontAwesome5 name="cc-discover" size={24} color={partnerColors.discover} />;
       default:
-        return <FontAwesome5 name="credit-card" size={24} color="#111827" />;
+        return <FontAwesome5 name="credit-card" size={24} color={palette.gray[900]} />;
     }
   };
 
@@ -116,11 +116,11 @@ export default function PaymentMethodsScreen() {
           onPress={() => router.back()}
           activeOpacity={0.7}
         >
-          <ArrowLeft color="#111827" size={20} />
+          <ArrowLeft color={palette.gray[900]} size={20} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Payment Method</Text>
         <TouchableOpacity style={styles.headerButton} activeOpacity={0.7}>
-          <MoreVertical color="#111827" size={20} />
+          <MoreVertical color={palette.gray[900]} size={20} />
         </TouchableOpacity>
       </View>
 
@@ -153,9 +153,9 @@ export default function PaymentMethodsScreen() {
               </View>
               <TouchableOpacity onPress={() => setDefaultCard(card.id)}>
                 {card.isDefault ? (
-                  <CheckCircle2 color="#111827" size={24} fill="#111827" />
+                  <CheckCircle2 color={palette.gray[900]} size={24} fill={palette.gray[900]} />
                 ) : (
-                  <Circle color="#D1D5DB" size={24} />
+                  <Circle color={palette.gray[300]} size={24} />
                 )}
               </TouchableOpacity>
             </TouchableOpacity>
@@ -167,7 +167,7 @@ export default function PaymentMethodsScreen() {
             activeOpacity={0.7}
             onPress={openAddModal}
           >
-            <Plus color="#111827" size={20} />
+            <Plus color={palette.gray[900]} size={20} />
             <Text style={styles.addPaymentText}>Add Payment Method</Text>
           </TouchableOpacity>
         </View>
@@ -182,7 +182,7 @@ export default function PaymentMethodsScreen() {
           >
             <View style={styles.cardRowLeft}>
               <View style={styles.addressIconBox}>
-                <MapPin color="#111827" size={20} />
+                <MapPin color={palette.gray[900]} size={20} />
               </View>
               <View>
                 {defaultAddress ? (
@@ -200,7 +200,7 @@ export default function PaymentMethodsScreen() {
                 )}
               </View>
             </View>
-            <ChevronRight color="#9CA3AF" size={20} />
+            <ChevronRight color={palette.gray[400]} size={20} />
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -252,12 +252,12 @@ export default function PaymentMethodsScreen() {
                 inputContainerStyle={styles.ccInputContainer}
                 inputStyle={styles.ccInput}
                 labelStyle={styles.ccLabel}
-                validColor="#0F3D26"
-                invalidColor="#EF4444"
-                placeholderColor="#9CA3AF"
+                validColor={colors.primary}
+                invalidColor={palette.red[500]}
+                placeholderColor={palette.gray[400]}
               />
 
-              <PrimaryButton
+              <Button
                 title={editingCardId ? "Save Changes" : "Save Card"}
                 onPress={handleSaveCard}
                 style={{ marginTop: 24 }}
@@ -274,7 +274,7 @@ export default function PaymentMethodsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: palette.gray[50],
   },
   header: {
     flexDirection: "row",
@@ -287,16 +287,16 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#F3F4F6",
+    borderColor: palette.gray[100],
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#111827",
+    color: palette.gray[900],
   },
   scrollContent: {
     paddingHorizontal: 20,
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
     gap: 24,
   },
   sectionCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 24,
     padding: 16,
     gap: 8,
@@ -325,25 +325,25 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 12,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: palette.gray[50],
     alignItems: "center",
     justifyContent: "center",
   },
   cardName: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#111827",
+    color: palette.gray[900],
     marginBottom: 4,
   },
   cardNumber: {
     fontSize: 14,
-    color: "#6B7280",
+    color: palette.gray[500],
   },
   addPaymentButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F9FAFB",
+    backgroundColor: palette.gray[50],
     borderRadius: 16,
     paddingVertical: 16,
     marginTop: 8,
@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
   addPaymentText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#111827",
+    color: palette.gray[900],
   },
   addressSection: {
     gap: 16,
@@ -360,11 +360,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#111827",
+    color: palette.gray[900],
     marginLeft: 8,
   },
   addressCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 24,
     padding: 20,
     flexDirection: "row",
@@ -375,11 +375,11 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: palette.gray[50],
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#F3F4F6",
+    borderColor: palette.gray[100],
   },
   modalOverlay: {
     flex: 1,
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.4)",
   },
   bottomSheet: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 24,
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
   dragIndicator: {
     width: 40,
     height: 4,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: palette.gray[200],
     borderRadius: 2,
     alignSelf: "center",
     marginBottom: 16,
@@ -415,25 +415,25 @@ const styles = StyleSheet.create({
   sheetTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#111827",
+    color: palette.gray[900],
   },
   ccInputContainer: {
-    backgroundColor: "#F9FAFB",
+    backgroundColor: palette.gray[50],
     borderRadius: 12,
     marginTop: 8,
     borderWidth: 1,
-    borderColor: "#F3F4F6",
+    borderColor: palette.gray[100],
     paddingHorizontal: 8,
   },
   ccInput: {
     height: 48,
     fontSize: 16,
-    color: "#111827",
+    color: palette.gray[900],
   },
   ccLabel: {
     fontSize: 12,
     fontWeight: "bold",
-    color: "#374151",
+    color: palette.gray[700],
     marginBottom: 4,
   },
 });

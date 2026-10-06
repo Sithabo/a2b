@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, StyleSheet, TouchableOpacity } from "react-native";
 import { Info } from "lucide-react-native";
+import { colors, palette } from "@a2b/ui";
 
 export interface PackageData {
   id: string;
@@ -30,11 +31,11 @@ export const PackageForm: React.FC<PackageFormProps> = ({ data, onChange }) => {
         <TextInput
           style={styles.codeTitleInput}
           placeholder="Cargo code"
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={palette.gray[400]}
           value={data.code}
           onChangeText={(v) => handleChange("code", v)}
         />
-        <Info size={20} color="#D1D5DB" />
+        <Info size={20} color={palette.gray[300]} />
       </View>
 
       {/* Weight Row */}
@@ -47,7 +48,7 @@ export const PackageForm: React.FC<PackageFormProps> = ({ data, onChange }) => {
             onChangeText={(v) => handleChange("weight", v)}
             keyboardType="numeric"
             placeholder="0"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={palette.gray[400]}
           />
         </View>
         <View style={styles.unitToggles}>
@@ -70,7 +71,7 @@ export const PackageForm: React.FC<PackageFormProps> = ({ data, onChange }) => {
             onChangeText={(v) => handleChange("length", v)}
             keyboardType="numeric"
             placeholder="0"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={palette.gray[400]}
           />
         </View>
         <View style={[styles.dimensionCell, styles.borderSides]}>
@@ -81,7 +82,7 @@ export const PackageForm: React.FC<PackageFormProps> = ({ data, onChange }) => {
             onChangeText={(v) => handleChange("width", v)}
             keyboardType="numeric"
             placeholder="0"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={palette.gray[400]}
           />
         </View>
         <View style={styles.dimensionCell}>
@@ -92,7 +93,7 @@ export const PackageForm: React.FC<PackageFormProps> = ({ data, onChange }) => {
             onChangeText={(v) => handleChange("height", v)}
             keyboardType="numeric"
             placeholder="0"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={palette.gray[400]}
           />
         </View>
       </View>
@@ -102,10 +103,10 @@ export const PackageForm: React.FC<PackageFormProps> = ({ data, onChange }) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "#E5E7EB", // stone-200
+    borderColor: palette.gray[200], // stone-200
     overflow: "hidden",
   },
   headerRow: {
@@ -115,19 +116,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: palette.gray[200],
   },
   codeTitleInput: {
     flex: 1,
     fontSize: 14,
     fontWeight: "600",
-    color: "#0F3D26",
+    color: colors.primary,
     padding: 0,
   },
   weightRow: {
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: palette.gray[200],
   },
   weightInputContainer: {
     flex: 1,
@@ -140,14 +141,14 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: 16,
     borderLeftWidth: 1,
-    borderLeftColor: "#E5E7EB",
+    borderLeftColor: palette.gray[200],
   },
   unitActive: {
-    color: "#0F3D26",
+    color: colors.primary,
     fontWeight: "bold",
   },
   unitInactive: {
-    color: "#D1D5DB",
+    color: palette.gray[300],
     fontWeight: "bold",
   },
   dimensionsRow: {
@@ -161,19 +162,19 @@ const styles = StyleSheet.create({
   borderSides: {
     borderLeftWidth: 1,
     borderRightWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: palette.gray[200],
   },
   label: {
     fontSize: 10,
     fontWeight: "bold",
-    color: "#9CA3AF",
+    color: palette.gray[400],
     textTransform: "uppercase",
     marginBottom: 2,
   },
   boldInput: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
     padding: 0,
   },
 });

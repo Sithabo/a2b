@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ViewStyle,
 } from "react-native";
+import { colors, palette } from "@a2b/ui";
 
 export interface ToolCardProps {
   title: string;
@@ -21,9 +22,9 @@ export const ToolCard: React.FC<ToolCardProps> = ({
   title,
   icon: Icon,
   onPress,
-  backgroundColor = "#0F3D26",
+  backgroundColor = colors.primary,
   iconBackgroundColor = "rgba(255, 255, 255, 0.15)",
-  textColor = "#FFFFFF",
+  textColor = palette.white,
   style,
 }) => {
   return (
@@ -47,7 +48,7 @@ const styles = StyleSheet.create({
     width: "31%", // Fits 2 in a row nicely with gap
     aspectRatio: 1, // Makes it a perfect square
     justifyContent: "space-between", // Icon top, text bottom
-    shadowColor: "#000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,

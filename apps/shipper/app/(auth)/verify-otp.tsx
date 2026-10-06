@@ -10,9 +10,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
-import { Button } from "@/components/ui/Button";
-import { ThemedText } from "@/components/ThemedText";
-import { Colors } from "@/constants/theme";
+import { colors, palette, Text, Button } from "@a2b/ui";
 
 export default function VerifyOtpScreen() {
   const router = useRouter();
@@ -70,31 +68,31 @@ export default function VerifyOtpScreen() {
           onPress={() => router.back()}
           style={styles.backButton}
         >
-          <ArrowLeft size={20} color={Colors.light.gray[900]} />
+          <ArrowLeft size={20} color={palette.gray[900]} />
         </TouchableOpacity>
 
         <View style={styles.headerContainer}>
-          <ThemedText type="title" style={styles.headerTitle}>
+          <Text variant="display" tone="primary" style={styles.headerTitle}>
             Verification Code
-          </ThemedText>
-          <ThemedText style={styles.headerSubtitle}>
+          </Text>
+          <Text tone="primary" style={styles.headerSubtitle}>
             We sent a code to {params.phone || "*******"}.
-          </ThemedText>
+          </Text>
         </View>
 
         <View style={styles.formContainer}>
           {/* Developer Hint */}
           <View style={styles.devHintBox}>
-            <ThemedText style={styles.devHintText}>
-              Dev Mode: Your code is <ThemedText style={{fontWeight: 'bold'}}>{generatedCode}</ThemedText>
-            </ThemedText>
+            <Text tone="primary" style={styles.devHintText}>
+              Dev Mode: Your code is <Text tone="primary" style={{fontWeight: 'bold'}}>{generatedCode}</Text>
+            </Text>
           </View>
 
           <View style={styles.inputContainer}>
-            <ThemedText style={styles.inputLabel}>Enter Code</ThemedText>
+            <Text tone="primary" style={styles.inputLabel}>Enter Code</Text>
             <TextInput
               placeholder="000000"
-              placeholderTextColor={Colors.light.gray[400]}
+              placeholderTextColor={palette.gray[400]}
               style={[styles.otpInput, error ? styles.inputError : null]}
               keyboardType="numeric"
               value={otp}
@@ -102,22 +100,21 @@ export default function VerifyOtpScreen() {
               maxLength={6}
               autoFocus
             />
-            {error ? <ThemedText style={styles.errorText}>{error}</ThemedText> : null}
+            {error ? <Text tone="primary" style={styles.errorText}>{error}</Text> : null}
           </View>
 
           <Button
             title="Verify & Continue"
             size="lg"
             onPress={handleVerify}
-            isLoading={isLoading}
+            loading={isLoading}
             disabled={otp.length < 6}
-            style={styles.verifyButton}
-            textStyle={styles.verifyButtonText}
+            fullWidth
           />
         </View>
 
         <TouchableOpacity style={styles.resendContainer} onPress={generateNewCode}>
-          <ThemedText style={styles.resendText}>Resend Code</ThemedText>
+          <Text tone="primary" style={styles.resendText}>Resend Code</Text>
         </TouchableOpacity>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -127,7 +124,7 @@ export default function VerifyOtpScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.light.ivory,
+    backgroundColor: palette.ivory[200],
   },
   container: {
     flex: 1,
@@ -137,11 +134,11 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: Colors.light.gray[200],
+    borderColor: palette.gray[200],
     marginBottom: 32,
   },
   headerContainer: {
@@ -149,23 +146,23 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   headerTitle: {
-    color: Colors.light.primary,
+    color: colors.primary,
     fontSize: 28,
   },
   headerSubtitle: {
     fontSize: 18,
-    color: Colors.light.gray[500],
+    color: palette.gray[500],
   },
   devHintBox: {
-    backgroundColor: Colors.light.gray[100],
+    backgroundColor: palette.gray[100],
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: Colors.light.gray[300],
+    borderColor: palette.gray[300],
     marginBottom: 8,
   },
   devHintText: {
-    color: Colors.light.gray[700],
+    color: palette.gray[700],
     textAlign: "center",
     fontSize: 14,
   },
@@ -177,13 +174,13 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontWeight: "600",
-    color: Colors.light.primary,
+    color: colors.primary,
     marginLeft: 4,
   },
   otpInput: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderWidth: 1,
-    borderColor: Colors.light.gray[200],
+    borderColor: palette.gray[200],
     borderRadius: 12,
     paddingHorizontal: 16,
     height: 64,
@@ -191,7 +188,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "bold",
     letterSpacing: 10,
-    color: Colors.light.gray[900],
+    color: palette.gray[900],
   },
   inputError: {
     borderColor: "red",
@@ -201,18 +198,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
   },
-  verifyButton: {
-    width: "100%",
-  },
-  verifyButtonText: {
-    fontWeight: "bold",
-  },
   resendContainer: {
     alignItems: "center",
     marginTop: 24,
   },
   resendText: {
-    color: Colors.light.primary,
+    color: colors.primary,
     fontWeight: "600",
     fontSize: 16,
     textDecorationLine: "underline",

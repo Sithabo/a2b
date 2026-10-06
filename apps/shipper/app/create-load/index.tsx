@@ -10,8 +10,6 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
   Anchor,
   ChevronRight,
@@ -20,12 +18,10 @@ import {
 import { useShipmentStore, LocationData } from "@/store/useShipmentStore";
 import { LocationSearchModal } from "@/components/LocationSearchModal";
 import { LocationPicker } from "@/components/LocationPicker";
-import { ScreenHeader } from "@/components/ScreenHeader";
+import { colors, palette, ScreenHeader } from "@a2b/ui";
 
 export default function RouteSelectionScreen() {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
 
   const pickupLocation = useShipmentStore((state) => state.pickupLocation);
@@ -72,7 +68,7 @@ export default function RouteSelectionScreen() {
   const isFormComplete = pickupLocation !== null && dropoffLocation !== null;
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.whiteAsh }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScreenHeader
         title="Post a Load"
         subtitle={isImportFlow ? "Step 1 of 3: Route Selection" : "Step 1 of 2: Route Selection"}
@@ -111,7 +107,7 @@ export default function RouteSelectionScreen() {
           activeOpacity={0.8}
         >
           <Text style={styles.nextButtonText}>NEXT: CARGO DETAILS</Text>
-          <ChevronRight size={18} color="#FFFFFF" />
+          <ChevronRight size={18} color={palette.white} />
         </TouchableOpacity>
       </View>
 
@@ -140,7 +136,7 @@ export default function RouteSelectionScreen() {
           
           <View style={styles.verificationContainer}>
             <View style={styles.modalHeaderIconBg}>
-              <Anchor size={30} color="#D4A017" />
+              <Anchor size={30} color={palette.gold[600]} />
             </View>
             
             <Text style={styles.modalTitle}>⚓ Port Pickup Verified</Text>
@@ -150,7 +146,7 @@ export default function RouteSelectionScreen() {
             </Text>
             
             <View style={styles.warningBox}>
-              <ShieldAlert size={18} color="#B45309" />
+              <ShieldAlert size={18} color={palette.amber[700]} />
               <Text style={styles.warningBoxText}>
                 Failure to provide valid paperwork halts driver clearance at port checkpoints.
               </Text>
@@ -184,18 +180,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
-    backgroundColor: "#FFFFFF",
+    borderBottomColor: palette.gray[200],
+    backgroundColor: palette.white,
   },
   backButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: palette.gray[100],
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: palette.gray[200],
   },
   headerTitleContainer: {
     flex: 1,
@@ -204,16 +200,16 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
   },
   headerSubtitle: {
     fontSize: 11,
-    color: "#6B7280",
+    color: palette.gray[500],
     marginTop: 2,
   },
   cancelText: {
     fontSize: 14,
-    color: "#EF4444",
+    color: palette.red[500],
     fontWeight: "bold",
   },
   content: {
@@ -224,11 +220,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 22,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
   },
   sectionSubtitle: {
     fontSize: 13,
-    color: "#6B7280",
+    color: palette.gray[500],
     lineHeight: 18,
   },
   locationPickerContainer: {
@@ -236,14 +232,14 @@ const styles = StyleSheet.create({
   },
   footer: {
     padding: 16,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
+    borderTopColor: palette.gray[200],
     paddingBottom: Platform.OS === "ios" ? 34 : 20,
   },
   nextButton: {
     height: 52,
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
     borderRadius: 12,
     flexDirection: "row",
     alignItems: "center",
@@ -251,11 +247,11 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   nextButtonDisabled: {
-    backgroundColor: "#9CA3AF",
+    backgroundColor: palette.gray[400],
     opacity: 0.5,
   },
   nextButtonText: {
-    color: "#FFFFFF",
+    color: palette.white,
     fontSize: 16,
     fontWeight: "bold",
   },
@@ -270,47 +266,47 @@ const styles = StyleSheet.create({
   },
   verificationContainer: {
     width: Dimensions.get("window").width * 0.88,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 20,
     padding: 24,
     alignItems: "center",
     gap: 16,
-    shadowColor: "#000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.25,
     shadowRadius: 20,
     elevation: 10,
     borderWidth: 1,
-    borderColor: "#F3F4F6",
+    borderColor: palette.gray[100],
   },
   modalHeaderIconBg: {
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: "#FFFBEB",
+    backgroundColor: palette.amber[50],
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#FEF3C7",
+    borderColor: palette.amber[100],
   },
   modalTitle: {
     fontSize: 19,
     fontWeight: "bold",
-    color: "#111827",
+    color: palette.gray[900],
     textAlign: "center",
   },
   modalText: {
     fontSize: 14,
-    color: "#4B5563",
+    color: palette.gray[600],
     lineHeight: 20,
     textAlign: "center",
   },
   warningBox: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FEF3C7",
+    backgroundColor: palette.amber[100],
     borderWidth: 1,
-    borderColor: "#FDE68A",
+    borderColor: palette.amber[200],
     borderRadius: 8,
     padding: 12,
     gap: 10,
@@ -320,20 +316,20 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 11,
     fontWeight: "500",
-    color: "#B45309",
+    color: palette.amber[700],
     lineHeight: 16,
   },
   modalCTAButton: {
     width: "100%",
     height: 52,
-    backgroundColor: "#0F3D26",
+    backgroundColor: colors.primary,
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
     marginTop: 8,
   },
   modalCTAButtonText: {
-    color: "#FFFFFF",
+    color: palette.white,
     fontSize: 16,
     fontWeight: "bold",
   },

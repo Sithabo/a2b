@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Slider from "@react-native-community/slider";
 import { Lightbulb } from "lucide-react-native";
+import { colors, palette } from "@a2b/ui";
 
 interface SurchargeItem {
   label: string;
@@ -63,9 +64,9 @@ export const OfferSlider: React.FC<OfferSliderProps> = ({
             step={5000}
             value={value}
             onValueChange={onChange}
-            minimumTrackTintColor="#0F3D26"
-            maximumTrackTintColor="#E5E7EB" // stone-200
-            thumbTintColor="#0F3D26"
+            minimumTrackTintColor={colors.primary}
+            maximumTrackTintColor={palette.gray[200]} // stone-200
+            thumbTintColor={colors.primary}
           />
 
           {/* Stepper Labels */}
@@ -108,7 +109,7 @@ export const OfferSlider: React.FC<OfferSliderProps> = ({
 
         {/* Tooltip Tips */}
         <View style={styles.tipsContainer}>
-          <Lightbulb size={24} color="#0F3D26" fill="#0F3D26" />
+          <Lightbulb size={24} color={colors.primary} fill={colors.primary} />
           <Text style={styles.tipsText}>
             <Text style={styles.tipsBold}>Tips:</Text> Offers above {formatValue(recommendedPrice + 15000)} GYD are 3x more likely to be accepted within an hour.
           </Text>
@@ -125,10 +126,10 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
   },
   card: {
-    backgroundColor: "#FAFAF9", // stone-50 to match screenshot feel
+    backgroundColor: palette.stone[50], // stone-50 to match screenshot feel
     borderRadius: 24,
     padding: 24,
     gap: 20,
@@ -139,7 +140,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 12,
     fontWeight: "bold",
-    color: "#A8A29E",
+    color: palette.stone[400],
     textTransform: "uppercase",
     letterSpacing: 1,
     marginBottom: 4,
@@ -147,7 +148,7 @@ const styles = StyleSheet.create({
   amount: {
     fontSize: 36,
     fontWeight: "900", // black
-    color: "#0F3D26",
+    color: colors.primary,
   },
   currency: {
     fontSize: 16,
@@ -174,27 +175,27 @@ const styles = StyleSheet.create({
   stepText: {
     fontSize: 12,
     fontWeight: "bold",
-    color: "#A8A29E",
+    color: palette.stone[400],
     textTransform: "capitalize",
   },
   stepValue: {
     fontSize: 12,
     fontWeight: "bold",
-    color: "#A8A29E",
+    color: palette.stone[400],
   },
   stepTextActive: {
     fontSize: 14,
     fontWeight: "900",
-    color: "#0F3D26",
+    color: colors.primary,
     textTransform: "capitalize",
   },
   stepValueActive: {
     fontSize: 14,
     fontWeight: "900",
-    color: "#0F3D26",
+    color: colors.primary,
   },
   breakdownCard: {
-    backgroundColor: "#F3F4F6", // gray-100
+    backgroundColor: palette.gray[100], // gray-100
     borderRadius: 16,
     padding: 16,
     gap: 8,
@@ -202,11 +203,11 @@ const styles = StyleSheet.create({
   breakdownTitle: {
     fontSize: 11,
     fontWeight: "bold",
-    color: "#374151", // gray-700
+    color: palette.gray[700], // gray-700
     textTransform: "uppercase",
     letterSpacing: 0.5,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: palette.gray[200],
     paddingBottom: 6,
     marginBottom: 4,
   },
@@ -217,28 +218,28 @@ const styles = StyleSheet.create({
   },
   breakdownLabel: {
     fontSize: 12,
-    color: "#4B5563", // gray-600
+    color: palette.gray[600], // gray-600
   },
   breakdownValue: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#111827",
+    color: palette.gray[900],
   },
   breakdownTotalRow: {
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
+    borderTopColor: palette.gray[200],
     paddingTop: 6,
     marginTop: 4,
   },
   breakdownTotalLabel: {
     fontSize: 12,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
   },
   breakdownTotalValue: {
     fontSize: 12,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
   },
   tipsContainer: {
     backgroundColor: "rgba(15, 61, 38, 0.08)", // bg-brand-forest/5
@@ -251,7 +252,7 @@ const styles = StyleSheet.create({
   tipsText: {
     flex: 1,
     fontSize: 12,
-    color: "#0F3D26",
+    color: colors.primary,
     fontWeight: "500",
     lineHeight: 18,
   },

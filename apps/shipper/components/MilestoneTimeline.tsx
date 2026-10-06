@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Check } from "lucide-react-native";
+import { colors, palette } from "@a2b/ui";
 
 export interface MilestoneItem {
   key: string;
@@ -68,7 +69,7 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({
                 </Text>
                 {isCompleted && (
                   <Check
-                    color="#10B981"
+                    color={palette.emerald[500]}
                     size={16}
                     style={styles.checkIcon}
                   />
@@ -130,12 +131,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   dotCompleted: {
-    backgroundColor: "#111827",
+    backgroundColor: palette.gray[900],
   },
   dotActive: {
-    backgroundColor: "#111827",
+    backgroundColor: palette.gray[900],
     borderWidth: 3,
-    borderColor: "#10B981",
+    borderColor: palette.emerald[500],
     alignItems: "center",
     justifyContent: "center",
   },
@@ -143,10 +144,10 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
   },
   dotPending: {
-    backgroundColor: "#E5E7EB",
+    backgroundColor: palette.gray[200],
   },
   timelineLine: {
     position: "absolute",
@@ -157,10 +158,10 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   lineCompleted: {
-    backgroundColor: "#111827",
+    backgroundColor: palette.gray[900],
   },
   linePending: {
-    backgroundColor: "#E5E7EB",
+    backgroundColor: palette.gray[200],
   },
   timelineContent: {
     flex: 1,
@@ -177,16 +178,16 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   textCompleted: {
-    color: "#111827",
+    color: palette.gray[900],
   },
   textPending: {
-    color: "#9CA3AF",
+    color: palette.gray[400],
   },
   checkIcon: {
     marginRight: 4,
   },
   activePill: {
-    backgroundColor: "#E6F4EA",
+    backgroundColor: palette.forest[50],
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 4,
@@ -194,11 +195,11 @@ const styles = StyleSheet.create({
   activePillText: {
     fontSize: 10,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
   },
   timelineMetaText: {
     fontSize: 12,
-    color: "#6B7280",
+    color: palette.gray[500],
     marginTop: 2,
     fontWeight: "500",
   },
@@ -208,12 +209,12 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   verificationCompleted: {
-    color: "#0F3D26",
+    color: colors.primary,
   },
   verificationActive: {
-    color: "#D97706",
+    color: palette.amber[600],
   },
   verificationPending: {
-    color: "#9CA3AF",
+    color: palette.gray[400],
   },
 });

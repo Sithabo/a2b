@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { LucideIcon } from "lucide-react-native";
+import { colors, palette } from "@a2b/ui";
 
 export interface LoadTypeOption {
   id: string;
@@ -39,7 +40,7 @@ export const LoadTypeSelector: React.FC<LoadTypeSelectorProps> = ({
             >
               <Icon
                 size={24}
-                color={isSelected ? "#0F3D26" : "#A8A29E"}
+                color={isSelected ? colors.primary : palette.stone[400]}
                 strokeWidth={isSelected ? 2.5 : 2}
               />
               <Text
@@ -65,7 +66,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
     marginBottom: 12,
   },
   gridContainer: {
@@ -77,24 +78,24 @@ const styles = StyleSheet.create({
   optionCard: {
     width: "48%", // 2 columns with spacing
     height: 90,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
     borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
     borderWidth: 1,
-    shadowColor: "#000",
+    shadowColor: palette.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.02,
     shadowRadius: 4,
     elevation: 1,
   },
   cardUnselected: {
-    borderColor: "#E5E7EB", // stone-200 / gray-200 approx
+    borderColor: palette.gray[200], // stone-200 / gray-200 approx
   },
   cardSelected: {
     borderWidth: 2,
-    borderColor: "#0F3D26", // brand-forest
+    borderColor: colors.primary, // brand-forest
   },
   optionText: {
     fontSize: 12,
@@ -102,9 +103,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   textUnselected: {
-    color: "#57534E", // stone-600
+    color: palette.stone[600], // stone-600
   },
   textSelected: {
-    color: "#0F3D26",
+    color: colors.primary,
   },
 });

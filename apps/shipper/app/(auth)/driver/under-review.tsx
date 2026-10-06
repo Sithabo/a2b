@@ -2,10 +2,8 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { Clock } from "lucide-react-native";
-import { Button } from "@/components/ui/Button";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ThemedText } from "@/components/ThemedText";
-import { Colors } from "@/constants/theme";
+import { colors, palette, Text, Button } from "@a2b/ui";
 
 export default function UnderReviewScreen() {
   const router = useRouter();
@@ -20,37 +18,37 @@ export default function UnderReviewScreen() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <View style={styles.iconWrapper}>
-          <Clock size={64} color={Colors.light.amber} />
+          <Clock size={64} color={palette.amber[600]} />
         </View>
 
         <View style={styles.headerContainer}>
-          <ThemedText type="title" style={styles.title}>
+          <Text variant="display" tone="primary" style={styles.title}>
             Account Under Review
-          </ThemedText>
-          <ThemedText style={styles.description}>
+          </Text>
+          <Text tone="primary" style={styles.description}>
             We're verifying your documents. This usually takes{" "}
-            <ThemedText style={styles.boldText}>24-48 hours</ThemedText>.
-          </ThemedText>
+            <Text tone="primary" style={styles.boldText}>24-48 hours</Text>.
+          </Text>
         </View>
 
         <View style={styles.infoBox}>
-          <ThemedText style={styles.infoText}>
+          <Text tone="primary" style={styles.infoText}>
             You cannot accept jobs yet. We'll send you an SMS when you're
             approved.
-          </ThemedText>
+          </Text>
         </View>
 
         <View style={styles.footerContainer}>
           <View style={styles.contactContainer}>
-            <ThemedText style={styles.questionText}>Questions?</ThemedText>
-            <ThemedText style={styles.phoneText}>Call: 0800 123 456</ThemedText>
+            <Text tone="primary" style={styles.questionText}>Questions?</Text>
+            <Text tone="primary" style={styles.phoneText}>Call: 0800 123 456</Text>
           </View>
 
           <Button
             title="Back to Home"
             variant="ghost"
             onPress={handleBackToHome}
-            style={styles.backButton}
+            fullWidth
           />
         </View>
       </View>
@@ -61,7 +59,7 @@ export default function UnderReviewScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.light.ivory,
+    backgroundColor: palette.ivory[200],
   },
   container: {
     flex: 1,
@@ -86,18 +84,18 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   title: {
-    color: Colors.light.primary,
+    color: colors.primary,
     textAlign: "center",
   },
   description: {
     textAlign: "center",
     fontSize: 18,
-    color: Colors.light.gray[500],
+    color: palette.gray[500],
     lineHeight: 28,
   },
   boldText: {
     fontWeight: "bold",
-    color: Colors.light.primary,
+    color: colors.primary,
   },
   infoBox: {
     backgroundColor: "rgba(217, 119, 6, 0.1)", // Amber/10
@@ -108,7 +106,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   infoText: {
-    color: "#92400E", // Amber-800 approx
+    color: palette.amber[800], // Amber-800 approx
     textAlign: "center",
     fontWeight: "500",
   },
@@ -122,16 +120,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   questionText: {
-    color: Colors.light.gray[400],
+    color: palette.gray[400],
     fontWeight: "bold",
     marginBottom: 4,
   },
   phoneText: {
-    color: Colors.light.primary,
+    color: colors.primary,
     fontSize: 18,
     fontWeight: "bold",
-  },
-  backButton: {
-    width: "100%",
   },
 });

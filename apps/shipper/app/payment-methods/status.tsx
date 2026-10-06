@@ -5,7 +5,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
 import { StatusHero } from "@/components/StatusHero";
 import { ReceiptCard, ReceiptDivider, ReceiptRow } from "@/components/ReceiptCard";
-import { PrimaryButton } from "@/components/PrimaryButton";
+import { colors, palette, Button } from "@a2b/ui";
 
 export default function PaymentStatusScreen() {
   const router = useRouter();
@@ -28,7 +28,7 @@ export default function PaymentStatusScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.navBar}>
         <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
-          <ArrowLeft size={24} color="#0F3D26" />
+          <ArrowLeft size={24} color={colors.primary} />
         </TouchableOpacity>
         <Text style={styles.navTitle}>Card Status</Text>
         <View style={{ width: 24 }} />
@@ -41,7 +41,7 @@ export default function PaymentStatusScreen() {
         <StatusHero state={isSuccess ? "confirmed" : "unconfirmed"} />
 
         <View style={styles.textCenter}>
-          <Text style={[styles.mainHeading, !isSuccess && { color: "#EF4444" }]}>
+          <Text style={[styles.mainHeading, !isSuccess && { color: palette.red[500] }]}>
             {title}
           </Text>
           <Text style={styles.subHeading}>{subtitle}</Text>
@@ -61,7 +61,7 @@ export default function PaymentStatusScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
-        <PrimaryButton
+        <Button
           title="Back to Payment Methods"
           onPress={() => router.replace("/payment-methods")}
         />
@@ -73,7 +73,7 @@ export default function PaymentStatusScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F7F6ED", // Beige theme
+    backgroundColor: palette.ivory[100], // Beige theme
   },
   navBar: {
     flexDirection: "row",
@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
   navTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#0F3D26",
+    color: colors.primary,
   },
   scrollContent: {
     paddingHorizontal: 24,
@@ -100,12 +100,12 @@ const styles = StyleSheet.create({
   mainHeading: {
     fontSize: 26,
     fontWeight: "900",
-    color: "#0F3D26",
+    color: colors.primary,
     textAlign: "center",
   },
   subHeading: {
     fontSize: 16,
-    color: "#57534E",
+    color: palette.stone[600],
     textAlign: "center",
   },
   receiptCard: {
@@ -116,6 +116,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 16,
     paddingBottom: 32,
-    backgroundColor: "#F7F6ED",
+    backgroundColor: palette.ivory[100],
   },
 });
