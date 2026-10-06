@@ -1,8 +1,8 @@
 import React, { forwardRef, useState } from 'react';
 import { StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
-import { colors } from '../tokens/colors';
-import { layout, radius, spacing, typography } from '../tokens/layout';
-import { Text } from './Text';
+import { colors } from '../tokens/colors.ts';
+import { layout, radius, spacing, typography } from '../tokens/layout.ts';
+import { Text } from './Text.tsx';
 
 export interface TextFieldProps extends TextInputProps {
   label?: string;

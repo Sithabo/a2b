@@ -1,5 +1,5 @@
 import { parsePhoneNumberFromString } from 'libphonenumber-js/min';
-import { isMarketCode, type Market, type MarketCode } from './markets';
+import { isMarketCode, type Market, type MarketCode } from './markets.ts';
 
 /** "150,000 UGX". Accepts the string prices the prototype stores. */
 export function formatMoney(amount: number | string | null | undefined, market: Market, opts: { code?: boolean } = {}) {

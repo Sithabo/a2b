@@ -1,9 +1,9 @@
 import React from 'react';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import type { LucideIcon } from 'lucide-react-native';
-import { tones, type Tone } from '../tokens/colors';
-import { radius, spacing } from '../tokens/layout';
-import { Text } from './Text';
+import { tones, type Tone } from '../tokens/colors.ts';
+import { radius, spacing } from '../tokens/layout.ts';
+import { Text } from './Text.tsx';
 
 export interface BadgeProps {
   label: string;

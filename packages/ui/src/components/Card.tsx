@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, type ViewProps } from 'react-native';
-import { colors } from '../tokens/colors';
-import { radius, spacing } from '../tokens/layout';
+import { colors } from '../tokens/colors.ts';
+import { radius, spacing } from '../tokens/layout.ts';
 
 export interface CardProps extends ViewProps {
   /** outlined = white with border (default), muted = sunken grey fill, brand = solid forest. */
