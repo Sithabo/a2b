@@ -9,6 +9,7 @@ apps/
 packages/
   core/        Domain types, status machine, pricing, market config (GY + UG)
   ui/          Design tokens and shared components
+  api-client/  Typed API client (Tuyau) generated from apps/api's routes
 backend/       Original SQL schema sketch (superseded by apps/api/database/migrations)
 design/        Design references (Stitch exports)
 docs/          Product and regulatory documents
@@ -44,6 +45,26 @@ In development:
 - **SMS codes** are printed to the API log (`SMS_DRIVER=log`). `OTP_TEST_NUMBERS` lists numbers that always accept a fixed code without any SMS (`+256700000001` / `+5926000001` → `123456`); ignored in production.
 - **Payments** use a mock provider (`PAYMENT_DRIVER=mock`) where every escrow deposit and payout succeeds. Real providers (MTN MoMo, Airtel Money, MMG, cards) implement `PaymentDriver` in `apps/api/app/services/payments/`.
 - **Customs documents** are stored privately under `apps/api/storage/` and only streamed through authorized routes.
+
+### Connecting the apps
+
+Apps talk to the API through `@a2b/api-client`; request and response types come straight from the API's routes, validators and transformers, so a change on the server shows up as a type error in the apps.
+
+```bash
+cp apps/shipper/.env.example apps/shipper/.env
+```
+
+`EXPO_PUBLIC_API_URL` defaults to `http://localhost:3333`, which works on the iOS simulator. On the Android emulator either run `adb reverse tcp:3333 tcp:3333` or use `http://10.0.2.2:3333`; on a physical phone use your computer's LAN IP.
+
+Until the driver app exists, play the driver's side from the API:
+
+```bash
+cd apps/api
+node ace carrier:simulate A2B-7K3P9Q accept          # → MATCHED (shipper can now fund escrow)
+node ace carrier:simulate A2B-7K3P9Q loaded          # → IN_TRANSIT
+node ace carrier:simulate A2B-7K3P9Q arrived         # → DELIVERED
+node ace carrier:simulate A2B-7K3P9Q release 482915  # code from the shipper's Release Funds screen
+```
 
 ### Load lifecycle
 

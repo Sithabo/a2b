@@ -42,6 +42,7 @@ test.group('Loads / escrow lifecycle', (group) => {
       },
     })
     assert.isNull(dataOf(accepted).location, 'exact addresses stay hidden until escrow is funded')
+    assert.isNull(dataOf(accepted).carrier, 'driver identity stays masked until escrow is funded')
 
     // MMG is Guyana-only
     const wrongRail = await client
@@ -57,6 +58,11 @@ test.group('Loads / escrow lifecycle', (group) => {
       .loginAs(shipper)
     deposit.assertBodyContains({
       data: { status: 'SECURED', escrow: { status: 'HELD', depositMethod: 'mtn' } },
+    })
+
+    const shipperView = await client.get(`/api/v1/loads/${id}`).loginAs(shipper)
+    shipperView.assertBodyContains({
+      data: { carrier: { driverName: driver.fullName, driverPhone: driver.phone } },
     })
 
     const driverView = await client.get(`/api/v1/loads/${id}`).loginAs(driver)

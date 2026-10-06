@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ViewStyle, TouchableOpacity } from "react-nativ
 import { Package, Wrench, FlaskConical, Apple, QrCode } from "lucide-react-native";
 import { Shipment } from "@/store/useShipmentStore";
 import { colors, palette } from "@a2b/ui";
+import { trackingLabel } from "@/lib/loads";
 
 export interface TrackingCardProps {
   shipment: Shipment;
@@ -142,7 +143,7 @@ export const TrackingCard: React.FC<TrackingCardProps> = ({
           <View style={styles.trackingInfo}>
             <Text style={styles.trackingLabel}>Tracking number</Text>
             <Text style={styles.trackingCode} numberOfLines={1} adjustsFontSizeToFit>
-              {`#${shipment.id}`}
+              {trackingLabel(shipment)}
             </Text>
           </View>
 

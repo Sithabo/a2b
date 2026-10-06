@@ -1,18 +1,22 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Truck, AlertCircle, ShieldCheck, ArrowRight } from 'lucide-react-native';
 import { colors, palette } from "@a2b/ui";
 import { useMarket } from "@/store/useMarket";
 import { formatMoney } from "@a2b/core";
-
-// Placeholder until the matched load's agreed price is passed in.
-const DEPOSIT = 150000;
+import { parseLoadId, useShipment } from "@/lib/loads";
+import { LoadState } from "@/components/LoadState";
 
 // Source: 5.html — "Driver Accepted & Deposit"
 export default function DriverFoundScreen() {
   const router = useRouter();
   const market = useMarket();
+  const { trackingId } = useLocalSearchParams<{ trackingId: string }>();
+  const { data: shipment, error, refetch } = useShipment(parseLoadId(trackingId));
+
+  if (!shipment) return <LoadState error={error} onRetry={refetch} />;
+  const deposit = shipment.escrow?.amount ?? Number(shipment.offerPrice);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -46,7 +50,7 @@ export default function DriverFoundScreen() {
           {/* Amount to Deposit */}
           <View style={styles.amountBox}>
             <Text style={styles.amountLabel}>Amount to Deposit</Text>
-            <Text style={styles.amountValue}>{formatMoney(DEPOSIT, market, { code: false })}</Text>
+            <Text style={styles.amountValue}>{formatMoney(deposit, market, { code: false })}</Text>
             <Text style={styles.amountCurrency}>{market.currency.code}</Text>
           </View>
 
@@ -62,10 +66,10 @@ export default function DriverFoundScreen() {
           {/* Primary CTA */}
           <TouchableOpacity
             style={styles.depositButton}
-            onPress={() => router.push('/match-pay/payment')}
+            onPress={() => router.push({ pathname: '/match-pay/payment', params: { trackingId: shipment.id } })}
             activeOpacity={0.85}
           >
-            <Text style={styles.depositButtonText}>Deposit {formatMoney(DEPOSIT, market)} to Unlock Driver</Text>
+            <Text style={styles.depositButtonText}>Deposit {formatMoney(deposit, market)} to Unlock Driver</Text>
           </TouchableOpacity>
 
           {/* Secondary cancel link */}

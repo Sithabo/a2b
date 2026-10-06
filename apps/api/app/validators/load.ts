@@ -28,6 +28,13 @@ export const createLoadValidator = vine.create({
   cargo: vine.object({
     type: vine.enum(cargoTypes),
     weightKg: vine.number().positive().optional(),
+    dimensions: vine
+      .object({
+        lengthMeters: vine.number().min(0),
+        widthMeters: vine.number().min(0),
+        heightMeters: vine.number().min(0),
+      })
+      .optional(),
     machinerySector: vine
       .enum([
         'AGRICULTURE',

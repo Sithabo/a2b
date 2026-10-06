@@ -117,6 +117,8 @@ export interface Fleet {
 
 export interface Load {
   id: string;
+  /** Human-friendly code shown to users, e.g. "A2B-7K3P9Q". */
+  reference?: string;
   /** Older locally-stored loads may not have one; treat as the user's market. */
   market?: MarketCode;
   pickup: string;

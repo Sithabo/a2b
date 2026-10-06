@@ -40,7 +40,9 @@ export default class LoadDocumentsController {
     }
 
     const key = `loads/${load.id}/${requirementId}-${randomUUID()}.${file.extname}`
-    await file.moveToDisk(key)
+    // moveFromFs (not file.moveToDisk) so this file type-checks without Drive's
+    // MultipartFile augmentation — the apps compile it via @a2b/api-client.
+    await drive.use().moveFromFs(file.tmpPath!, key)
 
     const existing = await LoadDocument.query()
       .where('load_id', load.id)

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   TextInput,
@@ -11,51 +11,58 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
 import { colors, palette, Text, Button } from "@a2b/ui";
+import { apiErrorMessage } from "@a2b/api-client";
+import { api } from "@/lib/api";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function VerifyOtpScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const [otp, setOtp] = useState("");
-  const [generatedCode, setGeneratedCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const setSession = useAuthStore((state) => state.setSession);
 
-  const generateNewCode = () => {
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    setGeneratedCode(code);
+  const phone = String(params.phone ?? "");
+  const role = params.role === "driver" ? "driver" : "shipper";
+
+  const handleResend = () => {
     setOtp("");
     setError("");
+    api.auth
+      .requestOtp({ body: { phone } })
+      .then(() => setNotice("A new code is on its way."))
+      .catch((err) => setError(apiErrorMessage(err)));
   };
 
-  useEffect(() => {
-    generateNewCode();
-  }, []);
-
-  const handleVerify = () => {
-    if (otp !== generatedCode) {
-      setError("Incorrect verification code.");
-      return;
-    }
-
+  const handleVerify = async () => {
     setError("");
     setIsLoading(true);
-
-    // Simulate API Verification
-    setTimeout(() => {
-      setIsLoading(false);
-
-      const role = params.role as string;
-      const phone = params.phone as string;
+    try {
+      const { data } = await api.auth.verifyOtp({ body: { phone, code: otp, role } });
+      if (data.user.role !== role) {
+        setError(
+          `This number is registered as a ${data.user.role.replace("_", " ")} account. Use the matching A2B app to sign in.`
+        );
+        return;
+      }
+      await setSession(data.token, data.user);
+      const { data: me } = await api.me.show({});
+      useAuthStore.getState().setUser(me);
 
       if (role === "driver") {
-        router.push("/(auth)/driver/verify-identity");
+        router.replace("/(auth)/driver/verify-identity");
+      } else if (me.shipperProfile) {
+        router.replace("/(tabs)");
       } else {
-        router.push({
-          pathname: "/(auth)/business-details",
-          params: { role: role || "user", phone },
-        });
+        router.replace("/(auth)/business-details");
       }
-    }, 1500);
+    } catch (err) {
+      setError(apiErrorMessage(err));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -81,12 +88,15 @@ export default function VerifyOtpScreen() {
         </View>
 
         <View style={styles.formContainer}>
-          {/* Developer Hint */}
-          <View style={styles.devHintBox}>
-            <Text tone="primary" style={styles.devHintText}>
-              Dev Mode: Your code is <Text tone="primary" style={{fontWeight: 'bold'}}>{generatedCode}</Text>
-            </Text>
-          </View>
+          {__DEV__ && (
+            <View style={styles.devHintBox}>
+              <Text tone="primary" style={styles.devHintText}>
+                Dev: the code is printed in the API log. Test numbers (e.g. +256 700 000 001) use{" "}
+                <Text tone="primary" style={{ fontWeight: "bold" }}>123456</Text>.
+              </Text>
+            </View>
+          )}
+          {notice ? <Text tone="primary" style={styles.devHintText}>{notice}</Text> : null}
 
           <View style={styles.inputContainer}>
             <Text tone="primary" style={styles.inputLabel}>Enter Code</Text>
@@ -113,7 +123,7 @@ export default function VerifyOtpScreen() {
           />
         </View>
 
-        <TouchableOpacity style={styles.resendContainer} onPress={generateNewCode}>
+        <TouchableOpacity style={styles.resendContainer} onPress={handleResend}>
           <Text tone="primary" style={styles.resendText}>Resend Code</Text>
         </TouchableOpacity>
       </KeyboardAvoidingView>

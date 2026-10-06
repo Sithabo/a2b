@@ -17,6 +17,8 @@ export default class LoadTransformer extends BaseTransformer<Load> {
   toObject() {
     const location = this.resource.$preloaded.location ? this.resource.location : null
     const escrow = this.resource.$preloaded.escrow ? this.resource.escrow : null
+    const driver = this.resource.$preloaded.driver ? this.resource.driver : null
+    const vehicle = this.resource.$preloaded.vehicle ? this.resource.vehicle : null
     return {
       ...this.pick(this.resource, [
         'id',
@@ -58,6 +60,24 @@ export default class LoadTransformer extends BaseTransformer<Load> {
               dropoffLng: location.dropoffLng,
               receiverName: location.receiverName,
               receiverPhone: location.receiverPhone,
+            }
+          : null,
+      /** Who is carrying the load — masked until escrow is funded (same rule as `location`). */
+      carrier:
+        this.options.showLocation && driver
+          ? {
+              driverName: driver.fullName,
+              driverPhone: driver.phone,
+              vehicle: vehicle
+                ? {
+                    plate: vehicle.plate,
+                    make: vehicle.make,
+                    model: vehicle.model,
+                    vehicleClass: vehicle.vehicleClass,
+                    bodyType: vehicle.bodyType,
+                    capacityTons: vehicle.capacityTons,
+                  }
+                : null,
             }
           : null,
       escrow: escrow

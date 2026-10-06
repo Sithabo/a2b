@@ -3,20 +3,29 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-nati
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { ArrowLeft, Check, FileText, Share2 } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useShipmentStore } from "@/store/useShipmentStore";
 import { colors, palette } from "@a2b/ui";
 import { useMarket } from "@/store/useMarket";
 import { formatMoney } from "@a2b/core";
+import { parseLoadId, trackingLabel, useShipment } from "@/lib/loads";
+import { LoadState } from "@/components/LoadState";
+
+const METHOD_LABELS: Record<string, string> = {
+  mtn: "MTN Mobile Money",
+  airtel: "Airtel Money",
+  mmg: "MMG Mobile Money",
+  card: "Debit/Credit Card",
+};
 
 export default function OfficialReceiptScreen() {
   const router = useRouter();
   const { trackingId } = useLocalSearchParams<{ trackingId: string }>();
-  const idToFind = trackingId ? trackingId.replace("#", "") : "";
-  const shipments = useShipmentStore((state) => state.shipments);
-  const shipment = shipments.find((s) => s.id === idToFind) || shipments[0];
+  const { data: shipment, error, refetch } = useShipment(parseLoadId(trackingId));
 
   const market = useMarket();
-  const formatCurrency = (val?: string) => formatMoney(val, market);
+  const formatCurrency = (val?: string | number) => formatMoney(val, market);
+
+  if (!shipment) return <LoadState error={error} onRetry={refetch} />;
+  const vehicle = shipment.carrier?.vehicle;
 
   return (
     <View style={styles.container}>
@@ -54,12 +63,12 @@ export default function OfficialReceiptScreen() {
             {/* Metadata Rows */}
             <View style={styles.metadataSection}>
               <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Transaction ID:</Text>
-                <Text style={styles.metaValue}>#A2B-TXN-{shipment.id}</Text>
+                <Text style={styles.metaLabel}>Load ID:</Text>
+                <Text style={styles.metaValue}>{trackingLabel(shipment)}</Text>
               </View>
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Driver:</Text>
-                <Text style={styles.metaValue}>{shipment.driverName || "John Mukasa"}</Text>
+                <Text style={styles.metaValue}>{shipment.carrier?.driverName ?? "—"}</Text>
               </View>
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Pickup:</Text>
@@ -71,7 +80,9 @@ export default function OfficialReceiptScreen() {
               </View>
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Vehicle:</Text>
-                <Text style={styles.metaValue}>Fuso Fighter (UAM 456K)</Text>
+                <Text style={styles.metaValue}>
+                  {vehicle ? `${vehicle.make} ${vehicle.model} (${vehicle.plate})` : "—"}
+                </Text>
               </View>
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Load Type:</Text>
@@ -79,7 +90,9 @@ export default function OfficialReceiptScreen() {
               </View>
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Payment Method:</Text>
-                <Text style={styles.metaValue}>MTN Mobile Money</Text>
+                <Text style={styles.metaValue}>
+                  {METHOD_LABELS[shipment.escrow?.depositMethod ?? ""] ?? "—"}
+                </Text>
               </View>
             </View>
 
@@ -93,7 +106,7 @@ export default function OfficialReceiptScreen() {
             {/* Price Footer */}
             <View style={styles.priceSection}>
               <Text style={styles.priceLabel}>Amount Paid:</Text>
-              <Text style={styles.priceValue}>{formatCurrency(shipment.offerPrice)}</Text>
+              <Text style={styles.priceValue}>{formatCurrency(shipment.escrow?.amount ?? shipment.offerPrice)}</Text>
             </View>
 
           </View>
