@@ -1,8 +1,0 @@
-{
-  "android": {
-    "package": "com.sithabo.a2b"
-  },
-  "ios": {
-    "bundleIdentifier": "com.sithabo.a2b"
-  }
-}
