@@ -9,3 +9,7 @@ export * from './components/IconButton.tsx';
 export * from './components/ScreenHeader.tsx';
 export * from './components/Text.tsx';
 export * from './components/TextField.tsx';
+export * from './components/Chip.tsx';
+export * from './components/EmptyState.tsx';
+export * from './components/PlateBadge.tsx';
+export * from './components/Stepper.tsx';
