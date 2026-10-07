@@ -15,7 +15,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { ChevronRight } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAuthStore } from "@/store/useAuthStore";
+import { useSession } from "@/lib/session";
 import { colors, palette, Text, Button } from "@a2b/ui";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -49,7 +49,7 @@ const SLIDES = [
 
 export default function OnboardingScreen() {
   const router = useRouter();
-  const { completeOnboarding } = useAuthStore();
+  const completeOnboarding = useSession((s) => s.completeOnboarding);
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollRef = useRef<Animated.ScrollView>(null);
   const scrollX = useSharedValue(0);

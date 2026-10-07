@@ -26,7 +26,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { TrackingCard } from "@/components/TrackingCard";
 import { ShippingCard } from "@/components/ShippingCard";
 import { ToolCard } from "@/components/ToolCard";
-import { useAuthStore } from "@/store/useAuthStore";
+import { useUserProfile } from "@/store/useShipperProfile";
 import { useShipmentStore } from "@/store/useShipmentStore";
 import { colors, palette } from "@a2b/ui";
 import { isActiveStatus, statusGroup } from "@a2b/core";
@@ -34,7 +34,7 @@ import { shipmentRoute, useMyShipments } from "@/lib/loads";
 
 export default function HomeScreen() {
   const router = useRouter();
-  const userProfile = useAuthStore((state) => state.userProfile);
+  const userProfile = useUserProfile();
   const draftShipment = useShipmentStore((state) => state.draftShipment);
   const { data: shipments = [], refetch, isRefetching } = useMyShipments();
   const [searchQuery, setSearchQuery] = useState("");

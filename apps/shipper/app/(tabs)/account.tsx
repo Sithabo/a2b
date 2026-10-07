@@ -18,11 +18,11 @@ import { useRouter } from "expo-router";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAuthStore } from "@/store/useAuthStore";
+import { useProfileImage, useUserProfile } from "@/store/useShipperProfile";
 import { useMarket } from "@/store/useMarket";
 import { isValidTaxId } from "@a2b/core";
 import { apiErrorMessage } from "@a2b/api-client";
-import { api } from "@/lib/api";
+import { api, useSession } from "@/lib/session";
 import {
   ArrowLeft,
   Pencil,
@@ -45,7 +45,10 @@ import { colors, palette } from "@a2b/ui";
 
 export default function AccountScreen() {
   const router = useRouter();
-  const { userProfile, logout, setUser, setProfileImage } = useAuthStore();
+  const userProfile = useUserProfile();
+  const setProfileImage = useProfileImage((s) => s.set);
+  const setUser = useSession((s) => s.setUser);
+  const signOut = useSession((s) => s.signOut);
   const market = useMarket();
   const tinErrorMessage = `Valid ${market.taxId.hint} ${market.taxId.issuer} Tax Identification Number required to bypass customs processing constraints.`;
   const insets = useSafeAreaInsets();
@@ -62,7 +65,7 @@ export default function AccountScreen() {
 
   const handleLogout = async () => {
     await api.auth.logout({}).catch(() => {}); // revoke the token server-side when online
-    await logout();
+    await signOut();
     router.replace("/(auth)/login");
   };
 

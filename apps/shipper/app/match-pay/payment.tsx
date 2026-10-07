@@ -6,7 +6,7 @@ import { colors, palette, partnerColors } from "@a2b/ui";
 import { useMarket } from "@/store/useMarket";
 import { formatMoney } from "@a2b/core";
 import { apiErrorMessage } from "@a2b/api-client";
-import { api } from "@/lib/api";
+import { api } from "@/lib/session";
 import { parseLoadId, useInvalidateLoads, useShipment } from "@/lib/loads";
 import { LoadState } from "@/components/LoadState";
 

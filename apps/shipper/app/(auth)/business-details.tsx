@@ -11,22 +11,19 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { ArrowLeft, Building2, MapPin } from "lucide-react-native";
-import { useAuthStore } from "@/store/useAuthStore";
-import CountryPicker, { Country, CountryCode } from "react-native-country-picker-modal";
-import { MARKET_CODES } from "@a2b/core";
 import { apiErrorMessage } from "@a2b/api-client";
-import { api } from "@/lib/api";
+import { api, useSession } from "@/lib/session";
+import { useMarket } from "@/store/useMarket";
 import { colors, palette, Text, Button } from "@a2b/ui";
 
 export default function BusinessDetailsScreen() {
   const router = useRouter();
   const [companyName, setCompanyName] = useState("");
   const [region, setRegion] = useState("");
-  const [countryCode, setCountryCode] = useState<CountryCode>("UG");
-  const [showPicker, setShowPicker] = useState(false);
+  const market = useMarket();
   const [isLoading, setIsLoading] = useState(false);
-  const setUser = useAuthStore((state) => state.setUser);
-  const completeOnboarding = useAuthStore((state) => state.completeOnboarding);
+  const setUser = useSession((state) => state.setUser);
+  const completeOnboarding = useSession((state) => state.completeOnboarding);
   const [error, setError] = useState("");
 
   const handleCompleteRegistration = async () => {
@@ -91,41 +88,18 @@ export default function BusinessDetailsScreen() {
             {/* Operating Region */}
             <View style={styles.inputGroup}>
               <Text tone="primary" style={styles.inputLabel}>
-                Preferred Operating Region
+                Operating region
               </Text>
-              <TouchableOpacity
-                style={styles.inputWrapper}
-                activeOpacity={0.7}
-                onPress={() => setShowPicker(true)}
-              >
+              <View style={styles.inputWrapper}>
                 <MapPin size={20} color={palette.gray[400]} />
-                <Text
-                  style={[
-                    styles.textInput,
-                    !region ? { color: palette.gray[400] } : null,
-                  ]}
-                >
-                  {region || "Select Country..."}
-                </Text>
-                <View style={{ width: 0, height: 0, opacity: 0 }}>
-                  <CountryPicker
-                    countryCodes={MARKET_CODES}
-                    withFilter
-                    withFlag
-                    countryCode={countryCode}
-                    visible={showPicker}
-                    onClose={() => setShowPicker(false)}
-                    onSelect={(country: Country) => {
-                      setRegion(country.name as string);
-                      setCountryCode(country.cca2);
-                      setShowPicker(false);
-                    }}
-                    modalProps={{
-                      presentationStyle: "pageSheet",
-                    }}
-                  />
-                </View>
-              </TouchableOpacity>
+                <TextInput
+                  placeholder={market.code === "GY" ? "e.g. Georgetown" : "e.g. Kampala Central"}
+                  placeholderTextColor={palette.gray[400]}
+                  style={styles.textInput}
+                  value={region}
+                  onChangeText={setRegion}
+                />
+              </View>
             </View>
 
             {error ? <Text tone="danger">{error}</Text> : null}

@@ -5,7 +5,7 @@ import { ArrowLeft, Clock } from "lucide-react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { apiErrorMessage } from "@a2b/api-client";
 import { colors, palette } from "@a2b/ui";
-import { api } from "@/lib/api";
+import { api } from "@/lib/session";
 import { parseLoadId, useShipment } from "@/lib/loads";
 
 const formatCode = (code: string) => `${code.slice(0, 3)} ${code.slice(3)}`;

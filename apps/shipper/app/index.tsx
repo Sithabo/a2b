@@ -1,8 +1,8 @@
 import { Redirect } from "expo-router";
-import { useAuthStore } from "@/store/useAuthStore";
+import { useSession } from "@/lib/session";
 
 export default function Index() {
-  const { isHydrated, isLoggedIn, hasCompletedOnboarding, user } = useAuthStore();
+  const { isHydrated, isSignedIn, hasCompletedOnboarding, user } = useSession();
 
   // Wait until the stored session has been read.
   if (!isHydrated) return null;
@@ -11,7 +11,7 @@ export default function Index() {
     return <Redirect href="/(auth)/onboarding" />;
   }
 
-  if (!isLoggedIn) {
+  if (!isSignedIn) {
     return <Redirect href="/(auth)/login" />;
   }
 
