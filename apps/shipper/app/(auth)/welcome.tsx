@@ -46,39 +46,19 @@ export default function WelcomeScreen() {
 
           <View style={styles.textContainer}>
             <Text variant="display" tone="primary" style={styles.title}>
-              Choose Your Role
+              Move your goods with A2B
             </Text>
             <Text tone="primary" style={styles.description}>
-              Are you sending goods across Uganda or delivering them? Select
-              your role to get started with A2B.
+              Post a load, pay safely through escrow and track it to the door —
+              across Guyana and Uganda.
             </Text>
           </View>
 
           <View style={styles.buttonContainer}>
-            {/* Shipper Button */}
-            <Button
-              title="I am a Shipper"
-              onPress={() =>
-                router.push({
-                  pathname: "/(auth)/login",
-                  params: { role: "shipper" },
-                })
-              }
-              fullWidth
-            />
-
-            {/* Driver Button */}
-            <Button
-              title="I am a Driver"
-              onPress={() =>
-                router.push({
-                  pathname: "/(auth)/login",
-                  params: { role: "driver" },
-                })
-              }
-              variant="secondary"
-              fullWidth
-            />
+            <Button title="Get started" onPress={() => router.push("/(auth)/login")} fullWidth />
+            <Text variant="caption" tone="muted" align="center">
+              Driving or running trucks? Use the A2B Driver or A2B Fleet app.
+            </Text>
           </View>
 
           {/* Bottom Indicator Line */}

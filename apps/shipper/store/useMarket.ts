@@ -1,16 +1,11 @@
-import { getMarket, marketFromCountry, marketFromPhone, type Market, type MarketCode } from '@a2b/core';
-import { useAuthStore } from './useAuthStore';
+import { getMarket, marketFromPhone, type Market, type MarketCode } from '@a2b/core';
+import { useSession } from '@/lib/session';
 
-/** Used until a profile has a market (e.g. sessions created before markets existed). */
+/** Used until a profile has loaded. */
 const DEFAULT_MARKET: MarketCode = 'UG';
 
-/** The signed-in user's market. */
+/** The signed-in shipper's market (from their account, which the API derives from their phone). */
 export function useMarket(): Market {
-  const profile = useAuthStore((state) => state.userProfile);
-  const code =
-    profile?.market ??
-    marketFromCountry(profile?.region) ??
-    (profile?.phone ? marketFromPhone(profile.phone) : undefined) ??
-    DEFAULT_MARKET;
-  return getMarket(code);
+  const user = useSession((s) => s.user);
+  return getMarket(user?.market ?? (user?.phone ? marketFromPhone(user.phone) : undefined) ?? DEFAULT_MARKET);
 }

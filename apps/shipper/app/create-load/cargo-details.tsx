@@ -28,7 +28,7 @@ import { useShipmentStore, CargoType, CargoDetails } from "@/store/useShipmentSt
 import { colors, palette, ScreenHeader, BottomSheet, Button } from "@a2b/ui";
 import { recommendOffer } from "@a2b/core";
 import { apiErrorMessage } from "@a2b/api-client";
-import { api } from "@/lib/api";
+import { api } from "@/lib/session";
 import { newLoadBody, useInvalidateLoads } from "@/lib/loads";
 import { useMarket } from "@/store/useMarket";
 

@@ -1,8 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { CargoDetails, CargoType, LoadStatus, LocationData, Shipment } from "@a2b/core";
 import type { Data } from "@a2b/api-client";
-import { api, API_URL } from "@/lib/api";
-import { useAuthStore } from "@/store/useAuthStore";
+import { api, API_URL, useSession } from "@/lib/session";
 
 const CARGO_LABELS: Record<CargoType, string> = {
   GENERAL_CARGO: "General Cargo",
@@ -166,7 +165,7 @@ export async function uploadLoadDocument(
     method: "POST",
     headers: {
       Accept: "application/json",
-      Authorization: `Bearer ${useAuthStore.getState().token ?? ""}`,
+      Authorization: `Bearer ${useSession.getState().token ?? ""}`,
     },
     body: form,
   });

@@ -32,7 +32,7 @@ import { colors, palette, ScreenHeader } from "@a2b/ui";
 import { useMarket } from "@/store/useMarket";
 import { documentsFor } from "@a2b/core";
 import { apiErrorMessage } from "@a2b/api-client";
-import { api } from "@/lib/api";
+import { api } from "@/lib/session";
 import { newLoadBody, uploadLoadDocument, useInvalidateLoads } from "@/lib/loads";
 
 interface DocumentInfo {
