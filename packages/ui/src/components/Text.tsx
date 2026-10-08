@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text as RNText, type TextProps as RNTextProps } from 'react-native';
+import { Platform, Text as RNText, type TextProps as RNTextProps } from 'react-native';
 import { colors } from '../tokens/colors.ts';
 import { typography, type TypographyVariant } from '../tokens/layout.ts';
 
@@ -24,10 +24,20 @@ export interface TextProps extends RNTextProps {
   align?: 'left' | 'center' | 'right';
 }
 
+/**
+ * Android 15 under-measures the width of text that has a lineHeight, clipping the
+ * last characters of content-sized labels (button titles, references, captions).
+ * Android uses the font's natural line height instead.
+ */
+const androidTypography = Object.fromEntries(
+  Object.entries(typography).map(([k, { lineHeight: _lh, ...rest }]) => [k, rest])
+) as Record<TypographyVariant, object>;
+
 export function Text({ variant = 'body', tone = 'default', color, align, style, ...rest }: TextProps) {
+  const base = Platform.OS === 'android' ? androidTypography[variant] : typography[variant];
   return (
     <RNText
-      style={[typography[variant], { color: color ?? toneColors[tone] }, align && { textAlign: align }, style]}
+      style={[base, { color: color ?? toneColors[tone] }, align && { textAlign: align }, style]}
       {...rest}
     />
   );

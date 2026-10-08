@@ -1,0 +1,25 @@
+{
+  "name": "@a2b/features",
+  "version": "0.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@a2b/api-client": "*",
+    "@a2b/core": "*",
+    "@a2b/ui": "*"
+  },
+  "peerDependencies": {
+    "@react-native-async-storage/async-storage": "*",
+    "@tanstack/react-query": "*",
+    "expo-secure-store": "*",
+    "lucide-react-native": "*",
+    "react": "*",
+    "react-native": "*",
+    "react-native-safe-area-context": "*",
+    "zustand": "*"
+  }
+}

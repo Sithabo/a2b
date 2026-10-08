@@ -5,11 +5,13 @@ npm-workspaces monorepo for the A2B freight apps.
 ```
 apps/
   shipper/     Expo app — shippers post loads and track them
+  fleet/       Expo app — fleet owners manage trucks and drivers, and dispatch loads
   api/         AdonisJS API + PostgreSQL — auth, loads, escrow, fleets, documents
 packages/
   core/        Domain types, status machine, pricing, market config (GY + UG)
   ui/          Design tokens and shared components
   api-client/  Typed API client (Tuyau) generated from apps/api's routes
+  features/    Shared app building blocks: session/API wiring, phone + OTP sign-in screens
 backend/       Original SQL schema sketch (superseded by apps/api/database/migrations)
 design/        Design references (Stitch exports)
 docs/          Product and regulatory documents
@@ -22,6 +24,7 @@ docs/          Product and regulatory documents
 ```bash
 npm install            # once, from the repo root
 npm run shipper        # start the shipper app
+npm run fleet          # start the fleet app
 npm run api            # start the API (http://localhost:3333)
 npm run test:api       # API test suite (uses the a2b_test database)
 npm run typecheck      # tsc across all workspaces
@@ -55,6 +58,14 @@ cp apps/shipper/.env.example apps/shipper/.env
 ```
 
 `EXPO_PUBLIC_API_URL` defaults to `http://localhost:3333`, which works on the iOS simulator. On the Android emulator either run `adb reverse tcp:3333 tcp:3333` or use `http://10.0.2.2:3333`; on a physical phone use your computer's LAN IP.
+
+Demo data for development (a shipper and open loads in each market):
+
+```bash
+cd apps/api && node ace db:seed --files database/seeders/demo_seeder.ts
+```
+
+OTP test numbers (code `123456`): shippers `+256700000001` / `+5926000001`, fleet owners `+256700000003` / `+5926000003`.
 
 Until the driver app exists, play the driver's side from the API:
 
