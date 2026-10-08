@@ -6,6 +6,7 @@ import { getMarket } from '@a2b/core'
 import Escrow from '#models/escrow'
 import PaymentTransaction from '#models/payment_transaction'
 import User from '#models/user'
+import DriverProfile from '#models/driver_profile'
 import type Load from '#models/load'
 import DomainError from '#exceptions/domain_error'
 import { actorFor } from '#services/load_access'
@@ -198,6 +199,9 @@ export async function releaseEscrow(driver: User, loadId: number, code: string) 
       { actor: 'driver', actorId: driver.id, note: 'Release code accepted' },
       trx
     )
+    await DriverProfile.query({ client: trx })
+      .where('user_id', driver.id)
+      .increment('completed_trips', 1)
     return { ok: true as const, load, escrow }
   })
 

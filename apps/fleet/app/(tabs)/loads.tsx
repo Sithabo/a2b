@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import { PackageSearch } from "lucide-react-native";
 import { ChipGroup, EmptyState, spacing, Text } from "@a2b/ui";
 import { ScreenScroll } from "@/components/ScreenScroll";
-import { LoadCard } from "@/components/LoadCard";
+import { LoadCard } from "@a2b/features";
 import { useFleetLoads, useLoadBoard } from "@/lib/queries";
 
 type View_ = "board" | "mine";

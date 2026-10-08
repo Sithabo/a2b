@@ -6,7 +6,7 @@ import { History, Wrench } from "lucide-react-native";
 import { bodyTypes, formatMoney, getMarket, vehicleClasses } from "@a2b/core";
 import { apiErrorMessage } from "@a2b/api-client";
 import { Badge, Button, Card, ChipGroup, colors, EmptyState, layout, PlateBadge, ScreenHeader, spacing, Text } from "@a2b/ui";
-import { LoadCard } from "@/components/LoadCard";
+import { LoadCard } from "@a2b/features";
 import { truckStateMeta } from "@/components/TruckCard";
 import { api } from "@/lib/session";
 import { buildRoster, earningsBetween, keys, useDrivers, useFleet, useFleetLoads, useInvalidate, useVehicles } from "@/lib/queries";
