@@ -2,16 +2,18 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { 
-  Shipment, 
-  LocationData, 
-  ShipmentStatus, 
-  CargoDetails, 
-  CargoType, 
-  MachinerySector 
-} from '../types/shipment';
+import {
+  normalizeStatus,
+  type CargoDetails,
+  type CargoType,
+  type LoadStatus,
+  type LocationData,
+  type MachinerySector,
+  type Shipment,
+} from '@a2b/core';
 
-export { Shipment, LocationData, ShipmentStatus, CargoDetails, CargoType, MachinerySector };
+export type { Shipment, LocationData, CargoDetails, CargoType, MachinerySector };
+export type ShipmentStatus = LoadStatus;
 
 interface ShipmentState {
   shipments: Shipment[];
@@ -51,7 +53,7 @@ const initialShipments: Shipment[] = [
     cargoType: "General cargo",
     weight: "250",
     offerPrice: "150000",
-    status: "ACTIVE",
+    status: "IN_TRANSIT",
     createdAt: new Date(Date.now() - 120 * 60000).toISOString(),
     deliveryDate: twoDaysFromNow.toISOString(),
     acceptedByDriver: true,
@@ -155,6 +157,16 @@ export const useShipmentStore = create<ShipmentState>()(
     {
       name: 'shipment-storage',
       storage: createJSONStorage(() => AsyncStorage),
+      version: 1,
+      // v0 stored ACTIVE / DRAFT_PENDING_DOCS; map them onto the shared status list.
+      migrate: (persisted: any, version) => {
+        if (version < 1 && persisted) {
+          const fix = (s: any) => (s?.status ? { ...s, status: normalizeStatus(s.status) } : s);
+          persisted.shipments = (persisted.shipments ?? []).map(fix);
+          persisted.draftShipment = fix(persisted.draftShipment);
+        }
+        return persisted;
+      },
       onRehydrateStorage: () => (state) => {
         if (state) {
           // Sync existing initial shipments with the latest values from code (like status and milestoneIndex)

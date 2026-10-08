@@ -28,6 +28,7 @@ import { ToolCard } from "@/components/ToolCard";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useShipmentStore } from "@/store/useShipmentStore";
 import { colors, palette } from "@a2b/ui";
+import { isActiveStatus, statusGroup } from "@a2b/core";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -47,24 +48,22 @@ export default function HomeScreen() {
       (s.cargoType && s.cargoType.toLowerCase().includes(query))
     );
 
-    let matchesStatus = true;
-    if (selectedStatus === "ACTIVE") {
-      matchesStatus = s.status === "ACTIVE" || s.status === "MATCHED" || s.status === "SECURED";
-    } else if (selectedStatus === "PENDING") {
-      matchesStatus = s.status === "OPEN";
-    } else if (selectedStatus === "COMPLETED") {
-      matchesStatus = s.status === "COMPLETED" || s.status === "DELIVERED";
-    }
+    const group = statusGroup(s.status);
+    const matchesStatus =
+      selectedStatus === "ALL" ||
+      (selectedStatus === "ACTIVE" && group === "active") ||
+      (selectedStatus === "PENDING" && group === "pending") ||
+      (selectedStatus === "COMPLETED" && group === "done");
 
     return matchesSearch && matchesStatus;
   });
 
   const activeShipments = filteredShipments.filter(
-    (s) => s.status === "ACTIVE" || s.status === "MATCHED" || s.status === "SECURED"
+    (s) => isActiveStatus(s.status)
   );
   
   const recentShipments = filteredShipments.filter(
-    (s) => s.status !== "DRAFT_PENDING_DOCS"
+    (s) => s.status !== "DRAFT"
   );
 
   return (
@@ -163,7 +162,7 @@ export default function HomeScreen() {
           {/* Top Content inside gradient */}
           <View style={styles.topContent}>
             {/* Active Alert Card if draft exists */}
-            {draftShipment && draftShipment.status === 'DRAFT_PENDING_DOCS' && (
+            {draftShipment && draftShipment.status === 'DRAFT' && (
               <TouchableOpacity
                 style={styles.alertCard}
                 activeOpacity={0.9}
@@ -215,7 +214,7 @@ export default function HomeScreen() {
                   key={s.id}
                   shipment={s}
                   imageSource={require("@/assets/images/cargo_box.png")}
-                  onPress={() => router.push({ pathname: s.status === "ACTIVE" ? "/active-delivery" : "/pending-delivery", params: { trackingId: `#${s.id}` } })}
+                  onPress={() => router.push({ pathname: s.status === "IN_TRANSIT" ? "/active-delivery" : "/pending-delivery", params: { trackingId: `#${s.id}` } })}
                 />
               ))}
             </View>

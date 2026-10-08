@@ -5,6 +5,8 @@ import { StatusHero } from "@/components/StatusHero";
 import { ReceiptCard, ReceiptDivider, ReceiptRow } from "@/components/ReceiptCard";
 import { useShipmentStore } from "@/store/useShipmentStore";
 import { colors, palette, ScreenHeader, Button } from "@a2b/ui";
+import { useMarket } from "@/store/useMarket";
+import { formatMoney } from "@a2b/core";
 
 export default function StatusScreen() {
   const router = useRouter();
@@ -29,8 +31,8 @@ export default function StatusScreen() {
   });
   
   const loadId = latestShipment?.id ? `#${latestShipment.id}` : ("#A2B-" + Math.floor(1000 + Math.random() * 9000));
-  const rawPrice = latestShipment?.offerPrice ? parseFloat(latestShipment.offerPrice) : 150000;
-  const formattedPrice = isNaN(rawPrice) ? "150,000" : rawPrice.toLocaleString("en-US");
+  const market = useMarket();
+  const formattedPrice = formatMoney(latestShipment?.offerPrice ?? 150000, market);
 
   return (
     <View style={styles.container}>
@@ -63,13 +65,13 @@ export default function StatusScreen() {
           <View style={styles.offerRow}>
             <Text style={styles.offerLabel}>Your Offer:</Text>
             <Text style={[styles.offerValue, !isSuccess && { color: palette.red[500] }]}>
-              {formattedPrice} UGX
+              {formattedPrice}
             </Text>
           </View>
 
           <ReceiptDivider />
 
-          <ReceiptRow label="Total" value={`${formattedPrice} UGX`} isBoldValue />
+          <ReceiptRow label="Total" value={formattedPrice} isBoldValue />
         </ReceiptCard>
       </ScrollView>
 

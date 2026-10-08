@@ -29,6 +29,7 @@ import {
 } from "lucide-react-native";
 import { useShipmentStore } from "@/store/useShipmentStore";
 import { colors, palette, ScreenHeader } from "@a2b/ui";
+import { useMarket } from "@/store/useMarket";
 
 interface DocumentInfo {
   name: string;
@@ -40,6 +41,7 @@ type SlotName = "bol" | "invoice" | "clearance" | "goInvest";
 
 export default function DocumentVaultScreen() {
   const router = useRouter();
+  const market = useMarket();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
 
@@ -143,7 +145,8 @@ export default function DocumentVaultScreen() {
                   weight,
                   containerId,
                   documents: uploadedFiles as any,
-                  status: "DRAFT_PENDING_DOCS",
+                  market: market.code,
+                  status: "DRAFT",
                   createdAt: new Date().toISOString(),
                   cargo: draftShipment?.cargo, // Preserve cargo details!
                   readyAt: draftShipment?.readyAt,
@@ -280,6 +283,7 @@ export default function DocumentVaultScreen() {
       cargoType,
       weight,
       offerPrice: draftShipment?.offerPrice || "185000",
+      market: market.code,
       status: "OPEN",
       deliveryDate: new Date(Date.now() + 3 * 86400000).toISOString(),
       acceptedByDriver: false,

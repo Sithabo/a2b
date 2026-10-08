@@ -18,6 +18,8 @@ import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useMarket } from "@/store/useMarket";
+import { isValidTaxId } from "@a2b/core";
 import {
   ArrowLeft,
   Pencil,
@@ -41,6 +43,8 @@ import { colors, palette } from "@a2b/ui";
 export default function AccountScreen() {
   const router = useRouter();
   const { userProfile, logout, updateProfile } = useAuthStore();
+  const market = useMarket();
+  const tinErrorMessage = `Valid ${market.taxId.hint} ${market.taxId.issuer} Tax Identification Number required to bypass customs processing constraints.`;
   const insets = useSafeAreaInsets();
   
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -84,9 +88,8 @@ export default function AccountScreen() {
 
   const handleSaveProfile = () => {
     if (editIsImporter) {
-      const tinRegex = /^\d{9}$/;
-      if (!tinRegex.test(editTin)) {
-        setTinError("Valid 9-digit GRA Tax Identification Number required to bypass customs processing constraints.");
+      if (!isValidTaxId(editTin, market)) {
+        setTinError(tinErrorMessage);
         return;
       }
     }
@@ -402,11 +405,11 @@ export default function AccountScreen() {
 
                 {editIsImporter && (
                   <View style={styles.tinContainer}>
-                    <Text style={styles.inputLabel}>GRA Tax Identification Number (TIN)</Text>
+                    <Text style={styles.inputLabel}>{market.taxId.issuer} Tax Identification Number (TIN)</Text>
                     <View style={[
                       styles.tinInputWrapper,
-                      editTin.length > 0 && !/^\d{9}$/.test(editTin) ? { borderColor: palette.red[700], borderWidth: 1.5 } : null,
-                      /^\d{9}$/.test(editTin) ? { borderColor: palette.emerald[500], borderWidth: 1.5 } : null,
+                      editTin.length > 0 && !isValidTaxId(editTin, market) ? { borderColor: palette.red[700], borderWidth: 1.5 } : null,
+                      isValidTaxId(editTin, market) ? { borderColor: palette.emerald[500], borderWidth: 1.5 } : null,
                     ]}>
                       <TextInput
                         style={styles.tinInput}
@@ -414,18 +417,18 @@ export default function AccountScreen() {
                         onChangeText={(text) => {
                           const cleaned = text.replace(/[^0-9]/g, "");
                           setEditTin(cleaned);
-                          if (cleaned.length > 0 && !/^\d{9}$/.test(cleaned)) {
-                            setTinError("Valid 9-digit GRA Tax Identification Number required to bypass customs processing constraints.");
+                          if (cleaned.length > 0 && !isValidTaxId(cleaned, market)) {
+                            setTinError(tinErrorMessage);
                           } else {
                             setTinError("");
                           }
                         }}
-                        placeholder="e.g. 123456789"
+                        placeholder={market.taxId.hint}
                         placeholderTextColor={palette.gray[400]}
                         keyboardType="numeric"
                         maxLength={9}
                       />
-                      {/^\d{9}$/.test(editTin) && (
+                      {isValidTaxId(editTin, market) && (
                         <View style={styles.emeraldCheck}>
                           <CheckCircle size={18} color={palette.emerald[500]} fill={palette.white} />
                         </View>

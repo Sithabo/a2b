@@ -4,6 +4,8 @@ import { Image } from "expo-image";
 import { Shipment } from "@/store/useShipmentStore";
 import { MessageSquare, Phone } from "lucide-react-native";
 import { colors, palette } from "@a2b/ui";
+import { useMarket } from "@/store/useMarket";
+import { formatMoney } from "@a2b/core";
 
 interface ModernShipmentCardProps {
   shipment: Shipment | any;
@@ -28,9 +30,8 @@ export const ModernShipmentCard: React.FC<ModernShipmentCardProps> = ({
   onPress,
 }) => {
   const isFound = status === "found";
-  const formattedPrice = shipment.offerPrice 
-    ? Number(shipment.offerPrice).toLocaleString() 
-    : "150,000"; // fallback
+  const market = useMarket();
+  const formattedPrice = formatMoney(shipment.offerPrice || 150000, market);
 
   return (
     <TouchableOpacity
@@ -77,7 +78,7 @@ export const ModernShipmentCard: React.FC<ModernShipmentCardProps> = ({
             #{shipment.id}
           </Text>
         </View>
-        <Text style={styles.priceText}>{formattedPrice} UGX</Text>
+        <Text style={styles.priceText}>{formattedPrice}</Text>
       </View>
 
       {/* Timeline Layout */}
