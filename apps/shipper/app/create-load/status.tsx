@@ -3,17 +3,15 @@ import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from "react-nati
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusHero } from "@/components/StatusHero";
 import { ReceiptCard, ReceiptDivider, ReceiptRow } from "@/components/ReceiptCard";
-import { useShipmentStore } from "@/store/useShipmentStore";
 import { colors, palette, ScreenHeader, Button } from "@a2b/ui";
 import { useMarket } from "@/store/useMarket";
-import { formatMoney } from "@a2b/core";
+import { formatMoney, statusMeta } from "@a2b/core";
+import { parseLoadId, trackingLabel, useShipment } from "@/lib/loads";
 
 export default function StatusScreen() {
   const router = useRouter();
-  const { state } = useLocalSearchParams<{ state: "confirmed" | "unconfirmed" }>();
-  
-  const shipments = useShipmentStore((state) => state.shipments);
-  const latestShipment = shipments[shipments.length - 1];
+  const { state, trackingId } = useLocalSearchParams<{ state: "confirmed" | "unconfirmed"; trackingId?: string }>();
+  const { data: latestShipment } = useShipment(parseLoadId(trackingId));
 
   // Default to confirmed if not explicitly failed (for safety/demo)
   const isSuccess = state !== "unconfirmed";
@@ -30,9 +28,9 @@ export default function StatusScreen() {
     year: "numeric",
   });
   
-  const loadId = latestShipment?.id ? `#${latestShipment.id}` : ("#A2B-" + Math.floor(1000 + Math.random() * 9000));
+  const loadId = latestShipment ? trackingLabel(latestShipment) : "—";
   const market = useMarket();
-  const formattedPrice = formatMoney(latestShipment?.offerPrice ?? 150000, market);
+  const formattedPrice = latestShipment ? formatMoney(latestShipment.offerPrice, market) : "—";
 
   return (
     <View style={styles.container}>
@@ -56,8 +54,8 @@ export default function StatusScreen() {
 
         <ReceiptCard style={styles.receiptCard}>
           <ReceiptRow
-            label="Payment Status:"
-            value={isSuccess ? "Escrow Secured" : "Declined"}
+            label="Status:"
+            value={latestShipment ? statusMeta[latestShipment.status].label : isSuccess ? "Posted" : "Declined"}
           />
           <ReceiptRow label="Date:" value={today} />
           <ReceiptRow label="Load ID:" value={loadId} />

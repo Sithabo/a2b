@@ -1,12 +1,31 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Linking } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Check, Phone, Package } from 'lucide-react-native';
 import { colors, palette } from "@a2b/ui";
+import { formatMoney } from "@a2b/core";
+import { useMarket } from "@/store/useMarket";
+import { parseLoadId, useShipment } from "@/lib/loads";
+import { LoadState } from "@/components/LoadState";
+
+const METHOD_LABELS: Record<string, string> = {
+  mtn: 'MTN Mobile Money',
+  airtel: 'Airtel Money',
+  mmg: 'MMG Mobile Money',
+  card: 'Debit/Credit Card',
+};
 
 // Source: 7.html — "Payment Confirmed!"
 export default function PaymentConfirmedScreen() {
   const router = useRouter();
+  const market = useMarket();
+  const { trackingId, method } = useLocalSearchParams<{ trackingId: string; method?: string }>();
+  const { data: shipment, error, refetch } = useShipment(parseLoadId(trackingId));
+
+  if (!shipment) return <LoadState error={error} onRetry={refetch} />;
+  const amount = shipment.escrow?.amount ?? Number(shipment.offerPrice);
+  const paidWith = METHOD_LABELS[method ?? shipment.escrow?.depositMethod ?? ''] ?? 'mobile money';
+  const driverPhone = shipment.carrier?.driverPhone;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -27,9 +46,9 @@ export default function PaymentConfirmedScreen() {
           {/* Amount Deposited Box */}
           <View style={styles.amountBox}>
             <Text style={styles.amountLabel}>Amount Deposited</Text>
-            <Text style={styles.amountValue}>150,000</Text>
+            <Text style={styles.amountValue}>{formatMoney(amount, market)}</Text>
             <View style={styles.paymentViaRow}>
-              <Text style={styles.paymentViaText}>via MTN Mobile Money</Text>
+              <Text style={styles.paymentViaText}>via {paidWith}</Text>
             </View>
           </View>
 
@@ -45,7 +64,8 @@ export default function PaymentConfirmedScreen() {
           <View style={styles.actionsContainer}>
             <TouchableOpacity
               style={styles.callButton}
-              onPress={() => console.log('Call Driver')}
+              onPress={() => driverPhone && Linking.openURL(`tel:${driverPhone}`)}
+              disabled={!driverPhone}
               activeOpacity={0.85}
             >
               <Phone color="white" size={20} />
@@ -54,7 +74,7 @@ export default function PaymentConfirmedScreen() {
 
             <TouchableOpacity
               style={styles.shipmentsButton}
-              onPress={() => router.replace('/receipts')}
+              onPress={() => router.replace('/(tabs)')}
               activeOpacity={0.85}
             >
               <Package color={colors.primary} size={20} />

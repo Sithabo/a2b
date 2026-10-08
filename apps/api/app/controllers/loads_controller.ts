@@ -23,7 +23,13 @@ import {
 import type User from '#models/user'
 
 async function findVisible(id: number, user: User) {
-  const load = await Load.query().where('id', id).preload('location').preload('escrow').first()
+  const load = await Load.query()
+    .where('id', id)
+    .preload('location')
+    .preload('escrow')
+    .preload('driver')
+    .preload('vehicle')
+    .first()
   if (!load || !(await canView(load, user))) {
     throw new DomainError('Load not found', { status: 404, code: 'E_NOT_FOUND' })
   }

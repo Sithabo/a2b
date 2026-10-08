@@ -6,6 +6,7 @@ import { MessageSquare, Phone } from "lucide-react-native";
 import { colors, palette } from "@a2b/ui";
 import { useMarket } from "@/store/useMarket";
 import { formatMoney } from "@a2b/core";
+import { trackingLabel } from "@/lib/loads";
 
 interface ModernShipmentCardProps {
   shipment: Shipment | any;
@@ -75,7 +76,7 @@ export const ModernShipmentCard: React.FC<ModernShipmentCardProps> = ({
             />
           )}
           <Text style={styles.orderId} numberOfLines={1}>
-            #{shipment.id}
+            {trackingLabel(shipment)}
           </Text>
         </View>
         <Text style={styles.priceText}>{formattedPrice}</Text>

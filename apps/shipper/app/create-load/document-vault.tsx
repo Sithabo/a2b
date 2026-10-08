@@ -30,6 +30,10 @@ import {
 import { useShipmentStore } from "@/store/useShipmentStore";
 import { colors, palette, ScreenHeader } from "@a2b/ui";
 import { useMarket } from "@/store/useMarket";
+import { documentsFor } from "@a2b/core";
+import { apiErrorMessage } from "@a2b/api-client";
+import { api } from "@/lib/api";
+import { newLoadBody, uploadLoadDocument, useInvalidateLoads } from "@/lib/loads";
 
 interface DocumentInfo {
   name: string;
@@ -37,7 +41,8 @@ interface DocumentInfo {
   uri?: string;
 }
 
-type SlotName = "bol" | "invoice" | "clearance" | "goInvest";
+/** A requirement id from the market's customs document catalog (@a2b/core). */
+type SlotName = string;
 
 export default function DocumentVaultScreen() {
   const router = useRouter();
@@ -45,7 +50,6 @@ export default function DocumentVaultScreen() {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
 
-  const addShipment = useShipmentStore((state) => state.addShipment);
   const draftShipment = useShipmentStore((state) => state.draftShipment);
   const setDraftShipment = useShipmentStore((state) => state.setDraftShipment);
   const clearDraftShipment = useShipmentStore((state) => state.clearDraftShipment);
@@ -69,19 +73,19 @@ export default function DocumentVaultScreen() {
 
   const [containerId, setContainerId] = useState(draftShipment?.containerId || "");
 
-  const requiresGoInvestWaiver = draftShipment?.cargo?.requiresGoInvestWaiver === true;
+  // Which documents this load needs depends on the market and the cargo sector.
+  const { required: requiredDocs } = documentsFor(
+    market.documents,
+    draftShipment?.cargo ?? { type: "GENERAL_CARGO" }
+  );
 
-  const [uploadedFiles, setUploadedFiles] = useState<{
-    bol: DocumentInfo | null;
-    invoice: DocumentInfo | null;
-    clearance: DocumentInfo | null;
-    goInvest: DocumentInfo | null;
-  }>({
-    bol: draftShipment?.documents?.bol || null,
-    invoice: draftShipment?.documents?.invoice || null,
-    clearance: draftShipment?.documents?.clearance || null,
-    goInvest: draftShipment?.documents?.goInvest || null,
-  });
+  const [uploadedFiles, setUploadedFiles] = useState<Record<SlotName, DocumentInfo | null>>(
+    () => ({ ...(draftShipment?.documents as Record<SlotName, DocumentInfo | null> | undefined) })
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Server draft created on a previous (failed) submit, reused on retry.
+  const [serverLoadId, setServerLoadId] = useState<number | null>(null);
+  const invalidateLoads = useInvalidateLoads();
 
   const [activeSlot, setActiveSlot] = useState<SlotName | null>(null);
   const [isSubmissionComplete, setIsSubmissionComplete] = useState(false);
@@ -96,11 +100,7 @@ export default function DocumentVaultScreen() {
 
   // Check if everything is filled
   const isFormValid =
-    containerId.trim().length > 4 &&
-    uploadedFiles.bol !== null &&
-    uploadedFiles.invoice !== null &&
-    uploadedFiles.clearance !== null &&
-    (!requiresGoInvestWaiver || uploadedFiles.goInvest !== null);
+    containerId.trim().length > 4 && requiredDocs.every((doc) => !!uploadedFiles[doc.id]);
 
   // Intercept navigation to cache draft if incomplete
   useEffect(() => {
@@ -112,11 +112,7 @@ export default function DocumentVaultScreen() {
 
       // Check if user has entered anything
       const hasProgress =
-        containerId.trim().length > 0 ||
-        uploadedFiles.bol !== null ||
-        uploadedFiles.invoice !== null ||
-        uploadedFiles.clearance !== null ||
-        uploadedFiles.goInvest !== null;
+        containerId.trim().length > 0 || Object.values(uploadedFiles).some(Boolean);
 
       if (hasProgress) {
         // Prevent default action
@@ -176,6 +172,7 @@ export default function DocumentVaultScreen() {
     setDraftShipment,
     resetRouteState,
     draftShipment,
+    market.code,
   ]);
 
   const moveFileToPermanentStorage = async (tempUri: string, documentType: string) => {
@@ -262,63 +259,53 @@ export default function DocumentVaultScreen() {
     }
   };
 
-  const handleFinalizeVerification = () => {
-    if (!isFormValid) return;
+  const handleFinalizeVerification = async () => {
+    if (!isFormValid || isSubmitting || !draftShipment?.cargo) return;
+    setIsSubmitting(true);
+    try {
+      // 1. Create the load as a draft (or reuse the one from a failed attempt)
+      let loadId = serverLoadId;
+      if (!loadId) {
+        const { data } = await api.loads.store({
+          body: newLoadBody({
+            pickup: draftShipment.pickupLocation ?? pickupLocation,
+            dropoff: draftShipment.dropoffLocation ?? dropoffLocation,
+            cargo: draftShipment.cargo,
+            offerPrice: Number(draftShipment.offerPrice ?? 0),
+            isImport: true,
+            containerId: containerId.trim(),
+            readyAt: draftShipment.readyAt,
+            deadlineAt: draftShipment.deadlineAt,
+          }),
+        });
+        loadId = data.id;
+        setServerLoadId(loadId);
+      }
 
-    setIsSubmissionComplete(true);
+      // 2. Upload each required scan
+      for (const doc of requiredDocs) {
+        const file = uploadedFiles[doc.id];
+        if (!file?.uri) throw new Error(`Rescan "${doc.label}" — the saved copy is no longer on this device.`);
+        await uploadLoadDocument(loadId, doc.id, { uri: file.uri, name: file.name });
+      }
 
-    const docsRecord: { [key: string]: { name: string; size: string; uri?: string } } = {
-      bol: uploadedFiles.bol!,
-      invoice: uploadedFiles.invoice!,
-      clearance: uploadedFiles.clearance!,
-    };
-    if (uploadedFiles.goInvest) {
-      docsRecord.goInvest = uploadedFiles.goInvest;
-    }
+      // 3. Put it on the load board (the API re-checks every required document)
+      await api.loads.publish({ params: { id: loadId } });
+      await invalidateLoads();
 
-    // Save final load to useShipmentStore
-    addShipment({
-      pickup,
-      delivery,
-      cargoType,
-      weight,
-      offerPrice: draftShipment?.offerPrice || "185000",
-      market: market.code,
-      status: "OPEN",
-      deliveryDate: new Date(Date.now() + 3 * 86400000).toISOString(),
-      acceptedByDriver: false,
-      is_import: true,
-      containerId,
-      documents: docsRecord as any,
-      pickupLocation: draftShipment?.pickupLocation || null,
-      dropoffLocation: draftShipment?.dropoffLocation || null,
-      cargo: draftShipment?.cargo,
-      readyAt: draftShipment?.readyAt,
-      deadlineAt: draftShipment?.deadlineAt,
-    });
-
-    // Clear draft state
-    clearDraftShipment();
-    resetRouteState();
-
-    // Route to success confirmation state
-    router.replace("/create-load/status?state=confirmed");
-  };
-
-  const getSlotLabel = (slot: SlotName | null) => {
-    switch (slot) {
-      case "bol":
-        return "Bill of Lading / Airway Bill";
-      case "invoice":
-        return "Original Certified Invoice";
-      case "clearance":
-        return "Customs Release Clearance";
-      case "goInvest":
-        return "GO-Invest Tax Waiver Concession";
-      default:
-        return "";
+      setIsSubmissionComplete(true);
+      clearDraftShipment();
+      resetRouteState();
+      router.replace({ pathname: "/create-load/status", params: { state: "confirmed", trackingId: String(loadId) } });
+    } catch (err) {
+      Alert.alert("Couldn't post this load", err instanceof Error ? err.message : apiErrorMessage(err));
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  const getSlotLabel = (slot: SlotName | null) =>
+    market.documents.find((doc) => doc.id === slot)?.label ?? "";
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -342,7 +329,7 @@ export default function DocumentVaultScreen() {
           <View style={styles.secureBannerTextContainer}>
             <Text style={styles.secureBannerTitle}>Institutional Level Security</Text>
             <Text style={styles.secureBannerSub}>
-              All documents are encrypted and directly routed to the Guyana Revenue Authority port log validator systems.
+              Documents are stored privately and shared only with your driver, as a digital customs pass, once escrow is funded.
             </Text>
           </View>
         </View>
@@ -364,195 +351,49 @@ export default function DocumentVaultScreen() {
         <View style={styles.uploadCardsSection}>
           <Text style={styles.sectionHeading}>Mandatory Compliance Documents</Text>
 
-          {/* Slot 1: Bill of Lading */}
-          <TouchableOpacity
-            style={[
-              styles.uploadCard,
-              uploadedFiles.bol ? styles.uploadCardCompleted : styles.uploadCardEmpty,
-            ]}
-            onPress={() => handleCardPress("bol")}
-            activeOpacity={0.75}
-          >
-            <View
-              style={[
-                styles.iconWrapper,
-                uploadedFiles.bol ? styles.iconWrapperCompleted : styles.iconWrapperEmpty,
-              ]}
-            >
-              {uploadedFiles.bol?.uri ? (
-                <Image
-                  source={{ uri: uploadedFiles.bol.uri }}
-                  style={styles.thumbnail}
-                  contentFit="cover"
-                />
-              ) : uploadedFiles.bol ? (
-                <CheckCircle size={20} color={palette.white} />
-              ) : (
-                <Upload size={20} color={palette.gray[500]} />
-              )}
-            </View>
-            <View style={styles.cardInfo}>
-              <Text
-                style={[
-                  styles.cardLabel,
-                  uploadedFiles.bol ? styles.cardLabelCompleted : styles.cardLabelEmpty,
-                ]}
-              >
-                Bill of Lading / Airway Bill
-              </Text>
-              <Text style={styles.cardMicrocopy} numberOfLines={1}>
-                {uploadedFiles.bol
-                  ? `${uploadedFiles.bol.name} (${uploadedFiles.bol.size})`
-                  : "Must display Freight Certified Stamp."}
-              </Text>
-            </View>
-            <ChevronRight size={18} color={uploadedFiles.bol ? palette.emerald[500] : palette.gray[300]} />
-          </TouchableOpacity>
-
-          {/* Slot 2: Certified Invoice */}
-          <TouchableOpacity
-            style={[
-              styles.uploadCard,
-              uploadedFiles.invoice ? styles.uploadCardCompleted : styles.uploadCardEmpty,
-            ]}
-            onPress={() => handleCardPress("invoice")}
-            activeOpacity={0.75}
-          >
-            <View
-              style={[
-                styles.iconWrapper,
-                uploadedFiles.invoice ? styles.iconWrapperCompleted : styles.iconWrapperEmpty,
-              ]}
-            >
-              {uploadedFiles.invoice?.uri ? (
-                <Image
-                  source={{ uri: uploadedFiles.invoice.uri }}
-                  style={styles.thumbnail}
-                  contentFit="cover"
-                />
-              ) : uploadedFiles.invoice ? (
-                <CheckCircle size={20} color={palette.white} />
-              ) : (
-                <Upload size={20} color={palette.gray[500]} />
-              )}
-            </View>
-            <View style={styles.cardInfo}>
-              <Text
-                style={[
-                  styles.cardLabel,
-                  uploadedFiles.invoice ? styles.cardLabelCompleted : styles.cardLabelEmpty,
-                ]}
-              >
-                Original Certified Invoice
-              </Text>
-              <Text style={styles.cardMicrocopy} numberOfLines={1}>
-                {uploadedFiles.invoice
-                  ? `${uploadedFiles.invoice.name} (${uploadedFiles.invoice.size})`
-                  : "Must feature company stamp or signature to verify valuation."}
-              </Text>
-            </View>
-            <ChevronRight size={18} color={uploadedFiles.invoice ? palette.emerald[500] : palette.gray[300]} />
-          </TouchableOpacity>
-
-          {/* Slot 3: Customs Clearance */}
-          <TouchableOpacity
-            style={[
-              styles.uploadCard,
-              uploadedFiles.clearance ? styles.uploadCardCompleted : styles.uploadCardEmpty,
-            ]}
-            onPress={() => handleCardPress("clearance")}
-            activeOpacity={0.75}
-          >
-            <View
-              style={[
-                styles.iconWrapper,
-                uploadedFiles.clearance ? styles.iconWrapperCompleted : styles.iconWrapperEmpty,
-              ]}
-            >
-              {uploadedFiles.clearance?.uri ? (
-                <Image
-                  source={{ uri: uploadedFiles.clearance.uri }}
-                  style={styles.thumbnail}
-                  contentFit="cover"
-                />
-              ) : uploadedFiles.clearance ? (
-                <CheckCircle size={20} color={palette.white} />
-              ) : (
-                <Upload size={20} color={palette.gray[500]} />
-              )}
-            </View>
-            <View style={styles.cardInfo}>
-              <Text
-                style={[
-                  styles.cardLabel,
-                  uploadedFiles.clearance ? styles.cardLabelCompleted : styles.cardLabelEmpty,
-                ]}
-              >
-                Customs Release Clearance
-              </Text>
-              <Text style={styles.cardMicrocopy} numberOfLines={1}>
-                {uploadedFiles.clearance
-                  ? `${uploadedFiles.clearance.name} (${uploadedFiles.clearance.size})`
-                  : "Form C21 or Form C32 A/B required."}
-              </Text>
-            </View>
-            <ChevronRight size={18} color={uploadedFiles.clearance ? palette.emerald[500] : palette.gray[300]} />
-          </TouchableOpacity>
-
-          {/* Slot 4: GO-Invest Tax Waiver Letter (Conditional) */}
-          {requiresGoInvestWaiver && (
-            <View style={styles.goInvestContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.uploadCard,
-                  uploadedFiles.goInvest ? styles.uploadCardCompleted : styles.uploadCardEmpty,
-                ]}
-                onPress={() => handleCardPress("goInvest")}
-                activeOpacity={0.75}
-              >
-                <View
-                  style={[
-                    styles.iconWrapper,
-                    uploadedFiles.goInvest ? styles.iconWrapperCompleted : styles.iconWrapperEmpty,
-                  ]}
+          {requiredDocs.map((doc) => {
+            const file = uploadedFiles[doc.id];
+            return (
+              <View key={doc.id} style={doc.id === "go_invest_concession" ? styles.goInvestContainer : undefined}>
+                <TouchableOpacity
+                  style={[styles.uploadCard, file ? styles.uploadCardCompleted : styles.uploadCardEmpty]}
+                  onPress={() => handleCardPress(doc.id)}
+                  activeOpacity={0.75}
                 >
-                  {uploadedFiles.goInvest?.uri ? (
-                    <Image
-                      source={{ uri: uploadedFiles.goInvest.uri }}
-                      style={styles.thumbnail}
-                      contentFit="cover"
-                    />
-                  ) : uploadedFiles.goInvest ? (
-                    <CheckCircle size={20} color={palette.white} />
-                  ) : (
-                    <Upload size={20} color={palette.gray[500]} />
-                  )}
-                </View>
-                <View style={styles.cardInfo}>
-                  <Text
-                    style={[
-                      styles.cardLabel,
-                      uploadedFiles.goInvest ? styles.cardLabelCompleted : styles.cardLabelEmpty,
-                    ]}
-                  >
-                    GO-Invest Tax Waiver Concession
-                  </Text>
-                  <Text style={styles.cardMicrocopy} numberOfLines={1}>
-                    {uploadedFiles.goInvest
-                      ? `${uploadedFiles.goInvest.name} (${uploadedFiles.goInvest.size})`
-                      : "Approved GO-Invest Zero-Rated Concession Letter."}
-                  </Text>
-                </View>
-                <ChevronRight size={18} color={uploadedFiles.goInvest ? palette.emerald[500] : palette.gray[300]} />
-              </TouchableOpacity>
+                  <View style={[styles.iconWrapper, file ? styles.iconWrapperCompleted : styles.iconWrapperEmpty]}>
+                    {file?.uri ? (
+                      <Image source={{ uri: file.uri }} style={styles.thumbnail} contentFit="cover" />
+                    ) : file ? (
+                      <CheckCircle size={20} color={palette.white} />
+                    ) : (
+                      <Upload size={20} color={palette.gray[500]} />
+                    )}
+                  </View>
+                  <View style={styles.cardInfo}>
+                    <Text style={[styles.cardLabel, file ? styles.cardLabelCompleted : styles.cardLabelEmpty]}>
+                      {doc.label}
+                    </Text>
+                    <Text style={styles.cardMicrocopy} numberOfLines={1}>
+                      {file
+                        ? `${file.name} (${file.size})`
+                        : doc.acceptedForms
+                          ? `${doc.acceptedForms.join(" or ")} required.`
+                          : doc.issuer}
+                    </Text>
+                  </View>
+                  <ChevronRight size={18} color={file ? palette.emerald[500] : palette.gray[300]} />
+                </TouchableOpacity>
 
-              <View style={styles.goInvestWarningCallout}>
-                <Text style={styles.goInvestWarningCalloutText}>
-                  ⚠️ <Text style={styles.goInvestWarningCalloutBold}>Warning:</Text> Machinery for this sector qualifies for zero-rated customs tax. Upload your GO-Invest concession approval letter to ensure your driver is not delayed at customs checkpoints over duty disputes.
-                </Text>
+                {doc.id === "go_invest_concession" && (
+                  <View style={styles.goInvestWarningCallout}>
+                    <Text style={styles.goInvestWarningCalloutText}>
+                      ⚠️ <Text style={styles.goInvestWarningCalloutBold}>Warning:</Text> Machinery for this sector qualifies for zero-rated customs tax. Upload your GO-Invest concession approval letter to ensure your driver is not delayed at customs checkpoints over duty disputes.
+                    </Text>
+                  </View>
+                )}
               </View>
-            </View>
-          )}
+            );
+          })}
         </View>
 
         {/* Port metadata card for context */}
@@ -580,10 +421,14 @@ export default function DocumentVaultScreen() {
         <TouchableOpacity
           style={[styles.submitButton, !isFormValid && styles.submitButtonDisabled]}
           onPress={handleFinalizeVerification}
-          disabled={!isFormValid}
+          disabled={!isFormValid || isSubmitting}
           activeOpacity={0.8}
         >
-          <Text style={styles.submitButtonText}>Complete Import Verification</Text>
+          {isSubmitting ? (
+            <ActivityIndicator color={palette.white} />
+          ) : (
+            <Text style={styles.submitButtonText}>Complete Import Verification</Text>
+          )}
         </TouchableOpacity>
       </View>
 

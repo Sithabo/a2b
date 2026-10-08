@@ -12,6 +12,7 @@ import {
   Platform,
   Switch,
   LayoutAnimation,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Image } from "expo-image";
@@ -20,6 +21,8 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { useAuthStore } from "@/store/useAuthStore";
 import { useMarket } from "@/store/useMarket";
 import { isValidTaxId } from "@a2b/core";
+import { apiErrorMessage } from "@a2b/api-client";
+import { api } from "@/lib/api";
 import {
   ArrowLeft,
   Pencil,
@@ -42,7 +45,7 @@ import { colors, palette } from "@a2b/ui";
 
 export default function AccountScreen() {
   const router = useRouter();
-  const { userProfile, logout, updateProfile } = useAuthStore();
+  const { userProfile, logout, setUser, setProfileImage } = useAuthStore();
   const market = useMarket();
   const tinErrorMessage = `Valid ${market.taxId.hint} ${market.taxId.issuer} Tax Identification Number required to bypass customs processing constraints.`;
   const insets = useSafeAreaInsets();
@@ -57,8 +60,9 @@ export default function AccountScreen() {
   const [editTin, setEditTin] = useState("");
   const [tinError, setTinError] = useState("");
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await api.auth.logout({}).catch(() => {}); // revoke the token server-side when online
+    await logout();
     router.replace("/(auth)/login");
   };
 
@@ -86,7 +90,7 @@ export default function AccountScreen() {
     }
   };
 
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
     if (editIsImporter) {
       if (!isValidTaxId(editTin, market)) {
         setTinError(tinErrorMessage);
@@ -94,19 +98,28 @@ export default function AccountScreen() {
       }
     }
     setIsSaving(true);
-    setTimeout(() => {
-      updateProfile({
-        company: editCompany,
-        region: editRegion,
-        email: editEmail,
-        name: editCompany, // Keep name synced with company for shippers
-        profileImage: editProfileImage || undefined,
-        is_importer: editIsImporter,
-        tin: editIsImporter ? editTin : null,
+    try {
+      await api.me.upsertShipperProfile({
+        body: {
+          companyName: editCompany,
+          region: editRegion || null,
+          isImporter: editIsImporter,
+          taxId: editIsImporter ? editTin : null,
+        },
       });
-      setIsSaving(false);
+      // Keep the account name in sync with the company name for shippers.
+      const { data } = await api.me.update({
+        body: { fullName: editCompany, ...(editEmail.trim() ? { email: editEmail.trim() } : {}) },
+      });
+      const { data: me } = await api.me.show({});
+      setUser({ ...data, ...me });
+      setProfileImage(editProfileImage || undefined); // avatar stays on-device until uploads exist
       setIsEditModalVisible(false);
-    }, 2000);
+    } catch (err) {
+      Alert.alert("Couldn't save", apiErrorMessage(err));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (

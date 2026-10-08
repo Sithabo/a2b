@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Platform,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -26,6 +27,9 @@ import { OrderSummary } from "@/components/OrderSummary";
 import { useShipmentStore, CargoType, CargoDetails } from "@/store/useShipmentStore";
 import { colors, palette, ScreenHeader, BottomSheet, Button } from "@a2b/ui";
 import { recommendOffer } from "@a2b/core";
+import { apiErrorMessage } from "@a2b/api-client";
+import { api } from "@/lib/api";
+import { newLoadBody, useInvalidateLoads } from "@/lib/loads";
 import { useMarket } from "@/store/useMarket";
 
 export default function CargoDetailsScreen() {
@@ -36,7 +40,8 @@ export default function CargoDetailsScreen() {
   const pickupLocation = useShipmentStore((state) => state.pickupLocation);
   const dropoffLocation = useShipmentStore((state) => state.dropoffLocation);
   const isImportFlow = useShipmentStore((state) => state.isImportFlow);
-  const addShipment = useShipmentStore((state) => state.addShipment);
+  const invalidateLoads = useInvalidateLoads();
+  const [isPosting, setIsPosting] = useState(false);
   const setCurrentStep = useShipmentStore((state) => state.setCurrentStep);
   const resetRouteState = useShipmentStore((state) => state.resetRouteState);
   const draftShipment = useShipmentStore((state) => state.draftShipment);
@@ -196,6 +201,12 @@ export default function CargoDetailsScreen() {
 
   const cargoTypeStr = loadTypes.find((t) => t.id === selectedType)?.label || "General Cargo";
 
+  // Total weight in kg for every cargo type (sector forms collect tons).
+  const totalWeightKg =
+    selectedType === "GENERAL_CARGO"
+      ? packages.reduce((acc, p) => acc + (parseFloat(p.weight) || 0), 0) || undefined
+      : (parseFloat(totalWeight) || 0) * 1000 || undefined;
+
   const offer = recommendOffer(
     { type: selectedType, requiresFlatbedLowboy, requiresHydraulicTipper, storageEnvironment },
     market
@@ -206,7 +217,7 @@ export default function CargoDetailsScreen() {
 
     const cargoDetails: CargoDetails = {
       type: selectedType,
-      weightKg: selectedType === 'GENERAL_CARGO' ? (parseFloat(totalWeight) || undefined) : undefined,
+      weightKg: totalWeightKg,
       dimensions: selectedType === 'GENERAL_CARGO' ? {
         lengthMeters: parseFloat(packages[0]?.length) || 0,
         widthMeters: parseFloat(packages[0]?.width) || 0,
@@ -269,12 +280,12 @@ export default function CargoDetailsScreen() {
     }
   };
 
-  const handleFinalizeDomesticOrder = () => {
+  const handleFinalizeDomesticOrder = async () => {
     if (!isFormValid) return;
 
     const cargoDetails: CargoDetails = {
       type: selectedType,
-      weightKg: selectedType === 'GENERAL_CARGO' ? (parseFloat(totalWeight) || undefined) : undefined,
+      weightKg: totalWeightKg,
       dimensions: selectedType === 'GENERAL_CARGO' ? {
         lengthMeters: parseFloat(packages[0]?.length) || 0,
         widthMeters: parseFloat(packages[0]?.width) || 0,
@@ -307,27 +318,30 @@ export default function CargoDetailsScreen() {
       deadlineDate.setHours(17, 0, 0, 0);
     }
 
-    addShipment({
-      pickup: pickupLocation?.name || "Houston, TX",
-      delivery: dropoffLocation?.name || "",
-      cargoType: cargoTypeStr,
-      weight: totalWeight + (selectedType === 'GENERAL_CARGO' ? " kg" : ""),
-      offerPrice: offerPrice.toString(),
-      market: market.code,
-      status: "OPEN",
-      deliveryDate: deliveryDate ? deliveryDate.toISOString() : new Date(Date.now() + 2 * 86400000).toISOString(),
-      acceptedByDriver: false,
-      is_import: false,
-      pickupLocation,
-      dropoffLocation,
-      cargo: cargoDetails,
-      readyAt: readyDate.toISOString(),
-      deadlineAt: deadlineDate.toISOString(),
-    });
+    setIsPosting(true);
+    try {
+      const { data } = await api.loads.store({
+        body: newLoadBody({
+          pickup: pickupLocation,
+          dropoff: dropoffLocation,
+          cargo: cargoDetails,
+          offerPrice,
+          isImport: false,
+          readyAt: readyDate.toISOString(),
+          deadlineAt: deadlineDate.toISOString(),
+        }),
+      });
+      await api.loads.publish({ params: { id: data.id } });
+      await invalidateLoads();
 
-    setIsReviewModalOpen(false);
-    resetRouteState();
-    router.replace("/create-load/status?state=confirmed");
+      setIsReviewModalOpen(false);
+      resetRouteState();
+      router.replace({ pathname: "/create-load/status", params: { state: "confirmed", trackingId: String(data.id) } });
+    } catch (err) {
+      Alert.alert("Couldn't post this load", apiErrorMessage(err));
+    } finally {
+      setIsPosting(false);
+    }
   };
 
   return (
@@ -776,6 +790,7 @@ export default function CargoDetailsScreen() {
           <Button
             title="Finalize order"
             onPress={handleFinalizeDomesticOrder}
+            loading={isPosting}
             disabled={!isFormValid}
           />
         </View>

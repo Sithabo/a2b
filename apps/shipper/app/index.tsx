@@ -1,17 +1,11 @@
 import { Redirect } from "expo-router";
 import { useAuthStore } from "@/store/useAuthStore";
-import { useEffect, useState } from "react";
 
 export default function Index() {
-  const { isLoggedIn, hasCompletedOnboarding } = useAuthStore();
-  const [mounted, setMounted] = useState(false);
+  const { isHydrated, isLoggedIn, hasCompletedOnboarding, user } = useAuthStore();
 
-  // Ensure Zustand is hydrated before redirecting
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
+  // Wait until the stored session has been read.
+  if (!isHydrated) return null;
 
   if (!hasCompletedOnboarding) {
     return <Redirect href="/(auth)/onboarding" />;
@@ -19,6 +13,11 @@ export default function Index() {
 
   if (!isLoggedIn) {
     return <Redirect href="/(auth)/login" />;
+  }
+
+  // Signed in but registration was interrupted before business details.
+  if (!user?.shipperProfile) {
+    return <Redirect href="/(auth)/business-details" />;
   }
 
   return <Redirect href="/(tabs)" />;

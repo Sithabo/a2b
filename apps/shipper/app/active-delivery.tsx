@@ -16,23 +16,15 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import {
-  ArrowLeft,
   Truck,
-  Clock,
-  User,
-  Star,
-  PhoneCall,
-  MessageSquare,
   Package,
   Copy,
-  Check,
-  Compass,
-  Phone,
-  Mail,
   X,
 } from "lucide-react-native";
-import { useShipmentStore } from "@/store/useShipmentStore";
 import { DriverContactCard } from "@/components/DriverContactCard";
+import { LoadState } from "@/components/LoadState";
+import { parseLoadId, trackingLabel, useShipment } from "@/lib/loads";
+import { vehicleClasses } from "@a2b/core";
 import { MilestoneTimeline } from "@/components/MilestoneTimeline";
 import { colors, palette, ScreenHeader } from "@a2b/ui";
 
@@ -43,30 +35,28 @@ export default function ActiveDeliveryScreen() {
 
   const [vehicleModalVisible, setVehicleModalVisible] = React.useState(false);
 
-  const idToFind = trackingId ? trackingId.replace("#", "") : "";
-  const shipments = useShipmentStore((state) => state.shipments);
-  const editShipment = useShipmentStore((state) => state.editShipment);
+  // Milestones come from the driver; poll while the load is moving.
+  const { data: shipment, error, refetch } = useShipment(parseLoadId(trackingId), { pollMs: 30_000 });
 
-  // Find dynamic shipment or fallback to default
-  const shipment =
-    shipments.find((s) => s.id === idToFind) ||
-    shipments.find((s) => s.status === "IN_TRANSIT") ||
-    shipments[0];
-
-  const currentMilestoneIndex = shipment?.milestoneIndex ?? 2;
+  const currentMilestoneIndex = shipment?.milestoneIndex ?? 0;
   const isImport = shipment?.is_import ?? false;
+  const driverName = shipment?.carrier?.driverName ?? "Your driver";
+  const driverPhone = shipment?.carrier?.driverPhone;
+  const vehicle = shipment?.carrier?.vehicle;
 
   const handleCallDriver = () => {
-    Linking.openURL("tel:+5926000101").catch((err) =>
+    if (!driverPhone) return;
+    Linking.openURL(`tel:${driverPhone}`).catch((err) =>
       console.error("Failed to open dialer:", err),
     );
   };
 
   const handleMessageDriver = () => {
-    const message = `Hi John, regarding shipment #${shipment?.id || "A2B-9874"}`;
+    if (!driverPhone || !shipment) return;
+    const message = `Hi ${driverName}, regarding shipment ${trackingLabel(shipment)}`;
     const url = Platform.select({
-      ios: `sms:+5926000101&body=${encodeURIComponent(message)}`,
-      default: `sms:+5926000101?body=${encodeURIComponent(message)}`,
+      ios: `sms:${driverPhone}&body=${encodeURIComponent(message)}`,
+      default: `sms:${driverPhone}?body=${encodeURIComponent(message)}`,
     });
     Linking.openURL(url).catch((err) =>
       console.error("Failed to open messaging app:", err),
@@ -74,29 +64,9 @@ export default function ActiveDeliveryScreen() {
   };
 
   const copyToClipboard = () => {
-    if (shipment?.id) {
-      Clipboard.setString(shipment.id);
-      Alert.alert("Copied", `Tracking ID #${shipment.id} copied to clipboard!`);
-    }
-  };
-
-  const handleAdvanceMilestone = () => {
-    if (shipment && currentMilestoneIndex < 6) {
-      const nextIndex = currentMilestoneIndex + 1;
-      editShipment(shipment.id, {
-        milestoneIndex: nextIndex,
-        // If we reach the last milestone, update status to DELIVERED
-        status: nextIndex === 6 ? "DELIVERED" : shipment.status,
-      });
-    }
-  };
-
-  const handleResetMilestones = () => {
     if (shipment) {
-      editShipment(shipment.id, {
-        milestoneIndex: 0,
-        status: "IN_TRANSIT",
-      });
+      Clipboard.setString(shipment.reference ?? shipment.id);
+      Alert.alert("Copied", `Tracking ID ${trackingLabel(shipment)} copied to clipboard!`);
     }
   };
 
@@ -206,6 +176,8 @@ export default function ActiveDeliveryScreen() {
     return shipment.cargoType || "General Cargo";
   };
 
+  if (!shipment) return <LoadState error={error} onRetry={refetch} />;
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
@@ -261,13 +233,13 @@ export default function ActiveDeliveryScreen() {
           <View style={styles.specsRow}>
             <Text style={styles.specsLabel}>Driver:</Text>
             <Text style={styles.specsValue}>
-              {shipment?.driverName || "John Mukasa"}
+              {driverName}
             </Text>
           </View>
           <View style={styles.specsRow}>
             <Text style={styles.specsLabel}>Weight:</Text>
             <Text style={styles.specsValue}>
-              {shipment?.weight || "250"} KG
+              {shipment?.weight}
             </Text>
           </View>
           <View style={[styles.specsRow, styles.specsRowLast]}>
@@ -280,7 +252,7 @@ export default function ActiveDeliveryScreen() {
 
         {/* Driver Contact Card (Clickable to show Vehicle Modal) */}
         <DriverContactCard
-          driverName={shipment?.driverName || "Guy Hawkins"}
+          driverName={driverName}
           onPressCard={() => setVehicleModalVisible(true)}
           onCallPress={handleCallDriver}
           onMessagePress={handleMessageDriver}
@@ -303,37 +275,6 @@ export default function ActiveDeliveryScreen() {
           />
         </View>
         {/* </View> */}
-
-        {/* Milestone Simulator Card */}
-        <View style={styles.simulatorCard}>
-          <View style={styles.simulatorHeader}>
-            <Text style={styles.simulatorTitle}>Milestone Simulator</Text>
-            <Text style={styles.simulatorSubtitle}>
-              Simulate geofenced updates and driver manifest approvals.
-            </Text>
-          </View>
-          <View style={styles.simulatorActions}>
-            <TouchableOpacity
-              style={[
-                styles.simButton,
-                currentMilestoneIndex >= 6 && styles.simButtonDisabled,
-              ]}
-              onPress={handleAdvanceMilestone}
-              disabled={currentMilestoneIndex >= 6}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.simButtonText}>Advance Milestone</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.simResetButton}
-              onPress={handleResetMilestones}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.simResetButtonText}>Reset Progress</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
 
         {/* Vehicle Information */}
         {/* <View style={styles.card}>
@@ -432,17 +373,11 @@ export default function ActiveDeliveryScreen() {
               />
               <View style={styles.modalDriverText}>
                 <Text style={styles.modalDriverName}>
-                  {shipment?.driverName || "Guy Hawkins"}
+                  {driverName}
                 </Text>
                 <Text style={styles.modalDriverRole}>
                   Delivery Partner • Verified
                 </Text>
-                <View style={styles.modalRatingRow}>
-                  <Star color={palette.amber[600]} size={14} fill={palette.amber[600]} />
-                  <Text style={styles.modalRatingText}>
-                    4.9 (124 deliveries)
-                  </Text>
-                </View>
               </View>
             </View>
 
@@ -459,31 +394,26 @@ export default function ActiveDeliveryScreen() {
             <View style={styles.modalGrid}>
               <View style={styles.modalGridItem}>
                 <Text style={styles.modalGridLabel}>Vehicle Type</Text>
-                <Text style={styles.modalGridValue}>Lorry (Medium)</Text>
+                <Text style={styles.modalGridValue}>
+                  {vehicle ? vehicleClasses[vehicle.vehicleClass].label : "—"}
+                </Text>
               </View>
               <View style={styles.modalGridItem}>
                 <Text style={styles.modalGridLabel}>Capacity</Text>
-                <Text style={styles.modalGridValue}>5 Tons (5,000 KG)</Text>
+                <Text style={styles.modalGridValue}>
+                  {vehicle ? `${vehicle.capacityTons} Tons` : "—"}
+                </Text>
               </View>
               <View style={styles.modalGridItem}>
                 <Text style={styles.modalGridLabel}>Make & Model</Text>
-                <Text style={styles.modalGridValue}>Isuzu FRR</Text>
+                <Text style={styles.modalGridValue}>
+                  {vehicle ? `${vehicle.make} ${vehicle.model}` : "—"}
+                </Text>
               </View>
               <View style={styles.modalGridItem}>
                 <Text style={styles.modalGridLabel}>Number Plate</Text>
                 <View style={styles.modalPlateBox}>
-                  <Text style={styles.modalPlateText}>UAM 456K</Text>
-                </View>
-              </View>
-              <View style={styles.modalGridItem}>
-                <Text style={styles.modalGridLabel}>Cargo Area</Text>
-                <Text style={styles.modalGridValue}>5.4m x 2.2m x 2.1m</Text>
-              </View>
-              <View style={styles.modalGridItem}>
-                <Text style={styles.modalGridLabel}>Compliance Status</Text>
-                <View style={styles.complianceBadge}>
-                  <View style={styles.complianceDot} />
-                  <Text style={styles.complianceText}>Active & Insured</Text>
+                  <Text style={styles.modalPlateText}>{vehicle?.plate ?? "—"}</Text>
                 </View>
               </View>
             </View>

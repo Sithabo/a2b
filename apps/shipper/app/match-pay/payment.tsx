@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronRight, Lock, CreditCard } from 'lucide-react-native';
 import { colors, palette, partnerColors } from "@a2b/ui";
 import { useMarket } from "@/store/useMarket";
 import { formatMoney } from "@a2b/core";
+import { apiErrorMessage } from "@a2b/api-client";
+import { api } from "@/lib/api";
+import { parseLoadId, useInvalidateLoads, useShipment } from "@/lib/loads";
+import { LoadState } from "@/components/LoadState";
 
 type PaymentMethod = 'mtn' | 'airtel' | 'mmg' | 'card' | null;
 
@@ -13,13 +17,26 @@ export default function PaymentMethodScreen() {
   const router = useRouter();
   const market = useMarket();
   const [selected, setSelected] = useState<PaymentMethod>(null);
+  const [isPaying, setIsPaying] = useState(false);
+  const { trackingId } = useLocalSearchParams<{ trackingId: string }>();
+  const loadId = parseLoadId(trackingId);
+  const { data: shipment, error, refetch } = useShipment(loadId);
+  const invalidateLoads = useInvalidateLoads();
 
-  const handleSelect = (method: PaymentMethod) => {
+  const handleSelect = async (method: PaymentMethod) => {
+    if (!method || !loadId || isPaying) return;
     setSelected(method);
-    // Small delay to show selected state then navigate
-    setTimeout(() => {
-      router.push('/match-pay/confirmed');
-    }, 300);
+    setIsPaying(true);
+    try {
+      await api.escrow.deposit({ params: { id: loadId }, body: { method } });
+      await invalidateLoads();
+      router.replace({ pathname: '/match-pay/confirmed', params: { trackingId: String(loadId), method } });
+    } catch (err) {
+      setSelected(null);
+      Alert.alert('Payment not completed', apiErrorMessage(err));
+    } finally {
+      setIsPaying(false);
+    }
   };
 
   const allMethods = [
@@ -63,6 +80,9 @@ export default function PaymentMethodScreen() {
     (m) => m.id === 'card' || market.mobileMoney.some((p) => p.id === m.id)
   );
 
+  if (!shipment) return <LoadState error={error} onRetry={refetch} />;
+  const amount = shipment.escrow?.amount ?? Number(shipment.offerPrice);
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
@@ -75,7 +95,7 @@ export default function PaymentMethodScreen() {
         {/* Amount Card */}
         <View style={styles.amountCard}>
           <Text style={styles.amountLabel}>Amount to Pay Driver</Text>
-          <Text style={styles.amountValue}>{formatMoney(150000, market, { code: false })}</Text>
+          <Text style={styles.amountValue}>{formatMoney(amount, market, { code: false })}</Text>
           <Text style={styles.amountCurrency}>{market.currency.code}</Text>
         </View>
 
@@ -112,7 +132,11 @@ export default function PaymentMethodScreen() {
                   <Text style={styles.methodSubtitle}>{method.subtitle}</Text>
                 </View>
 
-                <ChevronRight color={palette.gray[400]} size={20} />
+                {isPaying && isSelected ? (
+                  <ActivityIndicator color={colors.primary} />
+                ) : (
+                  <ChevronRight color={palette.gray[400]} size={20} />
+                )}
               </TouchableOpacity>
             );
           })}

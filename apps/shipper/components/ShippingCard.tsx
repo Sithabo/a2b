@@ -4,6 +4,7 @@ import { Package } from "lucide-react-native";
 import { Shipment } from "@/store/useShipmentStore";
 import { statusMeta } from "@a2b/core";
 import { colors, palette } from "@a2b/ui";
+import { trackingLabel } from "@/lib/loads";
 
 export interface ShippingCardProps {
   shipment: Shipment;
@@ -51,7 +52,7 @@ export const ShippingCard: React.FC<ShippingCardProps> = ({
   const deliveryDate = formatDateOnly(shipment.deliveryDate);
 
   const statusLabel = statusMeta[shipment.status].label;
-  const formattedTrackingId = shipment.id.startsWith("#") ? shipment.id : `#${shipment.id}`;
+  const formattedTrackingId = trackingLabel(shipment);
 
   return (
     <TouchableOpacity style={[styles.card, style]} onPress={onPress} activeOpacity={0.85}>

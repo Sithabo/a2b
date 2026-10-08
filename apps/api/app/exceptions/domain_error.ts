@@ -27,3 +27,8 @@ export default class DomainError extends Exception {
       .send({ errors: [{ message: error.message, code: error.code }] })
   }
 }
+
+/** Plain-text message for any error (used by CLI commands). */
+export function apiErrorMessageFor(error: unknown) {
+  return error instanceof Error ? error.message : String(error)
+}

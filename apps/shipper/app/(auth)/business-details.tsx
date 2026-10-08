@@ -9,40 +9,42 @@ import {
   StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter } from "expo-router";
 import { ArrowLeft, Building2, MapPin } from "lucide-react-native";
 import { useAuthStore } from "@/store/useAuthStore";
 import CountryPicker, { Country, CountryCode } from "react-native-country-picker-modal";
-import { isMarketCode, MARKET_CODES } from "@a2b/core";
+import { MARKET_CODES } from "@a2b/core";
+import { apiErrorMessage } from "@a2b/api-client";
+import { api } from "@/lib/api";
 import { colors, palette, Text, Button } from "@a2b/ui";
 
 export default function BusinessDetailsScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams();
   const [companyName, setCompanyName] = useState("");
   const [region, setRegion] = useState("");
   const [countryCode, setCountryCode] = useState<CountryCode>("UG");
   const [showPicker, setShowPicker] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const signUp = useAuthStore((state) => state.signUp);
+  const setUser = useAuthStore((state) => state.setUser);
+  const completeOnboarding = useAuthStore((state) => state.completeOnboarding);
+  const [error, setError] = useState("");
 
-  const handleCompleteRegistration = () => {
+  const handleCompleteRegistration = async () => {
     if (!companyName || !region) return;
-
+    setError("");
     setIsLoading(true);
-
-    setTimeout(() => {
-      setIsLoading(false);
-      signUp({
-        name: companyName, // Default name to company name for now
-        phone: (params.phone as string) || "",
-        company: companyName,
-        region: region,
-        market: isMarketCode(countryCode) ? countryCode : undefined,
-        role: (params.role as string) || "shipper",
-      });
+    try {
+      await api.me.upsertShipperProfile({ body: { companyName, region, isImporter: false } });
+      await api.me.update({ body: { fullName: companyName } });
+      const { data: me } = await api.me.show({});
+      setUser(me);
+      completeOnboarding();
       router.replace("/(tabs)");
-    }, 1500);
+    } catch (err) {
+      setError(apiErrorMessage(err));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -125,6 +127,8 @@ export default function BusinessDetailsScreen() {
                 </View>
               </TouchableOpacity>
             </View>
+
+            {error ? <Text tone="danger">{error}</Text> : null}
 
             <Button
               title="Complete Registration"

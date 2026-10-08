@@ -9,24 +9,24 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Image } from "expo-image";
-import { Clock, CheckCircle } from "lucide-react-native";
+import { Clock } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useShipmentStore } from "@/store/useShipmentStore";
-import { colors, palette, ScreenHeader } from "@a2b/ui";
+import { Badge, colors, palette, ScreenHeader } from "@a2b/ui";
 import { useMarket } from "@/store/useMarket";
-import { formatMoney } from "@a2b/core";
+import { formatMoney, statusMeta } from "@a2b/core";
+import { apiErrorMessage } from "@a2b/api-client";
+import { api } from "@/lib/api";
+import { parseLoadId, trackingLabel, useInvalidateLoads, useShipment } from "@/lib/loads";
+import { LoadState } from "@/components/LoadState";
 
 export default function PendingDeliveryScreen() {
   const router = useRouter();
   const { trackingId } = useLocalSearchParams<{ trackingId: string }>();
   const insets = useSafeAreaInsets();
 
-  const idToFind = trackingId ? trackingId.replace("#", "") : "";
-  const shipments = useShipmentStore((state) => state.shipments);
-  const deleteShipment = useShipmentStore((state) => state.deleteShipment);
-
-  // Find dynamic shipment or fallback to default
-  const shipment = shipments.find((s) => s.id === idToFind) || shipments[1];
+  const loadId = parseLoadId(trackingId);
+  const { data: shipment, error, refetch } = useShipment(loadId);
+  const invalidateLoads = useInvalidateLoads();
 
   const market = useMarket();
   const formatCurrency = (val?: string) => formatMoney(val, market);
@@ -66,14 +66,21 @@ export default function PendingDeliveryScreen() {
         {
           text: "Yes, Cancel",
           style: "destructive",
-          onPress: () => {
-            deleteShipment(shipment.id);
-            router.replace("/(tabs)");
+          onPress: async () => {
+            try {
+              await api.loads.cancel({ params: { id: loadId! }, body: {} });
+              await invalidateLoads();
+              router.replace("/(tabs)");
+            } catch (err) {
+              Alert.alert("Couldn't cancel", apiErrorMessage(err));
+            }
           },
         },
       ]
     );
   };
+
+  if (!shipment) return <LoadState error={error} onRetry={refetch} />;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -125,18 +132,15 @@ export default function PendingDeliveryScreen() {
             <View style={styles.metadataSection}>
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Order ID:</Text>
-                <Text style={styles.metaValue}>#{shipment.id}</Text>
+                <Text style={styles.metaValue}>{trackingLabel(shipment)}</Text>
               </View>
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Date Posted:</Text>
                 <Text style={styles.metaValue}>{formatDate(shipment.createdAt)}</Text>
               </View>
               <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Payment Status:</Text>
-                <View style={styles.escrowBadge}>
-                  <Text style={styles.escrowText}>Escrow Secured</Text>
-                  <CheckCircle color={palette.white} size={16} fill={palette.emerald[600]} />
-                </View>
+                <Text style={styles.metaLabel}>Status:</Text>
+                <Badge label={statusMeta[shipment.status].label} tone={statusMeta[shipment.status].tone} dot />
               </View>
             </View>
 

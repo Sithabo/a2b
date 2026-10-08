@@ -12,6 +12,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
 import CountryPicker, { CountryCode, Country } from 'react-native-country-picker-modal';
+import { api } from "@/lib/api";
+import { apiErrorMessage } from "@a2b/api-client";
 import { MARKET_CODES } from "@a2b/core";
 import { parsePhoneNumberFromString } from 'libphonenumber-js/min';
 import { colors, palette, partnerColors, Text, Button } from "@a2b/ui";
@@ -42,15 +44,16 @@ export default function LoginScreen() {
 
     setError("");
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // Pass the method and role to the next screen
-      router.push({
-        pathname: "/(auth)/verify-otp",
-        params: { role: params.role, method, phone: fullNumber },
-      });
-    }, 1000);
+    api.auth
+      .requestOtp({ body: { phone: parsedNumber.number } })
+      .then(({ data }) => {
+        router.push({
+          pathname: "/(auth)/verify-otp",
+          params: { role: params.role, method, phone: data.phone },
+        });
+      })
+      .catch((err) => setError(apiErrorMessage(err)))
+      .finally(() => setIsLoading(false));
   };
 
   return (

@@ -1,16 +1,71 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { ArrowLeft, Clock } from "lucide-react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { useShipmentStore } from "@/store/useShipmentStore";
+import { apiErrorMessage } from "@a2b/api-client";
 import { colors, palette } from "@a2b/ui";
+import { api } from "@/lib/api";
+import { parseLoadId, useShipment } from "@/lib/loads";
+
+const formatCode = (code: string) => `${code.slice(0, 3)} ${code.slice(3)}`;
+
+function formatRemaining(ms: number) {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+}
 
 export default function ReleaseFundsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { trackingId } = useLocalSearchParams<{ trackingId: string }>();
-  const updateShipmentStatus = useShipmentStore((state) => state.updateShipmentStatus);
+  const loadId = parseLoadId(trackingId);
+
+  const [code, setCode] = useState<string | null>(null);
+  const [expiresAt, setExpiresAt] = useState<number | null>(null);
+  const [error, setError] = useState("");
+  const [isIssuing, setIsIssuing] = useState(false);
+  const [now, setNow] = useState(Date.now());
+  const latestRequest = useRef(0);
+
+  // Watch for the driver entering the code.
+  const { data: shipment } = useShipment(loadId, { pollMs: 4000 });
+
+  const issueCode = useCallback(async () => {
+    if (!loadId) return;
+    const requestId = ++latestRequest.current;
+    setIsIssuing(true);
+    setError("");
+    try {
+      const { data } = await api.escrow.releaseCode({ params: { id: loadId } });
+      // Each new code replaces the previous one server-side; only show the newest.
+      if (requestId !== latestRequest.current) return;
+      setCode(data.code);
+      setExpiresAt(data.expiresAt ? new Date(data.expiresAt).getTime() : null);
+    } catch (err) {
+      if (requestId === latestRequest.current) setError(apiErrorMessage(err));
+    } finally {
+      if (requestId === latestRequest.current) setIsIssuing(false);
+    }
+  }, [loadId]);
+
+  useEffect(() => {
+    issueCode();
+  }, [issueCode]);
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (shipment?.status === "COMPLETED") {
+      router.replace({ pathname: "/official-receipt", params: { trackingId: shipment.id } });
+    }
+  }, [shipment?.status, shipment?.id, router]);
+
+  const remaining = expiresAt ? expiresAt - now : 0;
+  const expired = !!code && remaining <= 0;
 
   return (
     <View style={styles.container}>
@@ -37,29 +92,28 @@ export default function ReleaseFundsScreen() {
 
         {/* Big Code Card */}
         <View style={styles.codeCard}>
-          <Text style={styles.codeText}>482 915</Text>
+          {code && !expired ? (
+            <Text style={styles.codeText}>{formatCode(code)}</Text>
+          ) : isIssuing ? (
+            <ActivityIndicator color={colors.primary} />
+          ) : (
+            <Text style={styles.warningText}>{error || "This code has expired. Make a new one."}</Text>
+          )}
         </View>
 
-        {/* Demo Button to simulate Driver Entry */}
-        <TouchableOpacity
-          style={styles.demoButton}
-          activeOpacity={0.8}
-          onPress={() => {
-            const idToFind = trackingId ? trackingId.replace("#", "") : "";
-            if (idToFind) {
-              updateShipmentStatus(idToFind, "COMPLETED");
-            }
-            router.replace({ pathname: "/official-receipt", params: { trackingId } });
-          }}
-        >
-          <Text style={styles.demoButtonText}>[Demo: Simulate Driver Entering Code]</Text>
-        </TouchableOpacity>
+        {__DEV__ && code && shipment?.reference && (
+          <Text style={styles.demoButtonText} selectable>
+            Dev: act as the driver with{"\n"}node ace carrier:simulate {shipment.reference} release {code}
+          </Text>
+        )}
 
         {/* Expiration Timer */}
-        <View style={styles.timerRow}>
-          <Clock color={palette.amber[600]} size={16} />
-          <Text style={styles.timerText}>Expires in 09:52</Text>
-        </View>
+        {code && !expired && (
+          <View style={styles.timerRow}>
+            <Clock color={palette.amber[600]} size={16} />
+            <Text style={styles.timerText}>Expires in {formatRemaining(remaining)}</Text>
+          </View>
+        )}
 
         <Text style={styles.warningText}>
           Only give this code if you have{"\n"}inspected your goods.
@@ -71,6 +125,8 @@ export default function ReleaseFundsScreen() {
         <TouchableOpacity
           style={styles.primaryButton}
           activeOpacity={0.8}
+          onPress={issueCode}
+          disabled={isIssuing}
         >
           <Text style={styles.primaryButtonText}>Remake Code</Text>
         </TouchableOpacity>

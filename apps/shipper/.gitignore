@@ -41,3 +41,6 @@ app-example
 # generated native folders
 /ios
 /android
+
+# per-developer API URL (LAN IP)
+.env

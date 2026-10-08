@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   TextInput,
+  RefreshControl,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Link, useRouter } from "expo-router";
@@ -29,12 +30,13 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useShipmentStore } from "@/store/useShipmentStore";
 import { colors, palette } from "@a2b/ui";
 import { isActiveStatus, statusGroup } from "@a2b/core";
+import { shipmentRoute, useMyShipments } from "@/lib/loads";
 
 export default function HomeScreen() {
   const router = useRouter();
   const userProfile = useAuthStore((state) => state.userProfile);
   const draftShipment = useShipmentStore((state) => state.draftShipment);
-  const shipments = useShipmentStore((state) => state.shipments);
+  const { data: shipments = [], refetch, isRefetching } = useMyShipments();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<"ALL" | "ACTIVE" | "PENDING" | "COMPLETED">("ALL");
   const insets = useSafeAreaInsets();
@@ -43,6 +45,7 @@ export default function HomeScreen() {
     const query = searchQuery.toLowerCase().trim();
     const matchesSearch = !query || (
       s.id.toLowerCase().includes(query) ||
+      (s.reference ?? "").toLowerCase().includes(query) ||
       (s.pickup && s.pickup.toLowerCase().includes(query)) ||
       (s.delivery && s.delivery.toLowerCase().includes(query)) ||
       (s.cargoType && s.cargoType.toLowerCase().includes(query))
@@ -69,6 +72,7 @@ export default function HomeScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={palette.white} />}
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }]}
         showsVerticalScrollIndicator={false}
       >
@@ -187,7 +191,7 @@ export default function HomeScreen() {
               <TrackingCard
                 key={s.id}
                 shipment={s}
-                onPress={() => router.push({ pathname: "/active-delivery", params: { trackingId: `#${s.id}` } })}
+                onPress={() => router.push(shipmentRoute(s))}
               />
             ))}
 
@@ -214,7 +218,7 @@ export default function HomeScreen() {
                   key={s.id}
                   shipment={s}
                   imageSource={require("@/assets/images/cargo_box.png")}
-                  onPress={() => router.push({ pathname: s.status === "IN_TRANSIT" ? "/active-delivery" : "/pending-delivery", params: { trackingId: `#${s.id}` } })}
+                  onPress={() => router.push(shipmentRoute(s))}
                 />
               ))}
             </View>
