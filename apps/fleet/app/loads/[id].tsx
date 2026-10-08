@@ -19,7 +19,7 @@ import {
   spacing,
   Text,
 } from "@a2b/ui";
-import { cargoLabel } from "@/components/LoadCard";
+import { cargoLabel } from "@a2b/features";
 import { api } from "@/lib/session";
 import { buildRoster, keys, useDrivers, useFleetLoads, useInvalidate, useLoad, useVehicles } from "@/lib/queries";
 

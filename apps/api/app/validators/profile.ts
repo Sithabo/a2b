@@ -14,7 +14,8 @@ export const shipperProfileValidator = vine.create({
 })
 
 export const driverProfileValidator = vine.create({
-  licenseNumber: vine.string().trim().maxLength(40),
+  /** Required when the profile is first created; optional for later updates (e.g. duty toggle). */
+  licenseNumber: vine.string().trim().minLength(3).maxLength(40).optional(),
   licenseClass: vine.string().trim().maxLength(10).optional(),
   dutyStatus: vine.enum(['AVAILABLE', 'OFF_DUTY'] as const).optional(),
 })

@@ -54,6 +54,9 @@ export default class MeController {
       existing.merge(data)
       await existing.save()
     } else {
+      if (!data.licenseNumber) {
+        throw DomainError.invalid('Add your driving licence number', 'E_LICENSE_REQUIRED')
+      }
       await DriverProfile.create({
         ...data,
         userId: user.id,

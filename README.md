@@ -6,6 +6,7 @@ npm-workspaces monorepo for the A2B freight apps.
 apps/
   shipper/     Expo app — shippers post loads and track them
   fleet/       Expo app — fleet owners manage trucks and drivers, and dispatch loads
+  driver/      Expo app — drivers take loads, hold for escrow, deliver and enter release codes
   api/         AdonisJS API + PostgreSQL — auth, loads, escrow, fleets, documents
 packages/
   core/        Domain types, status machine, pricing, market config (GY + UG)
@@ -25,6 +26,7 @@ docs/          Product and regulatory documents
 npm install            # once, from the repo root
 npm run shipper        # start the shipper app
 npm run fleet          # start the fleet app
+npm run driver         # start the driver app
 npm run api            # start the API (http://localhost:3333)
 npm run test:api       # API test suite (uses the a2b_test database)
 npm run typecheck      # tsc across all workspaces
@@ -65,9 +67,9 @@ Demo data for development (a shipper and open loads in each market):
 cd apps/api && node ace db:seed --files database/seeders/demo_seeder.ts
 ```
 
-OTP test numbers (code `123456`): shippers `+256700000001` / `+5926000001`, fleet owners `+256700000003` / `+5926000003`.
+OTP test numbers (code `123456`): shippers `+256700000001` / `+5926000001`, drivers `+256700000002` / `+5926000002` (the same demo drivers `carrier:simulate` uses), fleet owners `+256700000003` / `+5926000003`.
 
-Until the driver app exists, play the driver's side from the API:
+To play the driver's side without the driver app:
 
 ```bash
 cd apps/api

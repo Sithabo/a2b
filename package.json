@@ -8,6 +8,7 @@
   "scripts": {
     "shipper": "npm run start -w @a2b/shipper",
     "fleet": "npm run start -w @a2b/fleet",
+    "driver": "npm run start -w @a2b/driver",
     "api": "npm run dev -w @a2b/api",
     "test:api": "npm run test -w @a2b/api",
     "lint": "npm run lint --workspaces --if-present",

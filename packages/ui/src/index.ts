@@ -13,3 +13,5 @@ export * from './components/Chip.tsx';
 export * from './components/EmptyState.tsx';
 export * from './components/PlateBadge.tsx';
 export * from './components/Stepper.tsx';
+export * from './components/CodePad.tsx';
+export * from './components/SlideToConfirm.tsx';
