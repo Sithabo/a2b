@@ -7,9 +7,9 @@ import Animated, {
     withTiming,
     runOnJS 
 } from 'react-native-reanimated';
-import { colors, palette } from '../tokens/colors';
-import { radius, spacing } from '../tokens/layout';
-import { Text } from './Text';
+import { colors, palette } from '../tokens/colors.ts';
+import { radius, spacing } from '../tokens/layout.ts';
+import { Text } from './Text.tsx';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 

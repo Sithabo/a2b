@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text as RNText, type TextProps as RNTextProps } from 'react-native';
-import { colors } from '../tokens/colors';
-import { typography, type TypographyVariant } from '../tokens/layout';
+import { colors } from '../tokens/colors.ts';
+import { typography, type TypographyVariant } from '../tokens/layout.ts';
 
 const toneColors = {
   default: colors.text,

@@ -2,9 +2,9 @@ import React from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, X } from 'lucide-react-native';
-import { layout, spacing } from '../tokens/layout';
-import { IconButton } from './IconButton';
-import { Text } from './Text';
+import { layout, spacing } from '../tokens/layout.ts';
+import { IconButton } from './IconButton.tsx';
+import { Text } from './Text.tsx';
 
 export interface ScreenHeaderProps {
   title: string;

@@ -8,9 +8,9 @@ import {
   type ViewStyle,
 } from 'react-native';
 import type { LucideIcon } from 'lucide-react-native';
-import { colors } from '../tokens/colors';
-import { layout, radius, spacing } from '../tokens/layout';
-import { Text } from './Text';
+import { colors } from '../tokens/colors.ts';
+import { layout, radius, spacing } from '../tokens/layout.ts';
+import { Text } from './Text.tsx';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'accent' | 'ghost' | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';

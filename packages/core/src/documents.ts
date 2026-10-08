@@ -1,4 +1,4 @@
-import type { CargoDetails, CargoType } from './domain';
+import type { CargoDetails, CargoType } from './domain.ts';
 
 /**
  * When a document is needed for a load that starts in a customs zone.

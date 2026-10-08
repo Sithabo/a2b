@@ -1,5 +1,5 @@
-import type { MarketCode } from './markets';
-import type { LoadStatus } from './status';
+import type { MarketCode } from './markets.ts';
+import type { LoadStatus } from './status.ts';
 
 export type UserRole = 'shipper' | 'driver' | 'fleet_owner' | 'admin';
 

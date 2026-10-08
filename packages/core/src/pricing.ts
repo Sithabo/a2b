@@ -1,5 +1,5 @@
-import type { CargoDetails, VehicleClass } from './domain';
-import type { Market } from './markets';
+import type { CargoDetails, VehicleClass } from './domain.ts';
+import type { Market } from './markets.ts';
 
 export interface TripEstimateInput {
   distanceKm: number;

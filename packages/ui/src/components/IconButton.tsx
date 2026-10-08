@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import type { LucideIcon } from 'lucide-react-native';
-import { colors } from '../tokens/colors';
+import { colors } from '../tokens/colors.ts';
 
 export interface IconButtonProps {
   icon: LucideIcon;

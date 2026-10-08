@@ -1,5 +1,5 @@
-import type { LocationData, VehicleClass } from './domain';
-import { guyanaDocuments, ugandaDocuments, type DocumentRequirement } from './documents';
+import type { LocationData, VehicleClass } from './domain.ts';
+import { guyanaDocuments, ugandaDocuments, type DocumentRequirement } from './documents.ts';
 
 export type MarketCode = 'GY' | 'UG';
 
