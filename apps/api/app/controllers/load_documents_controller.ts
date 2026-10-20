@@ -14,7 +14,7 @@ import type User from '#models/user'
 async function findForDocuments(id: number, user: User) {
   const load = await Load.find(id)
   if (!load || !(await canSeeLocation(load, user))) {
-    throw new DomainError('Load not found', { status: 404, code: 'E_NOT_FOUND' })
+    throw DomainError.notFound('Load not found')
   }
   return load
 }
@@ -70,7 +70,7 @@ export default class LoadDocumentsController {
       .where('load_id', load.id)
       .where('id', params.documentId)
       .first()
-    if (!doc) throw new DomainError('Document not found', { status: 404, code: 'E_NOT_FOUND' })
+    if (!doc) throw DomainError.notFound('Document not found')
     response.header('Content-Type', doc.mimeType)
     response.header(
       'Content-Disposition',

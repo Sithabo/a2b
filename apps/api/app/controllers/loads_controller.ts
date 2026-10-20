@@ -31,7 +31,7 @@ async function findVisible(id: number, user: User) {
     .preload('vehicle')
     .first()
   if (!load || !(await canView(load, user))) {
-    throw new DomainError('Load not found', { status: 404, code: 'E_NOT_FOUND' })
+    throw DomainError.notFound('Load not found')
   }
   return load
 }

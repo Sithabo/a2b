@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Anchor, MapPin, Search, X, ArrowLeft } from "lucide-react-native";
-import { LocationData } from "@/store/useShipmentStore";
+import type { LocationData } from "@a2b/core";
 import { colors, palette } from "@a2b/ui";
 
 interface LocationSearchModalProps {
@@ -25,16 +25,16 @@ interface LocationSearchModalProps {
 }
 
 const MOCK_PORTS: LocationData[] = [
-  { id: "p_01", name: "Georgetown Wharves (Port Zone)", latitude: 6.8114, longitude: -58.1672, is_port: true },
-  { id: "p_02", name: "Demerara Terminals (Port Zone)", latitude: 6.7901, longitude: -58.1812, is_port: true },
+  { id: "p_01", name: "Georgetown Wharves (Port Zone)", latitude: 6.8114, longitude: -58.1672, isPort: true },
+  { id: "p_02", name: "Demerara Terminals (Port Zone)", latitude: 6.7901, longitude: -58.1812, isPort: true },
 ];
 
 const MOCK_ADDRESSES: LocationData[] = [
-  { id: "g_01", name: "Linden Highway, Guyana", latitude: 6.4021, longitude: -58.2190, is_port: false },
-  { id: "g_02", name: "Demerara Harbour Bridge, Peters Hall", latitude: 6.7802, longitude: -58.1895, is_port: false },
-  { id: "g_03", name: "Demerara Street, Georgetown", latitude: 6.8011, longitude: -58.1590, is_port: false },
-  { id: "g_04", name: "Main Street, Georgetown, Guyana", latitude: 6.8082, longitude: -58.1654, is_port: false },
-  { id: "g_05", name: "Sheriff Street, Campbellville, GT", latitude: 6.8021, longitude: -58.1402, is_port: false },
+  { id: "g_01", name: "Linden Highway, Guyana", latitude: 6.4021, longitude: -58.2190, isPort: false },
+  { id: "g_02", name: "Demerara Harbour Bridge, Peters Hall", latitude: 6.7802, longitude: -58.1895, isPort: false },
+  { id: "g_03", name: "Demerara Street, Georgetown", latitude: 6.8011, longitude: -58.1590, isPort: false },
+  { id: "g_04", name: "Main Street, Georgetown, Guyana", latitude: 6.8082, longitude: -58.1654, isPort: false },
+  { id: "g_05", name: "Sheriff Street, Campbellville, GT", latitude: 6.8021, longitude: -58.1402, isPort: false },
 ];
 
 export const LocationSearchModal = ({
@@ -227,7 +227,7 @@ export const LocationSearchModal = ({
                     activeOpacity={0.75}
                   >
                     <View style={styles.resultLeft}>
-                      {location.is_port ? (
+                      {location.isPort ? (
                         <View style={styles.anchorWrapper}>
                           <Anchor size={18} color={colors.primary} />
                         </View>
@@ -236,12 +236,12 @@ export const LocationSearchModal = ({
                           <MapPin size={18} color={palette.gray[500]} />
                         </View>
                       )}
-                      <Text style={[styles.resultName, location.is_port && styles.resultNamePort]}>
+                      <Text style={[styles.resultName, location.isPort && styles.resultNamePort]}>
                         {location.name}
                       </Text>
                     </View>
                     
-                    {location.is_port && (
+                    {location.isPort && (
                       <View style={styles.portBadge}>
                         <Text style={styles.portBadgeText}>PORT NODE</Text>
                       </View>

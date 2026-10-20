@@ -1,5 +1,6 @@
 import { createTuyau } from '@tuyau/core/client'
 import { registry } from '@a2b/api/registry'
+import type { ApiErrorCode } from '@a2b/core'
 
 export type { Data } from '@a2b/api/data'
 
@@ -44,9 +45,9 @@ export function createApiClient({ baseUrl, getToken, onUnauthorized }: ApiClient
 
 export type ApiClient = ReturnType<typeof createApiClient>
 
-/** Shape of every A2B API error body. */
+/** Shape of every A2B API error body. Validation errors carry `field` instead of a code. */
 export interface ApiErrorBody {
-  errors: { message: string; code?: string; field?: string }[]
+  errors: { message: string; code?: ApiErrorCode; field?: string }[]
 }
 
 function errorBody(error: unknown): ApiErrorBody | undefined {
@@ -58,7 +59,7 @@ function errorBody(error: unknown): ApiErrorBody | undefined {
 }
 
 /** Machine-readable error code (e.g. "E_OTP_INVALID"), if the API sent one. */
-export function apiErrorCode(error: unknown): string | undefined {
+export function apiErrorCode(error: unknown): ApiErrorCode | undefined {
   return errorBody(error)?.errors[0]?.code
 }
 

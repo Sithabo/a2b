@@ -16,7 +16,7 @@ export interface UserProfile {
   region?: string;
   email?: string;
   profileImage?: string;
-  is_importer?: boolean;
+  isImporter?: boolean;
   tin?: string | null;
 }
 
@@ -40,7 +40,7 @@ export function toUserProfile(user: Data.User, profileImage?: string): UserProfi
     region: shipper?.region ?? undefined,
     email: user.email ?? undefined,
     profileImage,
-    is_importer: shipper?.isImporter ?? false,
+    isImporter: shipper?.isImporter ?? false,
     tin: shipper?.taxId ?? null,
   };
 }

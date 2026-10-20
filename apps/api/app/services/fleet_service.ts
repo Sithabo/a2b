@@ -9,7 +9,7 @@ import {
   isValidTaxId,
   normalizePlate,
   type BodyType,
-  type Fleet as FleetShape,
+  type FleetSizeTier,
   type VehicleClass,
 } from '@a2b/core'
 import Fleet from '#models/fleet'
@@ -33,7 +33,7 @@ export interface FleetInput {
   name: string
   address?: string | null
   taxId?: string | null
-  sizeTier: FleetShape['sizeTier']
+  sizeTier: FleetSizeTier
   primaryCorridor?: string | null
 }
 
@@ -126,7 +126,7 @@ export async function updateVehicle(
 ) {
   const fleet = await requireFleet(owner)
   const vehicle = await Vehicle.query().where('id', vehicleId).where('fleet_id', fleet.id).first()
-  if (!vehicle) throw new DomainError('Vehicle not found', { status: 404, code: 'E_NOT_FOUND' })
+  if (!vehicle) throw DomainError.notFound('Vehicle not found')
   if (changes.assignedDriverId) await assertDriverInFleet(fleet, changes.assignedDriverId)
 
   return db.transaction(async (trx) => {
@@ -277,7 +277,7 @@ export async function respondToInvite(driver: User, inviteId: number, accept: bo
       .where('driver_id', driver.id)
       .forUpdate()
       .first()
-    if (!found) throw new DomainError('Invite not found', { status: 404, code: 'E_NOT_FOUND' })
+    if (!found) throw DomainError.notFound('Invite not found')
     if (found.status !== 'PENDING')
       throw DomainError.conflict('This invite is no longer open', 'E_INVITE_CLOSED')
 

@@ -20,18 +20,19 @@ export default {
   },
   tables: {
     users: { columns: { role: t('UserRole', 'UserRole') } },
-    fleets: { columns: { size_tier: t("Fleet['sizeTier']", 'Fleet') } },
+    fleets: { columns: { size_tier: t('FleetSizeTier', 'FleetSizeTier') } },
+    fleet_invites: { columns: { status: t('FleetInviteStatus', 'FleetInviteStatus') } },
     driver_profiles: {
       columns: {
-        verification_status: t("'PENDING' | 'VERIFIED' | 'REJECTED'"),
-        duty_status: t("'AVAILABLE' | 'OFF_DUTY'"),
+        verification_status: t('DriverVerificationStatus', 'DriverVerificationStatus'),
+        duty_status: t('DutyStatus', 'DutyStatus'),
       },
     },
     vehicles: {
       columns: {
         vehicle_class: t('VehicleClass', 'VehicleClass'),
         body_type: t('BodyType', 'BodyType'),
-        status: t("Vehicle['status']", 'Vehicle'),
+        status: t('VehicleStatus', 'VehicleStatus'),
       },
     },
     loads: {
@@ -49,19 +50,18 @@ export default {
         actor_role: t('StatusActor', 'StatusActor'),
       },
     },
-    fleet_invites: {
-      columns: { status: t("'PENDING' | 'ACCEPTED' | 'DECLINED' | 'CANCELLED'") },
-    },
     escrows: {
       columns: {
-        status: t("'AWAITING_DEPOSIT' | 'HELD' | 'RELEASED' | 'REFUNDED'"),
+        status: t('EscrowStatus', 'EscrowStatus'),
+        deposit_method: t('PaymentMethod | null', 'PaymentMethod'),
         amount: money,
       },
     },
     payment_transactions: {
       columns: {
-        kind: t("'DEPOSIT' | 'PAYOUT' | 'REFUND'"),
-        status: t("'PENDING' | 'SUCCEEDED' | 'FAILED'"),
+        kind: t('PaymentKind', 'PaymentKind'),
+        method: t('PaymentMethod', 'PaymentMethod'),
+        status: t('PaymentStatus', 'PaymentStatus'),
         raw: t('Record<string, unknown> | null'),
         amount: money,
       },

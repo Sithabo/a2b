@@ -29,13 +29,13 @@ import { ToolCard } from "@/components/ToolCard";
 import { useUserProfile } from "@/store/useShipperProfile";
 import { useShipmentStore } from "@/store/useShipmentStore";
 import { colors, palette } from "@a2b/ui";
-import { isActiveStatus, statusGroup } from "@a2b/core";
+import { cargoLabel, isActiveStatus, statusGroup } from "@a2b/core";
 import { shipmentRoute, useMyShipments } from "@/lib/loads";
 
 export default function HomeScreen() {
   const router = useRouter();
   const userProfile = useUserProfile();
-  const draftShipment = useShipmentStore((state) => state.draftShipment);
+  const draft = useShipmentStore((state) => state.draft);
   const { data: shipments = [], refetch, isRefetching } = useMyShipments();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<"ALL" | "ACTIVE" | "PENDING" | "COMPLETED">("ALL");
@@ -44,11 +44,11 @@ export default function HomeScreen() {
   const filteredShipments = shipments.filter((s) => {
     const query = searchQuery.toLowerCase().trim();
     const matchesSearch = !query || (
-      s.id.toLowerCase().includes(query) ||
-      (s.reference ?? "").toLowerCase().includes(query) ||
-      (s.pickup && s.pickup.toLowerCase().includes(query)) ||
-      (s.delivery && s.delivery.toLowerCase().includes(query)) ||
-      (s.cargoType && s.cargoType.toLowerCase().includes(query))
+      String(s.id).includes(query) ||
+      s.reference.toLowerCase().includes(query) ||
+      s.pickupSummary.toLowerCase().includes(query) ||
+      s.dropoffSummary.toLowerCase().includes(query) ||
+      cargoLabel(s.cargoType).toLowerCase().includes(query)
     );
 
     const group = statusGroup(s.status);
@@ -166,7 +166,7 @@ export default function HomeScreen() {
           {/* Top Content inside gradient */}
           <View style={styles.topContent}>
             {/* Active Alert Card if draft exists */}
-            {draftShipment && draftShipment.status === 'DRAFT' && (
+            {draft?.savedAt && (
               <TouchableOpacity
                 style={styles.alertCard}
                 activeOpacity={0.9}
@@ -177,7 +177,7 @@ export default function HomeScreen() {
                   <Text style={styles.alertCardTitle}>⚠️ Unfinished Import Shipment Detected</Text>
                 </View>
                 <Text style={styles.alertCardText}>
-                  Your route information from {draftShipment.pickup || "Georgetown Port"} is saved. Tap here to complete your document uploads and release this load.
+                  Your route information from {draft.pickup?.name ?? "your pickup point"} is saved. Tap here to complete your document uploads and release this load.
                 </Text>
                 <View style={styles.alertCardFooter}>
                   <Text style={styles.alertCardBtnText}>Complete Document Vault Uploads</Text>

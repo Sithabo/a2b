@@ -5,16 +5,9 @@ import { ArrowLeft, Check, FileText, Share2 } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors, palette } from "@a2b/ui";
 import { useMarket } from "@/store/useMarket";
-import { formatMoney } from "@a2b/core";
+import { cargoLabel, formatMoney, paymentMethods } from "@a2b/core";
 import { parseLoadId, trackingLabel, useShipment } from "@/lib/loads";
 import { LoadState } from "@/components/LoadState";
-
-const METHOD_LABELS: Record<string, string> = {
-  mtn: "MTN Mobile Money",
-  airtel: "Airtel Money",
-  mmg: "MMG Mobile Money",
-  card: "Debit/Credit Card",
-};
 
 export default function OfficialReceiptScreen() {
   const router = useRouter();
@@ -22,7 +15,7 @@ export default function OfficialReceiptScreen() {
   const { data: shipment, error, refetch } = useShipment(parseLoadId(trackingId));
 
   const market = useMarket();
-  const formatCurrency = (val?: string | number) => formatMoney(val, market);
+  const formatCurrency = (amount: number) => formatMoney(amount, market);
 
   if (!shipment) return <LoadState error={error} onRetry={refetch} />;
   const vehicle = shipment.carrier?.vehicle;
@@ -72,11 +65,11 @@ export default function OfficialReceiptScreen() {
               </View>
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Pickup:</Text>
-                <Text style={styles.metaValue} numberOfLines={2}>{shipment.pickup}</Text>
+                <Text style={styles.metaValue} numberOfLines={2}>{shipment.pickupSummary}</Text>
               </View>
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Delivery:</Text>
-                <Text style={styles.metaValue} numberOfLines={2}>{shipment.delivery}</Text>
+                <Text style={styles.metaValue} numberOfLines={2}>{shipment.dropoffSummary}</Text>
               </View>
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Vehicle:</Text>
@@ -86,12 +79,12 @@ export default function OfficialReceiptScreen() {
               </View>
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Load Type:</Text>
-                <Text style={styles.metaValue}>{shipment.cargoType}</Text>
+                <Text style={styles.metaValue}>{cargoLabel(shipment.cargoType)}</Text>
               </View>
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Payment Method:</Text>
                 <Text style={styles.metaValue}>
-                  {METHOD_LABELS[shipment.escrow?.depositMethod ?? ""] ?? "—"}
+                  {shipment.escrow?.depositMethod ? paymentMethods[shipment.escrow.depositMethod].label : "—"}
                 </Text>
               </View>
             </View>

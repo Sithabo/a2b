@@ -3,7 +3,7 @@ import { Alert, Linking, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowDown, Clock, MapPin, Phone, ShieldCheck, Truck } from "lucide-react-native";
-import { formatMoney, getMarket, statusMeta, vehicleClasses } from "@a2b/core";
+import { cargoLabel, formatMoney, getMarket, statusMeta, vehicleClasses } from "@a2b/core";
 import { apiErrorMessage } from "@a2b/api-client";
 import {
   Badge,
@@ -19,7 +19,6 @@ import {
   spacing,
   Text,
 } from "@a2b/ui";
-import { cargoLabel } from "@a2b/features";
 import { api } from "@/lib/session";
 import { buildRoster, keys, useDrivers, useFleetLoads, useInvalidate, useLoad, useVehicles } from "@/lib/queries";
 

@@ -74,7 +74,7 @@ export default function AccountScreen() {
     setEditRegion(userProfile?.region || "");
     setEditEmail(userProfile?.email || "");
     setEditProfileImage(userProfile?.profileImage || null);
-    setEditIsImporter(userProfile?.is_importer || false);
+    setEditIsImporter(userProfile?.isImporter || false);
     setEditTin(userProfile?.tin || "");
     setTinError("");
     setIsEditModalVisible(true);

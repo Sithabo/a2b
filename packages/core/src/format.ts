@@ -1,11 +1,10 @@
 import { parsePhoneNumberFromString } from 'libphonenumber-js/min';
 import { isMarketCode, type Market, type MarketCode } from './markets.ts';
 
-/** "150,000 UGX". Accepts the string prices the prototype stores. */
-export function formatMoney(amount: number | string | null | undefined, market: Market, opts: { code?: boolean } = {}) {
-  const value = typeof amount === 'string' ? Number(amount.replace(/,/g, '')) : (amount ?? 0);
-  const safe = Number.isFinite(value) ? value : 0;
-  const digits = safe.toLocaleString('en-US', {
+/** "150,000 UGX". Amounts are whole units of the market's currency. */
+export function formatMoney(amount: number | null | undefined, market: Market, opts: { code?: boolean } = {}) {
+  const safe = Number.isFinite(amount) ? (amount as number) : 0;
+  const digits = safe.toLocaleString(market.currency.locale, {
     minimumFractionDigits: market.currency.decimals,
     maximumFractionDigits: market.currency.decimals,
   });

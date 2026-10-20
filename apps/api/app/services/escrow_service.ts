@@ -2,7 +2,7 @@ import { randomInt } from 'node:crypto'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 import hash from '@adonisjs/core/services/hash'
-import { getMarket } from '@a2b/core'
+import { getMarket, isPaymentMethodAvailable } from '@a2b/core'
 import Escrow from '#models/escrow'
 import PaymentTransaction from '#models/payment_transaction'
 import User from '#models/user'
@@ -26,7 +26,7 @@ async function escrowFor(load: Load, trx: TransactionClientContract) {
 
 function assertMethodAvailable(load: Load, method: PaymentMethod) {
   const market = getMarket(load.market)
-  if (method !== 'card' && !market.mobileMoney.some((p) => p.id === method)) {
+  if (!isPaymentMethodAvailable(method, market)) {
     throw DomainError.invalid(
       `${method.toUpperCase()} is not available in ${market.name}`,
       'E_METHOD_UNAVAILABLE'
@@ -166,7 +166,7 @@ export async function releaseEscrow(driver: User, loadId: number, code: string) 
       reference: `${load.reference}-PAY`,
       amount: escrow.amount,
       currency: escrow.currency,
-      method: (escrow.depositMethod as PaymentMethod) ?? 'card',
+      method: escrow.depositMethod ?? 'card',
       phone: payee.phone,
     })
     await PaymentTransaction.create(

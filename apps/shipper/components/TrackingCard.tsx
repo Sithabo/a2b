@@ -1,12 +1,21 @@
 import React from "react";
 import { View, Text, StyleSheet, ViewStyle, TouchableOpacity } from "react-native";
-import { Package, Wrench, FlaskConical, Apple, QrCode } from "lucide-react-native";
-import { Shipment } from "@/store/useShipmentStore";
+import { Package, Wrench, FlaskConical, Apple, QrCode, type LucideIcon } from "lucide-react-native";
+import type { CargoType } from "@a2b/core";
 import { colors, palette } from "@a2b/ui";
-import { trackingLabel } from "@/lib/loads";
+import { dueDate, trackingLabel, type Load } from "@/lib/loads";
+
+const CARGO_ICONS: Record<CargoType, LucideIcon> = {
+  GENERAL_CARGO: Package,
+  FRAGILE_CARGO: Package,
+  BULK_CARGO: Package,
+  HEAVY_MACHINERY: Wrench,
+  CHEMICALS_PHARMA: FlaskConical,
+  FOOD_BEVERAGE: Apple,
+};
 
 export interface TrackingCardProps {
-  shipment: Shipment;
+  shipment: Load;
   style?: ViewStyle;
   onPress?: () => void;
 }
@@ -26,11 +35,11 @@ export const TrackingCard: React.FC<TrackingCardProps> = ({
     return locStr.trim();
   };
 
-  const pickupName = getDisplayLocation(shipment.pickup);
-  const deliveryName = getDisplayLocation(shipment.delivery);
+  const pickupName = getDisplayLocation(shipment.pickupSummary);
+  const deliveryName = getDisplayLocation(shipment.dropoffSummary);
 
   // 2. Format dates and times as "29 jun 26" and "8:15 am" / "04:20 pm"
-  const formatDateTime = (dateStr?: string) => {
+  const formatDateTime = (dateStr?: string | null) => {
     if (!dateStr) return { date: "--", time: "--" };
     try {
       const dateObj = new Date(dateStr);
@@ -58,15 +67,16 @@ export const TrackingCard: React.FC<TrackingCardProps> = ({
   };
 
   const startInfo = formatDateTime(shipment.createdAt);
-  const deliveryInfo = formatDateTime(shipment.deliveryDate);
+  const deliveryInfo = formatDateTime(dueDate(shipment));
 
   // 3. Functional progress calculation based on time
   const getProgressPercentage = () => {
-    if (!shipment.createdAt || !shipment.deliveryDate) {
+    const due = dueDate(shipment);
+    if (!shipment.createdAt || !due) {
       return 50;
     }
     const start = new Date(shipment.createdAt).getTime();
-    const end = new Date(shipment.deliveryDate).getTime();
+    const end = new Date(due).getTime();
     const now = Date.now();
 
     if (now <= start) return 0;
@@ -81,29 +91,7 @@ export const TrackingCard: React.FC<TrackingCardProps> = ({
 
 
   // Cargo icon based on type
-  const getCargoIcon = (type?: string) => {
-    switch (type) {
-      case "GENERAL_CARGO":
-      case "GENERAL":
-      case "general":
-      case "General cargo":
-      case "Fragile cargo":
-        return Package;
-      case "HEAVY_MACHINERY":
-      case "Heavy Machinery":
-        return Wrench;
-      case "CHEMICALS_PHARMA":
-      case "Chemicals & Pharma":
-        return FlaskConical;
-      case "FOOD_BEVERAGE":
-      case "Food & Beverages":
-        return Apple;
-      default:
-        return Package;
-    }
-  };
-
-  const CargoIcon = getCargoIcon(shipment.cargoType || (shipment.cargo?.type));
+  const CargoIcon = CARGO_ICONS[shipment.cargoType];
 
   return (
     <TouchableOpacity style={[styles.card, style]} onPress={onPress} activeOpacity={0.95}>

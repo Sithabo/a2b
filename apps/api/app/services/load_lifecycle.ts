@@ -6,7 +6,16 @@ import LoadEvent from '#models/load_event'
 import DomainError from '#exceptions/domain_error'
 
 /** Which timestamp column each status stamps when entered. */
-const STAMPS: Partial<Record<LoadStatus, keyof Load>> = {
+type LifecycleStamp =
+  | 'postedAt'
+  | 'matchedAt'
+  | 'securedAt'
+  | 'inTransitAt'
+  | 'deliveredAt'
+  | 'completedAt'
+  | 'cancelledAt'
+
+const STAMPS: Partial<Record<LoadStatus, LifecycleStamp>> = {
   OPEN: 'postedAt',
   MATCHED: 'matchedAt',
   SECURED: 'securedAt',
@@ -19,7 +28,7 @@ const STAMPS: Partial<Record<LoadStatus, keyof Load>> = {
 /** Loads a row with FOR UPDATE so concurrent requests (e.g. two carriers accepting) serialize. */
 export async function lockLoad(id: number, trx: TransactionClientContract) {
   const load = await Load.query({ client: trx }).where('id', id).forUpdate().first()
-  if (!load) throw new DomainError('Load not found', { status: 404, code: 'E_NOT_FOUND' })
+  if (!load) throw DomainError.notFound('Load not found')
   return load
 }
 
@@ -53,7 +62,7 @@ export async function transition(
   load.useTransaction(trx)
   load.status = to
   const stamp = STAMPS[to]
-  if (stamp) (load as any)[stamp] = DateTime.now()
+  if (stamp) load[stamp] = DateTime.now()
   if (options.changes) load.merge(options.changes)
   await load.save()
 

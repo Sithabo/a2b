@@ -146,8 +146,6 @@ export default function TabLayout() {
         options={{ title: "Post Load" }}
       />
       {/* Commented out for consolidation */}
-      {/* <Tabs.Screen name="receipts" options={{ title: "Orders" }} /> */}
-      {/* <Tabs.Screen name="inbox" options={{ title: "Inbox" }} /> */}
       <Tabs.Screen name="account" options={{ title: "Account" }} />
     </Tabs>
   );
