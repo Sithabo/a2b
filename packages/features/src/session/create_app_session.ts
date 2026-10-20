@@ -8,11 +8,13 @@ import { createTokenStorage } from './token_storage.ts';
 
 export interface SessionState {
   hasCompletedOnboarding: boolean;
-  /** True once the stored token has been read at startup. */
+  /** True once both the stored token and the cached profile have been read at startup. */
   isHydrated: boolean;
   /** In memory only; persisted in the secure store, never AsyncStorage. */
   token: string | null;
+  /** Cached profile; refreshed from /me whenever there's a token. */
   user: Data.User | null;
+  /** Always `!!token`: having a token is what being signed in means. */
   isSignedIn: boolean;
 
   hydrate: () => Promise<void>;
@@ -41,7 +43,7 @@ export function createAppSession({ appId, role, apiUrl }: AppSessionConfig) {
 
   const useSession = create<SessionState>()(
     persist(
-      (set, get) => ({
+      (set) => ({
         hasCompletedOnboarding: false,
         isHydrated: false,
         token: null,
@@ -49,12 +51,15 @@ export function createAppSession({ appId, role, apiUrl }: AppSessionConfig) {
         isSignedIn: false,
 
         hydrate: async () => {
-          const token = await tokenStorage.get();
-          set({ token, isSignedIn: !!token && !!get().user, isHydrated: true });
+          // The token (secure store) and the cached profile (AsyncStorage) load
+          // separately; read both before anything routes on them.
+          const [token] = await Promise.all([tokenStorage.get(), persistHydrated()]);
+          set({ token, isSignedIn: !!token, isHydrated: true });
         },
         setSession: async (token, user) => {
           await tokenStorage.set(token);
-          set({ token, user, isSignedIn: true });
+          // Anyone who has signed in has been through onboarding.
+          set({ token, user, isSignedIn: true, hasCompletedOnboarding: true });
         },
         setUser: (user) => set({ user }),
         signOut: async () => {
@@ -72,6 +77,17 @@ export function createAppSession({ appId, role, apiUrl }: AppSessionConfig) {
       }
     )
   );
+
+  /** Resolves once the persisted part of the store (profile, onboarding) has loaded. */
+  function persistHydrated() {
+    if (useSession.persist.hasHydrated()) return Promise.resolve();
+    return new Promise<void>((resolve) => {
+      const unsubscribe = useSession.persist.onFinishHydration(() => {
+        unsubscribe();
+        resolve();
+      });
+    });
+  }
 
   const { api } = createApiClient({
     baseUrl: apiUrl,

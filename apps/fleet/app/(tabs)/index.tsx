@@ -3,6 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { PlusCircle, Truck } from "lucide-react-native";
 import { formatMoney, getMarket } from "@a2b/core";
+import { QueryFallback } from "@a2b/features";
 import { Button, Card, ChipGroup, colors, EmptyState, palette, radius, spacing, Text } from "@a2b/ui";
 import { ScreenScroll } from "@/components/ScreenScroll";
 import { TruckCard, truckStateMeta } from "@/components/TruckCard";
@@ -118,7 +119,9 @@ export default function FleetDashboard() {
         />
       )}
 
-      {vehicles.isSuccess && roster.length === 0 ? (
+      {!vehicles.data ? (
+        <QueryFallback error={vehicles.error} onRetry={() => vehicles.refetch()} />
+      ) : roster.length === 0 ? (
         <EmptyState
           icon={Truck}
           title="Add your first truck"
@@ -154,15 +157,15 @@ const styles = StyleSheet.create({
   heroRow: { flexDirection: "row", alignItems: "baseline", justifyContent: "space-between", gap: spacing.sm },
   utilization: { gap: spacing.sm },
   utilRow: { flexDirection: "row", justifyContent: "space-between" },
-  bar: { height: 8, borderRadius: 4, backgroundColor: "rgba(255,255,255,0.2)", overflow: "hidden" },
-  barFill: { height: "100%", borderRadius: 4, backgroundColor: palette.emerald[400] },
+  bar: { height: 8, borderRadius: radius.pill, backgroundColor: colors.onPrimaryTrack, overflow: "hidden" },
+  barFill: { height: "100%", borderRadius: radius.pill, backgroundColor: palette.emerald[400] },
   stats: { flexDirection: "row", gap: spacing.sm },
   stat: {
     flex: 1,
     alignItems: "center",
     paddingVertical: spacing.md,
     borderRadius: radius.sm,
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: colors.onPrimaryWash,
   },
   sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: spacing.sm },
 });

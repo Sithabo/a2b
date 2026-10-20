@@ -1,3 +1,4 @@
+import { fontFamily } from './fonts.ts';
 import type { TextStyle } from 'react-native';
 
 /** 4pt scale. */
@@ -58,16 +59,20 @@ export const elevation = {
 } as const;
 
 export const typography = {
-  display: { fontSize: 32, lineHeight: 40, fontWeight: '700', letterSpacing: -0.5 },
-  h1: { fontSize: 24, lineHeight: 32, fontWeight: '700', letterSpacing: -0.25 },
-  h2: { fontSize: 20, lineHeight: 28, fontWeight: '700' },
-  h3: { fontSize: 17, lineHeight: 24, fontWeight: '600' },
-  body: { fontSize: 16, lineHeight: 24, fontWeight: '400' },
-  bodyStrong: { fontSize: 16, lineHeight: 24, fontWeight: '600' },
-  bodySm: { fontSize: 14, lineHeight: 20, fontWeight: '400' },
-  caption: { fontSize: 12, lineHeight: 16, fontWeight: '400' },
-  label: { fontSize: 12, lineHeight: 16, fontWeight: '700', letterSpacing: 0.6, textTransform: 'uppercase' },
-  button: { fontSize: 16, lineHeight: 20, fontWeight: '600' },
+  display: { fontSize: 32, lineHeight: 40, fontFamily: fontFamily.bold, letterSpacing: -0.5 },
+  h1: { fontSize: 24, lineHeight: 32, fontFamily: fontFamily.bold, letterSpacing: -0.25 },
+  h2: { fontSize: 20, lineHeight: 28, fontFamily: fontFamily.bold },
+  h3: { fontSize: 17, lineHeight: 24, fontFamily: fontFamily.semibold },
+  /** Larger body for screens read outdoors or at arm's length (driver app). */
+  bodyLg: { fontSize: 18, lineHeight: 26, fontFamily: fontFamily.regular },
+  body: { fontSize: 16, lineHeight: 24, fontFamily: fontFamily.regular },
+  bodyStrong: { fontSize: 16, lineHeight: 24, fontFamily: fontFamily.semibold },
+  bodySm: { fontSize: 14, lineHeight: 20, fontFamily: fontFamily.regular },
+  caption: { fontSize: 12, lineHeight: 16, fontFamily: fontFamily.regular },
+  label: { fontSize: 12, lineHeight: 16, fontFamily: fontFamily.bold, letterSpacing: 0.6, textTransform: 'uppercase' },
+  button: { fontSize: 16, lineHeight: 20, fontFamily: fontFamily.semibold },
+  /** Bottom tab labels (pass as tabBarLabelStyle). */
+  tab: { fontSize: 12, lineHeight: 16, fontFamily: fontFamily.semibold },
 } as const satisfies Record<string, TextStyle>;
 
 export type TypographyVariant = keyof typeof typography;

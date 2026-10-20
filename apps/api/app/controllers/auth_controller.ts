@@ -44,6 +44,9 @@ export default class AuthController {
       return { user: created, isNewUser: true }
     })
 
+    // Apps route on the profile (licence, business details) right after sign-in
+    await user.load((loader) => loader.load('shipperProfile').load('driverProfile'))
+
     // Created after the transaction commits: the token row references the user.
     const token = await User.accessTokens.create(user, ['*'], {
       name: 'mobile',

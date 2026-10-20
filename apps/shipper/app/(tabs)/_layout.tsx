@@ -1,4 +1,5 @@
-import { Tabs, useRouter } from "expo-router";
+import { Redirect, Tabs, useRouter } from "expo-router";
+import { useSessionGate } from "@a2b/features";
 import React from "react";
 import {
   TouchableOpacity,
@@ -133,6 +134,11 @@ const styles = StyleSheet.create({
 // ─── Tab Layout ────────────────────────────────────────────────────────────────
 
 export default function TabLayout() {
+  // Deep links and expired sessions must not show signed-in screens.
+  const gate = useSessionGate();
+  if (gate === "loading") return null;
+  if (gate !== "signed-in") return <Redirect href="/(auth)/login" />;
+
   return (
     <Tabs
       tabBar={(props) => <CustomTabBar {...props} />}

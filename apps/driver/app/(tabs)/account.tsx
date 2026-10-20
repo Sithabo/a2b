@@ -1,5 +1,4 @@
 import { StyleSheet, View } from "react-native";
-import { useRouter } from "expo-router";
 import { LogOut } from "lucide-react-native";
 import { getMarket } from "@a2b/core";
 import { Badge, Button, Card, colors, spacing, Text } from "@a2b/ui";
@@ -13,7 +12,6 @@ const VERIFICATION = {
 } as const;
 
 export default function AccountScreen() {
-  const router = useRouter();
   const user = useSession((s) => s.user);
   const signOut = useSession((s) => s.signOut);
   const profile = user?.driverProfile;
@@ -22,8 +20,7 @@ export default function AccountScreen() {
 
   const handleSignOut = async () => {
     await api.auth.logout({}).catch(() => {}); // revoke the token server-side when online
-    await signOut();
-    router.replace("/(auth)/sign-in");
+    await signOut(); // the root layout routes back to sign-in
   };
 
   return (

@@ -2,10 +2,40 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "shipper-web",
+      "name": "api",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "web", "-w", "@a2b/shipper"],
-      "port": 8081
+      "runtimeArgs": [
+        "run",
+        "api"
+      ],
+      "port": 3333
+    },
+    {
+      "name": "shipper-web",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "cd apps/shipper && npx expo start --web --port 8082 --clear"
+      ],
+      "port": 8082
+    },
+    {
+      "name": "fleet-web",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "cd apps/fleet && npx expo start --web --port 8083 --clear"
+      ],
+      "port": 8083
+    },
+    {
+      "name": "driver-web",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "cd apps/driver && npx expo start --web --port 8084 --clear"
+      ],
+      "port": 8084
     }
   ]
 }

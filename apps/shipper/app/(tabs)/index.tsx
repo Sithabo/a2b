@@ -30,13 +30,16 @@ import { useUserProfile } from "@/store/useShipperProfile";
 import { useShipmentStore } from "@/store/useShipmentStore";
 import { colors, palette } from "@a2b/ui";
 import { cargoLabel, isActiveStatus, statusGroup } from "@a2b/core";
+import { QueryFallback } from "@a2b/features";
 import { shipmentRoute, useMyShipments } from "@/lib/loads";
 
 export default function HomeScreen() {
   const router = useRouter();
   const userProfile = useUserProfile();
   const draft = useShipmentStore((state) => state.draft);
-  const { data: shipments = [], refetch, isRefetching } = useMyShipments();
+  const shipmentsQuery = useMyShipments();
+  const { refetch, isRefetching } = shipmentsQuery;
+  const shipments = shipmentsQuery.data ?? [];
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<"ALL" | "ACTIVE" | "PENDING" | "COMPLETED">("ALL");
   const insets = useSafeAreaInsets();
@@ -224,8 +227,17 @@ export default function HomeScreen() {
             </View>
           )}
 
+          {/* Loading, or couldn't load (rather than "no shipments") */}
+          {!shipmentsQuery.data && (
+            <QueryFallback
+              error={shipmentsQuery.error}
+              onRetry={() => refetch()}
+              errorMessage="We couldn't load your shipments."
+            />
+          )}
+
           {/* Search Empty State */}
-          {filteredShipments.length === 0 && (
+          {shipmentsQuery.data && filteredShipments.length === 0 && (
             <View style={styles.emptyContainer}>
               <Package color={palette.gray[400]} size={48} />
               <Text style={styles.emptyTitle}>No Shipments Found</Text>

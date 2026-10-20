@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import { PackageSearch } from "lucide-react-native";
 import { ChipGroup, EmptyState, spacing, Text } from "@a2b/ui";
 import { ScreenScroll } from "@/components/ScreenScroll";
-import { LoadCard } from "@a2b/features";
+import { LoadCard, QueryFallback } from "@a2b/features";
 import { useFleetLoads, useLoadBoard } from "@/lib/queries";
 
 type View_ = "board" | "mine";
@@ -37,7 +37,9 @@ export default function LoadsScreen() {
         ]}
       />
 
-      {query.isSuccess && loads.length === 0 ? (
+      {!query.data ? (
+        <QueryFallback error={query.error} onRetry={() => query.refetch()} />
+      ) : loads.length === 0 ? (
         <EmptyState
           icon={PackageSearch}
           title={view === "board" ? "No open loads right now" : "No loads yet"}

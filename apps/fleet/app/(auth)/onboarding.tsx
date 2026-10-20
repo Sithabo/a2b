@@ -114,6 +114,6 @@ const styles = StyleSheet.create({
   },
   footer: { padding: layout.gutter, gap: spacing.xl },
   dots: { flexDirection: "row", justifyContent: "center", gap: spacing.sm },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.borderStrong },
+  dot: { width: 8, height: 8, borderRadius: radius.pill, backgroundColor: colors.borderStrong },
   dotActive: { width: 28, backgroundColor: colors.primary },
 });

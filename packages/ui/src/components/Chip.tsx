@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import type { LucideIcon } from 'lucide-react-native';
 import { colors } from '../tokens/colors.ts';
 import { radius, spacing } from '../tokens/layout.ts';
+import { fontFamily } from '../tokens/fonts.ts';
 import { Text } from './Text.tsx';
 
 export interface ChipProps {
@@ -64,7 +65,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   selected: { backgroundColor: colors.primary, borderColor: colors.primary },
-  label: { fontWeight: '600' },
+  label: { fontFamily: fontFamily.semibold },
   row: { flexDirection: 'row', gap: spacing.sm },
   wrap: { flexWrap: 'wrap' },
 });
