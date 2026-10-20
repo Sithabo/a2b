@@ -7,6 +7,7 @@
 import type { InferData, InferVariants } from '@adonisjs/core/types/transformers'
 import type DriverProfileTransformer from '#transformers/driver_profile_transformer'
 import type FleetDriverTransformer from '#transformers/fleet_driver_transformer'
+import type FleetInviteTransformer from '#transformers/fleet_invite_transformer'
 import type FleetTransformer from '#transformers/fleet_transformer'
 import type LoadDocumentTransformer from '#transformers/load_document_transformer'
 import type LoadEventTransformer from '#transformers/load_event_transformer'
@@ -23,6 +24,10 @@ export namespace Data {
   export type FleetDriver = InferData<FleetDriverTransformer>
   export namespace FleetDriver {
     export type Variants = InferVariants<FleetDriverTransformer>
+  }
+  export type FleetInvite = InferData<FleetInviteTransformer>
+  export namespace FleetInvite {
+    export type Variants = InferVariants<FleetInviteTransformer>
   }
   export type Fleet = InferData<FleetTransformer>
   export namespace Fleet {

@@ -10,7 +10,7 @@ export default function SignInScreen() {
       eyebrow="Drivers"
       title="A2B Driver"
       subtitle="Sign in with your mobile number. If your fleet added you, use the number they registered."
-      onCodeSent={(phone) => router.push({ pathname: "/(auth)/verify", params: { phone } })}
+      onCodeSent={(phone, devCode) => router.push({ pathname: "/(auth)/verify", params: { phone, devCode } })}
     />
   );
 }

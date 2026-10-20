@@ -1,13 +1,16 @@
 import { test } from '@japa/runner'
 import testUtils from '@adonisjs/core/services/test_utils'
-import { dataOf } from '#tests/helpers'
+import limiter from '@adonisjs/limiter/services/main'
+import { dataOf, nextPhone } from '#tests/helpers'
 import User from '#models/user'
+import otpConfig from '#config/otp'
 
 // +256700000001 is an OTP test number with the fixed code 123456 (see .env)
 const TEST_PHONE = '+256700000001'
 
 test.group('Auth / phone OTP', (group) => {
   group.each.setup(() => testUtils.db().withGlobalTransaction())
+  group.each.setup(() => limiter.clear())
 
   test('rejects numbers outside Guyana and Uganda', async ({ client }) => {
     const response = await client.post('/api/v1/auth/otp').json({ phone: '+254712345678' })
@@ -22,6 +25,15 @@ test.group('Auth / phone OTP', (group) => {
       .json({ phone: TEST_PHONE, code: '123456' })
     response.assertStatus(422)
     response.assertBodyContains({ errors: [{ code: 'E_ROLE_REQUIRED' }] })
+  })
+
+  test("a missing role doesn't use up the code", async ({ client }) => {
+    await client.post('/api/v1/auth/otp').json({ phone: TEST_PHONE })
+    await client.post('/api/v1/auth/verify').json({ phone: TEST_PHONE, code: '123456' })
+    const retry = await client
+      .post('/api/v1/auth/verify')
+      .json({ phone: TEST_PHONE, code: '123456', role: 'driver' })
+    retry.assertStatus(200)
   })
 
   test('creates the account with the market from the phone number', async ({ client, assert }) => {
@@ -73,6 +85,42 @@ test.group('Auth / phone OTP', (group) => {
   test('limits how many codes a number can request', async ({ client }) => {
     for (let i = 0; i < 3; i++) await client.post('/api/v1/auth/otp').json({ phone: TEST_PHONE })
     const response = await client.post('/api/v1/auth/otp').json({ phone: TEST_PHONE })
+    response.assertStatus(429)
+  })
+
+  test('outside production the code comes back in the response and signs you in', async ({
+    client,
+    assert,
+  }) => {
+    const phone = '+256772555111' // not a test number: a random code is generated
+    const requested = await client.post('/api/v1/auth/otp').json({ phone })
+    const devCode = dataOf(requested).devCode
+    assert.match(devCode, /^\d{6}$/)
+
+    const verified = await client
+      .post('/api/v1/auth/verify')
+      .json({ phone, code: devCode, role: 'shipper' })
+    verified.assertStatus(200)
+  })
+
+  test('the code is only returned when explicitly enabled', async ({ client, assert }) => {
+    const enabled = otpConfig.exposeCodes
+    otpConfig.exposeCodes = false
+    try {
+      const response = await client.post('/api/v1/auth/otp').json({ phone: '+256772555112' })
+      response.assertStatus(200)
+      assert.notProperty(dataOf(response), 'devCode')
+    } finally {
+      otpConfig.exposeCodes = enabled
+    }
+  })
+
+  test('limits how many codes one network can request', async ({ client }) => {
+    // Different numbers each time, so only the per-IP limit applies
+    for (let i = 0; i < 20; i++) {
+      ;(await client.post('/api/v1/auth/otp').json({ phone: nextPhone('UG') })).assertStatus(200)
+    }
+    const response = await client.post('/api/v1/auth/otp').json({ phone: nextPhone('UG') })
     response.assertStatus(429)
   })
 

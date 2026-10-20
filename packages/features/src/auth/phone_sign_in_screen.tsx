@@ -13,8 +13,11 @@ export interface PhoneSignInScreenProps {
   eyebrow: string;
   title: string;
   subtitle: string;
-  /** Called with the E.164 number once a code has been sent. */
-  onCodeSent: (phone: string) => void;
+  /**
+   * Called with the E.164 number once a code has been sent. Development API builds
+   * also return the code itself (`devCode`) so it can be shown on the verify screen.
+   */
+  onCodeSent: (phone: string, devCode?: string) => void;
   footer?: React.ReactNode;
 }
 
@@ -35,7 +38,7 @@ export function PhoneSignInScreen({ icon: Icon, eyebrow, title, subtitle, onCode
     setIsSending(true);
     try {
       const { data } = await api.auth.requestOtp({ body: { phone } });
-      onCodeSent(data.phone);
+      onCodeSent(data.phone, 'devCode' in data ? (data.devCode as string) : undefined);
     } catch (err) {
       setError(apiErrorMessage(err));
     } finally {

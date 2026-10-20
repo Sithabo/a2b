@@ -4,6 +4,7 @@ import { Slot } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AppSessionProvider } from "@a2b/features";
 import { session } from "@/lib/session";
+import "@/lib/clear_user_data";
 
 /**
  * Root layout: same navigator Expo Router generates when there is no _layout

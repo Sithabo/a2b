@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { X } from "lucide-react-native";
@@ -30,8 +30,15 @@ export default function AddDriverScreen() {
     setError("");
     setIsSaving(true);
     try {
-      await api.fleets.addDriver({ body: { phone, fullName: name.trim() || null } });
-      await invalidate(keys.drivers);
+      const { data } = await api.fleets.addDriver({ body: { phone, fullName: name.trim() || null } });
+      await invalidate(keys.drivers, keys.invites);
+      if (data.status === "INVITED") {
+        // They already drive on A2B, so they have to accept before joining
+        Alert.alert(
+          "Invite sent",
+          `${data.invite.driverName ?? "This driver"} already uses A2B. They'll join your fleet once they accept the invite in the A2B Driver app.`
+        );
+      }
       router.back();
     } catch (err) {
       setError(apiErrorMessage(err));

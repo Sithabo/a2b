@@ -11,6 +11,7 @@
 import { middleware } from '#start/kernel'
 import router from '@adonisjs/core/services/router'
 import { controllers } from '#generated/controllers'
+import { otpRequestThrottle, otpVerifyThrottle } from '#start/limiter'
 
 router.get('/', () => ({ name: 'a2b-api', status: 'ok' }))
 
@@ -18,8 +19,8 @@ router
   .group(() => {
     router
       .group(() => {
-        router.post('otp', [controllers.Auth, 'requestOtp'])
-        router.post('verify', [controllers.Auth, 'verifyOtp'])
+        router.post('otp', [controllers.Auth, 'requestOtp']).use(otpRequestThrottle)
+        router.post('verify', [controllers.Auth, 'verifyOtp']).use(otpVerifyThrottle)
         router.post('logout', [controllers.Auth, 'logout']).use(middleware.auth())
       })
       .prefix('auth')
@@ -31,6 +32,13 @@ router
         router.patch('me', [controllers.Me, 'update'])
         router.put('me/shipper-profile', [controllers.Me, 'upsertShipperProfile'])
         router.put('me/driver-profile', [controllers.Me, 'upsertDriverProfile'])
+        router.get('me/fleet-invites', [controllers.FleetInvites, 'index'])
+        router
+          .post('me/fleet-invites/:id/accept', [controllers.FleetInvites, 'accept'])
+          .where('id', router.matchers.number())
+        router
+          .post('me/fleet-invites/:id/decline', [controllers.FleetInvites, 'decline'])
+          .where('id', router.matchers.number())
 
         // Fleet (fleet owners)
         router.post('fleet', [controllers.Fleets, 'store'])
@@ -42,6 +50,7 @@ router
           .where('id', router.matchers.number())
         router.get('fleet/drivers', [controllers.Fleets, 'drivers'])
         router.post('fleet/drivers', [controllers.Fleets, 'addDriver'])
+        router.get('fleet/invites', [controllers.Fleets, 'invites'])
 
         // Loads
         router

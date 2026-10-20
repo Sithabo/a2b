@@ -45,6 +45,9 @@ export default {
         actor_role: t('StatusActor', 'StatusActor'),
       },
     },
+    fleet_invites: {
+      columns: { status: t("'PENDING' | 'ACCEPTED' | 'DECLINED' | 'CANCELLED'") },
+    },
     escrows: { columns: { status: t("'AWAITING_DEPOSIT' | 'HELD' | 'RELEASED' | 'REFUNDED'") } },
     payment_transactions: {
       columns: {

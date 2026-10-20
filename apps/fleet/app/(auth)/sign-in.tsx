@@ -10,7 +10,7 @@ export default function SignInScreen() {
       eyebrow="Fleet owners"
       title="Welcome to A2B Fleet"
       subtitle="Sign in with your business mobile number to manage your trucks, drivers and loads."
-      onCodeSent={(phone) => router.push({ pathname: "/(auth)/verify", params: { phone } })}
+      onCodeSent={(phone, devCode) => router.push({ pathname: "/(auth)/verify", params: { phone, devCode } })}
     />
   );
 }

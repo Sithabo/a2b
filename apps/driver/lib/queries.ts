@@ -9,6 +9,7 @@ export const keys = {
   board: ["loads", "board"] as const,
   load: (id: number) => ["loads", id] as const,
   documents: (id: number) => ["loads", id, "documents"] as const,
+  fleetInvites: ["me", "fleet-invites"] as const,
 };
 
 /** Loads assigned to this driver (dispatched by their fleet or accepted themselves). */
@@ -43,6 +44,14 @@ export function useDocuments(id: number | undefined, enabled = true) {
     queryKey: keys.documents(id ?? 0),
     enabled: !!id && enabled,
     queryFn: async () => (await api.loadDocuments.index({ params: { id: id! } })).data,
+  });
+}
+
+/** Fleets asking this driver to join them. */
+export function useFleetInvites() {
+  return useQuery({
+    queryKey: keys.fleetInvites,
+    queryFn: async () => (await api.fleetInvites.index({})).data,
   });
 }
 
