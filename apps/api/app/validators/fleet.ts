@@ -16,11 +16,11 @@ export const createVehicleValidator = vine.create({
   vehicleClass: vine.enum(Object.keys(vehicleClasses) as (keyof typeof vehicleClasses)[]),
   bodyType: vine.enum(Object.keys(bodyTypes) as (keyof typeof bodyTypes)[]),
   capacityTons: vine.number().positive().max(100),
-  assignedDriverId: vine.number().withoutDecimals().nullable().optional(),
+  assignedDriverId: vine.number().withoutDecimals().positive().nullable().optional(),
 })
 
 export const updateVehicleValidator = vine.create({
-  assignedDriverId: vine.number().withoutDecimals().nullable().optional(),
+  assignedDriverId: vine.number().withoutDecimals().positive().nullable().optional(),
   status: vine.enum(['ACTIVE', 'IDLE', 'MAINTENANCE'] as const).optional(),
 })
 

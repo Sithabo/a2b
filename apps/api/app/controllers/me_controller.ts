@@ -20,7 +20,14 @@ export default class MeController {
   async update({ auth, request, serialize }: HttpContext) {
     const user = auth.getUserOrFail()
     user.merge(await request.validateUsing(updateMeValidator))
-    await user.save()
+    try {
+      await user.save()
+    } catch (error) {
+      // users.email is unique ignoring case
+      if ((error as { code?: string }).code === '23505')
+        throw DomainError.conflict('Another account already uses this email', 'E_EMAIL_TAKEN')
+      throw error
+    }
     return serialize(UserTransformer.transform(user))
   }
 

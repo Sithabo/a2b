@@ -1,6 +1,14 @@
 import app from '@adonisjs/core/services/app'
 import env from '#start/env'
 import { defineConfig } from '@adonisjs/lucid'
+import pg from 'pg'
+
+/**
+ * Read bigint (int8) columns as numbers rather than strings. Money columns are
+ * bigint whole currency units, exact as JS numbers up to 9 quadrillion; this
+ * also makes count(*) results numbers.
+ */
+pg.types.setTypeParser(pg.types.builtins.INT8, (value) => Number.parseInt(value, 10))
 
 const dbConfig = defineConfig({
   connection: 'pg',

@@ -11,6 +11,9 @@ const t = (tsType: string, ...typeImports: string[]) => ({
   decorators: [{ name: '@column' }],
 })
 
+/** bigint money columns, parsed to JS numbers in config/database.ts */
+const money = t('number')
+
 export default {
   columns: {
     market: t('MarketCode', 'MarketCode'),
@@ -36,6 +39,7 @@ export default {
         status: t('LoadStatus', 'LoadStatus'),
         cargo_type: t('CargoType', 'CargoType'),
         cargo: t('CargoDetails', 'CargoDetails'),
+        offer_price: money,
       },
     },
     load_events: {
@@ -48,12 +52,18 @@ export default {
     fleet_invites: {
       columns: { status: t("'PENDING' | 'ACCEPTED' | 'DECLINED' | 'CANCELLED'") },
     },
-    escrows: { columns: { status: t("'AWAITING_DEPOSIT' | 'HELD' | 'RELEASED' | 'REFUNDED'") } },
+    escrows: {
+      columns: {
+        status: t("'AWAITING_DEPOSIT' | 'HELD' | 'RELEASED' | 'REFUNDED'"),
+        amount: money,
+      },
+    },
     payment_transactions: {
       columns: {
         kind: t("'DEPOSIT' | 'PAYOUT' | 'REFUND'"),
         status: t("'PENDING' | 'SUCCEEDED' | 'FAILED'"),
         raw: t('Record<string, unknown> | null'),
+        amount: money,
       },
     },
   },

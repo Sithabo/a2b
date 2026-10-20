@@ -1,5 +1,8 @@
 import vine from '@vinejs/vine'
 
+/** One trillion whole units: far above any real load in GYD or UGX. */
+export const MAX_OFFER_PRICE = 1_000_000_000_000
+
 const place = () =>
   vine.object({
     address: vine.string().trim().minLength(3).maxLength(255),
@@ -54,7 +57,8 @@ export const createLoadValidator = vine.create({
     chemicalContainer: vine.enum(['TANKER', 'IBC_TOTES', 'DRUMS', 'PALLETS'] as const).optional(),
   }),
   weightKg: vine.number().positive().nullable().optional(),
-  offerPrice: vine.number().withoutDecimals().positive(),
+  // Whole currency units; the cap only rejects typos and overflow
+  offerPrice: vine.number().withoutDecimals().positive().max(MAX_OFFER_PRICE),
   readyAt: vine
     .date({ formats: ['iso8601'] })
     .nullable()
