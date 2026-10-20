@@ -22,9 +22,9 @@ import {
   X,
 } from "lucide-react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { useBillingStore, CreditCard } from "@/store/useBillingStore";
-import { CreditCardInput, CreditCardView, LiteCreditCardInput } from "react-native-credit-card-input";
-import { colors, palette, partnerColors, Button } from "@a2b/ui";
+import { useBillingStore, type SavedCard } from "@/store/useBillingStore";
+import { CreditCardInput, CreditCardView, type CreditCardFormData, type CreditCardFormField } from "react-native-credit-card-input";
+import { palette, partnerColors, Button } from "@a2b/ui";
 
 export default function PaymentMethodsScreen() {
   const router = useRouter();
@@ -36,8 +36,8 @@ export default function PaymentMethodsScreen() {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingCardId, setEditingCardId] = useState<string | null>(null);
-  const [cardFormData, setCardFormData] = useState<any>(null);
-  const [focusedField, setFocusedField] = useState<any>();
+  const [cardFormData, setCardFormData] = useState<CreditCardFormData | null>(null);
+  const [focusedField, setFocusedField] = useState<CreditCardFormField>();
 
   const openAddModal = () => {
     setEditingCardId(null);
@@ -46,30 +46,22 @@ export default function PaymentMethodsScreen() {
     setIsModalVisible(true);
   };
 
-  const openEditModal = (card: CreditCard) => {
+  // Card details aren't kept on the phone, so "editing" means entering the card again.
+  const openEditModal = (card: SavedCard) => {
     setEditingCardId(card.id);
-    setCardFormData({
-      valid: true,
-      values: {
-        number: card.number,
-        expiry: card.expiry,
-        cvc: card.cvc,
-        name: card.name,
-        type: card.type,
-      },
-    });
+    setCardFormData(null);
+    setFocusedField(undefined);
     setIsModalVisible(true);
   };
 
   const handleSaveCard = () => {
     if (!cardFormData || !cardFormData.valid) return;
 
+    // Only what the list displays. Never persist the full number or the CVC.
     const newCardData = {
-      name: cardFormData.values.name || "Cardholder",
-      number: cardFormData.values.number,
+      brand: cardFormData.values.type,
+      last4: cardFormData.values.number.replace(/\D/g, "").slice(-4),
       expiry: cardFormData.values.expiry,
-      cvc: cardFormData.values.cvc,
-      type: cardFormData.values.type,
       isDefault: cards.length === 0,
     };
 
@@ -138,16 +130,16 @@ export default function PaymentMethodsScreen() {
               onPress={() => openEditModal(card)}
             >
               <View style={styles.cardRowLeft}>
-                <View style={styles.cardIconBox}>{getCardIcon(card.type)}</View>
+                <View style={styles.cardIconBox}>{getCardIcon(card.brand ?? "")}</View>
                 <View>
                   <Text style={styles.cardName}>
-                    {card.type
-                      ? card.type.charAt(0).toUpperCase() +
-                        card.type.slice(1).replace("-", " ")
+                    {card.brand
+                      ? card.brand.charAt(0).toUpperCase() +
+                        card.brand.slice(1).replace("-", " ")
                       : "Credit Card"}
                   </Text>
                   <Text style={styles.cardNumber}>
-                    ******** {card.number.slice(-4)}
+                    ******** {card.last4}
                   </Text>
                 </View>
               </View>
@@ -225,7 +217,7 @@ export default function PaymentMethodsScreen() {
             <View style={styles.dragIndicator} />
             <View style={styles.sheetHeader}>
               <Text style={styles.sheetTitle}>
-                {editingCardId ? "Edit Card" : "Add Card"}
+                {editingCardId ? "Replace Card" : "Add Card"}
               </Text>
             </View>
 
@@ -244,16 +236,10 @@ export default function PaymentMethodsScreen() {
 
               <CreditCardInput
                 autoFocus
-                requiresName
-                requiresCVC
-                allowScroll
                 onChange={setCardFormData}
                 onFocusField={setFocusedField}
-                inputContainerStyle={styles.ccInputContainer}
                 inputStyle={styles.ccInput}
                 labelStyle={styles.ccLabel}
-                validColor={colors.primary}
-                invalidColor={palette.red[500]}
                 placeholderColor={palette.gray[400]}
               />
 
@@ -416,14 +402,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     color: palette.gray[900],
-  },
-  ccInputContainer: {
-    backgroundColor: palette.gray[50],
-    borderRadius: 12,
-    marginTop: 8,
-    borderWidth: 1,
-    borderColor: palette.gray[100],
-    paddingHorizontal: 8,
   },
   ccInput: {
     height: 48,
