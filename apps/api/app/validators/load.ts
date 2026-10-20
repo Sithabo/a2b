@@ -1,4 +1,12 @@
 import vine from '@vinejs/vine'
+import {
+  BULK_TYPES,
+  CARGO_TYPES,
+  CHEMICAL_CONTAINERS,
+  MACHINERY_SECTORS,
+  PAYMENT_METHODS,
+  STORAGE_ENVIRONMENTS,
+} from '@a2b/core'
 
 /** One trillion whole units: far above any real load in GYD or UGX. */
 export const MAX_OFFER_PRICE = 1_000_000_000_000
@@ -12,15 +20,6 @@ const place = () =>
     contactPhone: vine.string().trim().maxLength(20).nullable().optional(),
   })
 
-const cargoTypes = [
-  'GENERAL_CARGO',
-  'FRAGILE_CARGO',
-  'BULK_CARGO',
-  'HEAVY_MACHINERY',
-  'FOOD_BEVERAGE',
-  'CHEMICALS_PHARMA',
-] as const
-
 export const createLoadValidator = vine.create({
   pickupSummary: vine.string().trim().minLength(2).maxLength(255),
   dropoffSummary: vine.string().trim().minLength(2).maxLength(255),
@@ -29,7 +28,7 @@ export const createLoadValidator = vine.create({
   isImport: vine.boolean(),
   containerId: vine.string().trim().maxLength(60).nullable().optional(),
   cargo: vine.object({
-    type: vine.enum(cargoTypes),
+    type: vine.enum(CARGO_TYPES),
     weightKg: vine.number().positive().optional(),
     dimensions: vine
       .object({
@@ -38,23 +37,14 @@ export const createLoadValidator = vine.create({
         heightMeters: vine.number().min(0),
       })
       .optional(),
-    machinerySector: vine
-      .enum([
-        'AGRICULTURE',
-        'MINING',
-        'CONSTRUCTION',
-        'FORESTRY',
-        'MANUFACTURING',
-        'OTHER',
-      ] as const)
-      .optional(),
+    machinerySector: vine.enum(MACHINERY_SECTORS).optional(),
     requiresGoInvestWaiver: vine.boolean().optional(),
-    bulkType: vine.enum(['DRY_BULK', 'LIQUID_BULK'] as const).optional(),
+    bulkType: vine.enum(BULK_TYPES).optional(),
     volumeCubicMeters: vine.number().positive().optional(),
     requiresHydraulicTipper: vine.boolean().optional(),
     requiresFlatbedLowboy: vine.boolean().optional(),
-    storageEnvironment: vine.enum(['AMBIENT', 'CHILLED', 'FROZEN'] as const).optional(),
-    chemicalContainer: vine.enum(['TANKER', 'IBC_TOTES', 'DRUMS', 'PALLETS'] as const).optional(),
+    storageEnvironment: vine.enum(STORAGE_ENVIRONMENTS).optional(),
+    chemicalContainer: vine.enum(CHEMICAL_CONTAINERS).optional(),
   }),
   weightKg: vine.number().positive().nullable().optional(),
   // Whole currency units; the cap only rejects typos and overflow
@@ -89,7 +79,7 @@ export const progressValidator = vine.create({
 })
 
 export const depositValidator = vine.create({
-  method: vine.enum(['mtn', 'airtel', 'mmg', 'card'] as const),
+  method: vine.enum(PAYMENT_METHODS),
 })
 
 export const releaseValidator = vine.create({

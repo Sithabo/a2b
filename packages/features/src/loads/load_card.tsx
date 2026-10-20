@@ -2,19 +2,8 @@ import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Anchor, ArrowRight, Weight } from 'lucide-react-native';
 import type { Data } from '@a2b/api-client';
-import { formatMoney, getMarket, statusMeta } from '@a2b/core';
+import { cargoLabel, formatMoney, getMarket, statusMeta } from '@a2b/core';
 import { Badge, colors, radius, spacing, Text } from '@a2b/ui';
-
-const CARGO_LABELS: Record<string, string> = {
-  GENERAL_CARGO: 'General cargo',
-  FRAGILE_CARGO: 'Fragile cargo',
-  BULK_CARGO: 'Bulk cargo',
-  HEAVY_MACHINERY: 'Heavy machinery',
-  FOOD_BEVERAGE: 'Food & beverages',
-  CHEMICALS_PHARMA: 'Chemicals & pharma',
-};
-
-export const cargoLabel = (type: string) => CARGO_LABELS[type] ?? type;
 
 /** Load board / fleet load card: route, payout, cargo, status. */
 export function LoadCard({ load, onPress }: { load: Data.Load; onPress: () => void }) {

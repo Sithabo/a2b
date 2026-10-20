@@ -16,7 +16,7 @@ export default function DriverFoundScreen() {
   const { data: shipment, error, refetch } = useShipment(parseLoadId(trackingId));
 
   if (!shipment) return <LoadState error={error} onRetry={refetch} />;
-  const deposit = shipment.escrow?.amount ?? Number(shipment.offerPrice);
+  const deposit = shipment.escrow?.amount ?? shipment.offerPrice;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>

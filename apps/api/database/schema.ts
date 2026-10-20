@@ -6,7 +6,7 @@
 
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
-import type { MarketCode, Fleet, StatusActor, LoadStatus, CargoDetails, CargoType, UserRole, BodyType, Vehicle, VehicleClass } from '@a2b/core'
+import type { DutyStatus, DriverVerificationStatus, PaymentMethod, EscrowStatus, FleetInviteStatus, MarketCode, FleetSizeTier, StatusActor, LoadStatus, CargoDetails, CargoType, PaymentKind, PaymentStatus, UserRole, BodyType, VehicleStatus, VehicleClass } from '@a2b/core'
 
 export class AuthAccessTokenSchema extends BaseModel {
   static $columns = ['abilities', 'createdAt', 'expiresAt', 'hash', 'id', 'lastUsedAt', 'name', 'tokenableId', 'type', 'updatedAt'] as const
@@ -41,7 +41,7 @@ export class DriverProfileSchema extends BaseModel {
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
   @column()
-  declare dutyStatus: 'AVAILABLE' | 'OFF_DUTY'
+  declare dutyStatus: DutyStatus
   @column()
   declare fleetId: number | null
   @column({ isPrimary: true })
@@ -57,7 +57,7 @@ export class DriverProfileSchema extends BaseModel {
   @column()
   declare userId: number
   @column()
-  declare verificationStatus: 'PENDING' | 'VERIFIED' | 'REJECTED'
+  declare verificationStatus: DriverVerificationStatus
 }
 
 export class EscrowSchema extends BaseModel {
@@ -70,7 +70,7 @@ export class EscrowSchema extends BaseModel {
   @column()
   declare currency: string
   @column()
-  declare depositMethod: string | null
+  declare depositMethod: PaymentMethod | null | null
   @column.dateTime()
   declare heldAt: DateTime | null
   @column({ isPrimary: true })
@@ -88,7 +88,7 @@ export class EscrowSchema extends BaseModel {
   @column.dateTime()
   declare releasedAt: DateTime | null
   @column()
-  declare status: 'AWAITING_DEPOSIT' | 'HELD' | 'RELEASED' | 'REFUNDED'
+  declare status: EscrowStatus
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 }
@@ -107,7 +107,7 @@ export class FleetInviteSchema extends BaseModel {
   @column.dateTime()
   declare respondedAt: DateTime | null
   @column()
-  declare status: 'PENDING' | 'ACCEPTED' | 'DECLINED' | 'CANCELLED'
+  declare status: FleetInviteStatus
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 }
@@ -130,7 +130,7 @@ export class FleetSchema extends BaseModel {
   @column()
   declare primaryCorridor: string | null
   @column()
-  declare sizeTier: Fleet['sizeTier']
+  declare sizeTier: FleetSizeTier
   @column()
   declare taxId: string | null
   @column.dateTime({ autoCreate: true, autoUpdate: true })
@@ -289,9 +289,9 @@ export class PaymentTransactionSchema extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
   @column()
-  declare kind: 'DEPOSIT' | 'PAYOUT' | 'REFUND'
+  declare kind: PaymentKind
   @column()
-  declare method: string
+  declare method: PaymentMethod
   @column()
   declare provider: string
   @column()
@@ -299,7 +299,7 @@ export class PaymentTransactionSchema extends BaseModel {
   @column()
   declare raw: Record<string, unknown> | null | null
   @column()
-  declare status: 'PENDING' | 'SUCCEEDED' | 'FAILED'
+  declare status: PaymentStatus
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 }
@@ -406,7 +406,7 @@ export class VehicleSchema extends BaseModel {
   @column()
   declare plate: string
   @column()
-  declare status: Vehicle['status']
+  declare status: VehicleStatus
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
   @column()

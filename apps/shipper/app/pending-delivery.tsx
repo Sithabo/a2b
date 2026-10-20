@@ -29,9 +29,9 @@ export default function PendingDeliveryScreen() {
   const invalidateLoads = useInvalidateLoads();
 
   const market = useMarket();
-  const formatCurrency = (val?: string) => formatMoney(val, market);
+  const formatCurrency = (amount: number) => formatMoney(amount, market);
 
-  const formatDate = (dateStr?: string) => {
+  const formatDate = (dateStr?: string | null) => {
     if (!dateStr) return "--";
     try {
       const d = new Date(dateStr);
@@ -155,7 +155,7 @@ export default function PendingDeliveryScreen() {
                 <View style={styles.timelineDot} />
                 <View style={styles.timelineTextContainer}>
                   <Text style={styles.timelineSubLabel}>PICKUP</Text>
-                  <Text style={styles.timelineLocation}>{shipment.pickup}</Text>
+                  <Text style={styles.timelineLocation}>{shipment.pickupSummary}</Text>
                 </View>
               </View>
 
@@ -164,7 +164,7 @@ export default function PendingDeliveryScreen() {
                 <View style={styles.timelineDot} />
                 <View style={styles.timelineTextContainer}>
                   <Text style={styles.timelineSubLabel}>DELIVERY</Text>
-                  <Text style={styles.timelineLocation}>{shipment.delivery}</Text>
+                  <Text style={styles.timelineLocation}>{shipment.dropoffSummary}</Text>
                 </View>
               </View>
             </View>

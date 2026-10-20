@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@a2b/api": "*",
+    "@a2b/core": "*",
     "@tuyau/core": "^1.2.2"
   }
 }

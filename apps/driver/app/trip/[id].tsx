@@ -5,8 +5,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { CheckCircle2, Clock, FileCheck2, Navigation, Phone } from "lucide-react-native";
 import type { Data } from "@a2b/api-client";
 import { apiErrorCode, apiErrorMessage } from "@a2b/api-client";
-import { formatMoney, getMarket, statusMeta } from "@a2b/core";
-import { cargoLabel } from "@a2b/features";
+import { cargoLabel, formatMoney, getMarket, statusMeta } from "@a2b/core";
 import {
   Badge,
   Button,

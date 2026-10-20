@@ -1,13 +1,12 @@
 import React from "react";
 import { View, Text, StyleSheet, Image, ViewStyle, ImageSourcePropType, TouchableOpacity } from "react-native";
 import { Package } from "lucide-react-native";
-import { Shipment } from "@/store/useShipmentStore";
-import { statusMeta } from "@a2b/core";
+import { cargoLabel, statusMeta } from "@a2b/core";
 import { colors, palette } from "@a2b/ui";
-import { trackingLabel } from "@/lib/loads";
+import { dueDate, trackingLabel, type Load } from "@/lib/loads";
 
 export interface ShippingCardProps {
-  shipment: Shipment;
+  shipment: Load;
   imageSource?: ImageSourcePropType;
   style?: ViewStyle;
   onPress?: () => void;
@@ -29,11 +28,11 @@ export const ShippingCard: React.FC<ShippingCardProps> = ({
     return locStr.trim();
   };
 
-  const pickupName = getDisplayLocation(shipment.pickup);
-  const deliveryName = getDisplayLocation(shipment.delivery);
+  const pickupName = getDisplayLocation(shipment.pickupSummary);
+  const deliveryName = getDisplayLocation(shipment.dropoffSummary);
 
   // Date format helper: e.g. "22 Mar 26"
-  const formatDateOnly = (dateStr?: string) => {
+  const formatDateOnly = (dateStr?: string | null) => {
     if (!dateStr) return "--";
     try {
       const dateObj = new Date(dateStr);
@@ -49,7 +48,7 @@ export const ShippingCard: React.FC<ShippingCardProps> = ({
   };
 
   const pickupDate = formatDateOnly(shipment.createdAt);
-  const deliveryDate = formatDateOnly(shipment.deliveryDate);
+  const deliveryDate = formatDateOnly(dueDate(shipment));
 
   const statusLabel = statusMeta[shipment.status].label;
   const formattedTrackingId = trackingLabel(shipment);
@@ -67,7 +66,7 @@ export const ShippingCard: React.FC<ShippingCardProps> = ({
           </View>
           <View style={styles.metaInfo}>
             <Text style={styles.trackingId}>{formattedTrackingId}</Text>
-            <Text style={styles.cargoType}>{shipment.cargoType}</Text>
+            <Text style={styles.cargoType}>{cargoLabel(shipment.cargoType)}</Text>
           </View>
         </View>
         <View style={styles.statusPill}>

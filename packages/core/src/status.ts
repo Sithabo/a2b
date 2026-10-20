@@ -18,7 +18,8 @@ export const LOAD_STATUSES = [
 export type LoadStatus = (typeof LOAD_STATUSES)[number];
 
 /** Who is allowed to move a load between states. `system` = backend (payments, timeouts). */
-export type StatusActor = 'shipper' | 'driver' | 'fleet_owner' | 'system';
+export const STATUS_ACTORS = ['shipper', 'driver', 'fleet_owner', 'system'] as const;
+export type StatusActor = (typeof STATUS_ACTORS)[number];
 
 /** Mirrors the tone names in @a2b/ui so apps can pass `statusMeta[s].tone` straight to a Badge. */
 export type StatusTone = 'neutral' | 'brand' | 'success' | 'warning' | 'danger' | 'info';
@@ -73,14 +74,3 @@ export const statusMeta: Record<LoadStatus, StatusMeta> = {
 export const statusGroup = (s: LoadStatus): StatusGroup => statusMeta[s].group;
 export const isActiveStatus = (s: LoadStatus) => statusMeta[s].group === 'active';
 
-/** Maps status values written by older app versions onto the canonical list. */
-export function normalizeStatus(value: string): LoadStatus {
-  switch (value) {
-    case 'ACTIVE':
-      return 'IN_TRANSIT';
-    case 'DRAFT_PENDING_DOCS':
-      return 'DRAFT';
-    default:
-      return (LOAD_STATUSES as readonly string[]).includes(value) ? (value as LoadStatus) : 'DRAFT';
-  }
-}

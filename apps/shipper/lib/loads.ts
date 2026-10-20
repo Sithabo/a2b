@@ -1,16 +1,20 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import type { CargoDetails, CargoType, LoadStatus, LocationData, Shipment } from "@a2b/core";
+import type { CargoDetails, LoadStatus, LocationData } from "@a2b/core";
 import type { Data } from "@a2b/api-client";
 import { api, API_URL, useSession } from "@/lib/session";
 
-const CARGO_LABELS: Record<CargoType, string> = {
-  GENERAL_CARGO: "General Cargo",
-  FRAGILE_CARGO: "Fragile Cargo",
-  BULK_CARGO: "Bulk Cargo",
-  HEAVY_MACHINERY: "Heavy Machinery",
-  FOOD_BEVERAGE: "Food & Beverages",
-  CHEMICALS_PHARMA: "Chemicals & Pharma",
-};
+/** A load as the API returns it to the shipper who posted it. */
+export type Load = Data.Load;
+
+/** "2,500 kg", from the load's weight or its cargo details. */
+export function weightLabel(load: Pick<Load, "weightKg" | "cargo">) {
+  const kg = load.weightKg ?? load.cargo.weightKg;
+  return kg ? `${kg.toLocaleString("en-US")} kg` : "—";
+}
+
+/** When the shipment is due: its delivery deadline, else when it's ready, else when it was posted. */
+export const dueDate = (load: Pick<Load, "deadlineAt" | "readyAt" | "createdAt">) =>
+  load.deadlineAt ?? load.readyAt ?? load.createdAt;
 
 /** Step on the 7-step tracking timeline (active-delivery) for each status. */
 const MILESTONE_FOR_STATUS: Partial<Record<LoadStatus, number>> = {
@@ -20,47 +24,10 @@ const MILESTONE_FOR_STATUS: Partial<Record<LoadStatus, number>> = {
   COMPLETED: 6,
 };
 
-export type ShipmentView = Shipment & {
-  /** Exact addresses and the driver unlock once escrow is funded. */
-  location: Data.Load["location"];
-  carrier: Data.Load["carrier"];
-  escrow: Data.Load["escrow"];
-};
+export const milestoneIndex = (load: Pick<Load, "status">) => MILESTONE_FOR_STATUS[load.status] ?? 0;
 
-/** Maps an API load onto the shape the shipper's screens and cards already use. */
-export function toShipment(load: Data.Load): ShipmentView {
-  const weightKg = load.weightKg ?? load.cargo.weightKg;
-  return {
-    id: String(load.id),
-    reference: load.reference,
-    market: load.market,
-    pickup: load.pickupSummary,
-    delivery: load.dropoffSummary,
-    cargoType: CARGO_LABELS[load.cargoType],
-    weight: weightKg ? `${weightKg.toLocaleString("en-US")} kg` : "—",
-    offerPrice: String(load.offerPrice),
-    status: load.status,
-    createdAt: load.createdAt ?? new Date().toISOString(),
-    deliveryDate: load.deadlineAt ?? load.readyAt ?? load.createdAt ?? new Date().toISOString(),
-    acceptedByDriver: load.driverId !== null,
-    driverId: load.driverId !== null ? String(load.driverId) : undefined,
-    driverName: load.carrier?.driverName ?? undefined,
-    is_import: load.isImport,
-    pickupLocation: null,
-    dropoffLocation: null,
-    cargo: load.cargo,
-    containerId: load.containerId ?? undefined,
-    milestoneIndex: MILESTONE_FOR_STATUS[load.status],
-    readyAt: load.readyAt ?? undefined,
-    deadlineAt: load.deadlineAt ?? undefined,
-    location: load.location,
-    carrier: load.carrier,
-    escrow: load.escrow,
-  };
-}
-
-/** "#A2B-7K3P9Q" (falls back to the numeric id). */
-export const trackingLabel = (s: Pick<Shipment, "id" | "reference">) => `#${s.reference ?? s.id}`;
+/** "#A2B-7K3P9Q" */
+export const trackingLabel = (load: Pick<Load, "reference">) => `#${load.reference}`;
 
 export const loadKeys = {
   all: ["loads"] as const,
@@ -71,7 +38,7 @@ export const loadKeys = {
 export function useMyShipments() {
   return useQuery({
     queryKey: loadKeys.mine(),
-    queryFn: async () => (await api.loads.index({ query: { scope: "mine" } })).data.map(toShipment),
+    queryFn: async () => (await api.loads.index({ query: { scope: "mine" } })).data,
   });
 }
 
@@ -80,7 +47,7 @@ export function useShipment(id: number | undefined, options: { pollMs?: number }
   return useQuery({
     queryKey: loadKeys.detail(id ?? 0),
     enabled: !!id,
-    queryFn: async () => toShipment((await api.loads.show({ params: { id: id! } })).data),
+    queryFn: async () => (await api.loads.show({ params: { id: id! } })).data,
     refetchInterval: options.pollMs,
   });
 }
@@ -99,9 +66,9 @@ export function parseLoadId(param: string | string[] | undefined): number | unde
 }
 
 /** Which screen shows a shipment best, given where it is in its lifecycle. */
-export function shipmentRoute(s: Pick<Shipment, "id" | "status">) {
-  const params = { trackingId: s.id };
-  switch (s.status) {
+export function shipmentRoute(load: Pick<Load, "id" | "status">) {
+  const params = { trackingId: String(load.id) };
+  switch (load.status) {
     case "MATCHED":
       return { pathname: "/match-pay/driver-found" as const, params };
     case "SECURED":
@@ -115,10 +82,12 @@ export function shipmentRoute(s: Pick<Shipment, "id" | "status">) {
   }
 }
 
+/** What the create-load wizard collects; also what an unfinished import draft keeps. */
 export interface NewLoadInput {
   pickup: LocationData | null;
   dropoff: LocationData | null;
   cargo: CargoDetails;
+  /** Whole units of the market currency. */
   offerPrice: number;
   isImport: boolean;
   containerId?: string;
@@ -126,8 +95,11 @@ export interface NewLoadInput {
   deadlineAt?: string;
 }
 
+/** The POST /loads request body, as the API's validator defines it. */
+export type CreateLoadBody = Parameters<typeof api.loads.store>[0]["body"];
+
 /** Request body for POST /loads from the create-load wizard's state. */
-export function newLoadBody(input: NewLoadInput) {
+export function newLoadBody(input: NewLoadInput): CreateLoadBody {
   const place = (loc: LocationData | null) => ({
     address: loc?.name ?? "",
     lat: loc?.latitude ?? null,

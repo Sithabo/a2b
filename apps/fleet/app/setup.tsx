@@ -3,13 +3,13 @@ import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "re
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Building2, Rocket, Truck } from "lucide-react-native";
-import { getMarket, isValidTaxId, type Fleet } from "@a2b/core";
+import { getMarket, isValidTaxId, type FleetSizeTier } from "@a2b/core";
 import { apiErrorMessage } from "@a2b/api-client";
 import { Badge, Button, Card, ChipGroup, colors, layout, spacing, Text, TextField } from "@a2b/ui";
 import { api, useSession } from "@/lib/session";
 import { keys, useInvalidate } from "@/lib/queries";
 
-const SIZE_TIERS: { value: Fleet["sizeTier"]; label: string }[] = [
+const SIZE_TIERS: { value: FleetSizeTier; label: string }[] = [
   { value: "1-5", label: "1–5 trucks" },
   { value: "6-20", label: "6–20 trucks" },
   { value: "20+", label: "20+ trucks" },
@@ -23,7 +23,7 @@ export default function FleetSetupScreen() {
 
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
-  const [sizeTier, setSizeTier] = useState<Fleet["sizeTier"]>("1-5");
+  const [sizeTier, setSizeTier] = useState<FleetSizeTier>("1-5");
   const [taxId, setTaxId] = useState("");
   const [corridor, setCorridor] = useState("");
   const [error, setError] = useState("");

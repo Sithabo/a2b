@@ -4,19 +4,18 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronRight, Lock, CreditCard } from 'lucide-react-native';
 import { colors, palette, partnerColors } from "@a2b/ui";
 import { useMarket } from "@/store/useMarket";
-import { formatMoney } from "@a2b/core";
+import { formatMoney, isPaymentMethodAvailable, paymentMethods, type PaymentMethod } from "@a2b/core";
 import { apiErrorMessage } from "@a2b/api-client";
 import { api } from "@/lib/session";
 import { parseLoadId, useInvalidateLoads, useShipment } from "@/lib/loads";
 import { LoadState } from "@/components/LoadState";
 
-type PaymentMethod = 'mtn' | 'airtel' | 'mmg' | 'card' | null;
 
 // Source: 6.html — "Choose Payment Method"
 export default function PaymentMethodScreen() {
   const router = useRouter();
   const market = useMarket();
-  const [selected, setSelected] = useState<PaymentMethod>(null);
+  const [selected, setSelected] = useState<PaymentMethod | null>(null);
   const [isPaying, setIsPaying] = useState(false);
   const { trackingId } = useLocalSearchParams<{ trackingId: string }>();
   const loadId = parseLoadId(trackingId);
@@ -24,7 +23,7 @@ export default function PaymentMethodScreen() {
   const invalidateLoads = useInvalidateLoads();
 
   const handleSelect = async (method: PaymentMethod) => {
-    if (!method || !loadId || isPaying) return;
+    if (!loadId || isPaying) return;
     setSelected(method);
     setIsPaying(true);
     try {
@@ -41,24 +40,24 @@ export default function PaymentMethodScreen() {
 
   const allMethods = [
     {
-      id: 'mmg' as PaymentMethod,
-      label: 'MMG Mobile Money',
+      id: 'mmg' as const,
+      label: paymentMethods.mmg.label,
       subtitle: 'Fast and secure',
       logoBg: palette.gray[800],
       logoText: 'MMG',
       logoTextColor: palette.white,
     },
     {
-      id: 'mtn' as PaymentMethod,
-      label: 'MTN Mobile Money',
+      id: 'mtn' as const,
+      label: paymentMethods.mtn.label,
       subtitle: 'Fast and secure',
       logoBg: partnerColors.mtn,
       logoText: 'MTN',
       logoTextColor: palette.black,
     },
     {
-      id: 'airtel' as PaymentMethod,
-      label: 'Airtel Money',
+      id: 'airtel' as const,
+      label: paymentMethods.airtel.label,
       subtitle: 'Quick transactions',
       logoText: 'Airtel',
       logoTextColor: palette.white,
@@ -67,21 +66,18 @@ export default function PaymentMethodScreen() {
       logoBg: partnerColors.airtel,
     },
     {
-      id: 'card' as PaymentMethod,
-      label: 'Debit/Credit Card',
+      id: 'card' as const,
+      label: paymentMethods.card.label,
       subtitle: 'Visa, Mastercard',
       logoBg: palette.gray[800],
       logoText: null,
       logoIcon: true,
     },
   ];
-  // Mobile money rails available in this market, plus cards everywhere.
-  const methods = allMethods.filter(
-    (m) => m.id === 'card' || market.mobileMoney.some((p) => p.id === m.id)
-  );
+  const methods = allMethods.filter((m) => isPaymentMethodAvailable(m.id, market));
 
   if (!shipment) return <LoadState error={error} onRetry={refetch} />;
-  const amount = shipment.escrow?.amount ?? Number(shipment.offerPrice);
+  const amount = shipment.escrow?.amount ?? shipment.offerPrice;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>

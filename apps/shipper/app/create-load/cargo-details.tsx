@@ -24,9 +24,9 @@ import { PackageForm, PackageData } from "@/components/PackageForm";
 import { DateTimePickerSection } from "@/components/DateTimePickerSection";
 import { OfferSlider } from "@/components/OfferSlider";
 import { OrderSummary } from "@/components/OrderSummary";
-import { useShipmentStore, CargoType, CargoDetails } from "@/store/useShipmentStore";
+import { useShipmentStore } from "@/store/useShipmentStore";
 import { colors, palette, ScreenHeader, BottomSheet, Button } from "@a2b/ui";
-import { recommendOffer } from "@a2b/core";
+import { cargoLabel, recommendOffer, type CargoDetails, type CargoType } from "@a2b/core";
 import { apiErrorMessage } from "@a2b/api-client";
 import { api } from "@/lib/session";
 import { newLoadBody, useInvalidateLoads } from "@/lib/loads";
@@ -44,8 +44,8 @@ export default function CargoDetailsScreen() {
   const [isPosting, setIsPosting] = useState(false);
   const setCurrentStep = useShipmentStore((state) => state.setCurrentStep);
   const resetRouteState = useShipmentStore((state) => state.resetRouteState);
-  const draftShipment = useShipmentStore((state) => state.draftShipment);
-  const setDraftShipment = useShipmentStore((state) => state.setDraftShipment);
+  const draft = useShipmentStore((state) => state.draft);
+  const setDraft = useShipmentStore((state) => state.setDraft);
 
   const [selectedType, setSelectedType] = useState<CargoType>("GENERAL_CARGO");
   const [packages, setPackages] = useState<PackageData[]>([
@@ -94,70 +94,64 @@ export default function CargoDetailsScreen() {
 
   // Load from draft if exists
   useEffect(() => {
-    if (draftShipment) {
-      if (draftShipment.cargo?.type) {
-        setSelectedType(draftShipment.cargo.type);
+    if (draft) {
+      if (draft.cargo.type) {
+        setSelectedType(draft.cargo.type);
       }
-      if (draftShipment.cargo?.type === 'HEAVY_MACHINERY') {
-        if (draftShipment.cargo?.requiresFlatbedLowboy !== undefined) {
-          setRequiresFlatbedLowboy(draftShipment.cargo.requiresFlatbedLowboy);
+      if (draft.cargo.type === 'HEAVY_MACHINERY') {
+        if (draft.cargo.requiresFlatbedLowboy !== undefined) {
+          setRequiresFlatbedLowboy(draft.cargo.requiresFlatbedLowboy);
         }
-        if (draftShipment.cargo?.requiresHydraulicTipper !== undefined) {
-          setRequiresHydraulicTipper(draftShipment.cargo.requiresHydraulicTipper);
+        if (draft.cargo.requiresHydraulicTipper !== undefined) {
+          setRequiresHydraulicTipper(draft.cargo.requiresHydraulicTipper);
         }
-        if (draftShipment.cargo?.dimensions?.widthMeters !== undefined) {
-          setMachineryWidthMeters(draftShipment.cargo.dimensions.widthMeters.toString());
+        if (draft.cargo.dimensions?.widthMeters !== undefined) {
+          setMachineryWidthMeters(draft.cargo.dimensions.widthMeters.toString());
         }
-        if (draftShipment.cargo?.dimensions?.heightMeters !== undefined) {
-          setMachineryHeightMeters(draftShipment.cargo.dimensions.heightMeters.toString());
+        if (draft.cargo.dimensions?.heightMeters !== undefined) {
+          setMachineryHeightMeters(draft.cargo.dimensions.heightMeters.toString());
         }
-        if (draftShipment.weight) {
-          const matched = draftShipment.weight.match(/^(\d+(\.\d+)?)/);
-          if (matched) setMachineryWeightTons(matched[1]);
-        }
-      }
-      if (draftShipment.cargo?.type === 'CHEMICALS_PHARMA') {
-        if (draftShipment.weight) {
-          const matched = draftShipment.weight.match(/^(\d+(\.\d+)?)/);
-          if (matched) setChemicalsWeightTons(matched[1]);
-        }
-        if (draftShipment.cargo?.volumeCubicMeters !== undefined) {
-          setChemicalsVolume(draftShipment.cargo.volumeCubicMeters.toString());
-        }
-        if (draftShipment.cargo?.chemicalContainer) {
-          setChemicalContainer(draftShipment.cargo.chemicalContainer);
+        if (draft.cargo.weightKg !== undefined) {
+          setMachineryWeightTons(String(draft.cargo.weightKg / 1000));
         }
       }
-      if (draftShipment.cargo?.type === 'FOOD_BEVERAGE') {
-        if (draftShipment.weight) {
-          const matched = draftShipment.weight.match(/^(\d+(\.\d+)?)/);
-          if (matched) setFoodWeightTons(matched[1]);
+      if (draft.cargo.type === 'CHEMICALS_PHARMA') {
+        if (draft.cargo.weightKg !== undefined) {
+          setChemicalsWeightTons(String(draft.cargo.weightKg / 1000));
         }
-        if (draftShipment.cargo?.volumeCubicMeters !== undefined) {
-          setFoodVolume(draftShipment.cargo.volumeCubicMeters.toString());
+        if (draft.cargo.volumeCubicMeters !== undefined) {
+          setChemicalsVolume(draft.cargo.volumeCubicMeters.toString());
         }
-        if (draftShipment.cargo?.storageEnvironment) {
-          setStorageEnvironment(draftShipment.cargo.storageEnvironment);
+        if (draft.cargo.chemicalContainer) {
+          setChemicalContainer(draft.cargo.chemicalContainer);
         }
       }
-      if (draftShipment.cargo?.type === 'GENERAL_CARGO' && draftShipment.cargo?.weightKg !== undefined) {
+      if (draft.cargo.type === 'FOOD_BEVERAGE') {
+        if (draft.cargo.weightKg !== undefined) {
+          setFoodWeightTons(String(draft.cargo.weightKg / 1000));
+        }
+        if (draft.cargo.volumeCubicMeters !== undefined) {
+          setFoodVolume(draft.cargo.volumeCubicMeters.toString());
+        }
+        if (draft.cargo.storageEnvironment) {
+          setStorageEnvironment(draft.cargo.storageEnvironment);
+        }
+      }
+      if (draft.cargo.type === 'GENERAL_CARGO' && draft.cargo.weightKg !== undefined) {
         setPackages([{
           id: "1",
           code: "",
-          weight: draftShipment.cargo.weightKg.toString(),
-          length: draftShipment.cargo.dimensions?.lengthMeters.toString() || "12",
-          width: draftShipment.cargo.dimensions?.widthMeters.toString() || "8",
-          height: draftShipment.cargo.dimensions?.heightMeters.toString() || "10",
+          weight: draft.cargo.weightKg.toString(),
+          length: draft.cargo.dimensions?.lengthMeters.toString() || "12",
+          width: draft.cargo.dimensions?.widthMeters.toString() || "8",
+          height: draft.cargo.dimensions?.heightMeters.toString() || "10",
         }]);
       }
-      if (draftShipment.offerPrice) {
-        setOfferPrice(parseFloat(draftShipment.offerPrice) || 150000);
+      if (draft.offerPrice > 0) {
+        setOfferPrice(draft.offerPrice);
       }
-      if (draftShipment.deliveryDate) {
-        setDeliveryDate(new Date(draftShipment.deliveryDate));
-      }
-      if (draftShipment.readyAt) {
-        const rDate = new Date(draftShipment.readyAt);
+      if (draft.readyAt) {
+        const rDate = new Date(draft.readyAt);
         setPickupDate(rDate);
         if (!isImportFlow) {
           const hours = rDate.getHours();
@@ -166,12 +160,12 @@ export default function CargoDetailsScreen() {
           else if (hours === 14) setPickupWindow("AFTERNOON");
         }
       }
-      if (draftShipment.deadlineAt) {
-        setDeliveryDate(new Date(draftShipment.deadlineAt));
-        setTime(new Date(draftShipment.deadlineAt));
+      if (draft.deadlineAt) {
+        setDeliveryDate(new Date(draft.deadlineAt));
+        setTime(new Date(draft.deadlineAt));
       }
     }
-  }, [draftShipment]);
+  }, [draft]);
 
   const loadTypes = [
     { id: "GENERAL_CARGO", label: "General Cargo", icon: Package },
@@ -199,7 +193,7 @@ export default function CargoDetailsScreen() {
     ? `${foodWeightTons} Tons`
     : packages.reduce((acc, p) => acc + (parseFloat(p.weight) || 0), 0).toString();
 
-  const cargoTypeStr = loadTypes.find((t) => t.id === selectedType)?.label || "General Cargo";
+  const cargoTypeStr = cargoLabel(selectedType);
 
   // Total weight in kg for every cargo type (sector forms collect tons).
   const totalWeightKg =
@@ -250,31 +244,21 @@ export default function CargoDetailsScreen() {
         deadlineDate.setHours(17, 0, 0, 0);
       }
 
-      setDraftShipment({
-        pickup: pickupLocation?.name || "Georgetown Port",
-        delivery: dropoffLocation?.name || "",
-        cargoType: cargoTypeStr,
-        weight: totalWeight + (selectedType === 'GENERAL_CARGO' ? " kg" : ""),
-        offerPrice: offerPrice.toString(),
-        is_import: true,
-        pickupLocation,
-        dropoffLocation,
+      setDraft({
+        pickup: pickupLocation,
+        dropoff: dropoffLocation,
         cargo: cargoDetails,
-        deliveryDate: deliveryDate ? deliveryDate.toISOString() : undefined,
+        offerPrice,
+        isImport: true,
         readyAt: readyDate.toISOString(),
         deadlineAt: deadlineDate.toISOString(),
+        // Keep what the shipper already entered in the document vault
+        containerId: draft?.containerId,
+        documents: draft?.documents ?? {},
       });
 
       setCurrentStep(3);
-      router.push({
-        pathname: "/create-load/document-vault",
-        params: {
-          pickup: pickupLocation?.name || "Georgetown Port",
-          delivery: dropoffLocation?.name || "",
-          cargoType: cargoTypeStr,
-          weight: totalWeight + (selectedType === 'GENERAL_CARGO' ? " kg" : ""),
-        }
-      });
+      router.push("/create-load/document-vault");
     } else {
       setIsReviewModalOpen(true);
     }

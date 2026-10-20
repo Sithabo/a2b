@@ -1,4 +1,5 @@
 import vine from '@vinejs/vine'
+import { SIGN_UP_ROLES } from '@a2b/core'
 
 const phone = () => vine.string().trim().minLength(8).maxLength(20)
 
@@ -13,5 +14,5 @@ export const verifyOtpValidator = vine.create({
     .fixedLength(6)
     .regex(/^\d{6}$/),
   /** Required the first time a number signs in; decides which app experience they get. */
-  role: vine.enum(['shipper', 'driver', 'fleet_owner'] as const).optional(),
+  role: vine.enum(SIGN_UP_ROLES).optional(),
 })

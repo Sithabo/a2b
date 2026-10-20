@@ -23,8 +23,8 @@ import {
 } from "lucide-react-native";
 import { DriverContactCard } from "@/components/DriverContactCard";
 import { LoadState } from "@/components/LoadState";
-import { parseLoadId, trackingLabel, useShipment } from "@/lib/loads";
-import { vehicleClasses } from "@a2b/core";
+import { milestoneIndex, parseLoadId, trackingLabel, useShipment, weightLabel } from "@/lib/loads";
+import { cargoLabel, vehicleClasses } from "@a2b/core";
 import { MilestoneTimeline } from "@/components/MilestoneTimeline";
 import { colors, palette, ScreenHeader } from "@a2b/ui";
 
@@ -38,8 +38,8 @@ export default function ActiveDeliveryScreen() {
   // Milestones come from the driver; poll while the load is moving.
   const { data: shipment, error, refetch } = useShipment(parseLoadId(trackingId), { pollMs: 30_000 });
 
-  const currentMilestoneIndex = shipment?.milestoneIndex ?? 0;
-  const isImport = shipment?.is_import ?? false;
+  const currentMilestoneIndex = shipment ? milestoneIndex(shipment) : 0;
+  const isImport = shipment?.isImport ?? false;
   const driverName = shipment?.carrier?.driverName ?? "Your driver";
   const driverPhone = shipment?.carrier?.driverPhone;
   const vehicle = shipment?.carrier?.vehicle;
@@ -91,8 +91,8 @@ export default function ActiveDeliveryScreen() {
     return getFormattedTime(d);
   };
 
-  const pickupName = shipment?.pickup || "Kampala, Makindye";
-  const deliveryName = shipment?.delivery || "Jinja, Industrial Area";
+  const pickupName = shipment?.pickupSummary ?? "";
+  const deliveryName = shipment?.dropoffSummary ?? "";
 
   // 7 milestones mapping
   const milestones = [
@@ -165,17 +165,6 @@ export default function ActiveDeliveryScreen() {
     }
   };
 
-  const getCargoName = () => {
-    if (!shipment) return "General Cargo";
-    if (shipment.cargo?.type) {
-      return shipment.cargo.type
-        .split("_")
-        .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
-        .join(" ");
-    }
-    return shipment.cargoType || "General Cargo";
-  };
-
   if (!shipment) return <LoadState error={error} onRetry={refetch} />;
 
   return (
@@ -200,10 +189,10 @@ export default function ActiveDeliveryScreen() {
             <Package color={palette.amber[600]} size={32} />
           </View>
           <View>
-            <Text style={styles.topTitle}>{getCargoName()}</Text>
+            <Text style={styles.topTitle}>{cargoLabel(shipment.cargoType)}</Text>
             <View style={styles.trackingRow}>
               <Text style={styles.trackingIdText}>
-                #Tracking ID: {shipment?.id || "A2B-9874"}
+                Tracking ID: {trackingLabel(shipment)}
               </Text>
               <TouchableOpacity
                 onPress={copyToClipboard}
@@ -239,7 +228,7 @@ export default function ActiveDeliveryScreen() {
           <View style={styles.specsRow}>
             <Text style={styles.specsLabel}>Weight:</Text>
             <Text style={styles.specsValue}>
-              {shipment?.weight}
+              {weightLabel(shipment)}
             </Text>
           </View>
           <View style={[styles.specsRow, styles.specsRowLast]}>
@@ -322,7 +311,7 @@ export default function ActiveDeliveryScreen() {
           onPress={() =>
             router.push({
               pathname: "/confirm-delivery",
-              params: { trackingId: shipment?.id },
+              params: { trackingId: String(shipment.id) },
             })
           }
         >

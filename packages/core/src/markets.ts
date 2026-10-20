@@ -1,4 +1,5 @@
-import type { LocationData, VehicleClass } from './domain.ts';
+import type { LocationData, StorageEnvironment, VehicleClass } from './domain.ts';
+import type { MobileMoneyProvider } from './payments.ts';
 import { guyanaDocuments, ugandaDocuments, type DocumentRequirement } from './documents.ts';
 
 export type MarketCode = 'GY' | 'UG';
@@ -18,7 +19,7 @@ export interface RateCard {
     flatbedRouteClearance: number;
     tipperGate: number;
     hazmatClearance: number;
-    coldChain: Record<'AMBIENT' | 'CHILLED' | 'FROZEN', number>;
+    coldChain: Record<StorageEnvironment, number>;
   };
 }
 
@@ -46,7 +47,7 @@ export interface Market {
     pattern: RegExp;
     hint: string;
   };
-  mobileMoney: { id: string; name: string }[];
+  mobileMoney: { id: MobileMoneyProvider; name: string }[];
   plate: {
     pattern: RegExp;
     example: string;
@@ -93,8 +94,8 @@ export const markets: Record<MarketCode, Market> = {
     customsAuthority: 'Guyana Revenue Authority (GRA)',
     documents: guyanaDocuments,
     customsZones: [
-      { id: 'gy_port_georgetown', name: 'Georgetown Wharves (Port Zone)', latitude: 6.8114, longitude: -58.1672, is_port: true },
-      { id: 'gy_port_demerara', name: 'Demerara Terminals (Port Zone)', latitude: 6.7901, longitude: -58.1812, is_port: true },
+      { id: 'gy_port_georgetown', name: 'Georgetown Wharves (Port Zone)', latitude: 6.8114, longitude: -58.1672, isPort: true },
+      { id: 'gy_port_demerara', name: 'Demerara Terminals (Port Zone)', latitude: 6.7901, longitude: -58.1812, isPort: true },
     ],
     rates: placeholderRates,
   },
@@ -114,8 +115,8 @@ export const markets: Record<MarketCode, Market> = {
     documents: ugandaDocuments,
     // Approximate centre points — confirm geofence radii before relying on them.
     customsZones: [
-      { id: 'ug_border_malaba', name: 'Malaba Border Post', latitude: 0.6366, longitude: 34.2716, is_port: true },
-      { id: 'ug_border_busia', name: 'Busia Border Post', latitude: 0.4633, longitude: 34.092, is_port: true },
+      { id: 'ug_border_malaba', name: 'Malaba Border Post', latitude: 0.6366, longitude: 34.2716, isPort: true },
+      { id: 'ug_border_busia', name: 'Busia Border Post', latitude: 0.4633, longitude: 34.092, isPort: true },
     ],
     rates: placeholderRates,
   },

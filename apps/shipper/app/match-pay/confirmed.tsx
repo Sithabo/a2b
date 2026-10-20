@@ -23,7 +23,7 @@ export default function PaymentConfirmedScreen() {
   const { data: shipment, error, refetch } = useShipment(parseLoadId(trackingId));
 
   if (!shipment) return <LoadState error={error} onRetry={refetch} />;
-  const amount = shipment.escrow?.amount ?? Number(shipment.offerPrice);
+  const amount = shipment.escrow?.amount ?? shipment.offerPrice;
   const paidWith = METHOD_LABELS[method ?? shipment.escrow?.depositMethod ?? ''] ?? 'mobile money';
   const driverPhone = shipment.carrier?.driverPhone;
 

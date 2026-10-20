@@ -1,4 +1,5 @@
 import vine from '@vinejs/vine'
+import { DUTY_STATUSES } from '@a2b/core'
 
 export const updateMeValidator = vine.create({
   fullName: vine.string().trim().maxLength(120).optional(),
@@ -17,5 +18,5 @@ export const driverProfileValidator = vine.create({
   /** Required when the profile is first created; optional for later updates (e.g. duty toggle). */
   licenseNumber: vine.string().trim().minLength(3).maxLength(40).optional(),
   licenseClass: vine.string().trim().maxLength(10).optional(),
-  dutyStatus: vine.enum(['AVAILABLE', 'OFF_DUTY'] as const).optional(),
+  dutyStatus: vine.enum(DUTY_STATUSES).optional(),
 })

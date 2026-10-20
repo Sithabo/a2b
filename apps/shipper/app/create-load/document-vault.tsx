@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { Image } from "expo-image";
@@ -27,19 +27,13 @@ import {
   ChevronRight,
   ArrowLeft,
 } from "lucide-react-native";
-import { useShipmentStore } from "@/store/useShipmentStore";
+import { useShipmentStore, type DraftDocument } from "@/store/useShipmentStore";
 import { colors, palette, ScreenHeader } from "@a2b/ui";
 import { useMarket } from "@/store/useMarket";
-import { documentsFor } from "@a2b/core";
+import { cargoLabel, documentsFor } from "@a2b/core";
 import { apiErrorMessage } from "@a2b/api-client";
 import { api } from "@/lib/session";
-import { newLoadBody, uploadLoadDocument, useInvalidateLoads } from "@/lib/loads";
-
-interface DocumentInfo {
-  name: string;
-  size: string;
-  uri?: string;
-}
+import { newLoadBody, uploadLoadDocument, useInvalidateLoads, weightLabel } from "@/lib/loads";
 
 /** A requirement id from the market's customs document catalog (@a2b/core). */
 type SlotName = string;
@@ -50,37 +44,24 @@ export default function DocumentVaultScreen() {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
 
-  const draftShipment = useShipmentStore((state) => state.draftShipment);
-  const setDraftShipment = useShipmentStore((state) => state.setDraftShipment);
-  const clearDraftShipment = useShipmentStore((state) => state.clearDraftShipment);
+  const draft = useShipmentStore((state) => state.draft);
+  const setDraft = useShipmentStore((state) => state.setDraft);
+  const clearDraft = useShipmentStore((state) => state.clearDraft);
   const resetRouteState = useShipmentStore((state) => state.resetRouteState);
   const pickupLocation = useShipmentStore((state) => state.pickupLocation);
   const dropoffLocation = useShipmentStore((state) => state.dropoffLocation);
 
-  // Get search params if routing from create-load screen
-  const params = useLocalSearchParams<{
-    pickup?: string;
-    delivery?: string;
-    cargoType?: string;
-    weight?: string;
-  }>();
+  // Shown for context; the draft is written by the cargo details step
+  const pickup = draft?.pickup?.name ?? pickupLocation?.name ?? "—";
+  const cargo = draft?.cargo ?? { type: "GENERAL_CARGO" as const };
 
-  // Restore from draft or params
-  const pickup = draftShipment?.pickup || pickupLocation?.name || params.pickup || "Georgetown Port";
-  const delivery = draftShipment?.delivery || dropoffLocation?.name || params.delivery || "";
-  const cargoType = draftShipment?.cargoType || params.cargoType || "general";
-  const weight = draftShipment?.weight || params.weight || "250";
-
-  const [containerId, setContainerId] = useState(draftShipment?.containerId || "");
+  const [containerId, setContainerId] = useState(draft?.containerId ?? "");
 
   // Which documents this load needs depends on the market and the cargo sector.
-  const { required: requiredDocs } = documentsFor(
-    market.documents,
-    draftShipment?.cargo ?? { type: "GENERAL_CARGO" }
-  );
+  const { required: requiredDocs } = documentsFor(market.documents, cargo);
 
-  const [uploadedFiles, setUploadedFiles] = useState<Record<SlotName, DocumentInfo | null>>(
-    () => ({ ...(draftShipment?.documents as Record<SlotName, DocumentInfo | null> | undefined) })
+  const [uploadedFiles, setUploadedFiles] = useState<Record<SlotName, DraftDocument | null>>(
+    () => ({ ...draft?.documents })
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   // Server draft created on a previous (failed) submit, reused on retry.
@@ -88,7 +69,9 @@ export default function DocumentVaultScreen() {
   const invalidateLoads = useInvalidateLoads();
 
   const [activeSlot, setActiveSlot] = useState<SlotName | null>(null);
-  const [isSubmissionComplete, setIsSubmissionComplete] = useState(false);
+  // A ref, not state: the leave-screen listener must see it the moment the load is posted,
+  // before a re-render re-subscribes the listener.
+  const isSubmissionComplete = useRef(false);
 
   // Options & Preview Modals
   const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
@@ -106,7 +89,7 @@ export default function DocumentVaultScreen() {
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", (e) => {
       // If complete, proceed without draft intercept
-      if (isSubmissionComplete) {
+      if (isSubmissionComplete.current) {
         return;
       }
 
@@ -126,7 +109,7 @@ export default function DocumentVaultScreen() {
               text: "Discard Draft",
               style: "destructive",
               onPress: () => {
-                clearDraftShipment();
+                clearDraft();
                 resetRouteState();
                 navigation.dispatch(e.data.action);
               },
@@ -134,22 +117,14 @@ export default function DocumentVaultScreen() {
             {
               text: "Save Draft & Exit",
               onPress: () => {
-                setDraftShipment({
-                  pickup,
-                  delivery,
-                  cargoType,
-                  weight,
-                  containerId,
-                  documents: uploadedFiles as any,
-                  market: market.code,
-                  status: "DRAFT",
-                  createdAt: new Date().toISOString(),
-                  cargo: draftShipment?.cargo, // Preserve cargo details!
-                  readyAt: draftShipment?.readyAt,
-                  deadlineAt: draftShipment?.deadlineAt,
-                  pickupLocation: draftShipment?.pickupLocation,
-                  dropoffLocation: draftShipment?.dropoffLocation,
-                });
+                if (draft) {
+                  setDraft({
+                    ...draft,
+                    containerId,
+                    documents: uploadedFiles,
+                    savedAt: new Date().toISOString(),
+                  });
+                }
                 navigation.dispatch(e.data.action);
               },
             },
@@ -159,21 +134,7 @@ export default function DocumentVaultScreen() {
     });
 
     return unsubscribe;
-  }, [
-    navigation,
-    containerId,
-    uploadedFiles,
-    isSubmissionComplete,
-    pickup,
-    delivery,
-    cargoType,
-    weight,
-    clearDraftShipment,
-    setDraftShipment,
-    resetRouteState,
-    draftShipment,
-    market.code,
-  ]);
+  }, [navigation, containerId, uploadedFiles, clearDraft, setDraft, resetRouteState, draft]);
 
   const moveFileToPermanentStorage = async (tempUri: string, documentType: string) => {
     try {
@@ -251,7 +212,7 @@ export default function DocumentVaultScreen() {
   };
 
   const handleCardPress = (slot: SlotName) => {
-    if (uploadedFiles[slot] !== null) {
+    if (uploadedFiles[slot]) {
       setSelectedSlot(slot);
       setIsOptionsModalOpen(true);
     } else {
@@ -260,7 +221,7 @@ export default function DocumentVaultScreen() {
   };
 
   const handleFinalizeVerification = async () => {
-    if (!isFormValid || isSubmitting || !draftShipment?.cargo) return;
+    if (!isFormValid || isSubmitting || !draft) return;
     setIsSubmitting(true);
     try {
       // 1. Create the load as a draft (or reuse the one from a failed attempt)
@@ -268,14 +229,11 @@ export default function DocumentVaultScreen() {
       if (!loadId) {
         const { data } = await api.loads.store({
           body: newLoadBody({
-            pickup: draftShipment.pickupLocation ?? pickupLocation,
-            dropoff: draftShipment.dropoffLocation ?? dropoffLocation,
-            cargo: draftShipment.cargo,
-            offerPrice: Number(draftShipment.offerPrice ?? 0),
+            ...draft,
+            pickup: draft.pickup ?? pickupLocation,
+            dropoff: draft.dropoff ?? dropoffLocation,
             isImport: true,
             containerId: containerId.trim(),
-            readyAt: draftShipment.readyAt,
-            deadlineAt: draftShipment.deadlineAt,
           }),
         });
         loadId = data.id;
@@ -293,8 +251,8 @@ export default function DocumentVaultScreen() {
       await api.loads.publish({ params: { id: loadId } });
       await invalidateLoads();
 
-      setIsSubmissionComplete(true);
-      clearDraftShipment();
+      isSubmissionComplete.current = true;
+      clearDraft();
       resetRouteState();
       router.replace({ pathname: "/create-load/status", params: { state: "confirmed", trackingId: String(loadId) } });
     } catch (err) {
@@ -405,13 +363,11 @@ export default function DocumentVaultScreen() {
           </View>
           <View style={styles.metadataRow}>
             <Text style={styles.metadataLabel}>Cargo Description:</Text>
-            <Text style={styles.metadataValue}>
-              {cargoType === "general" ? "General cargo" : cargoType}
-            </Text>
+            <Text style={styles.metadataValue}>{cargoLabel(cargo.type)}</Text>
           </View>
           <View style={styles.metadataRow}>
             <Text style={styles.metadataLabel}>Expected Weight:</Text>
-            <Text style={styles.metadataValue}>{weight} kg</Text>
+            <Text style={styles.metadataValue}>{weightLabel({ weightKg: null, cargo })}</Text>
           </View>
         </View>
       </ScrollView>

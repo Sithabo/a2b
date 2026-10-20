@@ -15,7 +15,8 @@ import {
   ChevronRight,
   ShieldAlert,
 } from "lucide-react-native";
-import { useShipmentStore, LocationData } from "@/store/useShipmentStore";
+import type { LocationData } from "@a2b/core";
+import { useShipmentStore } from "@/store/useShipmentStore";
 import { LocationSearchModal } from "@/components/LocationSearchModal";
 import { LocationPicker } from "@/components/LocationPicker";
 import { colors, palette, ScreenHeader } from "@a2b/ui";
@@ -46,7 +47,7 @@ export default function RouteSelectionScreen() {
       setActiveModalType(null);
 
       // Trigger geofence interstitial overlay if it's a port node
-      if (location.is_port) {
+      if (location.isPort) {
         setShowPortVerification(true);
       }
     } else if (activeModalType === "dropoff") {

@@ -1,4 +1,6 @@
-export type PaymentMethod = 'mtn' | 'airtel' | 'mmg' | 'card'
+import type { PaymentMethod } from '@a2b/core'
+
+export type { PaymentMethod }
 
 export interface PaymentRequest {
   /** Our escrow reference, sent to the provider for reconciliation. */
