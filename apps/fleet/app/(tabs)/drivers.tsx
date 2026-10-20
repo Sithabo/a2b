@@ -1,9 +1,9 @@
 import { Linking, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
-import { Phone, UserPlus, Users } from "lucide-react-native";
+import { Clock, Phone, UserPlus, Users } from "lucide-react-native";
 import { Badge, Button, Card, colors, EmptyState, IconButton, PlateBadge, radius, spacing, Text } from "@a2b/ui";
 import { ScreenScroll } from "@/components/ScreenScroll";
-import { useDrivers, useVehicles } from "@/lib/queries";
+import { useDrivers, useInvites, useVehicles } from "@/lib/queries";
 
 const VERIFICATION = {
   VERIFIED: { label: "Verified", tone: "success" },
@@ -15,9 +15,17 @@ export default function DriversScreen() {
   const router = useRouter();
   const drivers = useDrivers();
   const vehicles = useVehicles();
+  const invites = useInvites();
+  const pending = invites.data ?? [];
 
   return (
-    <ScreenScroll onRefresh={() => drivers.refetch()} refreshing={drivers.isRefetching}>
+    <ScreenScroll
+      onRefresh={() => {
+        drivers.refetch();
+        invites.refetch();
+      }}
+      refreshing={drivers.isRefetching || invites.isRefetching}
+    >
       <View style={styles.header}>
         <View style={{ flex: 1 }}>
           <Text variant="h1" tone="primary">
@@ -28,7 +36,24 @@ export default function DriversScreen() {
         <Button title="Add" icon={UserPlus} size="sm" onPress={() => router.push("/drivers/new")} />
       </View>
 
-      {drivers.isSuccess && drivers.data.length === 0 ? (
+      {pending.map((invite) => (
+        <Card key={`invite-${invite.id}`} style={styles.card} padding="lg">
+          <View style={[styles.avatar, styles.invitedAvatar]}>
+            <Clock size={20} color={colors.textSecondary} />
+          </View>
+          <View style={{ flex: 1, gap: spacing.xs }}>
+            <Text variant="bodyStrong">{invite.driverName ?? "Unnamed driver"}</Text>
+            <Text variant="caption" tone="muted">
+              {invite.driverPhone}
+            </Text>
+            <View style={styles.tags}>
+              <Badge label="Invited · waiting for them to accept" tone="neutral" />
+            </View>
+          </View>
+        </Card>
+      ))}
+
+      {drivers.isSuccess && drivers.data.length === 0 && pending.length === 0 ? (
         <EmptyState
           icon={Users}
           title="No drivers yet"
@@ -77,5 +102,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  invitedAvatar: { backgroundColor: colors.surfaceSunken },
   tags: { flexDirection: "row", gap: spacing.sm, alignItems: "center", flexWrap: "wrap" },
 });

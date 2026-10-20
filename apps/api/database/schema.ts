@@ -93,6 +93,25 @@ export class EscrowSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class FleetInviteSchema extends BaseModel {
+  static $columns = ['createdAt', 'driverId', 'fleetId', 'id', 'respondedAt', 'status', 'updatedAt'] as const
+  $columns = FleetInviteSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare driverId: number
+  @column()
+  declare fleetId: number
+  @column({ isPrimary: true })
+  declare id: number
+  @column.dateTime()
+  declare respondedAt: DateTime | null
+  @column()
+  declare status: 'PENDING' | 'ACCEPTED' | 'DECLINED' | 'CANCELLED'
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class FleetSchema extends BaseModel {
   static $columns = ['address', 'createdAt', 'id', 'market', 'name', 'ownerId', 'primaryCorridor', 'sizeTier', 'taxId', 'updatedAt'] as const
   $columns = FleetSchema.$columns
@@ -302,6 +321,17 @@ export class PhoneOtpSchema extends BaseModel {
   declare id: number
   @column()
   declare phone: string
+}
+
+export class RateLimitSchema extends BaseModel {
+  static $columns = ['expire', 'key', 'points'] as const
+  $columns = RateLimitSchema.$columns
+  @column()
+  declare expire: bigint | number | null
+  @column({ isPrimary: true })
+  declare key: string
+  @column()
+  declare points: number
 }
 
 export class ShipperProfileSchema extends BaseModel {

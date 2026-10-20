@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft } from 'lucide-react-native';
@@ -11,19 +11,26 @@ const RESEND_AFTER_SECONDS = 30;
 
 export interface VerifyCodeScreenProps {
   phone: string;
+  /** The code, as returned by a development API (shown in dev builds only). */
+  devCode?: string;
   onBack: () => void;
   /** Signed in; `user` includes profiles (fetched from /me). */
   onVerified: (user: Data.User) => void;
 }
 
 /** Verifies the SMS code and signs in as this app's role. */
-export function VerifyCodeScreen({ phone, onBack, onVerified }: VerifyCodeScreenProps) {
+export function VerifyCodeScreen({ phone, devCode: initialDevCode, onBack, onVerified }: VerifyCodeScreenProps) {
   const { api, role, useSession, refreshUser } = useAppSession();
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [resendIn, setResendIn] = useState(RESEND_AFTER_SECONDS);
+  const [devCode, setDevCode] = useState(initialDevCode);
+  const [isResending, setIsResending] = useState(false);
+  // Auto-submit on the 6th digit and a tap on Verify can land together; send one request
+  const verifyInFlight = useRef(false);
+  const resendInFlight = useRef(false);
 
   useEffect(() => {
     if (resendIn <= 0) return;
@@ -32,6 +39,8 @@ export function VerifyCodeScreen({ phone, onBack, onVerified }: VerifyCodeScreen
   }, [resendIn]);
 
   const verify = async (value: string) => {
+    if (verifyInFlight.current) return;
+    verifyInFlight.current = true;
     setError('');
     setIsVerifying(true);
     try {
@@ -48,6 +57,7 @@ export function VerifyCodeScreen({ phone, onBack, onVerified }: VerifyCodeScreen
       setError(apiErrorMessage(err));
       setCode('');
     } finally {
+      verifyInFlight.current = false;
       setIsVerifying(false);
     }
   };
@@ -59,13 +69,20 @@ export function VerifyCodeScreen({ phone, onBack, onVerified }: VerifyCodeScreen
   };
 
   const handleResend = async () => {
+    if (resendInFlight.current) return;
+    resendInFlight.current = true;
+    setIsResending(true);
     setError('');
     try {
-      await api.auth.requestOtp({ body: { phone } });
+      const { data } = await api.auth.requestOtp({ body: { phone } });
+      if ('devCode' in data) setDevCode(data.devCode as string);
       setNotice('A new code is on its way.');
       setResendIn(RESEND_AFTER_SECONDS);
     } catch (err) {
       setError(apiErrorMessage(err));
+    } finally {
+      resendInFlight.current = false;
+      setIsResending(false);
     }
   };
 
@@ -86,7 +103,9 @@ export function VerifyCodeScreen({ phone, onBack, onVerified }: VerifyCodeScreen
           {notice && !error ? <Text tone="secondary">{notice}</Text> : null}
           {__DEV__ && (
             <Text variant="caption" tone="muted">
-              Dev: codes are printed in the API log. Test numbers (+256 700 000 001, +592 600 0001) use 123456.
+              {devCode
+                ? `Dev: your code is ${devCode}`
+                : 'Dev: codes are printed in the API log. Test numbers (e.g. +256 700 000 001) use 123456.'}
             </Text>
           )}
 
@@ -96,6 +115,7 @@ export function VerifyCodeScreen({ phone, onBack, onVerified }: VerifyCodeScreen
             variant="ghost"
             size="md"
             onPress={handleResend}
+            loading={isResending}
             disabled={resendIn > 0}
           />
         </ScrollView>

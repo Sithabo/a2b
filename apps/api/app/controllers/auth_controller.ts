@@ -19,23 +19,32 @@ export default class AuthController {
    */
   async verifyOtp({ request, serialize }: HttpContext) {
     const { phone: input, code, role } = await request.validateUsing(verifyOtpValidator)
-    const { phone, market } = await verifyOtp(input, code)
 
-    let user = await User.findBy('phone', phone)
-    const isNewUser = !user
-    if (!user) {
+    // Runs inside the OTP transaction: if this throws, the code stays usable.
+    const { user, isNewUser } = await verifyOtp(input, code, async ({ phone, market }, trx) => {
+      const existing = await User.query({ client: trx }).where('phone', phone).first()
+      if (existing) {
+        if (!existing.phoneVerifiedAt) {
+          // e.g. a driver added by their fleet owner signing in for the first time
+          existing.useTransaction(trx)
+          existing.phoneVerifiedAt = DateTime.now()
+          await existing.save()
+        }
+        return { user: existing, isNewUser: false }
+      }
       if (!role)
         throw DomainError.invalid(
           'Choose whether you are a shipper, driver or fleet owner',
           'E_ROLE_REQUIRED'
         )
-      user = await User.create({ phone, market, role, phoneVerifiedAt: DateTime.now() })
-    } else if (!user.phoneVerifiedAt) {
-      // e.g. a driver added by their fleet owner signing in for the first time
-      user.phoneVerifiedAt = DateTime.now()
-      await user.save()
-    }
+      const created = await User.create(
+        { phone, market, role, phoneVerifiedAt: DateTime.now() },
+        { client: trx }
+      )
+      return { user: created, isNewUser: true }
+    })
 
+    // Created after the transaction commits: the token row references the user.
     const token = await User.accessTokens.create(user, ['*'], {
       name: 'mobile',
       expiresIn: '90 days',

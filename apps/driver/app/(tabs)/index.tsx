@@ -7,8 +7,9 @@ import { formatMoney, getMarket, statusMeta } from "@a2b/core";
 import { LoadCard } from "@a2b/features";
 import { Badge, Card, colors, EmptyState, palette, radius, spacing, Text } from "@a2b/ui";
 import { ScreenScroll } from "@/components/ScreenScroll";
+import { FleetInviteCard } from "@/components/FleetInviteCard";
 import { api, session, useSession } from "@/lib/session";
-import { currentJob, useLoadBoard, useMyLoads } from "@/lib/queries";
+import { currentJob, useFleetInvites, useLoadBoard, useMyLoads } from "@/lib/queries";
 
 export default function JobsScreen() {
   const router = useRouter();
@@ -20,6 +21,7 @@ export default function JobsScreen() {
   const mine = useMyLoads();
   const job = currentJob(mine.data);
   const board = useLoadBoard(onDuty && !job);
+  const invites = useFleetInvites();
 
   const toggleDuty = async (value: boolean) => {
     setIsToggling(true);
@@ -35,6 +37,7 @@ export default function JobsScreen() {
 
   const refresh = () => {
     mine.refetch();
+    invites.refetch();
     if (onDuty) board.refetch();
     session.refreshUser().catch(() => {});
   };
@@ -68,6 +71,8 @@ export default function JobsScreen() {
           accessibilityLabel="On duty"
         />
       </Card>
+
+      {invites.data?.map((invite) => <FleetInviteCard key={invite.id} invite={invite} />)}
 
       {profile?.verificationStatus === "PENDING" && (
         <Card style={styles.notice} padding="lg">

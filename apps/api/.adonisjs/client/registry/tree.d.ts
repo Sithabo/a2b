@@ -13,6 +13,11 @@ export interface ApiDefinition {
     upsertShipperProfile: typeof routes['me.upsert_shipper_profile']
     upsertDriverProfile: typeof routes['me.upsert_driver_profile']
   }
+  fleetInvites: {
+    index: typeof routes['fleet_invites.index']
+    accept: typeof routes['fleet_invites.accept']
+    decline: typeof routes['fleet_invites.decline']
+  }
   fleets: {
     store: typeof routes['fleets.store']
     show: typeof routes['fleets.show']
@@ -21,6 +26,7 @@ export interface ApiDefinition {
     updateVehicle: typeof routes['fleets.update_vehicle']
     drivers: typeof routes['fleets.drivers']
     addDriver: typeof routes['fleets.add_driver']
+    invites: typeof routes['fleets.invites']
   }
   loads: {
     index: typeof routes['loads.index']

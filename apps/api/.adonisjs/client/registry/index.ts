@@ -48,6 +48,24 @@ const routes = {
     tokens: [{"old":"/api/v1/me/driver-profile","type":0,"val":"api","end":""},{"old":"/api/v1/me/driver-profile","type":0,"val":"v1","end":""},{"old":"/api/v1/me/driver-profile","type":0,"val":"me","end":""},{"old":"/api/v1/me/driver-profile","type":0,"val":"driver-profile","end":""}],
     types: placeholder as Registry['me.upsert_driver_profile']['types'],
   },
+  'fleet_invites.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/me/fleet-invites',
+    tokens: [{"old":"/api/v1/me/fleet-invites","type":0,"val":"api","end":""},{"old":"/api/v1/me/fleet-invites","type":0,"val":"v1","end":""},{"old":"/api/v1/me/fleet-invites","type":0,"val":"me","end":""},{"old":"/api/v1/me/fleet-invites","type":0,"val":"fleet-invites","end":""}],
+    types: placeholder as Registry['fleet_invites.index']['types'],
+  },
+  'fleet_invites.accept': {
+    methods: ["POST"],
+    pattern: '/api/v1/me/fleet-invites/:id/accept',
+    tokens: [{"old":"/api/v1/me/fleet-invites/:id/accept","type":0,"val":"api","end":""},{"old":"/api/v1/me/fleet-invites/:id/accept","type":0,"val":"v1","end":""},{"old":"/api/v1/me/fleet-invites/:id/accept","type":0,"val":"me","end":""},{"old":"/api/v1/me/fleet-invites/:id/accept","type":0,"val":"fleet-invites","end":""},{"old":"/api/v1/me/fleet-invites/:id/accept","type":1,"val":"id","end":""},{"old":"/api/v1/me/fleet-invites/:id/accept","type":0,"val":"accept","end":""}],
+    types: placeholder as Registry['fleet_invites.accept']['types'],
+  },
+  'fleet_invites.decline': {
+    methods: ["POST"],
+    pattern: '/api/v1/me/fleet-invites/:id/decline',
+    tokens: [{"old":"/api/v1/me/fleet-invites/:id/decline","type":0,"val":"api","end":""},{"old":"/api/v1/me/fleet-invites/:id/decline","type":0,"val":"v1","end":""},{"old":"/api/v1/me/fleet-invites/:id/decline","type":0,"val":"me","end":""},{"old":"/api/v1/me/fleet-invites/:id/decline","type":0,"val":"fleet-invites","end":""},{"old":"/api/v1/me/fleet-invites/:id/decline","type":1,"val":"id","end":""},{"old":"/api/v1/me/fleet-invites/:id/decline","type":0,"val":"decline","end":""}],
+    types: placeholder as Registry['fleet_invites.decline']['types'],
+  },
   'fleets.store': {
     methods: ["POST"],
     pattern: '/api/v1/fleet',
@@ -89,6 +107,12 @@ const routes = {
     pattern: '/api/v1/fleet/drivers',
     tokens: [{"old":"/api/v1/fleet/drivers","type":0,"val":"api","end":""},{"old":"/api/v1/fleet/drivers","type":0,"val":"v1","end":""},{"old":"/api/v1/fleet/drivers","type":0,"val":"fleet","end":""},{"old":"/api/v1/fleet/drivers","type":0,"val":"drivers","end":""}],
     types: placeholder as Registry['fleets.add_driver']['types'],
+  },
+  'fleets.invites': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/fleet/invites',
+    tokens: [{"old":"/api/v1/fleet/invites","type":0,"val":"api","end":""},{"old":"/api/v1/fleet/invites","type":0,"val":"v1","end":""},{"old":"/api/v1/fleet/invites","type":0,"val":"fleet","end":""},{"old":"/api/v1/fleet/invites","type":0,"val":"invites","end":""}],
+    types: placeholder as Registry['fleets.invites']['types'],
   },
   'loads.index': {
     methods: ["GET","HEAD"],

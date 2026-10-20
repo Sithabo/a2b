@@ -29,7 +29,8 @@ test.group('Fleet', (group) => {
       .json({ phone: driverPhone, fullName: 'John Mukasa' })
       .loginAs(owner)
     added.assertStatus(201)
-    const driverId = dataOf(added).id
+    assert.equal(dataOf(added).status, 'ADDED')
+    const driverId = dataOf(added).driver.id
     assert.equal((await User.findOrFail(driverId)).role, 'driver')
 
     const truck = await client

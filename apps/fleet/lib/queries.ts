@@ -7,6 +7,7 @@ export const keys = {
   fleet: ["fleet"] as const,
   vehicles: ["fleet", "vehicles"] as const,
   drivers: ["fleet", "drivers"] as const,
+  invites: ["fleet", "invites"] as const,
   fleetLoads: ["loads", "fleet"] as const,
   board: ["loads", "board"] as const,
   load: (id: number) => ["loads", id] as const,
@@ -33,6 +34,11 @@ export function useVehicles() {
 
 export function useDrivers() {
   return useQuery({ queryKey: keys.drivers, queryFn: async () => (await api.fleets.drivers({})).data });
+}
+
+/** Drivers who already use A2B and haven't answered the fleet's invite yet. */
+export function useInvites() {
+  return useQuery({ queryKey: keys.invites, queryFn: async () => (await api.fleets.invites({})).data });
 }
 
 /** Loads the fleet has accepted (any status). */

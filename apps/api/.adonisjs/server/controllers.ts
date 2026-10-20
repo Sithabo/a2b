@@ -6,6 +6,7 @@
 export const controllers = {
   Auth: () => import('#controllers/auth_controller'),
   Escrow: () => import('#controllers/escrow_controller'),
+  FleetInvites: () => import('#controllers/fleet_invites_controller'),
   Fleets: () => import('#controllers/fleets_controller'),
   LoadDocuments: () => import('#controllers/load_documents_controller'),
   Loads: () => import('#controllers/loads_controller'),

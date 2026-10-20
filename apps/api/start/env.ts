@@ -36,6 +36,14 @@ export default await Env.create(new URL('../', import.meta.url), {
   SMS_DRIVER: Env.schema.enum(['log'] as const),
   /** Comma-separated "+256700000001=123456" pairs accepted without sending an SMS (dev/test only). */
   OTP_TEST_NUMBERS: Env.schema.string.optional(),
+  /**
+   * Return the code in the /auth/otp response so dev builds can show it on screen.
+   * Only honoured with SMS_DRIVER=log and never in production.
+   */
+  OTP_EXPOSE_CODES: Env.schema.boolean.optional(),
+
+  // Rate limiting — "database" in deployed environments, "memory" in tests
+  LIMITER_STORE: Env.schema.enum.optional(['database', 'memory'] as const),
 
   // Escrow payments
   PAYMENT_DRIVER: Env.schema.enum(['mock'] as const),

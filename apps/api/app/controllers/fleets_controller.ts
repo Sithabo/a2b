@@ -4,6 +4,7 @@ import Vehicle from '#models/vehicle'
 import FleetTransformer from '#transformers/fleet_transformer'
 import VehicleTransformer from '#transformers/vehicle_transformer'
 import FleetDriverTransformer from '#transformers/fleet_driver_transformer'
+import FleetInviteTransformer from '#transformers/fleet_invite_transformer'
 import {
   addDriverValidator,
   createFleetValidator,
@@ -14,6 +15,7 @@ import {
   addDriver,
   addVehicle,
   createFleet,
+  fleetInvites,
   requireFleet,
   updateVehicle,
 } from '#services/fleet_service'
@@ -62,16 +64,38 @@ export default class FleetsController {
     return serialize(FleetDriverTransformer.transform(drivers))
   }
 
+  /**
+   * 201 with the driver when they're added straight away, or 202 with an
+   * invite when they already drive on A2B and must accept first.
+   */
   async addDriver({ auth, request, response, serialize }: HttpContext) {
-    const driver = await addDriver(
+    const result = await addDriver(
       auth.getUserOrFail(),
       await request.validateUsing(addDriverValidator)
     )
+    if (result.status === 'INVITED') {
+      await result.invite.load((loader) => loader.load('fleet').load('driver'))
+      response.status(202)
+      return serialize({
+        status: result.status,
+        driver: null,
+        invite: FleetInviteTransformer.transform(result.invite),
+      })
+    }
     const profile = await DriverProfile.query()
-      .where('user_id', driver.id)
+      .where('user_id', result.driver.id)
       .preload('user')
       .firstOrFail()
     response.status(201)
-    return serialize(FleetDriverTransformer.transform(profile))
+    return serialize({
+      status: result.status,
+      driver: FleetDriverTransformer.transform(profile),
+      invite: null,
+    })
+  }
+
+  /** Drivers invited to the fleet who haven't answered yet. */
+  async invites({ auth, serialize }: HttpContext) {
+    return serialize(FleetInviteTransformer.transform(await fleetInvites(auth.getUserOrFail())))
   }
 }

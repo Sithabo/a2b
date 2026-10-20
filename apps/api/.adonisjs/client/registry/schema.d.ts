@@ -91,6 +91,42 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/me_controller').default['upsertDriverProfile']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'fleet_invites.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/me/fleet-invites'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/fleet_invites_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/fleet_invites_controller').default['index']>>>
+    }
+  }
+  'fleet_invites.accept': {
+    methods: ["POST"]
+    pattern: '/api/v1/me/fleet-invites/:id/accept'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/fleet_invites_controller').default['accept']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/fleet_invites_controller').default['accept']>>>
+    }
+  }
+  'fleet_invites.decline': {
+    methods: ["POST"]
+    pattern: '/api/v1/me/fleet-invites/:id/decline'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/fleet_invites_controller').default['decline']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/fleet_invites_controller').default['decline']>>>
+    }
+  }
   'fleets.store': {
     methods: ["POST"]
     pattern: '/api/v1/fleet'
@@ -173,6 +209,18 @@ export interface Registry {
       query: ExtractQuery<InferInput<(typeof import('#validators/fleet').addDriverValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/fleets_controller').default['addDriver']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/fleets_controller').default['addDriver']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'fleets.invites': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/fleet/invites'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/fleets_controller').default['invites']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/fleets_controller').default['invites']>>>
     }
   }
   'loads.index': {
