@@ -1,8 +1,7 @@
 import { StyleSheet, View } from "react-native";
 import { LogOut } from "lucide-react-native";
 import { getMarket } from "@a2b/core";
-import { Badge, Button, Card, colors, spacing, Text } from "@a2b/ui";
-import { ScreenScroll } from "@/components/ScreenScroll";
+import { Badge, Button, Card, colors, ScreenScroll, spacing, Text } from "@a2b/ui";
 import { api, useSession } from "@/lib/session";
 
 const VERIFICATION = {

@@ -2,8 +2,19 @@ import { Linking, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Clock, Phone, UserPlus, Users } from "lucide-react-native";
 import { QueryFallback } from "@a2b/features";
-import { Badge, Button, Card, colors, EmptyState, IconButton, PlateBadge, radius, spacing, Text } from "@a2b/ui";
-import { ScreenScroll } from "@/components/ScreenScroll";
+import {
+  Badge,
+  Button,
+  Card,
+  colors,
+  EmptyState,
+  IconButton,
+  PlateBadge,
+  radius,
+  ScreenScroll,
+  spacing,
+  Text,
+} from "@a2b/ui";
 import { useDrivers, useInvites, useVehicles } from "@/lib/queries";
 
 const VERIFICATION = {

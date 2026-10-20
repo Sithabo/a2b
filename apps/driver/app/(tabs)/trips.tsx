@@ -3,8 +3,7 @@ import { useRouter } from "expo-router";
 import { History } from "lucide-react-native";
 import { formatMoney, getMarket } from "@a2b/core";
 import { LoadCard, QueryFallback } from "@a2b/features";
-import { Card, colors, EmptyState, palette, spacing, Text } from "@a2b/ui";
-import { ScreenScroll } from "@/components/ScreenScroll";
+import { Card, colors, EmptyState, palette, ScreenScroll, spacing, Text } from "@a2b/ui";
 import { useSession } from "@/lib/session";
 import { useMyLoads } from "@/lib/queries";
 
