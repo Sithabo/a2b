@@ -11,6 +11,9 @@ import { truckStateMeta } from "@/components/TruckCard";
 import { api } from "@/lib/session";
 import { buildRoster, earningsBetween, keys, useDrivers, useFleet, useFleetLoads, useInvalidate, useVehicles } from "@/lib/queries";
 
+
+const NO_DRIVER = "none";
+
 export default function TruckDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -74,18 +77,21 @@ export default function TruckDetailScreen() {
           </Text>
           {drivers.data?.length ? (
             <ChipGroup
-              value={driver ? String(driver.id) : null}
-              onChange={(value) => update({ assignedDriverId: Number(value) })}
-              options={drivers.data.map((d) => ({ value: String(d.id), label: d.fullName ?? d.phone }))}
+              value={driver ? String(driver.id) : NO_DRIVER}
+              onChange={(value) => update({ assignedDriverId: value === NO_DRIVER ? null : Number(value) })}
+              options={[
+                ...drivers.data.map((d) => ({ value: String(d.id), label: d.fullName ?? d.phone })),
+                { value: NO_DRIVER, label: "No driver" },
+              ]}
             />
           ) : (
             <Button title="Add a driver" variant="secondary" size="md" onPress={() => router.push("/drivers/new")} />
           )}
-          {activeLoad && (
-            <Text variant="caption" tone="muted">
-              {"Changing the driver doesn't affect the load already dispatched."}
-            </Text>
-          )}
+          <Text variant="caption" tone="muted">
+            {activeLoad
+              ? "Changing the driver doesn't affect the load already dispatched. A driver drives one truck, so picking one takes them off their other truck."
+              : "A driver drives one truck, so picking one takes them off their other truck."}
+          </Text>
         </Card>
 
         {activeLoad && (

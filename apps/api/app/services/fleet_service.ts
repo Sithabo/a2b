@@ -79,6 +79,22 @@ async function assertDriverInFleet(fleet: Fleet, driverId: number) {
     throw DomainError.invalid('That driver is not in your fleet', 'E_DRIVER_NOT_IN_FLEET')
 }
 
+/**
+ * A driver drives one truck at a time (enforced by a unique index), so
+ * assigning them to a truck takes them off any other one. Loads already
+ * dispatched keep the truck they were dispatched with.
+ */
+async function releaseDriverFromOtherTrucks(
+  driverId: number,
+  exceptVehicleId: number | null,
+  trx: TransactionClientContract
+) {
+  await Vehicle.query({ client: trx })
+    .where('assigned_driver_id', driverId)
+    .if(exceptVehicleId, (q) => q.whereNot('id', exceptVehicleId!))
+    .update({ assigned_driver_id: null, updated_at: DateTime.now().toSQL() })
+}
+
 export async function addVehicle(owner: User, input: VehicleInput) {
   const fleet = await requireFleet(owner)
   const market = getMarket(fleet.market)
@@ -92,12 +108,14 @@ export async function addVehicle(owner: User, input: VehicleInput) {
     throw DomainError.conflict('A vehicle with this plate is already registered', 'E_PLATE_TAKEN')
   }
   if (input.assignedDriverId) await assertDriverInFleet(fleet, input.assignedDriverId)
-  return Vehicle.create({
-    ...input,
-    plate,
-    fleetId: fleet.id,
-    market: fleet.market,
-    status: 'IDLE',
+
+  return db.transaction(async (trx) => {
+    if (input.assignedDriverId)
+      await releaseDriverFromOtherTrucks(input.assignedDriverId, null, trx)
+    return Vehicle.create(
+      { ...input, plate, fleetId: fleet.id, market: fleet.market, status: 'IDLE' },
+      { client: trx }
+    )
   })
 }
 
@@ -110,9 +128,15 @@ export async function updateVehicle(
   const vehicle = await Vehicle.query().where('id', vehicleId).where('fleet_id', fleet.id).first()
   if (!vehicle) throw new DomainError('Vehicle not found', { status: 404, code: 'E_NOT_FOUND' })
   if (changes.assignedDriverId) await assertDriverInFleet(fleet, changes.assignedDriverId)
-  vehicle.merge(changes)
-  await vehicle.save()
-  return vehicle
+
+  return db.transaction(async (trx) => {
+    if (changes.assignedDriverId)
+      await releaseDriverFromOtherTrucks(changes.assignedDriverId, vehicle.id, trx)
+    vehicle.useTransaction(trx)
+    vehicle.merge(changes)
+    await vehicle.save()
+    return vehicle
+  })
 }
 
 export type AddDriverResult =
