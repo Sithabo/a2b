@@ -5,6 +5,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { CheckCircle2, Clock, FileCheck2, Navigation, Phone } from "lucide-react-native";
 import type { Data } from "@a2b/api-client";
 import { apiErrorCode, apiErrorMessage } from "@a2b/api-client";
+import { QueryFallback, useProgressLoad, useReleaseEscrow, useWithdrawLoad } from "@a2b/features";
 import { cargoLabel, formatMoney, getMarket, statusMeta } from "@a2b/core";
 import {
   Badge,
@@ -14,51 +15,37 @@ import {
   colors,
   layout,
   palette,
+  radius,
   ScreenHeader,
   SlideToConfirm,
   spacing,
   Text,
 } from "@a2b/ui";
-import { api } from "@/lib/session";
-import { keys, openDirections, useInvalidate, useLoad } from "@/lib/queries";
+import { openDirections, useLoad } from "@/lib/queries";
 
 /** The driver's job screen; what it shows follows the load's status. */
 export default function TripScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const loadId = Number(id);
-  const invalidate = useInvalidate();
-
   // Waiting on the shipper to fund escrow: check often. Otherwise a slow refresh.
-  const [pollMs, setPollMs] = useState<number | undefined>(10_000);
-  const load = useLoad(loadId, pollMs);
+  const load = useLoad(loadId, (job) =>
+    job?.status === "MATCHED" ? 10_000 : job?.status === "DELIVERED" || job?.status === "COMPLETED" ? false : 30_000
+  );
   const l = load.data;
-  const desiredPoll = l?.status === "MATCHED" ? 10_000 : l?.status === "DELIVERED" || l?.status === "COMPLETED" ? undefined : 30_000;
-  if (l && desiredPoll !== pollMs) setPollMs(desiredPoll);
-
-  const [isWorking, setIsWorking] = useState(false);
+  const progressLoad = useProgressLoad(loadId);
+  const withdrawal = useWithdrawLoad(loadId);
 
   if (!l) {
     return (
       <SafeAreaView style={styles.safe}>
         <ScreenHeader title="Job" onBackPress={() => router.back()} />
+        <QueryFallback error={load.error} onRetry={() => load.refetch()} errorMessage="We couldn't load this job." />
       </SafeAreaView>
     );
   }
 
-  const refreshAll = () => invalidate(keys.load(loadId), keys.myLoads);
-
-  const progress = async (status: "IN_TRANSIT" | "DELIVERED") => {
-    setIsWorking(true);
-    try {
-      await api.loads.progress({ params: { id: loadId }, body: { status } });
-      await refreshAll();
-    } catch (err) {
-      Alert.alert("Couldn't update the job", apiErrorMessage(err));
-    } finally {
-      setIsWorking(false);
-    }
-  };
+  const progress = (status: "IN_TRANSIT" | "DELIVERED") => progressLoad.mutate(status);
 
   const withdraw = () =>
     Alert.alert("Withdraw from this load?", "It goes back on the board for other drivers.", [
@@ -66,15 +53,7 @@ export default function TripScreen() {
       {
         text: "Withdraw",
         style: "destructive",
-        onPress: async () => {
-          try {
-            await api.loads.withdraw({ params: { id: loadId } });
-            await invalidate(keys.myLoads, keys.board, keys.load(loadId));
-            router.replace("/(tabs)");
-          } catch (err) {
-            Alert.alert("Couldn't withdraw", apiErrorMessage(err));
-          }
-        },
+        onPress: () => withdrawal.mutate(undefined, { onSuccess: () => router.replace("/(tabs)") }),
       },
     ]);
 
@@ -94,7 +73,7 @@ export default function TripScreen() {
           <Text variant="display" color={palette.amber[900]} align="center">
             Hold the truck
           </Text>
-          <Text variant="body" color={palette.amber[900]} align="center" style={{ fontSize: 18 }}>
+          <Text variant="bodyLg" color={palette.amber[900]} align="center">
             The shipper is funding escrow for {formatMoney(l.escrow?.amount ?? l.offerPrice, getMarket(l.market))}.
             Don&apos;t drive to pickup yet — the address and contacts appear here as soon as the money is secured.
           </Text>
@@ -112,7 +91,7 @@ export default function TripScreen() {
 
   // ── Release code ──────────────────────────────────────────────────────────
   if (l.status === "DELIVERED") {
-    return <ReleaseCode load={l} header={header} onReleased={refreshAll} />;
+    return <ReleaseCode load={l} header={header} />;
   }
 
   // ── Pickup / delivery legs ────────────────────────────────────────────────
@@ -165,9 +144,9 @@ export default function TripScreen() {
 
         <View style={{ marginTop: spacing.lg }}>
           {toPickup ? (
-            <SlideToConfirm label="Slide when cargo is loaded" onConfirm={() => progress("IN_TRANSIT")} loading={isWorking} />
+            <SlideToConfirm label="Slide when cargo is loaded" onConfirm={() => progress("IN_TRANSIT")} loading={progressLoad.isPending} />
           ) : (
-            <SlideToConfirm label="Slide when you've arrived" onConfirm={() => progress("DELIVERED")} loading={isWorking} />
+            <SlideToConfirm label="Slide when you've arrived" onConfirm={() => progress("DELIVERED")} loading={progressLoad.isPending} />
           )}
         </View>
       </ScrollView>
@@ -175,27 +154,25 @@ export default function TripScreen() {
   );
 }
 
-function ReleaseCode({ load, header, onReleased }: { load: Data.Load; header: React.ReactNode; onReleased: () => Promise<unknown> }) {
+function ReleaseCode({ load, header }: { load: Data.Load; header: React.ReactNode }) {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
-  const [isReleasing, setIsReleasing] = useState(false);
+  // Errors show under the keypad rather than in an alert
+  const release = useReleaseEscrow(load.id, { errorTitle: false });
+  const isReleasing = release.isPending;
 
-  const submit = async (value: string) => {
-    setIsReleasing(true);
+  const submit = (value: string) => {
     setError("");
-    try {
-      await api.escrow.release({ params: { id: load.id }, body: { code: value } });
-      await onReleased();
-    } catch (err) {
-      setError(
-        apiErrorCode(err) === "E_NO_RELEASE_CODE"
-          ? "The shipper hasn't made a code yet. Ask them to open Release Funds in their app."
-          : apiErrorMessage(err)
-      );
-      setCode("");
-    } finally {
-      setIsReleasing(false);
-    }
+    release.mutate(value, {
+      onError: (err) => {
+        setError(
+          apiErrorCode(err) === "E_NO_RELEASE_CODE"
+            ? "The shipper hasn't made a code yet. Ask them to open Release Funds in their app."
+            : apiErrorMessage(err)
+        );
+        setCode("");
+      },
+    });
   };
 
   return (
@@ -278,7 +255,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     width: 112,
     height: 112,
-    borderRadius: 56,
+    borderRadius: radius.pill,
     backgroundColor: palette.amber[200],
     alignItems: "center",
     justifyContent: "center",

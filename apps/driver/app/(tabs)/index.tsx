@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Switch, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Switch, View } from "react-native";
 import { useRouter } from "expo-router";
 import { ArrowRight, Moon, PackageSearch, ShieldAlert } from "lucide-react-native";
 import { apiErrorMessage } from "@a2b/api-client";
 import { formatMoney, getMarket, statusMeta } from "@a2b/core";
-import { LoadCard } from "@a2b/features";
+import { LoadCard, QueryFallback } from "@a2b/features";
 import { Badge, Card, colors, EmptyState, palette, radius, spacing, Text } from "@a2b/ui";
 import { ScreenScroll } from "@/components/ScreenScroll";
 import { FleetInviteCard } from "@/components/FleetInviteCard";
@@ -117,9 +117,9 @@ export default function JobsScreen() {
           <Text variant="h2">Open loads</Text>
           {!onDuty ? (
             <EmptyState icon={Moon} title="You're off duty" message="Switch on above when you're ready for a load." />
-          ) : board.isPending ? (
-            <ActivityIndicator color={colors.primary} style={{ marginTop: spacing.xl }} />
-          ) : board.isSuccess && board.data.length === 0 ? (
+          ) : !board.data ? (
+            <QueryFallback error={board.error} onRetry={() => board.refetch()} />
+          ) : board.data.length === 0 ? (
             <EmptyState icon={PackageSearch} title="No open loads right now" message="Pull down to refresh." />
           ) : (
             board.data?.map((load) => (

@@ -14,13 +14,13 @@ export interface VerifyCodeScreenProps {
   /** The code, as returned by a development API (shown in dev builds only). */
   devCode?: string;
   onBack: () => void;
-  /** Signed in; `user` includes profiles (fetched from /me). */
+  /** Signed in; `user` includes the shipper or driver profile. */
   onVerified: (user: Data.User) => void;
 }
 
 /** Verifies the SMS code and signs in as this app's role. */
 export function VerifyCodeScreen({ phone, devCode: initialDevCode, onBack, onVerified }: VerifyCodeScreenProps) {
-  const { api, role, useSession, refreshUser } = useAppSession();
+  const { api, role, useSession } = useAppSession();
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
@@ -46,13 +46,16 @@ export function VerifyCodeScreen({ phone, devCode: initialDevCode, onBack, onVer
     try {
       const { data } = await api.auth.verifyOtp({ body: { phone, code: value, role } });
       if (data.user.role !== role) {
+        // This app can't use that account: revoke the token we were just given.
+        api.auth.logout({ headers: { Authorization: `Bearer ${data.token}` } }).catch(() => {});
         setError(
           `This number is registered as a ${data.user.role.replace('_', ' ')} account. Use the matching A2B app to sign in.`
         );
         return;
       }
+      // The response includes the profile, so the app can route straight away.
       await useSession.getState().setSession(data.token, data.user);
-      onVerified(await refreshUser());
+      onVerified(data.user);
     } catch (err) {
       setError(apiErrorMessage(err));
       setCode('');

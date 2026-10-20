@@ -14,9 +14,10 @@ export const keys = {
 };
 
 /** The owner's fleet, or null if they haven't set it up yet. */
-export function useFleet() {
+export function useFleet(enabled = true) {
   return useQuery({
     queryKey: keys.fleet,
+    enabled,
     queryFn: async () => {
       try {
         return (await api.fleets.show({})).data;

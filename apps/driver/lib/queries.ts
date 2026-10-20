@@ -29,13 +29,19 @@ export function useLoadBoard(enabled = true) {
   });
 }
 
-/** One load; pass pollMs while waiting on the shipper (escrow, release code). */
-export function useLoad(id: number | undefined, pollMs?: number) {
+/**
+ * One load. `pollMs` refetches it while waiting on the shipper (escrow,
+ * release code); pass a function to choose the interval from the load itself.
+ */
+export function useLoad(
+  id: number | undefined,
+  pollMs?: number | ((load: Data.Load | undefined) => number | false)
+) {
   return useQuery({
     queryKey: keys.load(id ?? 0),
     enabled: !!id,
     queryFn: async () => (await api.loads.show({ params: { id: id! } })).data,
-    refetchInterval: pollMs,
+    refetchInterval: typeof pollMs === "function" ? (query) => pollMs(query.state.data) : pollMs,
   });
 }
 

@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowDown, Clock, MapPin, Phone, ShieldCheck, Truck } from "lucide-react-native";
 import { cargoLabel, formatMoney, getMarket, statusMeta, vehicleClasses } from "@a2b/core";
-import { apiErrorMessage } from "@a2b/api-client";
+import { QueryFallback, useAcceptLoad, useWithdrawLoad } from "@a2b/features";
 import {
   Badge,
   Button,
@@ -19,8 +19,7 @@ import {
   spacing,
   Text,
 } from "@a2b/ui";
-import { api } from "@/lib/session";
-import { buildRoster, keys, useDrivers, useFleetLoads, useInvalidate, useLoad, useVehicles } from "@/lib/queries";
+import { buildRoster, useDrivers, useFleetLoads, useLoad, useVehicles } from "@/lib/queries";
 
 const formatDate = (iso: string | null) =>
   iso ? new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—";
@@ -33,9 +32,10 @@ export default function LoadDetailScreen() {
   const vehicles = useVehicles();
   const drivers = useDrivers();
   const fleetLoads = useFleetLoads();
-  const invalidate = useInvalidate();
   const [truckId, setTruckId] = useState<string | null>(null);
-  const [isWorking, setIsWorking] = useState(false);
+  const accept = useAcceptLoad(loadId, { errorTitle: "Couldn't dispatch" });
+  const withdrawal = useWithdrawLoad(loadId);
+  const isWorking = accept.isPending || withdrawal.isPending;
 
   const idleTrucks = useMemo(
     () =>
@@ -47,6 +47,7 @@ export default function LoadDetailScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <ScreenHeader title="Load" onBackPress={() => router.back()} />
+        <QueryFallback error={load.error} onRetry={() => load.refetch()} errorMessage="We couldn't load this load." />
       </SafeAreaView>
     );
   }
@@ -57,20 +58,7 @@ export default function LoadDetailScreen() {
   const isOpen = l.status === "OPEN";
   const isOurs = l.fleetId !== null;
 
-  const run = async (action: () => Promise<unknown>, failTitle: string) => {
-    setIsWorking(true);
-    try {
-      await action();
-      await invalidate(keys.load(loadId), keys.board, keys.fleetLoads);
-    } catch (err) {
-      Alert.alert(failTitle, apiErrorMessage(err));
-    } finally {
-      setIsWorking(false);
-    }
-  };
-
-  const dispatch = () =>
-    run(() => api.loads.accept({ params: { id: loadId }, body: { vehicleId: Number(truckId) } }), "Couldn't dispatch");
+  const dispatch = () => accept.mutate({ vehicleId: Number(truckId) });
 
   const withdraw = () =>
     Alert.alert("Withdraw from this load?", "It goes back on the load board for other carriers.", [
@@ -78,7 +66,7 @@ export default function LoadDetailScreen() {
       {
         text: "Withdraw",
         style: "destructive",
-        onPress: () => run(() => api.loads.withdraw({ params: { id: loadId } }), "Couldn't withdraw"),
+        onPress: () => withdrawal.mutate(),
       },
     ]);
 

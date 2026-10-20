@@ -59,7 +59,7 @@ export default function HowItWorksScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.introHeading}>Seamless Freight Logistics</Text>
         <Text style={styles.introSub}>
-          A2B connects shippers directly with trusted carriers across Guyana's industrial corridors. Follow our simple process to post and track your shipments safely:
+          A2B connects shippers directly with trusted carriers across Guyana&apos;s industrial corridors. Follow our simple process to post and track your shipments safely:
         </Text>
 
         <View style={styles.stepsList}>

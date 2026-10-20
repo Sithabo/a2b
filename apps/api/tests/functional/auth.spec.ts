@@ -70,6 +70,28 @@ test.group('Auth / phone OTP', (group) => {
     assert.equal((await User.findByOrFail('phone', TEST_PHONE)).role, 'driver')
   })
 
+  test('signing in returns the profile the app routes on', async ({ client }) => {
+    await client.post('/api/v1/auth/otp').json({ phone: TEST_PHONE })
+    await client
+      .post('/api/v1/auth/verify')
+      .json({ phone: TEST_PHONE, code: '123456', role: 'driver' })
+    const user = await User.findByOrFail('phone', TEST_PHONE)
+    await user.related('driverProfile').create({
+      licenseNumber: 'UG-123456',
+      verificationStatus: 'PENDING',
+      dutyStatus: 'OFF_DUTY',
+      completedTrips: 0,
+    })
+
+    await client.post('/api/v1/auth/otp').json({ phone: TEST_PHONE })
+    const response = await client
+      .post('/api/v1/auth/verify')
+      .json({ phone: TEST_PHONE, code: '123456', role: 'driver' })
+    response.assertBodyContains({
+      data: { isNewUser: false, user: { driverProfile: { licenseNumber: 'UG-123456' } } },
+    })
+  })
+
   test('a code cannot be used twice', async ({ client }) => {
     await client.post('/api/v1/auth/otp').json({ phone: TEST_PHONE })
     await client

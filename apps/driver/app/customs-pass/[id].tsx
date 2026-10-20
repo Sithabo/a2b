@@ -5,7 +5,7 @@ import { Image } from "expo-image";
 import QRCode from "react-native-qrcode-svg";
 import { FileText, X } from "lucide-react-native";
 import { getMarket } from "@a2b/core";
-import { Card, colors, EmptyState, IconButton, layout, palette, spacing, Text } from "@a2b/ui";
+import { Card, colors, EmptyState, IconButton, layout, palette, radius, spacing, Text } from "@a2b/ui";
 import { API_URL, useSession } from "@/lib/session";
 import { useDocuments, useLoad } from "@/lib/queries";
 
@@ -95,5 +95,5 @@ const styles = StyleSheet.create({
   content: { padding: layout.gutter, gap: spacing.lg, paddingBottom: spacing["4xl"] },
   qrCard: { alignItems: "center", gap: spacing.md, paddingVertical: spacing["2xl"] },
   doc: { gap: spacing.md },
-  scan: { width: "100%", aspectRatio: 0.75, backgroundColor: palette.gray[100], borderRadius: 8 },
+  scan: { width: "100%", aspectRatio: 0.75, backgroundColor: palette.gray[100], borderRadius: radius.sm },
 });

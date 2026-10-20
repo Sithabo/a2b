@@ -65,8 +65,7 @@ export default function AccountScreen() {
 
   const handleLogout = async () => {
     await api.auth.logout({}).catch(() => {}); // revoke the token server-side when online
-    await signOut();
-    router.replace("/(auth)/login");
+    await signOut(); // the root layout routes back to sign-in
   };
 
   const openEditModal = () => {

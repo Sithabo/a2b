@@ -1,5 +1,6 @@
 export * from './tokens/colors.ts';
 export * from './tokens/layout.ts';
+export * from './tokens/fonts.ts';
 
 export * from './components/Badge.tsx';
 export * from './components/BottomSheet.tsx';

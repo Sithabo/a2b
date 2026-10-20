@@ -1,14 +1,12 @@
-import { useState } from "react";
-import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { AlertTriangle, ArrowDown, MapPin } from "lucide-react-native";
-import { apiErrorMessage } from "@a2b/api-client";
 import { cargoLabel, formatMoney, getMarket, statusMeta } from "@a2b/core";
-import { Badge, Button, Card, colors, layout, palette, ScreenHeader, spacing, Text } from "@a2b/ui";
+import { Badge, Button, Card, colors, layout, palette, radius, ScreenHeader, spacing, Text } from "@a2b/ui";
 import { cargoNotes } from "@/components/cargoNotes";
-import { api } from "@/lib/session";
-import { keys, useInvalidate, useLoad } from "@/lib/queries";
+import { QueryFallback, useAcceptLoad } from "@a2b/features";
+import { useLoad } from "@/lib/queries";
 
 const formatDate = (iso: string | null) =>
   iso ? new Date(iso).toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—";
@@ -19,31 +17,21 @@ export default function LoadOverviewScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const loadId = Number(id);
   const load = useLoad(loadId);
-  const invalidate = useInvalidate();
-  const [isAccepting, setIsAccepting] = useState(false);
+  const accept = useAcceptLoad(loadId);
 
   if (!load.data) {
     return (
       <SafeAreaView style={styles.safe}>
         <ScreenHeader title="Load" onBackPress={() => router.back()} />
+        <QueryFallback error={load.error} onRetry={() => load.refetch()} errorMessage="We couldn't load this load." />
       </SafeAreaView>
     );
   }
   const l = load.data;
   const notes = cargoNotes(l.cargo, l.isImport);
 
-  const accept = async () => {
-    setIsAccepting(true);
-    try {
-      await api.loads.accept({ params: { id: loadId }, body: {} });
-      await invalidate(keys.myLoads, keys.board, keys.load(loadId));
-      router.replace({ pathname: "/trip/[id]", params: { id: String(loadId) } });
-    } catch (err) {
-      Alert.alert("Couldn't accept this load", apiErrorMessage(err));
-    } finally {
-      setIsAccepting(false);
-    }
-  };
+  const acceptLoad = () =>
+    accept.mutate({}, { onSuccess: () => router.replace({ pathname: "/trip/[id]", params: { id: String(loadId) } }) });
 
   return (
     <SafeAreaView style={styles.safe} edges={["bottom"]}>
@@ -86,7 +74,7 @@ export default function LoadOverviewScreen() {
         </Card>
 
         {l.status === "OPEN" ? (
-          <Button title="Accept load" onPress={accept} loading={isAccepting} />
+          <Button title="Accept load" onPress={acceptLoad} loading={accept.isPending} />
         ) : (
           <Badge label={statusMeta[l.status].label} tone={statusMeta[l.status].tone} dot />
         )}
@@ -133,7 +121,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     alignItems: "flex-start",
     padding: spacing.md,
-    borderRadius: 8,
+    borderRadius: radius.sm,
     backgroundColor: palette.amber[50],
   },
 });

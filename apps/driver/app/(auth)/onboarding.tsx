@@ -63,7 +63,7 @@ export default function OnboardingScreen() {
             <Text variant="display" color={colors.onPrimary}>
               {item.title}
             </Text>
-            <Text variant="body" color={palette.forest[50]} style={{ fontSize: 18 }}>
+            <Text variant="bodyLg" color={palette.forest[50]}>
               {item.body}
             </Text>
           </View>
@@ -103,6 +103,6 @@ const styles = StyleSheet.create({
   },
   footer: { padding: layout.gutter, gap: spacing.xl },
   dots: { flexDirection: "row", justifyContent: "center", gap: spacing.sm },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "rgba(255,255,255,0.3)" },
+  dot: { width: 8, height: 8, borderRadius: radius.pill, backgroundColor: colors.onPrimaryInactive },
   dotActive: { width: 28, backgroundColor: palette.amber[300] },
 });

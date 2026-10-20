@@ -19,7 +19,8 @@ const DEMO_DRIVERS: Record<MarketCode, { phone: string; fullName: string }> = {
  */
 export default class SimulateCarrier extends BaseCommand {
   static commandName = 'carrier:simulate'
-  static description = 'Act as a demo driver on a load (dev only): accept, loaded, arrived, release <code>'
+  static description =
+    'Act as a demo driver on a load (dev only): accept, loaded, arrived, release <code>'
   static options: CommandOptions = { startApp: true }
 
   @args.string({ description: 'Load reference, e.g. A2B-7K3P9Q' })
@@ -55,7 +56,12 @@ export default class SimulateCarrier extends BaseCommand {
     const demo = DEMO_DRIVERS[load.market]
     const driver =
       (await User.findBy('phone', demo.phone)) ??
-      (await User.create({ ...demo, role: 'driver', market: load.market, phoneVerifiedAt: DateTime.now() }))
+      (await User.create({
+        ...demo,
+        role: 'driver',
+        market: load.market,
+        phoneVerifiedAt: DateTime.now(),
+      }))
     await DriverProfile.firstOrCreate(
       { userId: driver.id },
       { verificationStatus: 'VERIFIED', dutyStatus: 'AVAILABLE', completedTrips: 0 }
@@ -73,11 +79,14 @@ export default class SimulateCarrier extends BaseCommand {
           await reportProgress(driver, load.id, 'DELIVERED')
           break
         case 'release':
-          if (!this.code) throw new Error('Pass the 6-digit code: carrier:simulate <ref> release <code>')
+          if (!this.code)
+            throw new Error('Pass the 6-digit code: carrier:simulate <ref> release <code>')
           await releaseEscrow(driver, load.id, this.code)
           break
         default:
-          throw new Error(`Unknown action "${this.action}". Use accept, loaded, arrived or release.`)
+          throw new Error(
+            `Unknown action "${this.action}". Use accept, loaded, arrived or release.`
+          )
       }
     } catch (error) {
       this.logger.error(apiErrorMessageFor(error))

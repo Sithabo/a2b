@@ -1,6 +1,7 @@
 import { Linking, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Clock, Phone, UserPlus, Users } from "lucide-react-native";
+import { QueryFallback } from "@a2b/features";
 import { Badge, Button, Card, colors, EmptyState, IconButton, PlateBadge, radius, spacing, Text } from "@a2b/ui";
 import { ScreenScroll } from "@/components/ScreenScroll";
 import { useDrivers, useInvites, useVehicles } from "@/lib/queries";
@@ -53,7 +54,9 @@ export default function DriversScreen() {
         </Card>
       ))}
 
-      {drivers.isSuccess && drivers.data.length === 0 && pending.length === 0 ? (
+      {!drivers.data ? (
+        <QueryFallback error={drivers.error} onRetry={() => drivers.refetch()} />
+      ) : drivers.data.length === 0 && pending.length === 0 ? (
         <EmptyState
           icon={Users}
           title="No drivers yet"

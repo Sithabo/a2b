@@ -2,7 +2,7 @@ import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { History } from "lucide-react-native";
 import { formatMoney, getMarket } from "@a2b/core";
-import { LoadCard } from "@a2b/features";
+import { LoadCard, QueryFallback } from "@a2b/features";
 import { Card, colors, EmptyState, palette, spacing, Text } from "@a2b/ui";
 import { ScreenScroll } from "@/components/ScreenScroll";
 import { useSession } from "@/lib/session";
@@ -36,7 +36,9 @@ export default function TripsScreen() {
         </Text>
       </Card>
 
-      {mine.isSuccess && completed.length === 0 ? (
+      {!mine.data ? (
+        <QueryFallback error={mine.error} onRetry={() => mine.refetch()} />
+      ) : completed.length === 0 ? (
         <EmptyState icon={History} title="No completed trips yet" message="Delivered loads show up here." />
       ) : (
         <View style={{ gap: spacing.md }}>

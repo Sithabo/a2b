@@ -23,7 +23,7 @@ export default function ChatScreen() {
           </View>
           <Text style={styles.emptyTitle}>Feature Coming Soon!</Text>
           <Text style={styles.emptyText}>
-            Our live chatbot support channel is currently under active development. In the meantime, you can reach out directly via "Call A2B Support".
+            Our live chatbot support channel is currently under active development. In the meantime, you can reach out directly via &ldquo;Call A2B Support&rdquo;.
           </Text>
         </View>
       </View>

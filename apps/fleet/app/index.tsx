@@ -1,17 +1,17 @@
 import { ActivityIndicator, View } from "react-native";
 import { Redirect } from "expo-router";
+import { useSessionGate } from "@a2b/features";
 import { colors } from "@a2b/ui";
-import { useSession } from "@/lib/session";
 import { useFleet } from "@/lib/queries";
 
 /** Routes to onboarding, sign-in, fleet setup or the dashboard. */
 export default function Index() {
-  const { isHydrated, isSignedIn, hasCompletedOnboarding } = useSession();
-  const fleet = useFleet();
+  const gate = useSessionGate();
+  const fleet = useFleet(gate === "signed-in");
 
-  if (!isHydrated) return null;
-  if (!hasCompletedOnboarding) return <Redirect href="/(auth)/onboarding" />;
-  if (!isSignedIn) return <Redirect href="/(auth)/sign-in" />;
+  if (gate === "loading") return null;
+  if (gate === "onboarding") return <Redirect href="/(auth)/onboarding" />;
+  if (gate === "signed-out") return <Redirect href="/(auth)/sign-in" />;
 
   if (fleet.isPending) {
     return (

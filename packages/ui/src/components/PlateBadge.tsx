@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { palette } from '../tokens/colors.ts';
 import { radius, spacing } from '../tokens/layout.ts';
+import { fontFamily } from '../tokens/fonts.ts';
 import { Text } from './Text.tsx';
 
 /** A vehicle registration plate, styled like the yellow commercial plates in both markets. */
@@ -27,5 +28,5 @@ const styles = StyleSheet.create({
     backgroundColor: palette.amber[300],
   },
   small: { paddingHorizontal: spacing.sm, paddingVertical: 2, borderWidth: 1.5 },
-  text: { letterSpacing: 1.5, fontWeight: '800' },
+  text: { letterSpacing: 1.5, fontFamily: fontFamily.bold },
 });
