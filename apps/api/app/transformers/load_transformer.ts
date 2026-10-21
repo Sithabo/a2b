@@ -19,6 +19,7 @@ export default class LoadTransformer extends BaseTransformer<Load> {
     const escrow = this.resource.$preloaded.escrow ? this.resource.escrow : null
     const driver = this.resource.$preloaded.driver ? this.resource.driver : null
     const vehicle = this.resource.$preloaded.vehicle ? this.resource.vehicle : null
+    const delivery = this.resource.$preloaded.delivery ? this.resource.delivery : null
     return {
       ...this.pick(this.resource, [
         'id',
@@ -80,6 +81,10 @@ export default class LoadTransformer extends BaseTransformer<Load> {
                 : null,
             }
           : null,
+      /** Proof of delivery; the photo is at GET /loads/:id/delivery-photo. */
+      delivery: delivery
+        ? { receiverName: delivery.receiverName, deliveredAt: delivery.createdAt }
+        : null,
       escrow: escrow
         ? {
             status: escrow.status,

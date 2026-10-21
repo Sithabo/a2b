@@ -1,7 +1,16 @@
 import { BaseCommand, args } from '@adonisjs/core/ace'
 import type { CommandOptions } from '@adonisjs/core/types/ace'
+import { writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { DateTime } from 'luxon'
 import type { MarketCode } from '@a2b/core'
+
+/** A valid 1×1 JPEG, used as the proof-of-delivery photo for simulated arrivals. */
+const PLACEHOLDER_JPEG = Buffer.from(
+  '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/yQALCAABAAEBAREA/8wABgAQEAX/2gAIAQEAAD8A0s8g/9k=',
+  'base64'
+)
 
 /** Fixed demo drivers, one per market. Their numbers are OTP test numbers too. */
 const DEMO_DRIVERS: Record<MarketCode, { phone: string; fullName: string }> = {
@@ -42,7 +51,7 @@ export default class SimulateCarrier extends BaseCommand {
     const { default: Load } = await import('#models/load')
     const { default: User } = await import('#models/user')
     const { default: DriverProfile } = await import('#models/driver_profile')
-    const { acceptLoad, reportProgress } = await import('#services/load_service')
+    const { acceptLoad, deliverLoad, reportProgress } = await import('#services/load_service')
     const { releaseEscrow } = await import('#services/escrow_service')
     const { apiErrorMessageFor } = await import('#exceptions/domain_error')
 
@@ -75,9 +84,21 @@ export default class SimulateCarrier extends BaseCommand {
         case 'loaded':
           await reportProgress(driver, load.id, 'IN_TRANSIT')
           break
-        case 'arrived':
-          await reportProgress(driver, load.id, 'DELIVERED')
+        case 'arrived': {
+          // Proof of delivery needs a photo; use a placeholder image
+          const tmpPath = join(tmpdir(), `a2b-pod-${load.id}.jpg`)
+          await writeFile(tmpPath, PLACEHOLDER_JPEG)
+          await deliverLoad(driver, load.id, {
+            receiverName: 'Demo receiver',
+            photo: {
+              tmpPath,
+              extname: 'jpg',
+              mimeType: 'image/jpeg',
+              size: PLACEHOLDER_JPEG.length,
+            },
+          })
           break
+        }
         case 'release':
           if (!this.code)
             throw new Error('Pass the 6-digit code: carrier:simulate <ref> release <code>')

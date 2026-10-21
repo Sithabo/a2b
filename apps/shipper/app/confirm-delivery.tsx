@@ -3,11 +3,17 @@ import { View, StyleSheet } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Image } from "expo-image";
 import { Shield } from "lucide-react-native";
-import { Button, colors, ScreenHeader, spacing, Text } from "@a2b/ui";
+import { AuthImage } from "@a2b/features";
+import { Button, Card, colors, radius, ScreenHeader, spacing, Text } from "@a2b/ui";
+import { parseLoadId, useShipment } from "@/lib/loads";
 
 export default function ConfirmDeliveryScreen() {
   const router = useRouter();
   const { trackingId } = useLocalSearchParams<{ trackingId: string }>();
+  const loadId = parseLoadId(trackingId);
+  // The driver's proof of delivery, so the shipper can check before releasing payment
+  const { data: shipment } = useShipment(loadId);
+  const delivery = shipment?.delivery;
 
   return (
     <View style={styles.container}>
@@ -15,14 +21,34 @@ export default function ConfirmDeliveryScreen() {
       <ScreenHeader title="Confirm Delivery" onBackPress={() => router.back()} />
 
       <View style={styles.content}>
-        {/* Cargo Image */}
-        <View style={styles.imageContainer}>
-          <Image
-            source={require("@/assets/images/cargo_box.png")}
-            style={styles.cargoImage}
-            contentFit="contain"
-          />
-        </View>
+        {delivery && loadId ? (
+          <Card style={styles.proof} padding="md">
+            <AuthImage
+              path={`loads/${loadId}/delivery-photo`}
+              style={styles.proofPhoto}
+              accessibilityLabel="The driver's photo of the delivered cargo"
+            />
+            <Text variant="bodyStrong">Received by {delivery.receiverName}</Text>
+            {delivery.deliveredAt && (
+              <Text variant="caption" tone="muted">
+                {new Date(delivery.deliveredAt).toLocaleString("en-GB", {
+                  day: "numeric",
+                  month: "short",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </Text>
+            )}
+          </Card>
+        ) : (
+          <View style={styles.imageContainer}>
+            <Image
+              source={require("@/assets/images/cargo_box.png")}
+              style={styles.cargoImage}
+              contentFit="contain"
+            />
+          </View>
+        )}
 
         {/* Title */}
         <Text variant="display" tone="primary" align="center" style={styles.title}>
@@ -70,6 +96,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: spacing["4xl"],
   },
+  proof: { alignSelf: "stretch", gap: spacing.xs, marginBottom: spacing["2xl"] },
+  proofPhoto: { width: "100%", aspectRatio: 4 / 3, borderRadius: radius.sm },
   imageContainer: {
     marginBottom: spacing["4xl"],
   },

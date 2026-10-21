@@ -88,6 +88,11 @@ export const depositValidator = vine.create({
   method: vine.enum(PAYMENT_METHODS),
 })
 
+export const deliverValidator = vine.create({
+  receiverName: vine.string().trim().minLength(2).maxLength(120),
+  photo: vine.file({ size: '10mb', extnames: ['jpg', 'jpeg', 'png', 'heic', 'webp'] }),
+})
+
 export const releaseValidator = vine.create({
   code: vine.string().regex(/^\d{6}$/),
 })

@@ -187,6 +187,29 @@ export class FleetSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class LoadDeliverySchema extends BaseModel {
+  static $columns = ['createdAt', 'deliveredBy', 'id', 'loadId', 'photoKey', 'photoMimeType', 'photoSizeBytes', 'receiverName', 'updatedAt'] as const
+  $columns = LoadDeliverySchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare deliveredBy: number | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare loadId: number
+  @column()
+  declare photoKey: string
+  @column()
+  declare photoMimeType: string
+  @column()
+  declare photoSizeBytes: number
+  @column()
+  declare receiverName: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class LoadDocumentSchema extends BaseModel {
   static $columns = ['createdAt', 'fileKey', 'id', 'loadId', 'mimeType', 'originalName', 'requirementId', 'sizeBytes', 'updatedAt', 'uploadedBy'] as const
   $columns = LoadDocumentSchema.$columns

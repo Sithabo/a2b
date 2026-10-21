@@ -134,7 +134,9 @@ export function createAppSession({ appId, role, apiUrl }: AppSessionConfig) {
   async function upload<T = unknown>(
     path: string,
     fields: Record<string, string>,
-    file: UploadFile
+    file: UploadFile,
+    /** The form field the API expects the file in. */
+    fileField = 'file'
   ): Promise<T> {
     if (!useSession.getState().isHydrated) await sessionHydrated();
     const token = useSession.getState().token;
@@ -144,9 +146,9 @@ export function createAppSession({ appId, role, apiUrl }: AppSessionConfig) {
     const type = file.mimeType ?? 'image/jpeg';
     if (Platform.OS === 'web') {
       // Browsers give a blob:/data: URL; send the actual bytes
-      form.append('file', await (await fetch(file.uri)).blob(), file.name);
+      form.append(fileField, await (await fetch(file.uri)).blob(), file.name);
     } else {
-      form.append('file', { uri: file.uri, name: file.name, type } as unknown as Blob);
+      form.append(fileField, { uri: file.uri, name: file.name, type } as unknown as Blob);
     }
 
     const response = await fetch(`${apiUrl}/api/v1/${path}`, {
@@ -169,7 +171,7 @@ export function createAppSession({ appId, role, apiUrl }: AppSessionConfig) {
     return data;
   }
 
-  return { role, api, queryClient, useSession, refreshUser, upload };
+  return { role, api, apiUrl, queryClient, useSession, refreshUser, upload };
 }
 
 export type AppSession = ReturnType<typeof createAppSession>;

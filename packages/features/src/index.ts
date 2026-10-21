@@ -7,3 +7,4 @@ export * from './auth/verify_code_screen.tsx';
 export * from './loads/load_card.tsx';
 export * from './queries/load_mutations.ts';
 export * from './queries/query_fallback.tsx';
+export * from './media/auth_image.tsx';

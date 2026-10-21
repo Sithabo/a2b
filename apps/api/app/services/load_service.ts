@@ -1,4 +1,5 @@
-import { randomInt } from 'node:crypto'
+import { randomInt, randomUUID } from 'node:crypto'
+import drive from '@adonisjs/drive/services/main'
 import db from '@adonisjs/lucid/services/db'
 import {
   LOAD_STATUSES,
@@ -10,6 +11,7 @@ import {
 import Load from '#models/load'
 import LoadEvent from '#models/load_event'
 import LoadLocation from '#models/load_location'
+import LoadDelivery from '#models/load_delivery'
 import Escrow from '#models/escrow'
 import Vehicle from '#models/vehicle'
 import DriverProfile from '#models/driver_profile'
@@ -357,11 +359,72 @@ export async function cancelLoad(shipper: User, loadId: number, reason?: string)
   return load
 }
 
-/** Driver milestones: SECURED → IN_TRANSIT (cargo loaded) → DELIVERED (arrived). */
+/**
+ * Driver milestone: SECURED → IN_TRANSIT (cargo loaded). Arrival is recorded
+ * with proof of delivery instead (`deliverLoad`).
+ */
 export async function reportProgress(driver: User, loadId: number, to: 'IN_TRANSIT' | 'DELIVERED') {
+  if (to === 'DELIVERED') {
+    throw DomainError.invalid(
+      "Add the receiver's name and a photo of the delivered cargo",
+      'E_POD_REQUIRED'
+    )
+  }
   return db.transaction(async (trx) => {
     const load = await lockLoad(loadId, trx)
     if ((await actorFor(load, driver, trx)) !== 'driver') throw DomainError.forbidden()
     return transition(load, to, { actor: 'driver', actorId: driver.id }, trx)
   })
+}
+
+/** A photo taken on the device, already received by the server. */
+export interface DeliveryPhoto {
+  tmpPath: string
+  extname: string
+  mimeType: string
+  size: number
+}
+
+/**
+ * IN_TRANSIT → DELIVERED with proof of delivery: who received the cargo and a
+ * photo of it. The shipper sees both before handing over the release code.
+ */
+export async function deliverLoad(
+  driver: User,
+  loadId: number,
+  input: { receiverName: string; photo: DeliveryPhoto }
+) {
+  const key = `loads/${loadId}/delivery-${randomUUID()}.${input.photo.extname}`
+  await drive.use().moveFromFs(input.photo.tmpPath, key)
+  try {
+    return await db.transaction(async (trx) => {
+      const load = await lockLoad(loadId, trx)
+      if ((await actorFor(load, driver, trx)) !== 'driver') throw DomainError.forbidden()
+      await transition(
+        load,
+        'DELIVERED',
+        { actor: 'driver', actorId: driver.id, note: `Received by ${input.receiverName}` },
+        trx
+      )
+      await LoadDelivery.create(
+        {
+          loadId: load.id,
+          receiverName: input.receiverName,
+          photoKey: key,
+          photoMimeType: input.photo.mimeType,
+          photoSizeBytes: input.photo.size,
+          deliveredBy: driver.id,
+        },
+        { client: trx }
+      )
+      return load
+    })
+  } catch (error) {
+    // Nothing points at the photo if the delivery wasn't recorded
+    await drive
+      .use()
+      .delete(key)
+      .catch(() => {})
+    throw error
+  }
 }

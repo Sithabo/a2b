@@ -1,12 +1,17 @@
 import { test } from '@japa/runner'
 import testUtils from '@adonisjs/core/services/test_utils'
+import drive from '@adonisjs/drive/services/main'
 import PaymentTransaction from '#models/payment_transaction'
 import Escrow from '#models/escrow'
 import User from '#models/user'
-import { makeLoad, makeUser, nextPhone, dataOf } from '#tests/helpers'
+import { makeLoad, makeUser, nextPhone, dataOf, deliver } from '#tests/helpers'
 
 test.group('Fleet', (group) => {
   group.each.setup(() => testUtils.db().withGlobalTransaction())
+  group.each.setup(() => {
+    drive.fake('fs')
+    return () => drive.restore('fs')
+  })
 
   test('owner sets up a fleet, adds a driver and a truck, and dispatches a load', async ({
     client,
@@ -75,10 +80,7 @@ test.group('Fleet', (group) => {
       .post(`/api/v1/loads/${load.id}/progress`)
       .json({ status: 'IN_TRANSIT' })
       .loginAs(driver)
-    await client
-      .post(`/api/v1/loads/${load.id}/progress`)
-      .json({ status: 'DELIVERED' })
-      .loginAs(driver)
+    await deliver(client, load.id, driver)
     const { code } = (
       await client.post(`/api/v1/loads/${load.id}/release-code`).loginAs(shipper)
     ).body().data

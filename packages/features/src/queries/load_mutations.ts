@@ -2,6 +2,7 @@ import { Alert } from 'react-native';
 import { useMutation } from '@tanstack/react-query';
 import { apiErrorMessage } from '@a2b/api-client';
 import { useAppSession } from '../session/session_context.tsx';
+import type { UploadFile } from '../session/create_app_session.ts';
 
 /**
  * Every app keys its load queries under this root (["loads", "board"],
@@ -55,6 +56,17 @@ export function useCancelLoad(loadId: number, options: LoadMutationOptions = {})
   return useLoadMutation(
     (reason?: string) => api.loads.cancel({ params: { id: loadId }, body: { reason } }),
     "Couldn't cancel this load",
+    options
+  );
+}
+
+/** The driver arrives: the receiver's name and a photo of the delivered cargo (IN_TRANSIT → DELIVERED). */
+export function useDeliverLoad(loadId: number, options: LoadMutationOptions = {}) {
+  const { upload } = useAppSession();
+  return useLoadMutation(
+    ({ receiverName, photo }: { receiverName: string; photo: UploadFile }) =>
+      upload(`loads/${loadId}/deliver`, { receiverName }, photo, 'photo'),
+    "Couldn't confirm the delivery",
     options
   );
 }

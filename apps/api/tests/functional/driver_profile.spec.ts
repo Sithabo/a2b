@@ -1,12 +1,17 @@
 import { test } from '@japa/runner'
 import testUtils from '@adonisjs/core/services/test_utils'
+import drive from '@adonisjs/drive/services/main'
 import { DateTime } from 'luxon'
 import User from '#models/user'
 import DriverProfile from '#models/driver_profile'
-import { dataOf, makeLoad, makeUser } from '#tests/helpers'
+import { dataOf, makeLoad, makeUser, deliver } from '#tests/helpers'
 
 test.group('Driver profile', (group) => {
   group.each.setup(() => testUtils.db().withGlobalTransaction())
+  group.each.setup(() => {
+    drive.fake('fs')
+    return () => drive.restore('fs')
+  })
 
   test('a new driver must give a licence number to create their profile', async ({ client }) => {
     const driver = await User.create({
@@ -52,10 +57,7 @@ test.group('Driver profile', (group) => {
       .post(`/api/v1/loads/${load.id}/progress`)
       .json({ status: 'IN_TRANSIT' })
       .loginAs(driver)
-    await client
-      .post(`/api/v1/loads/${load.id}/progress`)
-      .json({ status: 'DELIVERED' })
-      .loginAs(driver)
+    await deliver(client, load.id, driver)
     const { code } = dataOf(
       await client.post(`/api/v1/loads/${load.id}/release-code`).loginAs(shipper)
     )

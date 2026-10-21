@@ -46,6 +46,8 @@ export interface ApiDefinition {
     withdraw: typeof routes['loads.withdraw']
     cancel: typeof routes['loads.cancel']
     progress: typeof routes['loads.progress']
+    deliver: typeof routes['loads.deliver']
+    deliveryPhoto: typeof routes['loads.delivery_photo']
   }
   escrow: {
     deposit: typeof routes['escrow.deposit']
