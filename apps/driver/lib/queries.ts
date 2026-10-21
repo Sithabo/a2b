@@ -1,8 +1,8 @@
 import { Linking } from "react-native";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Data } from "@a2b/api-client";
 import { isActiveStatus } from "@a2b/core";
-import { api } from "@/lib/session";
+import { api, session } from "@/lib/session";
 
 export const keys = {
   myLoads: ["loads", "mine"] as const,
@@ -10,6 +10,7 @@ export const keys = {
   load: (id: number) => ["loads", id] as const,
   documents: (id: number) => ["loads", id, "documents"] as const,
   fleetInvites: ["me", "fleet-invites"] as const,
+  verification: ["me", "verification"] as const,
 };
 
 /** Loads assigned to this driver (dispatched by their fleet or accepted themselves). */
@@ -58,6 +59,25 @@ export function useFleetInvites() {
   return useQuery({
     queryKey: keys.fleetInvites,
     queryFn: async () => (await api.fleetInvites.index({})).data,
+  });
+}
+
+/** Verification documents the driver has uploaded (the checklist is the market's `driverDocuments`). */
+export function useDriverDocuments() {
+  return useQuery({
+    queryKey: keys.verification,
+    queryFn: async () => (await api.driverDocuments.index({})).data,
+  });
+}
+
+/** Uploads (or replaces) one verification document, then refreshes the checklist and profile. */
+export function useUploadDriverDocument() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ requirementId, file }: { requirementId: string; file: { uri: string; name: string; mimeType?: string } }) =>
+      session.upload("me/driver-documents", { requirementId }, file),
+    onSuccess: () =>
+      Promise.all([queryClient.invalidateQueries({ queryKey: keys.verification }), session.refreshUser()]),
   });
 }
 

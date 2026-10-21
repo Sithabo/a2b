@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { CargoDetails, LoadStatus, LocationData } from "@a2b/core";
 import type { Data } from "@a2b/api-client";
-import { api, API_URL, useSession } from "@/lib/session";
+import { api, session } from "@/lib/session";
 
 /** A load as the API returns it to the shipper who posted it. */
 export type Load = Data.Load;
@@ -120,29 +120,11 @@ export function newLoadBody(input: NewLoadInput): CreateLoadBody {
   };
 }
 
-/**
- * Uploads one customs document scan. Uses fetch directly because React Native's
- * FormData file objects ({ uri, name, type }) aren't Blobs, which the typed client expects.
- */
-export async function uploadLoadDocument(
+/** Uploads one customs document scan for a draft load. */
+export function uploadLoadDocument(
   loadId: number,
   requirementId: string,
   file: { uri: string; name: string; mimeType?: string }
 ) {
-  const form = new FormData();
-  form.append("requirementId", requirementId);
-  form.append("file", { uri: file.uri, name: file.name, type: file.mimeType ?? "image/jpeg" } as unknown as Blob);
-
-  const response = await fetch(`${API_URL}/api/v1/loads/${loadId}/documents`, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      Authorization: `Bearer ${useSession.getState().token ?? ""}`,
-    },
-    body: form,
-  });
-  if (!response.ok) {
-    // Same shape as typed-client errors so apiErrorMessage() works on it.
-    throw { response: await response.json().catch(() => undefined) };
-  }
+  return session.upload(`loads/${loadId}/documents`, { requirementId }, file);
 }

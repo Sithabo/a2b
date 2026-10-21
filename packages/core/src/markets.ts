@@ -1,6 +1,11 @@
 import type { LocationData, StorageEnvironment, VehicleClass } from './domain.ts';
 import type { MobileMoneyProvider } from './payments.ts';
 import { guyanaDocuments, ugandaDocuments, type DocumentRequirement } from './documents.ts';
+import {
+  guyanaDriverDocuments,
+  ugandaDriverDocuments,
+  type DriverDocumentRequirement,
+} from './driver_documents.ts';
 
 export type MarketCode = 'GY' | 'UG';
 
@@ -56,6 +61,8 @@ export interface Market {
   };
   customsAuthority: string;
   documents: DocumentRequirement[];
+  /** What a driver uploads to get verified. */
+  driverDocuments: DriverDocumentRequirement[];
   /** Customs-controlled zones used for geofenced port detection. */
   customsZones: LocationData[];
   /**
@@ -93,6 +100,7 @@ export const markets: Record<MarketCode, Market> = {
     plate: { pattern: /^[A-Z]{3}\s?\d{4}$/, example: 'GAB 1234', verified: false },
     customsAuthority: 'Guyana Revenue Authority (GRA)',
     documents: guyanaDocuments,
+    driverDocuments: guyanaDriverDocuments,
     customsZones: [
       { id: 'gy_port_georgetown', name: 'Georgetown Wharves (Port Zone)', latitude: 6.8114, longitude: -58.1672, isPort: true },
       { id: 'gy_port_demerara', name: 'Demerara Terminals (Port Zone)', latitude: 6.7901, longitude: -58.1812, isPort: true },
@@ -113,6 +121,7 @@ export const markets: Record<MarketCode, Market> = {
     plate: { pattern: /^U[A-Z]{2}\s?\d{3}[A-Z]$/, example: 'UBH 892K', verified: false },
     customsAuthority: 'Uganda Revenue Authority (URA)',
     documents: ugandaDocuments,
+    driverDocuments: ugandaDriverDocuments,
     // Approximate centre points — confirm geofence radii before relying on them.
     customsZones: [
       { id: 'ug_border_malaba', name: 'Malaba Border Post', latitude: 0.6366, longitude: 34.2716, isPort: true },

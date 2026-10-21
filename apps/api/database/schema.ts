@@ -6,7 +6,7 @@
 
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
-import type { DutyStatus, DriverVerificationStatus, PaymentMethod, EscrowStatus, FleetInviteStatus, MarketCode, FleetSizeTier, StatusActor, LoadStatus, CargoDetails, CargoType, PaymentKind, PaymentStatus, UserRole, BodyType, VehicleStatus, VehicleClass } from '@a2b/core'
+import type { DutyStatus, DriverVerificationStatus, DriverReviewDecision, PaymentMethod, EscrowStatus, FleetInviteStatus, MarketCode, FleetSizeTier, StatusActor, LoadStatus, CargoDetails, CargoType, PaymentKind, PaymentStatus, UserRole, BodyType, VehicleStatus, VehicleClass } from '@a2b/core'
 
 export class AuthAccessTokenSchema extends BaseModel {
   static $columns = ['abilities', 'createdAt', 'expiresAt', 'hash', 'id', 'lastUsedAt', 'name', 'tokenableId', 'type', 'updatedAt'] as const
@@ -33,8 +33,31 @@ export class AuthAccessTokenSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class DriverDocumentSchema extends BaseModel {
+  static $columns = ['createdAt', 'driverId', 'fileKey', 'id', 'mimeType', 'originalName', 'requirementId', 'sizeBytes', 'updatedAt'] as const
+  $columns = DriverDocumentSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare driverId: number
+  @column()
+  declare fileKey: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare mimeType: string
+  @column()
+  declare originalName: string
+  @column()
+  declare requirementId: string
+  @column()
+  declare sizeBytes: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class DriverProfileSchema extends BaseModel {
-  static $columns = ['completedTrips', 'createdAt', 'dutyStatus', 'fleetId', 'id', 'licenseClass', 'licenseNumber', 'ratingAvg', 'updatedAt', 'userId', 'verificationStatus'] as const
+  static $columns = ['completedTrips', 'createdAt', 'dutyStatus', 'fleetId', 'id', 'licenseClass', 'licenseNumber', 'ratingAvg', 'reviewNote', 'reviewedAt', 'reviewedBy', 'submittedAt', 'updatedAt', 'userId', 'verificationStatus'] as const
   $columns = DriverProfileSchema.$columns
   @column()
   declare completedTrips: number
@@ -52,12 +75,37 @@ export class DriverProfileSchema extends BaseModel {
   declare licenseNumber: string | null
   @column()
   declare ratingAvg: number | null
+  @column()
+  declare reviewNote: string | null
+  @column.dateTime()
+  declare reviewedAt: DateTime | null
+  @column()
+  declare reviewedBy: number | null
+  @column.dateTime()
+  declare submittedAt: DateTime | null
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
   @column()
   declare userId: number
   @column()
   declare verificationStatus: DriverVerificationStatus
+}
+
+export class DriverReviewSchema extends BaseModel {
+  static $columns = ['createdAt', 'decision', 'driverId', 'id', 'note', 'reviewerId'] as const
+  $columns = DriverReviewSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare decision: DriverReviewDecision
+  @column()
+  declare driverId: number
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare note: string | null
+  @column()
+  declare reviewerId: number | null
 }
 
 export class EscrowSchema extends BaseModel {

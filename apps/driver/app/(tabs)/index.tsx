@@ -73,11 +73,20 @@ export default function JobsScreen() {
 
       {invites.data?.map((invite) => <FleetInviteCard key={invite.id} invite={invite} />)}
 
-      {profile?.verificationStatus === "PENDING" && (
-        <Card style={styles.notice} padding="lg">
+      {profile && profile.verificationStatus !== "VERIFIED" && (
+        <Card
+          style={styles.notice}
+          padding="lg"
+          onPress={() => router.push("/verification")}
+          accessibilityLabel="Get verified"
+        >
           <ShieldAlert size={20} color={palette.amber[800]} />
           <Text variant="bodySm" color={palette.amber[900]} style={{ flex: 1 }}>
-            Your licence is being verified. You can still take jobs your fleet dispatches to you.
+            {profile.verificationStatus === "REJECTED"
+              ? "We couldn't verify your documents. Tap to see why and upload new ones."
+              : profile.submittedAt
+                ? "Your documents are being reviewed. Until then you can take jobs your fleet dispatches to you."
+                : "Upload your licence and ID to get verified. Until then you can take jobs your fleet dispatches to you."}
           </Text>
         </Card>
       )}
@@ -148,6 +157,6 @@ const styles = StyleSheet.create({
     borderColor: palette.amber[200],
   },
   jobCard: { gap: spacing.md },
-  row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: spacing.sm },
+  row: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: spacing.sm },
   open: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
 });

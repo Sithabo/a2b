@@ -38,7 +38,14 @@
         }
       ],
       "expo-secure-store",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Allow A2B Driver to use your camera to photograph your licence and ID for verification.",
+          "photosPermission": "Allow A2B Driver to choose photos of your licence and ID for verification."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

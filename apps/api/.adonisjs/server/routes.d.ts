@@ -12,6 +12,9 @@ export type ScannedRoutes = {
     'me.update': { paramsTuple?: []; params?: {} }
     'me.upsert_shipper_profile': { paramsTuple?: []; params?: {} }
     'me.upsert_driver_profile': { paramsTuple?: []; params?: {} }
+    'driver_documents.index': { paramsTuple?: []; params?: {} }
+    'driver_documents.store': { paramsTuple?: []; params?: {} }
+    'driver_documents.download': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'fleet_invites.index': { paramsTuple?: []; params?: {} }
     'fleet_invites.accept': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'fleet_invites.decline': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -40,9 +43,15 @@ export type ScannedRoutes = {
     'load_documents.index': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'load_documents.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'load_documents.download': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'documentId': ParamValue} }
+    'admin_drivers.index': { paramsTuple?: []; params?: {} }
+    'admin_drivers.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin_drivers.document': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'documentId': ParamValue} }
+    'admin_drivers.review': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   GET: {
     'me.show': { paramsTuple?: []; params?: {} }
+    'driver_documents.index': { paramsTuple?: []; params?: {} }
+    'driver_documents.download': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'fleet_invites.index': { paramsTuple?: []; params?: {} }
     'fleets.show': { paramsTuple?: []; params?: {} }
     'fleets.vehicles': { paramsTuple?: []; params?: {} }
@@ -54,9 +63,14 @@ export type ScannedRoutes = {
     'loads.requirements': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'load_documents.index': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'load_documents.download': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'documentId': ParamValue} }
+    'admin_drivers.index': { paramsTuple?: []; params?: {} }
+    'admin_drivers.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin_drivers.document': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'documentId': ParamValue} }
   }
   HEAD: {
     'me.show': { paramsTuple?: []; params?: {} }
+    'driver_documents.index': { paramsTuple?: []; params?: {} }
+    'driver_documents.download': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'fleet_invites.index': { paramsTuple?: []; params?: {} }
     'fleets.show': { paramsTuple?: []; params?: {} }
     'fleets.vehicles': { paramsTuple?: []; params?: {} }
@@ -68,12 +82,16 @@ export type ScannedRoutes = {
     'loads.requirements': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'load_documents.index': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'load_documents.download': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'documentId': ParamValue} }
+    'admin_drivers.index': { paramsTuple?: []; params?: {} }
+    'admin_drivers.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin_drivers.document': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'documentId': ParamValue} }
   }
   POST: {
     'payment_webhooks': { paramsTuple?: []; params?: {} }
     'auth.request_otp': { paramsTuple?: []; params?: {} }
     'auth.verify_otp': { paramsTuple?: []; params?: {} }
     'auth.logout': { paramsTuple?: []; params?: {} }
+    'driver_documents.store': { paramsTuple?: []; params?: {} }
     'fleet_invites.accept': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'fleet_invites.decline': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'fleets.store': { paramsTuple?: []; params?: {} }
@@ -90,6 +108,7 @@ export type ScannedRoutes = {
     'escrow.release_code': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'escrow.release': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'load_documents.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin_drivers.review': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   PATCH: {
     'me.update': { paramsTuple?: []; params?: {} }

@@ -1,5 +1,6 @@
 export * from './documents.ts';
 export * from './domain.ts';
+export * from './driver_documents.ts';
 export * from './errors.ts';
 export * from './format.ts';
 export * from './markets.ts';
