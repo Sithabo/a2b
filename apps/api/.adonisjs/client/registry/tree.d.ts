@@ -24,6 +24,10 @@ export interface ApiDefinition {
     accept: typeof routes['fleet_invites.accept']
     decline: typeof routes['fleet_invites.decline']
   }
+  places: {
+    search: typeof routes['places.search']
+    details: typeof routes['places.details']
+  }
   fleets: {
     store: typeof routes['fleets.store']
     show: typeof routes['fleets.show']

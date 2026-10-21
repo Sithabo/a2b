@@ -10,9 +10,11 @@ import {
   CheckCircle,
 } from "lucide-react-native";
 import { Card, colors, layout, radius, ScreenHeader, spacing, Text } from "@a2b/ui";
+import { useMarket } from "@/store/useMarket";
 
 export default function HowItWorksScreen() {
   const router = useRouter();
+  const market = useMarket();
 
   const steps = [
     {
@@ -22,13 +24,13 @@ export default function HowItWorksScreen() {
     },
     {
       icon: DollarSign,
-      title: "2. Set Your Offer",
-      desc: "Use the interactive pricing slider to place your bidding rate. Itemized surcharge rows display exact regulatory fees transparently.",
+      title: "2. Set Your Price",
+      desc: "Set the price you'll pay with the offer slider; it starts from a recommendation for your cargo. The first verified carrier to accept it gets the job.",
     },
     {
       icon: Truck,
       title: "3. Match with Drivers",
-      desc: "Registered, vetted freight carriers in Guyana will view your load and accept the shipment. You get full visibility of the driver and truck profiles.",
+      desc: `Verified carriers in ${market.name} see your load and accept it. Once you fund escrow you see the driver, the truck and their contact details.`,
     },
     {
       icon: ShieldCheck,
@@ -37,8 +39,8 @@ export default function HowItWorksScreen() {
     },
     {
       icon: Navigation,
-      title: "5. Real-Time Tracking",
-      desc: "Follow your shipment live on our GPS tracking map. Monitor delivery progress milestones from Georgetown ports to regional address hubs.",
+      title: "5. Track Each Step",
+      desc: "Follow the shipment as the driver confirms pickup and arrival. At drop-off they photograph the cargo and record who received it.",
     },
     {
       icon: CheckCircle,
@@ -59,7 +61,7 @@ export default function HowItWorksScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text variant="h1" tone="primary" style={styles.introHeading}>Seamless Freight Logistics</Text>
         <Text variant="bodySm" tone="secondary" style={styles.introSub}>
-          A2B connects shippers directly with trusted carriers across Guyana&apos;s industrial corridors. Follow our simple process to post and track your shipments safely:
+          A2B connects shippers directly with trusted carriers across {market.name}. Follow our simple process to post and track your shipments safely:
         </Text>
 
         <View style={styles.stepsList}>

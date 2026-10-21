@@ -90,6 +90,18 @@ const routes = {
     tokens: [{"old":"/api/v1/me/fleet-invites/:id/decline","type":0,"val":"api","end":""},{"old":"/api/v1/me/fleet-invites/:id/decline","type":0,"val":"v1","end":""},{"old":"/api/v1/me/fleet-invites/:id/decline","type":0,"val":"me","end":""},{"old":"/api/v1/me/fleet-invites/:id/decline","type":0,"val":"fleet-invites","end":""},{"old":"/api/v1/me/fleet-invites/:id/decline","type":1,"val":"id","end":""},{"old":"/api/v1/me/fleet-invites/:id/decline","type":0,"val":"decline","end":""}],
     types: placeholder as Registry['fleet_invites.decline']['types'],
   },
+  'places.search': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/places',
+    tokens: [{"old":"/api/v1/places","type":0,"val":"api","end":""},{"old":"/api/v1/places","type":0,"val":"v1","end":""},{"old":"/api/v1/places","type":0,"val":"places","end":""}],
+    types: placeholder as Registry['places.search']['types'],
+  },
+  'places.details': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/places/details',
+    tokens: [{"old":"/api/v1/places/details","type":0,"val":"api","end":""},{"old":"/api/v1/places/details","type":0,"val":"v1","end":""},{"old":"/api/v1/places/details","type":0,"val":"places","end":""},{"old":"/api/v1/places/details","type":0,"val":"details","end":""}],
+    types: placeholder as Registry['places.details']['types'],
+  },
   'fleets.store': {
     methods: ["POST"],
     pattern: '/api/v1/fleet',

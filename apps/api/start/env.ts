@@ -58,4 +58,9 @@ export default await Env.create(new URL('../', import.meta.url), {
   |----------------------------------------------------------
   */
   DRIVE_DISK: Env.schema.enum(['fs'] as const),
+
+  // Place search: "catalog" uses only A2B's curated places; "google" adds Google Places
+  PLACES_PROVIDER: Env.schema.enum.optional(['catalog', 'google'] as const),
+  /** Server-side key with the Places API (New) enabled; never sent to the apps. */
+  GOOGLE_MAPS_API_KEY: Env.schema.string.optional(),
 })

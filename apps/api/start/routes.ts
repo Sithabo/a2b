@@ -11,7 +11,7 @@
 import { middleware } from '#start/kernel'
 import router from '@adonisjs/core/services/router'
 import { controllers } from '#generated/controllers'
-import { otpRequestThrottle, otpVerifyThrottle } from '#start/limiter'
+import { otpRequestThrottle, otpVerifyThrottle, placesThrottle } from '#start/limiter'
 
 router.get('/', () => ({ name: 'a2b-api', status: 'ok' }))
 
@@ -47,6 +47,10 @@ router
         router
           .post('me/fleet-invites/:id/decline', [controllers.FleetInvites, 'decline'])
           .where('id', router.matchers.number())
+
+        // Place search (pickup / drop-off)
+        router.get('places', [controllers.Places, 'search']).use(placesThrottle)
+        router.get('places/details', [controllers.Places, 'details']).use(placesThrottle)
 
         // Fleet (fleet owners)
         router.post('fleet', [controllers.Fleets, 'store'])

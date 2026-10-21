@@ -1,4 +1,5 @@
-import type { LocationData, StorageEnvironment, VehicleClass } from './domain.ts';
+import type { StorageEnvironment, VehicleClass } from './domain.ts';
+import { guyanaPlaces, ugandaPlaces, type MarketPlace } from './places.ts';
 import type { MobileMoneyProvider } from './payments.ts';
 import { guyanaDocuments, ugandaDocuments, type DocumentRequirement } from './documents.ts';
 import {
@@ -63,8 +64,10 @@ export interface Market {
   documents: DocumentRequirement[];
   /** What a driver uploads to get verified. */
   driverDocuments: DriverDocumentRequirement[];
-  /** Customs-controlled zones used for geofenced port detection. */
-  customsZones: LocationData[];
+  /** Known places: suggestions, offline search results and customs zones. */
+  places: MarketPlace[];
+  /** The customs-controlled places (ports, border posts, airport cargo), for port detection. */
+  customsZones: MarketPlace[];
   /**
    * PLACEHOLDER: both markets currently use the same numbers the shipper prototype had.
    * Calibrate per market (GYD vs UGX) before launch.
@@ -101,10 +104,8 @@ export const markets: Record<MarketCode, Market> = {
     customsAuthority: 'Guyana Revenue Authority (GRA)',
     documents: guyanaDocuments,
     driverDocuments: guyanaDriverDocuments,
-    customsZones: [
-      { id: 'gy_port_georgetown', name: 'Georgetown Wharves (Port Zone)', latitude: 6.8114, longitude: -58.1672, isPort: true },
-      { id: 'gy_port_demerara', name: 'Demerara Terminals (Port Zone)', latitude: 6.7901, longitude: -58.1812, isPort: true },
-    ],
+    places: guyanaPlaces,
+    customsZones: guyanaPlaces.filter((p) => p.isPort),
     rates: placeholderRates,
   },
   UG: {
@@ -122,11 +123,8 @@ export const markets: Record<MarketCode, Market> = {
     customsAuthority: 'Uganda Revenue Authority (URA)',
     documents: ugandaDocuments,
     driverDocuments: ugandaDriverDocuments,
-    // Approximate centre points — confirm geofence radii before relying on them.
-    customsZones: [
-      { id: 'ug_border_malaba', name: 'Malaba Border Post', latitude: 0.6366, longitude: 34.2716, isPort: true },
-      { id: 'ug_border_busia', name: 'Busia Border Post', latitude: 0.4633, longitude: 34.092, isPort: true },
-    ],
+    places: ugandaPlaces,
+    customsZones: ugandaPlaces.filter((p) => p.isPort),
     rates: placeholderRates,
   },
 };
