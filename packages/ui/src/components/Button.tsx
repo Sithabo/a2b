@@ -28,6 +28,9 @@ export interface ButtonProps {
   fullWidth?: boolean;
   style?: StyleProp<ViewStyle>;
   testID?: string;
+  /** Defaults to the title; set it when the title alone isn't descriptive ("Edit"). */
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
 }
 
 const variantStyles: Record<ButtonVariant, { bg: string; fg: string; border: string }> = {
@@ -56,6 +59,8 @@ export function Button({
   fullWidth = false,
   style,
   testID,
+  accessibilityLabel,
+  accessibilityHint,
 }: ButtonProps) {
   const v = variantStyles[variant];
   const inactive = disabled || loading;
@@ -65,6 +70,10 @@ export function Button({
     <Pressable
       testID={testID}
       accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? title}
+      accessibilityHint={accessibilityHint}
+      // The small size is 40pt tall; extend its touch target to the 48pt minimum
+      hitSlop={size === 'sm' ? 4 : undefined}
       accessibilityState={{ disabled: inactive, busy: loading }}
       onPress={onPress}
       disabled={inactive}

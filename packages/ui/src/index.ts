@@ -16,3 +16,6 @@ export * from './components/PlateBadge.tsx';
 export * from './components/Stepper.tsx';
 export * from './components/CodePad.tsx';
 export * from './components/SlideToConfirm.tsx';
+export * from './components/ScreenScroll.tsx';
+export * from './components/SegmentedControl.tsx';
+export * from './components/ListSection.tsx';

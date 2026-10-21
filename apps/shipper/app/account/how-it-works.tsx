@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import {
   FileText,
@@ -9,7 +9,7 @@ import {
   Navigation,
   CheckCircle,
 } from "lucide-react-native";
-import { colors, palette, ScreenHeader } from "@a2b/ui";
+import { Card, colors, layout, radius, ScreenHeader, spacing, Text } from "@a2b/ui";
 
 export default function HowItWorksScreen() {
   const router = useRouter();
@@ -48,7 +48,7 @@ export default function HowItWorksScreen() {
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background || palette.gray[50] }]}>
+    <View style={styles.container}>
       <ScreenHeader
         title="How A2B Works"
         subtitle="Step-by-step freight shipping guide"
@@ -57,8 +57,8 @@ export default function HowItWorksScreen() {
       />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <Text style={styles.introHeading}>Seamless Freight Logistics</Text>
-        <Text style={styles.introSub}>
+        <Text variant="h1" tone="primary" style={styles.introHeading}>Seamless Freight Logistics</Text>
+        <Text variant="bodySm" tone="secondary" style={styles.introSub}>
           A2B connects shippers directly with trusted carriers across Guyana&apos;s industrial corridors. Follow our simple process to post and track your shipments safely:
         </Text>
 
@@ -66,15 +66,15 @@ export default function HowItWorksScreen() {
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
-              <View key={index} style={styles.stepCard}>
+              <Card key={index} style={styles.stepCard}>
                 <View style={styles.iconContainer}>
                   <Icon color={colors.primary} size={24} />
                 </View>
                 <View style={styles.stepContent}>
-                  <Text style={styles.stepTitle}>{step.title}</Text>
-                  <Text style={styles.stepDesc}>{step.desc}</Text>
+                  <Text variant="bodyStrong">{step.title}</Text>
+                  <Text variant="bodySm" tone="muted">{step.desc}</Text>
                 </View>
-              </View>
+              </Card>
             );
           })}
         </View>
@@ -86,60 +86,35 @@ export default function HowItWorksScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: colors.background,
   },
   scrollContent: {
-    padding: 20,
-    paddingBottom: 40,
+    padding: layout.gutter,
+    paddingBottom: spacing['4xl'],
   },
   introHeading: {
-    fontSize: 22,
-    fontWeight: "900",
-    color: colors.primary,
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   introSub: {
-    fontSize: 14,
-    color: palette.gray[600],
-    lineHeight: 22,
-    marginBottom: 24,
+    marginBottom: spacing['2xl'],
   },
   stepsList: {
-    gap: 16,
+    gap: spacing.lg,
   },
   stepCard: {
     flexDirection: "row",
-    backgroundColor: palette.white,
-    borderRadius: 20,
-    padding: 20,
-    gap: 16,
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: palette.gray[100],
+    gap: spacing.lg,
   },
   iconContainer: {
     width: 48,
     height: 48,
-    borderRadius: 16,
-    backgroundColor: palette.forest[50],
+    borderRadius: radius.md,
+    backgroundColor: colors.primaryMuted,
     alignItems: "center",
     justifyContent: "center",
   },
   stepContent: {
     flex: 1,
-    gap: 4,
-  },
-  stepTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: palette.gray[900],
-  },
-  stepDesc: {
-    fontSize: 13,
-    color: palette.gray[500],
-    lineHeight: 20,
+    gap: spacing.xs,
   },
 });

@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { Alert, Pressable, StyleSheet, Switch, View } from "react-native";
+import { Alert, StyleSheet, Switch, View } from "react-native";
 import { useRouter } from "expo-router";
 import { ArrowRight, Moon, PackageSearch, ShieldAlert } from "lucide-react-native";
 import { apiErrorMessage } from "@a2b/api-client";
 import { formatMoney, getMarket, statusMeta } from "@a2b/core";
 import { LoadCard, QueryFallback } from "@a2b/features";
-import { Badge, Card, colors, EmptyState, palette, radius, spacing, Text } from "@a2b/ui";
-import { ScreenScroll } from "@/components/ScreenScroll";
+import { Badge, Card, colors, EmptyState, palette, ScreenScroll, spacing, Text } from "@a2b/ui";
 import { FleetInviteCard } from "@/components/FleetInviteCard";
 import { api, session, useSession } from "@/lib/session";
 import { currentJob, useFleetInvites, useLoadBoard, useMyLoads } from "@/lib/queries";
@@ -84,9 +83,11 @@ export default function JobsScreen() {
       )}
 
       {job && (
-        <Pressable
+        <Card
+          variant="brand"
           onPress={() => router.push({ pathname: "/trip/[id]", params: { id: String(job.id) } })}
-          style={({ pressed }) => [styles.jobCard, pressed && { opacity: 0.9 }]}
+          accessibilityLabel={`Current job: ${job.pickupSummary} to ${job.dropoffSummary}`}
+          style={styles.jobCard}
         >
           <View style={styles.row}>
             <Badge
@@ -109,7 +110,7 @@ export default function JobsScreen() {
               <ArrowRight size={18} color={colors.onPrimary} />
             </View>
           </View>
-        </Pressable>
+        </Card>
       )}
 
       {!job && (
@@ -146,7 +147,7 @@ const styles = StyleSheet.create({
     backgroundColor: palette.amber[50],
     borderColor: palette.amber[200],
   },
-  jobCard: { gap: spacing.md, padding: spacing.xl, borderRadius: radius.md, backgroundColor: colors.primary },
+  jobCard: { gap: spacing.md },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: spacing.sm },
   open: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
 });

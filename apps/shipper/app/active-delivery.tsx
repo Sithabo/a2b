@@ -1,9 +1,7 @@
 import React from "react";
 import {
   View,
-  Text,
   ScrollView,
-  TouchableOpacity,
   StyleSheet,
   Linking,
   Platform,
@@ -26,7 +24,20 @@ import { LoadState } from "@/components/LoadState";
 import { milestoneIndex, parseLoadId, trackingLabel, useShipment, weightLabel } from "@/lib/loads";
 import { cargoLabel, vehicleClasses } from "@a2b/core";
 import { MilestoneTimeline } from "@/components/MilestoneTimeline";
-import { colors, palette, ScreenHeader } from "@a2b/ui";
+import {
+  Button,
+  Card,
+  colors,
+  elevation,
+  IconButton,
+  layout,
+  palette,
+  PlateBadge,
+  radius,
+  ScreenHeader,
+  spacing,
+  Text,
+} from "@a2b/ui";
 
 export default function ActiveDeliveryScreen() {
   const router = useRouter();
@@ -167,8 +178,9 @@ export default function ActiveDeliveryScreen() {
 
   if (!shipment) return <LoadState error={error} onRetry={refetch} />;
 
+
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={styles.container}>
       {/* Header */}
       <ScreenHeader
         title="Active Delivery"
@@ -186,58 +198,58 @@ export default function ActiveDeliveryScreen() {
         {/* Top Header Card (emulates screenshot) */}
         <View style={styles.topCard}>
           <View style={styles.topAvatarContainer}>
-            <Package color={palette.amber[600]} size={32} />
+            <Package color={colors.accent} size={32} />
           </View>
-          <View>
-            <Text style={styles.topTitle}>{cargoLabel(shipment.cargoType)}</Text>
+          <View style={styles.topTextContainer}>
+            <Text variant="h2">{cargoLabel(shipment.cargoType)}</Text>
             <View style={styles.trackingRow}>
-              <Text style={styles.trackingIdText}>
+              <Text variant="bodySm" tone="muted">
                 Tracking ID: {trackingLabel(shipment)}
               </Text>
-              <TouchableOpacity
+              <IconButton
+                icon={Copy}
+                variant="plain"
+                size={28}
                 onPress={copyToClipboard}
-                style={styles.copyBtn}
-                activeOpacity={0.6}
-              >
-                <Copy color={palette.gray[500]} size={14} />
-              </TouchableOpacity>
+                accessibilityLabel="Copy tracking ID"
+              />
             </View>
           </View>
         </View>
 
         {/* Specs Details Card (emulates screenshot grey card) */}
-        <View style={styles.specsCard}>
+        <Card variant="muted" padding="lg">
           <View style={styles.specsRow}>
-            <Text style={styles.specsLabel}>From:</Text>
-            <Text style={styles.specsValue} numberOfLines={1}>
+            <Text variant="bodySm" tone="muted">From:</Text>
+            <Text variant="bodyStrong" align="right" style={styles.specsValue} numberOfLines={1}>
               {pickupName}
             </Text>
           </View>
           <View style={styles.specsRow}>
-            <Text style={styles.specsLabel}>Destination:</Text>
-            <Text style={styles.specsValue} numberOfLines={1}>
+            <Text variant="bodySm" tone="muted">Destination:</Text>
+            <Text variant="bodyStrong" align="right" style={styles.specsValue} numberOfLines={1}>
               {deliveryName}
             </Text>
           </View>
           <View style={styles.specsRow}>
-            <Text style={styles.specsLabel}>Driver:</Text>
-            <Text style={styles.specsValue}>
+            <Text variant="bodySm" tone="muted">Driver:</Text>
+            <Text variant="bodyStrong" align="right" style={styles.specsValue}>
               {driverName}
             </Text>
           </View>
           <View style={styles.specsRow}>
-            <Text style={styles.specsLabel}>Weight:</Text>
-            <Text style={styles.specsValue}>
+            <Text variant="bodySm" tone="muted">Weight:</Text>
+            <Text variant="bodyStrong" align="right" style={styles.specsValue}>
               {weightLabel(shipment)}
             </Text>
           </View>
           <View style={[styles.specsRow, styles.specsRowLast]}>
-            <Text style={styles.specsLabel}>Status:</Text>
-            <Text style={[styles.specsValue, { color: colors.primary }]}>
+            <Text variant="bodySm" tone="muted">Status:</Text>
+            <Text variant="bodyStrong" tone="primary" align="right" style={styles.specsValue}>
               {getMilestoneStatusText(currentMilestoneIndex)}
             </Text>
           </View>
-        </View>
+        </Card>
 
         {/* Driver Contact Card (Clickable to show Vehicle Modal) */}
         <DriverContactCard
@@ -248,14 +260,6 @@ export default function ActiveDeliveryScreen() {
         />
 
         {/* Vertical Stepper Timeline Component (replacing live map) */}
-        {/* <View style={styles.card}> */}
-        {/* <View style={styles.timelineHeader}>
-          <Compass color={colors.primary} size={18} />
-          <Text style={styles.cardSectionTitle}>
-            Milestone Tracking Timeline
-          </Text>
-        </View> */}
-
         <View style={styles.timelineContainer}>
           <MilestoneTimeline
             milestones={milestones}
@@ -263,64 +267,29 @@ export default function ActiveDeliveryScreen() {
             getMilestoneTime={getMilestoneTime}
           />
         </View>
-        {/* </View> */}
-
-        {/* Vehicle Information */}
-        {/* <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Truck color={palette.gray[500]} size={14} />
-            <Text style={styles.cardTitle}>Vehicle Information</Text>
-          </View>
-
-          <View style={styles.vehicleGrid}>
-            <View style={styles.gridItem}>
-              <Text style={styles.gridLabel}>Vehicle Type</Text>
-              <Text style={styles.gridValue}>Lorry (Medium)</Text>
-            </View>
-            <View style={[styles.gridItem, { alignItems: "flex-end" }]}>
-              <Text style={styles.gridLabel}>Capacity</Text>
-              <Text style={styles.gridValue}>5 Tons</Text>
-            </View>
-
-            <View style={styles.divider} />
-
-            <View style={styles.gridItem}>
-              <Text style={styles.gridLabel}>Make & Model</Text>
-              <Text style={styles.gridValue}>Isuzu FRR</Text>
-            </View>
-            <View style={[styles.gridItem, { alignItems: "flex-end" }]}>
-              <Text style={styles.gridLabel}>Number Plate</Text>
-              <View style={styles.plateBox}>
-                <Text style={styles.plateText}>UAM 456K</Text>
-              </View>
-            </View>
-          </View>
-        </View> */}
       </ScrollView>
 
       {/* Action Bottom */}
       <View
         style={[
           styles.confirmActionContainer,
-          { bottom: insets.bottom > 0 ? insets.bottom : 20 },
+          { bottom: insets.bottom > 0 ? insets.bottom : spacing.xl },
         ]}
       >
-        <TouchableOpacity
-          style={styles.confirmButton}
-          activeOpacity={0.8}
+        <Button
+          title={
+            currentMilestoneIndex === 6
+              ? "Confirm & Release Funds"
+              : "Confirm Delivery"
+          }
+          fullWidth
           onPress={() =>
             router.push({
               pathname: "/confirm-delivery",
               params: { trackingId: String(shipment.id) },
             })
           }
-        >
-          <Text style={styles.confirmButtonText}>
-            {currentMilestoneIndex === 6
-              ? "Confirm & Release Funds"
-              : "Confirm Delivery"}
-          </Text>
-        </TouchableOpacity>
+        />
       </View>
 
       {/* Vehicle Info Modal */}
@@ -332,6 +301,8 @@ export default function ActiveDeliveryScreen() {
       >
         <Pressable
           style={styles.modalOverlay}
+          accessibilityRole="button"
+          accessibilityLabel="Close"
           onPress={() => setVehicleModalVisible(false)}
         >
           <Pressable
@@ -343,14 +314,13 @@ export default function ActiveDeliveryScreen() {
 
             {/* Header */}
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Driver & Vehicle Info</Text>
-              <TouchableOpacity
+              <Text variant="h3">Driver & Vehicle Info</Text>
+              <IconButton
+                icon={X}
+                variant="plain"
                 onPress={() => setVehicleModalVisible(false)}
-                style={styles.modalCloseBtn}
-                activeOpacity={0.6}
-              >
-                <X color={palette.gray[700]} size={20} />
-              </TouchableOpacity>
+                accessibilityLabel="Close"
+              />
             </View>
 
             {/* Driver Profile Summary */}
@@ -361,10 +331,10 @@ export default function ActiveDeliveryScreen() {
                 contentFit="cover"
               />
               <View style={styles.modalDriverText}>
-                <Text style={styles.modalDriverName}>
+                <Text variant="bodyStrong">
                   {driverName}
                 </Text>
-                <Text style={styles.modalDriverRole}>
+                <Text variant="bodySm" tone="muted" style={styles.modalDriverRole}>
                   Delivery Partner • Verified
                 </Text>
               </View>
@@ -376,45 +346,42 @@ export default function ActiveDeliveryScreen() {
             {/* Vehicle Details Title */}
             <View style={styles.modalSectionHeader}>
               <Truck color={colors.primary} size={18} />
-              <Text style={styles.modalSectionTitle}>Vehicle Details</Text>
+              <Text variant="label" tone="primary">Vehicle Details</Text>
             </View>
 
             {/* Vehicle Details Grid */}
             <View style={styles.modalGrid}>
               <View style={styles.modalGridItem}>
-                <Text style={styles.modalGridLabel}>Vehicle Type</Text>
-                <Text style={styles.modalGridValue}>
+                <Text variant="label" tone="muted" style={styles.modalGridLabel}>Vehicle Type</Text>
+                <Text variant="bodyStrong">
                   {vehicle ? vehicleClasses[vehicle.vehicleClass].label : "—"}
                 </Text>
               </View>
               <View style={styles.modalGridItem}>
-                <Text style={styles.modalGridLabel}>Capacity</Text>
-                <Text style={styles.modalGridValue}>
+                <Text variant="label" tone="muted" style={styles.modalGridLabel}>Capacity</Text>
+                <Text variant="bodyStrong">
                   {vehicle ? `${vehicle.capacityTons} Tons` : "—"}
                 </Text>
               </View>
               <View style={styles.modalGridItem}>
-                <Text style={styles.modalGridLabel}>Make & Model</Text>
-                <Text style={styles.modalGridValue}>
+                <Text variant="label" tone="muted" style={styles.modalGridLabel}>Make & Model</Text>
+                <Text variant="bodyStrong">
                   {vehicle ? `${vehicle.make} ${vehicle.model}` : "—"}
                 </Text>
               </View>
               <View style={styles.modalGridItem}>
-                <Text style={styles.modalGridLabel}>Number Plate</Text>
-                <View style={styles.modalPlateBox}>
-                  <Text style={styles.modalPlateText}>{vehicle?.plate ?? "—"}</Text>
-                </View>
+                <Text variant="label" tone="muted" style={styles.modalGridLabel}>Number Plate</Text>
+                <PlateBadge plate={vehicle?.plate ?? "—"} size="sm" />
               </View>
             </View>
 
             {/* Close Button */}
-            <TouchableOpacity
+            <Button
+              title="Got It"
+              fullWidth
               style={styles.modalButton}
-              activeOpacity={0.8}
               onPress={() => setVehicleModalVisible(false)}
-            >
-              <Text style={styles.modalButtonText}>Got It</Text>
-            </TouchableOpacity>
+            />
           </Pressable>
         </Pressable>
       </Modal>
@@ -425,494 +392,133 @@ export default function ActiveDeliveryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    backgroundColor: colors.primary,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingTop: 56, // For safe area
-    paddingBottom: 16,
-    paddingHorizontal: 16,
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
-    zIndex: 10,
-  },
-  backButton: {
-    padding: 8,
-    marginLeft: -8,
-  },
-  headerTitleContainer: {
-    flex: 1,
-    paddingHorizontal: 16,
-  },
-  headerTitle: {
-    color: palette.white,
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  headerSubtitle: {
-    color: palette.emerald[200],
-    fontSize: 12,
-    fontWeight: "500",
-  },
-  placeholderIcon: {
-    width: 40,
+    backgroundColor: colors.background,
   },
   scrollContent: {
-    padding: 16,
-    gap: 16,
+    padding: layout.gutter,
+    gap: spacing.lg,
   },
   topCard: {
-    // backgroundColor: palette.white,
-    // borderRadius: 20,
-    padding: 20,
+    padding: spacing.xl,
     alignItems: "center",
     width: "100%",
-    display: "flex",
     flexDirection: "row",
-    gap: 24,
-    // borderWidth: 1,
-    // borderColor: palette.gray[100],
-    // shadowColor: palette.black,
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowOpacity: 0.05,
-    // shadowRadius: 8,
-    // elevation: 2,
+    gap: spacing["2xl"],
   },
   topAvatarContainer: {
     width: 64,
     height: 64,
-    borderRadius: 32,
-    backgroundColor: palette.amber[50],
+    borderRadius: radius.pill,
+    backgroundColor: colors.accentMuted,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 12,
+    marginBottom: spacing.md,
     borderWidth: 1,
     borderColor: palette.amber[100],
   },
-  topTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: palette.gray[900],
-    // textAlign: "center",
+  topTextContainer: {
+    flexShrink: 1,
   },
   trackingRow: {
     flexDirection: "row",
-    // alignItems: "center",
-    gap: 6,
-    marginTop: 6,
-  },
-  trackingIdText: {
-    fontSize: 14,
-    color: palette.gray[500],
-    fontWeight: "500",
-  },
-  copyBtn: {
-    padding: 4,
-  },
-  specsCard: {
-    backgroundColor: palette.gray[100],
-    borderRadius: 16,
-    padding: 16,
-    width: "100%",
+    alignItems: "center",
+    gap: spacing.xs,
+    marginTop: spacing.xs,
   },
   specsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 10,
-    // borderBottomWidth: 1,
-    // borderBottomColor: palette.gray[200],
+    alignItems: "center",
+    paddingVertical: spacing.sm,
   },
   specsRowLast: {
-    borderBottomWidth: 0,
-    paddingBottom: 4,
-  },
-  specsLabel: {
-    fontSize: 14,
-    color: palette.gray[500],
-    fontWeight: "500",
+    paddingBottom: spacing.xs,
   },
   specsValue: {
-    fontSize: 14,
-    color: palette.gray[900],
-    fontWeight: "600",
-    textAlign: "right",
     flex: 1,
-    paddingLeft: 16,
-  },
-  card: {
-    backgroundColor: palette.white,
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: palette.gray[100],
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  cardHeader: {
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginBottom: 16,
-  },
-  cardTitle: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: palette.gray[500],
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  contactActions: {
-    width: "100%",
-    flexDirection: "row",
-    gap: 12,
-  },
-  callButton: {
-    flex: 1,
-    backgroundColor: colors.primary,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 12,
-    borderRadius: 12,
-    gap: 8,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  callText: {
-    color: "white",
-    fontWeight: "600",
-    fontSize: 14,
-  },
-  messageButton: {
-    flex: 1,
-    backgroundColor: palette.white,
-    borderWidth: 1,
-    borderColor: palette.gray[200],
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 12,
-    borderRadius: 12,
-    gap: 8,
-  },
-  messageText: {
-    color: palette.gray[700],
-    fontWeight: "600",
-    fontSize: 14,
-  },
-  timelineHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: palette.gray[100],
-    paddingBottom: 12,
-  },
-  cardSectionTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: colors.primary,
+    paddingLeft: spacing.lg,
   },
   timelineContainer: {
     width: "100%",
-    paddingHorizontal: 25,
-    paddingVertical: 20,
-  },
-
-  simulatorCard: {
-    backgroundColor: palette.amber[50],
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: palette.amber[200],
-  },
-  simulatorHeader: {
-    marginBottom: 12,
-  },
-  simulatorTitle: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: palette.amber[700],
-  },
-  simulatorSubtitle: {
-    fontSize: 12,
-    color: palette.amber[900],
-    marginTop: 2,
-  },
-  simulatorActions: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  simButton: {
-    flex: 1,
-    backgroundColor: palette.amber[600],
-    paddingVertical: 10,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  simButtonDisabled: {
-    backgroundColor: palette.amber[300],
-    opacity: 0.6,
-  },
-  simButtonText: {
-    color: palette.white,
-    fontWeight: "bold",
-    fontSize: 12,
-  },
-  simResetButton: {
-    backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: palette.amber[600],
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  simResetButtonText: {
-    color: palette.amber[600],
-    fontWeight: "bold",
-    fontSize: 12,
-  },
-  vehicleGrid: {
-    width: "100%",
-    flexDirection: "row",
-    flexWrap: "wrap",
-    rowGap: 16,
-  },
-  gridItem: {
-    width: "50%",
-  },
-  gridLabel: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: palette.gray[400],
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-    marginBottom: 2,
-  },
-  gridValue: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: palette.gray[800],
-  },
-  divider: {
-    width: "100%",
-    height: 1,
-    backgroundColor: palette.gray[100],
-    marginVertical: 4,
-  },
-  plateBox: {
-    backgroundColor: palette.gray[100],
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: palette.gray[200],
-    marginTop: 4,
-  },
-  plateText: {
-    fontSize: 12,
-    fontWeight: "bold",
-    fontFamily: "monospace",
-    color: palette.gray[800],
+    paddingHorizontal: spacing["2xl"],
+    paddingVertical: spacing.xl,
   },
   confirmActionContainer: {
     position: "absolute",
     left: 0,
     right: 0,
-    paddingHorizontal: 20,
-  },
-  confirmButton: {
-    width: "100%",
-    backgroundColor: colors.primary,
-    paddingVertical: 14,
-    borderRadius: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  confirmButtonText: {
-    color: palette.white,
-    fontSize: 16,
-    fontWeight: "bold",
+    paddingHorizontal: layout.gutter,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    backgroundColor: colors.overlay,
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: palette.white,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    padding: 24,
-    paddingBottom: 40,
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 5,
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radius.md,
+    borderTopRightRadius: radius.md,
+    padding: spacing["2xl"],
+    paddingBottom: spacing["4xl"],
+    ...elevation.md,
   },
   modalHandle: {
     width: 36,
     height: 4,
-    backgroundColor: palette.gray[200],
-    borderRadius: 2,
+    backgroundColor: colors.border,
+    borderRadius: radius.pill,
     alignSelf: "center",
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: palette.gray[900],
-  },
-  modalCloseBtn: {
-    padding: 4,
+    marginBottom: spacing.xl,
   },
   modalDriverSummary: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: spacing.xl,
   },
   modalDriverAvatar: {
     width: 56,
     height: 56,
-    borderRadius: 28,
-    backgroundColor: palette.gray[100],
+    borderRadius: radius.pill,
+    backgroundColor: colors.surfaceSunken,
   },
   modalDriverText: {
-    marginLeft: 16,
+    marginLeft: spacing.lg,
     flex: 1,
   },
-  modalDriverName: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: palette.gray[900],
-  },
   modalDriverRole: {
-    fontSize: 13,
-    color: palette.gray[500],
-    marginTop: 2,
-  },
-  modalRatingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 4,
-    gap: 4,
-  },
-  modalRatingText: {
-    fontSize: 12,
-    color: palette.gray[600],
-    fontWeight: "600",
+    marginTop: spacing.xxs,
   },
   modalDivider: {
     height: 1,
-    backgroundColor: palette.gray[100],
-    marginVertical: 16,
+    backgroundColor: colors.border,
+    marginVertical: spacing.lg,
   },
   modalSectionHeader: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    marginBottom: 16,
-  },
-  modalSectionTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: colors.primary,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
   },
   modalGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    rowGap: 16,
-    columnGap: 16,
-    marginBottom: 24,
+    rowGap: spacing.lg,
+    columnGap: spacing.lg,
+    marginBottom: spacing["2xl"],
   },
   modalGridItem: {
     width: "47%",
   },
   modalGridLabel: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: palette.gray[400],
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-    marginBottom: 4,
-  },
-  modalGridValue: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: palette.gray[800],
-  },
-  modalPlateBox: {
-    backgroundColor: palette.gray[100],
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: palette.gray[200],
-    alignSelf: "flex-start",
-  },
-  modalPlateText: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: palette.gray[800],
-  },
-  complianceBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: palette.emerald[50],
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    alignSelf: "flex-start",
-  },
-  complianceDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: palette.emerald[500],
-    marginRight: 6,
-  },
-  complianceText: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: palette.emerald[700],
+    marginBottom: spacing.xs,
   },
   modalButton: {
-    width: "100%",
-    backgroundColor: colors.primary,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 8,
-  },
-  modalButtonText: {
-    color: palette.white,
-    fontSize: 15,
-    fontWeight: "700",
+    marginTop: spacing.sm,
   },
 });

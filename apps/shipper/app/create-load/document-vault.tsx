@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
-  Text,
   ScrollView,
-  TextInput,
-  TouchableOpacity,
+  Pressable,
   StyleSheet,
   Modal,
-  Platform,
   Alert,
   ActivityIndicator,
 } from "react-native";
@@ -23,12 +20,25 @@ import {
   CheckCircle,
   X,
   Shield,
-  File,
   ChevronRight,
   ArrowLeft,
 } from "lucide-react-native";
 import { useShipmentStore, type DraftDocument } from "@/store/useShipmentStore";
-import { colors, palette, ScreenHeader } from "@a2b/ui";
+import {
+  Badge,
+  Button,
+  IconButton,
+  ScreenHeader,
+  Text,
+  TextField,
+  colors,
+  elevation,
+  fontFamily,
+  layout,
+  palette,
+  radius,
+  spacing,
+} from "@a2b/ui";
 import { useMarket } from "@/store/useMarket";
 import { cargoLabel, documentsFor } from "@a2b/core";
 import { apiErrorMessage } from "@a2b/api-client";
@@ -68,7 +78,8 @@ export default function DocumentVaultScreen() {
   const [serverLoadId, setServerLoadId] = useState<number | null>(null);
   const invalidateLoads = useInvalidateLoads();
 
-  const [activeSlot, setActiveSlot] = useState<SlotName | null>(null);
+  // Only the setter is read today; the value is kept for the scan-in-progress slot.
+  const [, setActiveSlot] = useState<SlotName | null>(null);
   // A ref, not state: the leave-screen listener must see it the moment the load is posted,
   // before a re-render re-subscribes the listener.
   const isSubmissionComplete = useRef(false);
@@ -285,53 +296,54 @@ export default function DocumentVaultScreen() {
         <View style={styles.secureBanner}>
           <Shield size={20} color={colors.primary} />
           <View style={styles.secureBannerTextContainer}>
-            <Text style={styles.secureBannerTitle}>Institutional Level Security</Text>
-            <Text style={styles.secureBannerSub}>
+            <Text variant="bodyStrong" tone="primary">Institutional Level Security</Text>
+            <Text variant="caption" tone="primary" style={styles.secureBannerSub}>
               Documents are stored privately and shared only with your driver, as a digital customs pass, once escrow is funded.
             </Text>
           </View>
         </View>
 
         {/* Input for customs reference */}
-        <View style={styles.inputSection}>
-          <Text style={styles.inputLabel}>Customs Reference / Container ID</Text>
-          <TextInput
-            style={styles.textInput}
-            value={containerId}
-            onChangeText={setContainerId}
-            placeholder="e.g. CON-GY-82195"
-            placeholderTextColor={palette.gray[400]}
-            autoCapitalize="characters"
-          />
-        </View>
+        <TextField
+          label="Customs Reference / Container ID"
+          value={containerId}
+          onChangeText={setContainerId}
+          placeholder="e.g. CON-GY-82195"
+          autoCapitalize="characters"
+        />
 
         {/* Upload slots */}
         <View style={styles.uploadCardsSection}>
-          <Text style={styles.sectionHeading}>Mandatory Compliance Documents</Text>
+          <Text variant="h3" style={styles.sectionHeading}>Mandatory Compliance Documents</Text>
 
           {requiredDocs.map((doc) => {
             const file = uploadedFiles[doc.id];
             return (
               <View key={doc.id} style={doc.id === "go_invest_concession" ? styles.goInvestContainer : undefined}>
-                <TouchableOpacity
-                  style={[styles.uploadCard, file ? styles.uploadCardCompleted : styles.uploadCardEmpty]}
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={file ? `${doc.label}, uploaded` : `${doc.label}, scan document`}
+                  style={({ pressed }) => [
+                    styles.uploadCard,
+                    file ? styles.uploadCardCompleted : styles.uploadCardEmpty,
+                    pressed && { opacity: 0.85 },
+                  ]}
                   onPress={() => handleCardPress(doc.id)}
-                  activeOpacity={0.75}
                 >
                   <View style={[styles.iconWrapper, file ? styles.iconWrapperCompleted : styles.iconWrapperEmpty]}>
                     {file?.uri ? (
                       <Image source={{ uri: file.uri }} style={styles.thumbnail} contentFit="cover" />
                     ) : file ? (
-                      <CheckCircle size={20} color={palette.white} />
+                      <CheckCircle size={20} color={colors.onPrimary} />
                     ) : (
-                      <Upload size={20} color={palette.gray[500]} />
+                      <Upload size={20} color={colors.textMuted} />
                     )}
                   </View>
                   <View style={styles.cardInfo}>
-                    <Text style={[styles.cardLabel, file ? styles.cardLabelCompleted : styles.cardLabelEmpty]}>
+                    <Text variant="bodyStrong" tone={file ? "success" : "default"}>
                       {doc.label}
                     </Text>
-                    <Text style={styles.cardMicrocopy} numberOfLines={1}>
+                    <Text variant="caption" tone="muted" numberOfLines={1}>
                       {file
                         ? `${file.name} (${file.size})`
                         : doc.acceptedForms
@@ -339,13 +351,13 @@ export default function DocumentVaultScreen() {
                           : doc.issuer}
                     </Text>
                   </View>
-                  <ChevronRight size={18} color={file ? palette.emerald[500] : palette.gray[300]} />
-                </TouchableOpacity>
+                  <ChevronRight size={18} color={file ? colors.success : colors.borderStrong} />
+                </Pressable>
 
                 {doc.id === "go_invest_concession" && (
                   <View style={styles.goInvestWarningCallout}>
-                    <Text style={styles.goInvestWarningCalloutText}>
-                      ⚠️ <Text style={styles.goInvestWarningCalloutBold}>Warning:</Text> Machinery for this sector qualifies for zero-rated customs tax. Upload your GO-Invest concession approval letter to ensure your driver is not delayed at customs checkpoints over duty disputes.
+                    <Text variant="caption" color={colors.warning}>
+                      ⚠️ <Text variant="caption" color={colors.warning} style={styles.bold}>Warning:</Text> Machinery for this sector qualifies for zero-rated customs tax. Upload your GO-Invest concession approval letter to ensure your driver is not delayed at customs checkpoints over duty disputes.
                     </Text>
                   </View>
                 )}
@@ -356,36 +368,30 @@ export default function DocumentVaultScreen() {
 
         {/* Port metadata card for context */}
         <View style={styles.metadataInfoCard}>
-          <Text style={styles.metadataTitle}>Import Cargo Context</Text>
+          <Text variant="bodyStrong" style={styles.metadataTitle}>Import Cargo Context</Text>
           <View style={styles.metadataRow}>
-            <Text style={styles.metadataLabel}>Pickup Point:</Text>
-            <Text style={styles.metadataValue}>{pickup}</Text>
+            <Text variant="caption" tone="muted">Pickup Point:</Text>
+            <Text variant="caption" style={styles.semibold}>{pickup}</Text>
           </View>
           <View style={styles.metadataRow}>
-            <Text style={styles.metadataLabel}>Cargo Description:</Text>
-            <Text style={styles.metadataValue}>{cargoLabel(cargo.type)}</Text>
+            <Text variant="caption" tone="muted">Cargo Description:</Text>
+            <Text variant="caption" style={styles.semibold}>{cargoLabel(cargo.type)}</Text>
           </View>
           <View style={styles.metadataRow}>
-            <Text style={styles.metadataLabel}>Expected Weight:</Text>
-            <Text style={styles.metadataValue}>{weightLabel({ weightKg: null, cargo })}</Text>
+            <Text variant="caption" tone="muted">Expected Weight:</Text>
+            <Text variant="caption" style={styles.semibold}>{weightLabel({ weightKg: null, cargo })}</Text>
           </View>
         </View>
       </ScrollView>
 
       {/* Footer Submission Button */}
-      <View style={[styles.footer, { paddingBottom: insets.bottom > 0 ? insets.bottom : 16 }]}>
-        <TouchableOpacity
-          style={[styles.submitButton, !isFormValid && styles.submitButtonDisabled]}
+      <View style={[styles.footer, { paddingBottom: insets.bottom > 0 ? insets.bottom : spacing.lg }]}>
+        <Button
+          title="Complete Import Verification"
           onPress={handleFinalizeVerification}
           disabled={!isFormValid || isSubmitting}
-          activeOpacity={0.8}
-        >
-          {isSubmitting ? (
-            <ActivityIndicator color={palette.white} />
-          ) : (
-            <Text style={styles.submitButtonText}>Complete Import Verification</Text>
-          )}
-        </TouchableOpacity>
+          loading={isSubmitting}
+        />
       </View>
 
       {/* Document Scanner Enhancement Loader Overlay */}
@@ -393,8 +399,8 @@ export default function DocumentVaultScreen() {
         <View style={styles.loadingOverlay}>
           <View style={styles.loadingBox}>
             <ActivityIndicator size="large" color={colors.primary} />
-            <Text style={styles.loadingText}>Applying Grayscale Enhancement...</Text>
-            <Text style={styles.loadingSubtext}>Optimizing stamps & signatures contrast</Text>
+            <Text variant="bodyStrong" style={styles.loadingText}>Applying Grayscale Enhancement...</Text>
+            <Text variant="caption" tone="muted" align="center">Optimizing stamps & signatures contrast</Text>
           </View>
         </View>
       </Modal>
@@ -407,50 +413,54 @@ export default function DocumentVaultScreen() {
         onRequestClose={() => setIsOptionsModalOpen(false)}
       >
         <View style={styles.pickerOverlay}>
-          <TouchableOpacity
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Close"
             style={styles.pickerBackdrop}
-            activeOpacity={1}
             onPress={() => setIsOptionsModalOpen(false)}
           />
-          <View style={[styles.pickerSheet, { paddingBottom: insets.bottom > 0 ? insets.bottom + 16 : 24 }]}>
+          <View style={[styles.pickerSheet, { paddingBottom: insets.bottom > 0 ? insets.bottom + spacing.lg : spacing["2xl"] }]}>
             <View style={styles.pickerHeader}>
-              <Text style={styles.pickerTitle}>{getSlotLabel(selectedSlot)}</Text>
-              <TouchableOpacity onPress={() => setIsOptionsModalOpen(false)}>
-                <X size={22} color={palette.gray[900]} />
-              </TouchableOpacity>
+              <Text variant="h3" style={styles.pickerTitle}>{getSlotLabel(selectedSlot)}</Text>
+              <IconButton
+                icon={X}
+                variant="plain"
+                accessibilityLabel="Close"
+                onPress={() => setIsOptionsModalOpen(false)}
+              />
             </View>
 
             <View style={styles.modalActions}>
-              <TouchableOpacity
-                style={styles.modalActionButton}
+              <Button
+                title="View Document Scan"
+                variant="secondary"
+                size="md"
                 onPress={() => {
                   setIsOptionsModalOpen(false);
                   setIsViewModalOpen(true);
                 }}
-              >
-                <Text style={styles.modalActionText}>View Document Scan</Text>
-              </TouchableOpacity>
+              />
 
-              <TouchableOpacity
-                style={styles.modalActionButton}
+              <Button
+                title="Replace / Retake Scan"
+                variant="secondary"
+                size="md"
                 onPress={() => {
                   setIsOptionsModalOpen(false);
                   handleScanDocument(selectedSlot!);
                 }}
-              >
-                <Text style={styles.modalActionText}>Replace / Retake Scan</Text>
-              </TouchableOpacity>
+              />
 
-              <TouchableOpacity
-                style={[styles.modalActionButton, styles.modalActionDelete]}
+              <Button
+                title="Remove Document"
+                variant="danger"
+                size="md"
                 onPress={() => {
                   setUploadedFiles((prev) => ({ ...prev, [selectedSlot!]: null }));
                   setIsOptionsModalOpen(false);
                   setSelectedSlot(null);
                 }}
-              >
-                <Text style={styles.modalActionDeleteText}>Remove Document</Text>
-              </TouchableOpacity>
+              />
             </View>
           </View>
         </View>
@@ -466,11 +476,13 @@ export default function DocumentVaultScreen() {
         <View style={[styles.viewerContainer, { paddingTop: insets.top }]}>
           {/* Header */}
           <View style={styles.viewerHeader}>
-            <TouchableOpacity onPress={() => setIsViewModalOpen(false)} style={styles.viewerClose}>
-              <ArrowLeft color={palette.white} size={24} />
-            </TouchableOpacity>
-            <Text style={styles.viewerTitle}>Document Preview</Text>
-            <View style={{ width: 40 }} />
+            <IconButton
+              icon={ArrowLeft}
+              accessibilityLabel="Go back"
+              onPress={() => setIsViewModalOpen(false)}
+            />
+            <Text variant="h3" tone="inverse">Document Preview</Text>
+            <View style={styles.viewerHeaderSpacer} />
           </View>
 
           {/* Image Canvas with Grayscale Effect */}
@@ -483,31 +495,32 @@ export default function DocumentVaultScreen() {
                   contentFit="contain"
                 />
                 <View style={styles.grayscaleBadge}>
-                  <Text style={styles.grayscaleBadgeText}>Grayscale Filter Applied (Contrast Enhanced)</Text>
+                  <Badge label="Grayscale Filter Applied (Contrast Enhanced)" tone="success" />
                 </View>
               </View>
             ) : (
-              <Text style={{ color: palette.white }}>No image available</Text>
+              <Text tone="inverse">No image available</Text>
             )}
           </View>
 
           {/* Footer Actions (Retake / Close) */}
-          <View style={[styles.viewerFooter, { paddingBottom: insets.bottom > 0 ? insets.bottom : 20 }]}>
-            <TouchableOpacity
-              style={styles.viewerRetakeButton}
+          <View style={[styles.viewerFooter, { paddingBottom: insets.bottom > 0 ? insets.bottom : spacing.xl }]}>
+            <Button
+              title="Retake Scan"
+              variant="secondary"
+              size="md"
+              style={[styles.viewerButton, styles.viewerRetakeButton]}
               onPress={() => {
                 setIsViewModalOpen(false);
                 handleScanDocument(selectedSlot!);
               }}
-            >
-              <Text style={styles.viewerRetakeText}>Retake Scan</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.viewerCloseButton}
+            />
+            <Button
+              title="Close"
+              size="md"
+              style={styles.viewerButton}
               onPress={() => setIsViewModalOpen(false)}
-            >
-              <Text style={styles.viewerCloseText}>Close</Text>
-            </TouchableOpacity>
+            />
           </View>
         </View>
       </Modal>
@@ -520,179 +533,106 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: 20,
-    gap: 20,
-    paddingBottom: 120,
+    padding: layout.gutter,
+    gap: spacing.xl,
   },
   secureBanner: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: palette.forest[50],
+    backgroundColor: colors.primaryMuted,
     borderWidth: 1,
-    borderColor: palette.emerald[200],
-    borderRadius: 12,
-    padding: 16,
-    gap: 12,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing.lg,
+    gap: spacing.md,
   },
   secureBannerTextContainer: {
     flex: 1,
   },
-  secureBannerTitle: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: colors.primary,
-  },
   secureBannerSub: {
-    fontSize: 11,
-    color: colors.primary,
     opacity: 0.8,
-    lineHeight: 16,
-    marginTop: 2,
-  },
-  inputSection: {
-    gap: 8,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: palette.gray[700],
-    marginLeft: 2,
-  },
-  textInput: {
-    backgroundColor: palette.white,
-    borderWidth: 1.5,
-    borderColor: palette.gray[200],
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    height: 52,
-    fontSize: 15,
-    color: palette.gray[900],
+    marginTop: spacing.xxs,
   },
   uploadCardsSection: {
-    gap: 12,
+    gap: spacing.md,
   },
   sectionHeading: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: palette.gray[900],
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   uploadCard: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 14,
-    padding: 16,
-    gap: 16,
+    minHeight: layout.touchMin,
+    borderRadius: radius.md,
+    padding: spacing.lg,
+    gap: spacing.lg,
     borderWidth: 2,
   },
   uploadCardEmpty: {
     borderStyle: "dashed",
-    backgroundColor: palette.white,
-    borderColor: palette.gray[300],
+    backgroundColor: colors.surface,
+    borderColor: colors.borderStrong,
   },
   uploadCardCompleted: {
     borderStyle: "solid",
-    backgroundColor: "rgba(16, 185, 129, 0.04)",
-    borderColor: palette.emerald[500],
+    backgroundColor: colors.successMuted,
+    borderColor: colors.success,
   },
   iconWrapper: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: radius.pill,
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
   },
   iconWrapperEmpty: {
-    backgroundColor: palette.gray[100],
+    backgroundColor: colors.surfaceSunken,
   },
   iconWrapperCompleted: {
-    backgroundColor: palette.emerald[500],
+    backgroundColor: colors.success,
   },
   thumbnail: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: radius.pill,
   },
   cardInfo: {
     flex: 1,
-    gap: 4,
-  },
-  cardLabel: {
-    fontSize: 15,
-    fontWeight: "bold",
-  },
-  cardLabelEmpty: {
-    color: palette.gray[800],
-  },
-  cardLabelCompleted: {
-    color: palette.emerald[500],
-  },
-  cardMicrocopy: {
-    fontSize: 12,
-    color: palette.gray[500],
-    lineHeight: 16,
+    gap: spacing.xs,
   },
   metadataInfoCard: {
-    backgroundColor: palette.white,
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: palette.gray[200],
-    borderRadius: 12,
-    padding: 16,
-    gap: 10,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing.lg,
+    gap: spacing.sm,
   },
   metadataTitle: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: palette.gray[900],
     borderBottomWidth: 1,
-    borderBottomColor: palette.gray[100],
-    paddingBottom: 8,
+    borderBottomColor: colors.surfaceSunken,
+    paddingBottom: spacing.sm,
   },
   metadataRow: {
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  metadataLabel: {
-    fontSize: 12,
-    color: palette.gray[500],
+  semibold: {
+    fontFamily: fontFamily.semibold,
   },
-  metadataValue: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: palette.gray[900],
+  bold: {
+    fontFamily: fontFamily.bold,
   },
   footer: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    padding: 16,
-    backgroundColor: palette.white,
+    padding: spacing.lg,
+    backgroundColor: colors.surface,
     borderTopWidth: 1,
-    borderTopColor: palette.gray[200],
-    paddingBottom: Platform.OS === "ios" ? 34 : 20,
-  },
-  submitButton: {
-    height: 52,
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  submitButtonDisabled: {
-    backgroundColor: palette.gray[400],
-    opacity: 0.65,
-  },
-  submitButtonText: {
-    color: palette.white,
-    fontSize: 16,
-    fontWeight: "bold",
+    borderTopColor: colors.border,
   },
   pickerOverlay: {
     flex: 1,
@@ -700,82 +640,48 @@ const styles = StyleSheet.create({
   },
   pickerBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    backgroundColor: colors.overlay,
   },
   pickerSheet: {
-    backgroundColor: palette.white,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 24,
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radius.md,
+    borderTopRightRadius: radius.md,
+    padding: spacing["2xl"],
+    ...elevation.md,
   },
   pickerHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: spacing.xl,
     borderBottomWidth: 1,
-    borderBottomColor: palette.gray[100],
-    paddingBottom: 12,
+    borderBottomColor: colors.surfaceSunken,
+    paddingBottom: spacing.md,
   },
   pickerTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: palette.gray[900],
+    flex: 1,
   },
   modalActions: {
-    gap: 12,
-  },
-  modalActionButton: {
-    height: 50,
-    borderRadius: 10,
-    borderWidth: 1.5,
-    borderColor: palette.gray[200],
-    backgroundColor: palette.white,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalActionText: {
-    fontSize: 15,
-    fontWeight: "bold",
-    color: palette.gray[800],
-  },
-  modalActionDelete: {
-    borderColor: palette.red[100],
-    backgroundColor: palette.red[50],
-  },
-  modalActionDeleteText: {
-    fontSize: 15,
-    fontWeight: "bold",
-    color: palette.red[500],
+    gap: spacing.md,
   },
   loadingOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: colors.overlay,
     justifyContent: "center",
     alignItems: "center",
   },
   loadingBox: {
-    backgroundColor: palette.white,
-    borderRadius: 16,
-    padding: 24,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing["2xl"],
     alignItems: "center",
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-    gap: 8,
+    ...elevation.md,
+    gap: spacing.sm,
   },
   loadingText: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: palette.gray[900],
-    marginTop: 8,
-  },
-  loadingSubtext: {
-    fontSize: 12,
-    color: palette.gray[500],
-    textAlign: "center",
+    marginTop: spacing.sm,
   },
   viewerContainer: {
     flex: 1,
@@ -785,24 +691,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: palette.gray[800],
   },
-  viewerClose: {
-    padding: 8,
-  },
-  viewerTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: palette.white,
+  viewerHeaderSpacer: {
+    width: 40,
   },
   viewerContent: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    padding: layout.gutter,
   },
   scannedImageContainer: {
     width: "100%",
@@ -813,75 +714,32 @@ const styles = StyleSheet.create({
   viewerImage: {
     width: "100%",
     height: "85%",
-    borderRadius: 8,
+    borderRadius: radius.sm,
   },
   grayscaleBadge: {
     position: "absolute",
-    bottom: 24,
-    backgroundColor: "rgba(16, 185, 129, 0.9)",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  grayscaleBadgeText: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: palette.white,
+    bottom: spacing["2xl"],
   },
   viewerFooter: {
     flexDirection: "row",
-    padding: 20,
-    gap: 12,
+    padding: layout.gutter,
+    gap: spacing.md,
     backgroundColor: palette.gray[900],
   },
+  viewerButton: {
+    flex: 1,
+  },
   viewerRetakeButton: {
-    flex: 1,
-    height: 48,
-    borderRadius: 10,
-    borderWidth: 1.5,
-    borderColor: palette.white,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  viewerRetakeText: {
-    color: palette.white,
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  viewerCloseButton: {
-    flex: 1,
-    height: 48,
-    backgroundColor: colors.primary,
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  viewerCloseText: {
-    color: palette.white,
-    fontSize: 14,
-    fontWeight: "bold",
+    backgroundColor: colors.surface,
   },
   goInvestContainer: {
-    gap: 8,
+    gap: spacing.sm,
   },
   goInvestWarningCallout: {
-    backgroundColor: palette.amber[100],
-    borderRadius: 12,
-    padding: 12,
+    backgroundColor: colors.warningMuted,
+    borderRadius: radius.md,
+    padding: spacing.md,
     borderWidth: 1,
-    borderColor: palette.amber[300],
-  },
-  goInvestWarningCalloutText: {
-    fontSize: 12,
-    color: palette.amber[600],
-    lineHeight: 18,
-  },
-  goInvestWarningCalloutBold: {
-    fontWeight: "bold",
+    borderColor: colors.border,
   },
 });

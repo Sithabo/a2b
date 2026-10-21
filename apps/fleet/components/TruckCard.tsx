@@ -1,8 +1,8 @@
 import React from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { ChevronRight, MapPin, UserRound } from "lucide-react-native";
 import { statusMeta, vehicleClasses, type StatusTone } from "@a2b/core";
-import { Badge, Button, colors, palette, PlateBadge, radius, spacing, Text } from "@a2b/ui";
+import { Badge, Button, Card, colors, palette, PlateBadge, radius, spacing, Text } from "@a2b/ui";
 import type { RosterTruck, TruckState } from "@/lib/queries";
 
 export const truckStateMeta: Record<TruckState, { label: string; tone: StatusTone }> = {
@@ -24,7 +24,7 @@ export function TruckCard({ truck, onPress, onAssignDriver, onFindLoad }: TruckC
   const meta = truckStateMeta[state];
 
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.card, pressed && { opacity: 0.9 }]}>
+    <Card onPress={onPress} padding="lg" style={styles.card} accessibilityLabel={`Truck ${truck.vehicle.plate}`}>
       <View style={styles.top}>
         <View style={styles.identity}>
           <PlateBadge plate={vehicle.plate} size="sm" />
@@ -63,19 +63,12 @@ export function TruckCard({ truck, onPress, onAssignDriver, onFindLoad }: TruckC
           <Button title="Assign driver" variant="secondary" size="sm" onPress={onAssignDriver} />
         )
       ) : null}
-    </Pressable>
+    </Card>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    gap: spacing.md,
-    padding: spacing.lg,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-  },
+  card: { gap: spacing.md },
   top: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", gap: spacing.md },
   identity: { flex: 1, gap: spacing.xs },
   driverRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },

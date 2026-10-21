@@ -4,8 +4,7 @@ import { useRouter } from "expo-router";
 import { PlusCircle, Truck } from "lucide-react-native";
 import { formatMoney, getMarket } from "@a2b/core";
 import { QueryFallback } from "@a2b/features";
-import { Button, Card, ChipGroup, colors, EmptyState, palette, radius, spacing, Text } from "@a2b/ui";
-import { ScreenScroll } from "@/components/ScreenScroll";
+import { Button, Card, ChipGroup, colors, EmptyState, palette, radius, ScreenScroll, spacing, Text } from "@a2b/ui";
 import { TruckCard, truckStateMeta } from "@/components/TruckCard";
 import { buildRoster, earningsBetween, useDrivers, useFleet, useFleetLoads, useVehicles, type TruckState } from "@/lib/queries";
 

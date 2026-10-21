@@ -1,16 +1,16 @@
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Anchor, ArrowRight, Weight } from 'lucide-react-native';
 import type { Data } from '@a2b/api-client';
 import { cargoLabel, formatMoney, getMarket, statusMeta } from '@a2b/core';
-import { Badge, colors, radius, spacing, Text } from '@a2b/ui';
+import { Badge, Card, colors, spacing, Text } from '@a2b/ui';
 
 /** Load board / fleet load card: route, payout, cargo, status. */
 export function LoadCard({ load, onPress }: { load: Data.Load; onPress: () => void }) {
   const market = getMarket(load.market);
   const showStatus = load.status !== 'OPEN';
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.card, pressed && { opacity: 0.9 }]}>
+    <Card onPress={onPress} padding="lg" style={styles.card} accessibilityLabel={`${load.pickupSummary} to ${load.dropoffSummary}`}>
       <View style={styles.top}>
         <Text variant='h2' tone='primary'>
           {formatMoney(load.escrow?.amount ?? load.offerPrice, market)}
@@ -48,19 +48,12 @@ export function LoadCard({ load, onPress }: { load: Data.Load; onPress: () => vo
           {load.reference}
         </Text>
       </View>
-    </Pressable>
+    </Card>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    gap: spacing.sm,
-    padding: spacing.lg,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-  },
+  card: { gap: spacing.sm },
   top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: spacing.sm },
   route: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   place: { flexShrink: 1 },

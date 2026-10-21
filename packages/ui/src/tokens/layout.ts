@@ -60,6 +60,8 @@ export const elevation = {
 
 export const typography = {
   display: { fontSize: 32, lineHeight: 40, fontFamily: fontFamily.bold, letterSpacing: -0.5 },
+  /** One-time codes read aloud or typed by someone else (release codes). */
+  code: { fontSize: 44, lineHeight: 52, fontFamily: fontFamily.bold, letterSpacing: 6 },
   h1: { fontSize: 24, lineHeight: 32, fontFamily: fontFamily.bold, letterSpacing: -0.25 },
   h2: { fontSize: 20, lineHeight: 28, fontFamily: fontFamily.bold },
   h3: { fontSize: 17, lineHeight: 24, fontFamily: fontFamily.semibold },

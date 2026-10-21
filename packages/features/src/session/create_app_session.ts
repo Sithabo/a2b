@@ -78,6 +78,18 @@ export function createAppSession({ appId, role, apiUrl }: AppSessionConfig) {
     )
   );
 
+  /** Resolves once hydrate() has run (token and profile both read). */
+  function sessionHydrated() {
+    return new Promise<void>((resolve) => {
+      const unsubscribe = useSession.subscribe((state) => {
+        if (state.isHydrated) {
+          unsubscribe();
+          resolve();
+        }
+      });
+    });
+  }
+
   /** Resolves once the persisted part of the store (profile, onboarding) has loaded. */
   function persistHydrated() {
     if (useSession.persist.hasHydrated()) return Promise.resolve();
@@ -91,9 +103,17 @@ export function createAppSession({ appId, role, apiUrl }: AppSessionConfig) {
 
   const { api } = createApiClient({
     baseUrl: apiUrl,
-    getToken: () => useSession.getState().token,
-    onUnauthorized: () => {
-      if (useSession.getState().token) useSession.getState().signOut();
+    // Screens opened from a deep link can query before startup has read the
+    // stored token; hold those requests until it has, rather than send them bare.
+    getToken: async () => {
+      if (!useSession.getState().isHydrated) await sessionHydrated();
+      return useSession.getState().token;
+    },
+    // Only a rejection of the token we hold now ends the session; a 401 for an
+    // older or missing token (e.g. a request that raced sign-in) is ignored.
+    onUnauthorized: (rejectedToken) => {
+      const { token, signOut } = useSession.getState();
+      if (token && rejectedToken === token) signOut();
     },
   });
 

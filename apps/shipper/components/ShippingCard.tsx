@@ -1,8 +1,8 @@
 import React from "react";
-import { View, Text, StyleSheet, Image, ViewStyle, ImageSourcePropType, TouchableOpacity } from "react-native";
+import { View, StyleSheet, Image, ViewStyle, ImageSourcePropType } from "react-native";
 import { Package } from "lucide-react-native";
 import { cargoLabel, statusMeta } from "@a2b/core";
-import { colors, palette } from "@a2b/ui";
+import { Badge, Card, Text, colors, radius, spacing } from "@a2b/ui";
 import { dueDate, trackingLabel, type Load } from "@/lib/loads";
 
 export interface ShippingCardProps {
@@ -54,7 +54,12 @@ export const ShippingCard: React.FC<ShippingCardProps> = ({
   const formattedTrackingId = trackingLabel(shipment);
 
   return (
-    <TouchableOpacity style={[styles.card, style]} onPress={onPress} activeOpacity={0.85}>
+    <Card
+      padding="lg"
+      onPress={onPress}
+      accessibilityLabel={`Shipment ${formattedTrackingId}, ${statusLabel}, ${pickupName} to ${deliveryName}`}
+      style={style}
+    >
       <View style={styles.topRow}>
         <View style={styles.topLeft}>
           <View style={styles.imageContainer}>
@@ -65,54 +70,52 @@ export const ShippingCard: React.FC<ShippingCardProps> = ({
             )}
           </View>
           <View style={styles.metaInfo}>
-            <Text style={styles.trackingId}>{formattedTrackingId}</Text>
-            <Text style={styles.cargoType}>{cargoLabel(shipment.cargoType)}</Text>
+            <Text variant="h3" numberOfLines={1}>{formattedTrackingId}</Text>
+            <Text variant="bodySm" tone="muted" numberOfLines={1} style={styles.cargoType}>
+              {cargoLabel(shipment.cargoType)}
+            </Text>
+            {/* Under the reference rather than beside it, so neither gets squeezed */}
+            <Badge label={statusLabel} tone={statusMeta[shipment.status].tone} dot style={styles.status} />
           </View>
-        </View>
-        <View style={styles.statusPill}>
-          <Text style={styles.statusPillText}>{statusLabel}</Text>
         </View>
       </View>
 
       <View style={styles.bottomRow}>
-        <View style={[styles.locCol, { marginRight: 8, flex: 1 }]}>
-          <Text style={styles.locLabel} numberOfLines={1} ellipsizeMode="tail">{pickupName}</Text>
-          <Text style={styles.locDate}>{pickupDate}</Text>
+        <View style={[styles.locCol, styles.locColLeft]}>
+          <Text variant="bodySm" tone="muted" numberOfLines={1} ellipsizeMode="tail">{pickupName}</Text>
+          <Text variant="bodyStrong">{pickupDate}</Text>
         </View>
-        <View style={[styles.locColRight, { marginLeft: 8, flex: 1 }]}>
-          <Text style={styles.locLabelRight} numberOfLines={1} ellipsizeMode="tail">{deliveryName}</Text>
-          <Text style={styles.locDate}>{deliveryDate}</Text>
+        <View style={[styles.locCol, styles.locColRight]}>
+          <Text variant="bodySm" tone="muted" align="right" numberOfLines={1} ellipsizeMode="tail">{deliveryName}</Text>
+          <Text variant="bodyStrong">{deliveryDate}</Text>
         </View>
       </View>
-    </TouchableOpacity>
+    </Card>
   );
 };
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: palette.white,
-    borderRadius: 24,
-    padding: 16,
-  },
   topRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    gap: spacing.sm,
   },
   topLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: spacing.md,
+    flexShrink: 1,
   },
   imageContainer: {
     width: 54,
     height: 54,
-    borderRadius: 16, // Squircle - slightly less rounded than fully circular image container
-    backgroundColor: palette.gray[100],
+    borderRadius: radius.md,
+    backgroundColor: colors.surfaceSunken,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: palette.gray[200],
+    borderColor: colors.border,
     overflow: "hidden",
   },
   cargoImage: {
@@ -121,52 +124,26 @@ const styles = StyleSheet.create({
   },
   metaInfo: {
     justifyContent: "center",
+    flexShrink: 1,
   },
-  trackingId: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: palette.gray[900],
-  },
+  status: { marginTop: spacing.sm },
   cargoType: {
-    fontSize: 13,
-    color: palette.gray[500],
-    marginTop: 2,
-  },
-  statusPill: {
-    backgroundColor: colors.primary, // Forest Green status pill
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
-  },
-  statusPillText: {
-    color: palette.white,
-    fontSize: 11,
-    fontWeight: "bold",
+    marginTop: spacing.xxs,
   },
   bottomRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 20,
+    marginTop: spacing.xl,
   },
   locCol: {
-    gap: 4,
+    flex: 1,
+    gap: spacing.xs,
+  },
+  locColLeft: {
+    marginRight: spacing.sm,
   },
   locColRight: {
-    gap: 4,
+    marginLeft: spacing.sm,
     alignItems: "flex-end",
-  },
-  locLabel: {
-    fontSize: 13,
-    color: palette.gray[500],
-  },
-  locLabelRight: {
-    fontSize: 13,
-    color: palette.gray[500],
-    textAlign: "right",
-  },
-  locDate: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: palette.gray[900],
   },
 });

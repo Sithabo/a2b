@@ -6,10 +6,13 @@ export type { Data } from '@a2b/api/data'
 
 export interface ApiClientOptions {
   baseUrl: string
-  /** Current access token, read before every request. */
+  /** Current access token, read before every request (may wait for storage to load). */
   getToken: () => string | null | undefined | Promise<string | null | undefined>
-  /** Called when the API rejects the token (expired or revoked). */
-  onUnauthorized?: () => void
+  /**
+   * Called when the API rejects a request with 401, with the token that request
+   * carried (null if it had none), so callers can ignore stale rejections.
+   */
+  onUnauthorized?: (rejectedToken: string | null) => void
 }
 
 /**
@@ -35,8 +38,10 @@ export function createApiClient({ baseUrl, getToken, onUnauthorized }: ApiClient
         },
       ],
       afterResponse: [
-        (_request, _options, response) => {
-          if (response.status === 401) onUnauthorized?.()
+        (request, _options, response) => {
+          if (response.status !== 401) return
+          const header = request.headers.get('Authorization')
+          onUnauthorized?.(header?.startsWith('Bearer ') ? header.slice(7) : null)
         },
       ],
     },

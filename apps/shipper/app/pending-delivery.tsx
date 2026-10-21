@@ -1,9 +1,7 @@
 import React from "react";
 import {
   View,
-  Text,
   ScrollView,
-  TouchableOpacity,
   StyleSheet,
   Alert,
 } from "react-native";
@@ -11,7 +9,18 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { Image } from "expo-image";
 import { Clock } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Badge, colors, palette, ScreenHeader } from "@a2b/ui";
+import {
+  Badge,
+  Button,
+  colors,
+  fontFamily,
+  layout,
+  radius,
+  ScreenHeader,
+  spacing,
+  Text,
+  tones,
+} from "@a2b/ui";
 import { useMarket } from "@/store/useMarket";
 import { formatMoney, statusMeta } from "@a2b/core";
 import { apiErrorMessage } from "@a2b/api-client";
@@ -83,7 +92,7 @@ export default function PendingDeliveryScreen() {
   if (!shipment) return <LoadState error={error} onRetry={refetch} />;
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={styles.container}>
       {/* Header */}
       <ScreenHeader
         title="Order Details"
@@ -99,10 +108,12 @@ export default function PendingDeliveryScreen() {
       >
         {/* Waiting Pill */}
         <View style={styles.statusPillContainer}>
-          <View style={styles.statusPill}>
-            <Clock color={palette.white} size={16} />
-            <Text style={styles.statusPillText}>Waiting for Driver</Text>
-          </View>
+          <Badge
+            label={statusMeta[shipment.status].label}
+            tone={statusMeta[shipment.status].tone}
+            icon={Clock}
+            style={styles.statusPill}
+          />
         </View>
 
         {/* Receipt Card Wrapper */}
@@ -118,28 +129,30 @@ export default function PendingDeliveryScreen() {
                   contentFit="contain"
                 />
               </View>
-              <Text style={styles.priceText}>{formatCurrency(shipment.offerPrice)}</Text>
+              <Text variant="display" tone="primary" style={styles.priceText}>
+                {formatCurrency(shipment.offerPrice)}
+              </Text>
             </View>
 
             {/* Visual Divider with Cutouts */}
             <View style={styles.dividerRow}>
-              <View style={[styles.cutoutLeft, { backgroundColor: colors.background }]} />
+              <View style={[styles.cutout, styles.cutoutLeft]} />
               <View style={styles.dashedLineHorizontal} />
-              <View style={[styles.cutoutRight, { backgroundColor: colors.background }]} />
+              <View style={[styles.cutout, styles.cutoutRight]} />
             </View>
 
             {/* Order Details Metadata */}
             <View style={styles.metadataSection}>
               <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Order ID:</Text>
-                <Text style={styles.metaValue}>{trackingLabel(shipment)}</Text>
+                <Text variant="body" tone="secondary">Order ID:</Text>
+                <Text variant="bodyStrong">{trackingLabel(shipment)}</Text>
               </View>
               <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Date Posted:</Text>
-                <Text style={styles.metaValue}>{formatDate(shipment.createdAt)}</Text>
+                <Text variant="body" tone="secondary">Date Posted:</Text>
+                <Text variant="bodyStrong">{formatDate(shipment.createdAt)}</Text>
               </View>
               <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Status:</Text>
+                <Text variant="body" tone="secondary">Status:</Text>
                 <Badge label={statusMeta[shipment.status].label} tone={statusMeta[shipment.status].tone} dot />
               </View>
             </View>
@@ -154,24 +167,24 @@ export default function PendingDeliveryScreen() {
               <View style={styles.timelineRow}>
                 <View style={styles.timelineDot} />
                 <View style={styles.timelineTextContainer}>
-                  <Text style={styles.timelineSubLabel}>PICKUP</Text>
-                  <Text style={styles.timelineLocation}>{shipment.pickupSummary}</Text>
+                  <Text variant="label" tone="muted">PICKUP</Text>
+                  <Text variant="bodyStrong" style={styles.timelineLocation}>{shipment.pickupSummary}</Text>
                 </View>
               </View>
 
               {/* Delivery */}
-              <View style={[styles.timelineRow, { marginTop: 28 }]}>
+              <View style={[styles.timelineRow, styles.timelineRowSpaced]}>
                 <View style={styles.timelineDot} />
                 <View style={styles.timelineTextContainer}>
-                  <Text style={styles.timelineSubLabel}>DELIVERY</Text>
-                  <Text style={styles.timelineLocation}>{shipment.dropoffSummary}</Text>
+                  <Text variant="label" tone="muted">DELIVERY</Text>
+                  <Text variant="bodyStrong" style={styles.timelineLocation}>{shipment.dropoffSummary}</Text>
                 </View>
               </View>
             </View>
 
             <View style={styles.tipBox}>
-              <Text style={styles.tipText}>
-                <Text style={styles.tipBold}>Tip:</Text> Your offer is within
+              <Text variant="bodySm" color={tones.success.fg}>
+                <Text variant="bodySm" color={tones.success.fg} style={styles.tipBold}>Tip:</Text> Your offer is within
                 the fair market range for this route.
               </Text>
             </View>
@@ -183,16 +196,15 @@ export default function PendingDeliveryScreen() {
       <View
         style={[
           styles.cancelActionContainer,
-          { bottom: insets.bottom > 0 ? insets.bottom : 20 },
+          { bottom: insets.bottom > 0 ? insets.bottom : spacing.xl },
         ]}
       >
-        <TouchableOpacity
-          style={styles.stickyCancelButton}
-          activeOpacity={0.8}
+        <Button
+          title="Cancel Order"
+          variant="danger"
+          fullWidth
           onPress={handleCancelOrder}
-        >
-          <Text style={styles.stickyCancelButtonText}>Cancel Order</Text>
-        </TouchableOpacity>
+        />
       </View>
     </View>
   );
@@ -201,149 +213,110 @@ export default function PendingDeliveryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: colors.background,
   },
   scrollContent: {
-    paddingBottom: 40,
+    paddingBottom: spacing["4xl"],
   },
   statusPillContainer: {
-    paddingHorizontal: 16,
-    marginTop: -16,
+    paddingHorizontal: layout.gutter,
+    paddingTop: spacing.sm,
     alignItems: "center",
-    zIndex: 11,
-    paddingTop: 24,
   },
   statusPill: {
-    backgroundColor: palette.amber[600],
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 12,
-    borderRadius: 9999,
-    width: "100%",
-    gap: 8,
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  statusPillText: {
-    color: palette.white,
-    fontWeight: "bold",
-    fontSize: 15,
+    alignSelf: "center",
   },
   receiptWrapper: {
-    paddingHorizontal: 16,
-    marginTop: 16,
+    paddingHorizontal: layout.gutter,
+    marginTop: spacing.lg,
     position: "relative",
   },
   receiptCard: {
-    backgroundColor: palette.white,
-    borderRadius: 24,
-    paddingVertical: 32,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingVertical: spacing["3xl"],
     position: "relative",
+    overflow: "hidden", // clips the outer half of the cutouts
   },
   receiptHeader: {
     alignItems: "center",
-    paddingHorizontal: 24,
+    paddingHorizontal: spacing["2xl"],
   },
   cargoBoxContainer: {
     width: 140,
     height: 140,
-    backgroundColor: palette.gray[50],
-    borderRadius: 16,
+    backgroundColor: colors.surfaceMuted,
+    borderRadius: radius.md,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   cargoImage: {
     width: 120,
     height: 120,
   },
   priceText: {
-    fontSize: 32,
-    fontWeight: "900",
-    color: colors.primary,
-    marginBottom: 24,
+    marginBottom: spacing["2xl"],
   },
   dividerRow: {
     flexDirection: "row",
     alignItems: "center",
     position: "relative",
     height: 30,
-    marginVertical: 8,
+    marginVertical: spacing.sm,
   },
   dashedLineHorizontal: {
     flex: 1,
     height: 1,
     borderBottomWidth: 1,
-    borderColor: palette.gray[200],
+    borderColor: colors.border,
     borderStyle: "dashed",
-    marginHorizontal: 15,
+    marginHorizontal: spacing.lg,
+  },
+  cutout: {
+    position: "absolute",
+    top: 0,
+    width: 30,
+    height: 30,
+    borderRadius: radius.pill,
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.border,
+    zIndex: 2,
   },
   cutoutLeft: {
-    position: "absolute",
     left: -15,
-    top: 0,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    zIndex: 2,
   },
   cutoutRight: {
-    position: "absolute",
     right: -15,
-    top: 0,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    zIndex: 2,
   },
   metadataSection: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    gap: 16,
+    paddingHorizontal: spacing["2xl"],
+    paddingTop: spacing.lg,
+    gap: spacing.lg,
   },
   metaRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  metaLabel: {
-    fontSize: 15,
-    color: palette.gray[600],
-    fontWeight: "500",
-  },
-  metaValue: {
-    fontSize: 15,
-    fontWeight: "bold",
-    color: palette.gray[900],
-  },
-  escrowBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  escrowText: {
-    fontSize: 15,
-    fontWeight: "bold",
-    color: palette.emerald[600],
-  },
   solidDivider: {
     height: 1,
-    backgroundColor: palette.gray[100],
-    marginHorizontal: 24,
-    marginVertical: 24,
+    backgroundColor: colors.border,
+    marginHorizontal: spacing["2xl"],
+    marginVertical: spacing["2xl"],
   },
   timelineSection: {
-    paddingHorizontal: 24,
+    paddingHorizontal: spacing["2xl"],
     position: "relative",
   },
   timelineLine: {
     position: "absolute",
-    left: 31,
+    left: 31, // centre of the dots: section padding + half the dot - half the line
     top: 10,
-    bottom: 24,
+    bottom: 30, // ends inside the delivery dot
     width: 2,
     backgroundColor: colors.primary,
   },
@@ -351,71 +324,39 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
   },
+  timelineRowSpaced: {
+    marginTop: spacing["2xl"],
+  },
   timelineDot: {
     width: 16,
     height: 16,
-    borderRadius: 8,
+    borderRadius: radius.pill,
     backgroundColor: colors.primary,
-    marginTop: 2,
-    marginRight: 16,
+    marginTop: spacing.xxs,
+    marginRight: spacing.lg,
   },
   timelineTextContainer: {
     flex: 1,
   },
-  timelineSubLabel: {
-    fontSize: 11,
-    fontWeight: "bold",
-    color: palette.gray[500],
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
   timelineLocation: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: palette.gray[900],
-    marginTop: 4,
+    marginTop: spacing.xs,
   },
   tipBox: {
-    marginHorizontal: 24,
-    marginTop: 32,
-    backgroundColor: palette.emerald[50],
+    marginHorizontal: spacing["2xl"],
+    marginTop: spacing["3xl"],
+    backgroundColor: colors.successMuted,
     borderWidth: 1,
-    borderColor: palette.emerald[200],
-    borderRadius: 8,
-    padding: 16,
-  },
-  tipText: {
-    fontSize: 14,
-    color: palette.emerald[800],
-    lineHeight: 20,
+    borderColor: tones.success.bg,
+    borderRadius: radius.sm,
+    padding: spacing.lg,
   },
   tipBold: {
-    fontWeight: "bold",
+    fontFamily: fontFamily.bold,
   },
   cancelActionContainer: {
     position: "absolute",
     left: 0,
     right: 0,
-    paddingHorizontal: 20,
-  },
-  stickyCancelButton: {
-    width: "100%",
-    backgroundColor: palette.red[50],
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: palette.red[100],
-    shadowColor: palette.red[500],
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  stickyCancelButtonText: {
-    color: palette.red[500],
-    fontSize: 16,
-    fontWeight: "bold",
+    paddingHorizontal: layout.gutter,
   },
 });

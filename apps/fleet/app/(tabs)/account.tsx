@@ -1,8 +1,7 @@
 import { StyleSheet, View } from "react-native";
 import { LogOut } from "lucide-react-native";
 import { getMarket } from "@a2b/core";
-import { Button, Card, colors, spacing, Text } from "@a2b/ui";
-import { ScreenScroll } from "@/components/ScreenScroll";
+import { Button, Card, colors, ScreenScroll, spacing, Text } from "@a2b/ui";
 import { api, useSession } from "@/lib/session";
 import { useFleet } from "@/lib/queries";
 

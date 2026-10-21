@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, ScrollView, Pressable, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronRight, Lock, CreditCard } from 'lucide-react-native';
-import { colors, palette, partnerColors } from "@a2b/ui";
+import { Card, Text, colors, layout, palette, partnerColors, radius, spacing } from "@a2b/ui";
 import { useMarket } from "@/store/useMarket";
 import { formatMoney, isPaymentMethodAvailable, paymentMethods, type PaymentMethod } from "@a2b/core";
 import { apiErrorMessage } from "@a2b/api-client";
@@ -61,8 +62,6 @@ export default function PaymentMethodScreen() {
       subtitle: 'Quick transactions',
       logoText: 'Airtel',
       logoTextColor: palette.white,
-      logoTextFontSize: 11,
-      logoTextFontWeight: 'bold' as const,
       logoBg: partnerColors.airtel,
     },
     {
@@ -80,43 +79,44 @@ export default function PaymentMethodScreen() {
   const amount = shipment.escrow?.amount ?? shipment.offerPrice;
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <SafeAreaView edges={['top']} style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Choose Payment Method</Text>
-        <Text style={styles.headerSubtitle}>Select how you want to pay the driver</Text>
+        <Text variant="h1" tone="primary" style={styles.headerTitle}>Choose Payment Method</Text>
+        <Text variant="bodySm" tone="muted">Select how you want to pay the driver</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Amount Card */}
-        <View style={styles.amountCard}>
-          <Text style={styles.amountLabel}>Amount to Pay Driver</Text>
-          <Text style={styles.amountValue}>{formatMoney(amount, market, { code: false })}</Text>
-          <Text style={styles.amountCurrency}>{market.currency.code}</Text>
-        </View>
+        <Card padding="2xl" style={styles.amountCard}>
+          <Text variant="bodySm" tone="muted" style={styles.amountLabel}>Amount to Pay Driver</Text>
+          <Text variant="display" tone="primary">{formatMoney(amount, market, { code: false })}</Text>
+          <Text variant="label" tone="muted" style={styles.amountCurrency}>{market.currency.code}</Text>
+        </Card>
 
         {/* Payment Method Rows */}
         <View style={styles.methodsList}>
           {methods.map((method) => {
             const isSelected = selected === method.id;
             return (
-              <TouchableOpacity
+              <Pressable
                 key={method.id}
-                style={[styles.methodRow, isSelected && styles.methodRowSelected]}
+                accessibilityRole="button"
+                accessibilityLabel={`Pay with ${method.label}, ${method.subtitle}`}
+                accessibilityState={{ selected: isSelected, busy: isPaying && isSelected }}
+                style={({ pressed }) => [
+                  styles.methodRow,
+                  isSelected && styles.methodRowSelected,
+                  pressed && styles.pressed,
+                ]}
                 onPress={() => handleSelect(method.id)}
-                activeOpacity={0.75}
               >
                 {/* Logo/Icon */}
                 <View style={[styles.methodLogo, { backgroundColor: method.logoBg }]}>
                   {method.logoIcon ? (
-                    <CreditCard color="white" size={26} />
+                    <CreditCard color={colors.textInverse} size={26} />
                   ) : (
-                    <Text
-                      style={[
-                        styles.methodLogoText,
-                        { color: method.logoTextColor, fontSize: method.logoTextFontSize ?? 13 },
-                      ]}
-                    >
+                    <Text variant="label" color={method.logoTextColor} style={styles.methodLogoText}>
                       {method.logoText}
                     </Text>
                   )}
@@ -124,16 +124,16 @@ export default function PaymentMethodScreen() {
 
                 {/* Text */}
                 <View style={styles.methodTextContainer}>
-                  <Text style={styles.methodLabel}>{method.label}</Text>
-                  <Text style={styles.methodSubtitle}>{method.subtitle}</Text>
+                  <Text variant="bodyStrong" style={styles.methodLabel}>{method.label}</Text>
+                  <Text variant="caption" tone="muted">{method.subtitle}</Text>
                 </View>
 
                 {isPaying && isSelected ? (
                   <ActivityIndicator color={colors.primary} />
                 ) : (
-                  <ChevronRight color={palette.gray[400]} size={20} />
+                  <ChevronRight color={colors.textMuted} size={20} />
                 )}
-              </TouchableOpacity>
+              </Pressable>
             );
           })}
         </View>
@@ -141,130 +141,84 @@ export default function PaymentMethodScreen() {
         {/* Escrow Footer Note */}
         <View style={styles.escrowNote}>
           <Lock color={colors.primary} size={14} />
-          <Text style={styles.escrowNoteText}>Payments are secured by Escrow Protection</Text>
+          <Text variant="caption" tone="muted">Payments are secured by Escrow Protection</Text>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: colors.background,
   },
   header: {
-    paddingTop: 56,
-    paddingBottom: 24,
-    paddingHorizontal: 24,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing['2xl'],
+    paddingHorizontal: spacing['2xl'],
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.primary,
-    marginBottom: 8,
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: palette.gray[500],
+    marginBottom: spacing.sm,
   },
   scrollContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 60,
-    gap: 24,
+    paddingHorizontal: spacing['2xl'],
+    paddingBottom: spacing['4xl'],
+    gap: spacing['2xl'],
   },
   amountCard: {
-    backgroundColor: palette.white,
-    borderRadius: 16,
-    padding: 24,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: palette.gray[100],
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 20,
-    elevation: 2,
   },
   amountLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: palette.gray[500],
-    marginBottom: 8,
-  },
-  amountValue: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: colors.primary,
-    letterSpacing: -0.5,
+    marginBottom: spacing.sm,
   },
   amountCurrency: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: palette.gray[500],
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginTop: 4,
+    marginTop: spacing.xs,
   },
   methodsList: {
-    gap: 12,
+    gap: spacing.md,
   },
   methodRow: {
     width: '100%',
-    backgroundColor: palette.white,
+    minHeight: layout.touchMin,
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: palette.gray[200],
-    borderRadius: 12,
-    padding: 16,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing.lg,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
   },
   methodRowSelected: {
     borderColor: colors.primary,
     borderWidth: 2,
   },
+  pressed: {
+    opacity: 0.85,
+  },
   methodLogo: {
     width: 56,
     height: 56,
-    borderRadius: 8,
+    borderRadius: radius.sm,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    elevation: 1,
+    marginRight: spacing.lg,
   },
   methodLogoText: {
-    fontWeight: 'bold',
+    // Partner names keep their own casing ("Airtel").
+    textTransform: 'none',
   },
   methodTextContainer: {
     flex: 1,
   },
   methodLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: palette.gray[800],
-    marginBottom: 2,
-  },
-  methodSubtitle: {
-    fontSize: 12,
-    color: palette.gray[500],
+    marginBottom: spacing.xxs,
   },
   escrowNote: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
+    gap: spacing.sm,
     opacity: 0.8,
-  },
-  escrowNoteText: {
-    fontSize: 12,
-    color: palette.gray[500],
   },
 });

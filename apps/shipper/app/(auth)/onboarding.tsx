@@ -1,11 +1,10 @@
 import React, { useState, useRef } from "react";
 import {
   View,
-  TouchableOpacity,
+  Pressable,
   Dimensions,
   Image,
   StyleSheet,
-  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import Animated, {
@@ -16,7 +15,7 @@ import Animated, {
 import { ChevronRight } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSession } from "@/lib/session";
-import { colors, palette, Text, Button } from "@a2b/ui";
+import { Button, colors, radius, spacing, Text } from "@a2b/ui";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -35,7 +34,7 @@ const SLIDES = [
     description:
       "Experience peace of mind with our integrated mobile money and secure payment systems.",
     icon: require("../../assets/logo/a2b.png"),
-    color: palette.amber[600], // Amber
+    color: colors.accent, // Amber
   },
   {
     id: 3,
@@ -101,9 +100,7 @@ export default function OnboardingScreen() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         {/* Header with Logo */}
-        <View style={styles.header}>
-          {/* Logo/Header content removed in previous edits, keeping empty/minimal as per user preference which evolved to showing generic header or nothing */}
-        </View>
+        <View style={styles.header} />
 
         {/* Carousel */}
         <View style={styles.carouselContainer}>
@@ -123,11 +120,11 @@ export default function OnboardingScreen() {
 
                 {/* Content */}
                 <View style={styles.contentContainer}>
-                  <Text variant="display" tone="primary" style={styles.title}>
+                  <Text variant="display" tone="primary" align="center" style={styles.title}>
                     {item.title}
                   </Text>
 
-                  <Text tone="primary" style={styles.description}>
+                  <Text tone="secondary" align="center" style={styles.description}>
                     {item.description}
                   </Text>
                 </View>
@@ -139,17 +136,22 @@ export default function OnboardingScreen() {
         {/* Dot Indicators */}
         <View style={styles.dotsContainer}>
           {SLIDES.map((_, index) => (
-            <TouchableOpacity
+            <Pressable
               key={index}
+              accessibilityRole="button"
+              accessibilityLabel={`Go to slide ${index + 1} of ${SLIDES.length}`}
+              accessibilityState={{ selected: currentIndex === index }}
+              hitSlop={styles.dotHitSlop}
               onPress={() => handleDotPress(index)}
-              style={[
+              style={({ pressed }) => [
                 styles.dot,
                 {
                   backgroundColor:
                     currentIndex === index
                       ? colors.primary
-                      : palette.gray[300],
+                      : colors.borderStrong,
                 },
+                pressed && styles.pressed,
               ]}
             />
           ))}
@@ -182,24 +184,24 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: palette.white,
+    backgroundColor: colors.surface,
   },
   container: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingBottom: 24,
+    paddingBottom: spacing['2xl'],
   },
   header: {
     alignItems: "center",
-    marginTop: 40,
-    marginBottom: 24,
+    marginTop: spacing['4xl'],
+    marginBottom: spacing['2xl'],
     flexDirection: "row",
   },
   carouselContainer: {
     flex: 1,
     width: "100%",
-    paddingVertical: 40,
+    paddingVertical: spacing['4xl'],
   },
   scrollView: {
     flex: 1,
@@ -211,43 +213,50 @@ const styles = StyleSheet.create({
     width: SCREEN_WIDTH,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 32,
+    paddingHorizontal: spacing['3xl'],
   },
   image: {
     width: SCREEN_WIDTH - 80,
     height: SCREEN_WIDTH - 80,
     resizeMode: "contain",
-    marginBottom: 40,
+    marginBottom: spacing['4xl'],
   },
   contentContainer: {
     alignItems: "center",
   },
   title: {
-    marginBottom: 12,
-    textAlign: "center",
+    marginBottom: spacing.md,
   },
   description: {
-    textAlign: "center",
-    paddingHorizontal: 16,
-    color: palette.gray[600],
+    paddingHorizontal: spacing.lg,
   },
   dotsContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    gap: 8,
-    marginBottom: 24, // moved dots to be above footer in flow logic
+    gap: spacing.sm,
+    marginBottom: spacing['2xl'], // moved dots to be above footer in flow logic
   },
   dot: {
     height: 8,
     width: 24,
-    borderRadius: 4,
-    marginVertical: 20,
+    borderRadius: radius.pill,
+    marginVertical: spacing.xl,
+  },
+  // Dots are 24x8; extend the touch target to 48pt tall without overlapping neighbours.
+  dotHitSlop: {
+    top: spacing.xl,
+    bottom: spacing.xl,
+    left: spacing.xs,
+    right: spacing.xs,
+  },
+  pressed: {
+    opacity: 0.85,
   },
   footer: {
     width: "100%",
     maxWidth: 384, // max-w-sm approx
-    paddingHorizontal: 24,
-    gap: 24,
-    marginBottom: 16,
+    paddingHorizontal: spacing['2xl'],
+    gap: spacing['2xl'],
+    marginBottom: spacing.lg,
   },
 });

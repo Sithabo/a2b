@@ -1,7 +1,7 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { Image } from "expo-image";
-import { palette } from "@a2b/ui";
+import { Badge, Text, colors, palette, radius, spacing } from "@a2b/ui";
 
 export interface OrderData {
   id: string;
@@ -31,34 +31,36 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ data }) => {
         </View>
 
         <View style={styles.headerRight}>
-          <Text style={styles.orderId}>#{data.id}</Text>
-          <Text style={styles.orderTitle}>{data.title}</Text>
-          <View style={styles.statusBadge}>
-            <Text style={styles.statusText}>{data.status}</Text>
-          </View>
+          <Text variant="bodySm" tone="secondary">
+            #{data.id}
+          </Text>
+          <Text variant="h3" style={styles.orderTitle}>
+            {data.title}
+          </Text>
+          <Badge label={data.status} tone="info" />
         </View>
       </View>
 
       {/* Details Box Section */}
       <View style={styles.detailsBox}>
         <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Quantity : </Text>
-          <Text style={styles.detailValue}>{data.quantity}</Text>
+          <Text tone="secondary">Quantity : </Text>
+          <Text>{data.quantity}</Text>
         </View>
 
         <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Size : </Text>
-          <Text style={styles.detailValue}>{data.size}</Text>
+          <Text tone="secondary">Size : </Text>
+          <Text>{data.size}</Text>
         </View>
 
         <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Weight : </Text>
-          <Text style={styles.detailValue}>{data.weight}</Text>
+          <Text tone="secondary">Weight : </Text>
+          <Text>{data.weight}</Text>
         </View>
 
         <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Type order : </Text>
-          <Text style={styles.detailValue}>{data.type}</Text>
+          <Text tone="secondary">Type order : </Text>
+          <Text>{data.type}</Text>
         </View>
       </View>
     </View>
@@ -67,23 +69,25 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ data }) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: palette.white,
-    borderRadius: 24,
-    padding: 16,
-    gap: 20,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.lg,
+    gap: spacing.xl,
   },
   header: {
     flexDirection: "row",
-    gap: 16,
+    gap: spacing.lg,
   },
   imageContainer: {
     width: 80,
     height: 80,
     backgroundColor: palette.ivory[100], // matches the beige background
-    borderRadius: 16,
+    borderRadius: radius.md,
     justifyContent: "center",
     alignItems: "center",
-    padding: 8,
+    padding: spacing.sm,
   },
   image: {
     width: "100%",
@@ -92,47 +96,20 @@ const styles = StyleSheet.create({
   headerRight: {
     flex: 1,
     justifyContent: "space-between",
-    paddingVertical: 2,
-  },
-  orderId: {
-    fontSize: 14,
-    color: palette.stone[600], // stone-600
+    paddingVertical: spacing.xxs,
   },
   orderTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: palette.stone[900], // stone-900
-    marginBottom: 4,
-  },
-  statusBadge: {
-    backgroundColor: palette.violet[600], // violet-600 approx
-    alignSelf: "flex-start",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 9999,
-  },
-  statusText: {
-    color: palette.white,
-    fontSize: 12,
-    fontWeight: "bold",
+    marginBottom: spacing.xs,
   },
   detailsBox: {
-    backgroundColor: palette.slate[200], // slate-200 / slate-100 hybrid matching grey
-    borderRadius: 16,
-    padding: 20,
-    gap: 16,
+    backgroundColor: colors.surfaceSunken,
+    borderRadius: radius.md,
+    padding: spacing.xl,
+    gap: spacing.lg,
   },
   detailRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-  },
-  detailLabel: {
-    fontSize: 15,
-    color: palette.zinc[700], // zinc-700
-  },
-  detailValue: {
-    fontSize: 15,
-    color: palette.stone[900], // stone-900
   },
 });

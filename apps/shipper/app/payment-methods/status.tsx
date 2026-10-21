@@ -1,11 +1,10 @@
 import React from "react";
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import { View, ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowLeft } from "lucide-react-native";
 import { StatusHero } from "@/components/StatusHero";
 import { ReceiptCard, ReceiptDivider, ReceiptRow } from "@/components/ReceiptCard";
-import { colors, palette, Button } from "@a2b/ui";
+import { Button, colors, layout, ScreenHeader, spacing, Text } from "@a2b/ui";
 
 export default function PaymentStatusScreen() {
   const router = useRouter();
@@ -25,14 +24,8 @@ export default function PaymentStatusScreen() {
   });
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.navBar}>
-        <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
-          <ArrowLeft size={24} color={colors.primary} />
-        </TouchableOpacity>
-        <Text style={styles.navTitle}>Card Status</Text>
-        <View style={{ width: 24 }} />
-      </View>
+    <SafeAreaView style={styles.container} edges={["bottom", "left", "right"]}>
+      <ScreenHeader title="Card Status" onBackPress={() => router.back()} />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -41,10 +34,10 @@ export default function PaymentStatusScreen() {
         <StatusHero state={isSuccess ? "confirmed" : "unconfirmed"} />
 
         <View style={styles.textCenter}>
-          <Text style={[styles.mainHeading, !isSuccess && { color: palette.red[500] }]}>
+          <Text variant="h1" tone={isSuccess ? "primary" : "danger"} align="center">
             {title}
           </Text>
-          <Text style={styles.subHeading}>{subtitle}</Text>
+          <Text tone="secondary" align="center">{subtitle}</Text>
         </View>
 
         <ReceiptCard style={styles.receiptCard}>
@@ -73,49 +66,26 @@ export default function PaymentStatusScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: palette.ivory[100], // Beige theme
-  },
-  navBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-  },
-  navTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: colors.primary,
+    backgroundColor: colors.background,
   },
   scrollContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 40,
+    paddingHorizontal: spacing['2xl'],
+    paddingBottom: spacing['4xl'],
     alignItems: "center",
   },
   textCenter: {
     alignItems: "center",
-    gap: 8,
-    marginVertical: 24,
-  },
-  mainHeading: {
-    fontSize: 26,
-    fontWeight: "900",
-    color: colors.primary,
-    textAlign: "center",
-  },
-  subHeading: {
-    fontSize: 16,
-    color: palette.stone[600],
-    textAlign: "center",
+    gap: spacing.sm,
+    marginVertical: spacing['2xl'],
   },
   receiptCard: {
-    marginTop: 8,
+    marginTop: spacing.sm,
     width: "100%",
   },
   footer: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 32,
-    backgroundColor: palette.ivory[100],
+    paddingHorizontal: layout.gutter,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing['3xl'],
+    backgroundColor: colors.background,
   },
 });

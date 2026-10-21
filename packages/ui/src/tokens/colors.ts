@@ -110,6 +110,8 @@ export const colors = {
   primary: palette.forest[900],
   primaryMuted: palette.forest[50],
   onPrimary: palette.white,
+  /** Secondary text and icons on primary (dark) surfaces. */
+  onPrimaryMuted: 'rgba(255, 255, 255, 0.7)',
   /** White washes for tracks, chips and inactive dots on primary (dark) surfaces. */
   onPrimaryWash: 'rgba(255, 255, 255, 0.08)',
   onPrimaryTrack: 'rgba(255, 255, 255, 0.2)',

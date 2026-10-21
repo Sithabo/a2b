@@ -2,7 +2,7 @@ import React from "react";
 import { View, Image, StyleSheet, Dimensions, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { colors, palette, Text, Button } from "@a2b/ui";
+import { Button, colors, spacing, Text } from "@a2b/ui";
 
 const { width, height } = Dimensions.get("window");
 const isSmallDevice = width < 375;
@@ -24,7 +24,7 @@ export default function WelcomeScreen() {
             source={require("../../assets/logo/a2b.png")}
             style={styles.headerLogo}
           />
-          <Text tone="primary" style={styles.headerText}>A2B</Text>
+          <Text variant="h1" tone="primary">A2B</Text>
         </View>
 
         {/* Middle: Illustration */}
@@ -39,16 +39,11 @@ export default function WelcomeScreen() {
 
         {/* Bottom: Text & Buttons */}
         <View style={styles.bottomContainer}>
-          {/* Top Indicator Line
-          <View style={styles.indicatorContainer}>
-            <View style={styles.topIndicator} />
-          </View> */}
-
           <View style={styles.textContainer}>
-            <Text variant="display" tone="primary" style={styles.title}>
+            <Text variant={isSmallDevice ? "h1" : "display"} tone="primary" align="center" style={styles.title}>
               Move your goods with A2B
             </Text>
-            <Text tone="primary" style={styles.description}>
+            <Text variant={isSmallDevice ? "bodySm" : "body"} tone="secondary" align="center" style={styles.description}>
               Post a load, pay safely through escrow and track it to the door —
               across Guyana and Uganda.
             </Text>
@@ -60,11 +55,6 @@ export default function WelcomeScreen() {
               Driving or running trucks? Use the A2B Driver or A2B Fleet app.
             </Text>
           </View>
-
-          {/* Bottom Indicator Line */}
-          {/* <View style={styles.indicatorContainer}>
-            <View style={styles.bottomIndicator} />
-          </View> */}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -74,39 +64,34 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: palette.white,
+    backgroundColor: colors.surface,
   },
   scrollContainer: {
     flexGrow: 1,
     justifyContent: "space-between",
-    paddingBottom: 20,
+    paddingBottom: spacing.xl,
   },
   header: {
     alignItems: "center",
-    paddingTop: isShortDevice ? 10 : 16,
-    paddingBottom: isShortDevice ? 10 : 16,
+    paddingTop: isShortDevice ? spacing.sm : spacing.lg,
+    paddingBottom: isShortDevice ? spacing.sm : spacing.lg,
     flexDirection: "row",
     justifyContent: "center",
-    gap: 8,
+    gap: spacing.sm,
   },
   headerLogo: {
     width: 32,
     height: 32,
     resizeMode: "contain",
   },
-  headerText: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: colors.primary, // Forest
-  },
   centerImageContainer: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: isShortDevice ? 10 : 16,
+    paddingVertical: isShortDevice ? spacing.sm : spacing.lg,
     flex: 1,
   },
   imageWrapper: {
-    padding: 10,
+    padding: spacing.sm,
     position: "relative",
     width: "100%",
     alignItems: "center",
@@ -119,49 +104,24 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
   },
   bottomContainer: {
-    paddingHorizontal: 24,
-    paddingBottom: isShortDevice ? 20 : 32,
+    paddingHorizontal: spacing['2xl'],
+    paddingBottom: isShortDevice ? spacing.xl : spacing['3xl'],
     width: "100%",
     maxWidth: 450,
     alignSelf: "center",
   },
-  indicatorContainer: {
-    alignItems: "center",
-    marginVertical: isShortDevice ? 12 : 16,
-  },
-  topIndicator: {
-    width: 32,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.primary,
-  },
-  bottomIndicator: {
-    width: 128,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.primary,
-    marginTop: isShortDevice ? 16 : 24,
-  },
   textContainer: {
     alignItems: "center",
-    marginBottom: isShortDevice ? 16 : 24,
+    marginBottom: isShortDevice ? spacing.lg : spacing['2xl'],
   },
   title: {
-    fontSize: isSmallDevice ? 28 : 32,
-    fontWeight: "bold",
-    color: colors.primary,
-    marginBottom: 12,
-    textAlign: "center",
+    marginBottom: spacing.md,
   },
   description: {
-    fontSize: isSmallDevice ? 14 : 16,
-    color: palette.gray[600],
-    lineHeight: isSmallDevice ? 20 : 24,
-    textAlign: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.lg,
   },
   buttonContainer: {
-    gap: 16,
+    gap: spacing.lg,
     width: "100%",
   },
 });

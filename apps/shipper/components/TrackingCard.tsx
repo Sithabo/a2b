@@ -1,8 +1,8 @@
 import React from "react";
-import { View, Text, StyleSheet, ViewStyle, TouchableOpacity } from "react-native";
+import { View, StyleSheet, ViewStyle } from "react-native";
 import { Package, Wrench, FlaskConical, Apple, QrCode, type LucideIcon } from "lucide-react-native";
 import type { CargoType } from "@a2b/core";
-import { colors, palette } from "@a2b/ui";
+import { Card, Text, colors, radius, spacing } from "@a2b/ui";
 import { dueDate, trackingLabel, type Load } from "@/lib/loads";
 
 const CARGO_ICONS: Record<CargoType, LucideIcon> = {
@@ -94,13 +94,17 @@ export const TrackingCard: React.FC<TrackingCardProps> = ({
   const CargoIcon = CARGO_ICONS[shipment.cargoType];
 
   return (
-    <TouchableOpacity style={[styles.card, style]} onPress={onPress} activeOpacity={0.95}>
+    <Card
+      onPress={onPress}
+      accessibilityLabel={`Shipment ${trackingLabel(shipment)}, ${pickupName} to ${deliveryName}`}
+      style={style}
+    >
       {/* Top Section: Locations and progress line */}
       <View style={styles.topSection}>
         <View style={styles.locationColLeft}>
-          <Text style={styles.locationName}>{pickupName}</Text>
-          <Text style={styles.dateTimeText}>{startInfo.date}</Text>
-          <Text style={styles.dateTimeText}>{startInfo.time}</Text>
+          <Text variant="h2" numberOfLines={2} style={styles.locationName}>{pickupName}</Text>
+          <Text variant="caption" tone="muted" style={styles.dateTimeText}>{startInfo.date}</Text>
+          <Text variant="caption" tone="muted" style={styles.dateTimeText}>{startInfo.time}</Text>
         </View>
 
         <View style={styles.lineWrapper}>
@@ -115,9 +119,9 @@ export const TrackingCard: React.FC<TrackingCardProps> = ({
         </View>
 
         <View style={styles.locationColRight}>
-          <Text style={styles.locationName}>{deliveryName}</Text>
-          <Text style={styles.dateTimeText}>{deliveryInfo.date}</Text>
-          <Text style={styles.dateTimeText}>{deliveryInfo.time}</Text>
+          <Text variant="h2" numberOfLines={2} align="right" style={styles.locationName}>{deliveryName}</Text>
+          <Text variant="caption" tone="muted" style={styles.dateTimeText}>{deliveryInfo.date}</Text>
+          <Text variant="caption" tone="muted" style={styles.dateTimeText}>{deliveryInfo.time}</Text>
         </View>
       </View>
 
@@ -129,8 +133,8 @@ export const TrackingCard: React.FC<TrackingCardProps> = ({
 
         <View style={styles.greenBlock}>
           <View style={styles.trackingInfo}>
-            <Text style={styles.trackingLabel}>Tracking number</Text>
-            <Text style={styles.trackingCode} numberOfLines={1} adjustsFontSizeToFit>
+            <Text variant="caption" color={colors.onPrimaryMuted}>Tracking number</Text>
+            <Text variant="h3" tone="inverse" style={styles.trackingCode} numberOfLines={1} adjustsFontSizeToFit>
               {trackingLabel(shipment)}
             </Text>
           </View>
@@ -140,58 +144,43 @@ export const TrackingCard: React.FC<TrackingCardProps> = ({
           </View>
         </View>
       </View>
-    </TouchableOpacity>
+    </Card>
   );
 };
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: palette.white,
-    borderRadius: 24,
-    padding: 20,
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: palette.gray[200],
-  },
   topSection: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     width: "100%",
   },
+  // Long place names wrap instead of pushing the dates off the card
   locationColLeft: {
     alignItems: "flex-start",
-    minWidth: 80,
+    flexShrink: 1,
+    maxWidth: "40%",
   },
   locationColRight: {
     alignItems: "flex-end",
-    minWidth: 80,
+    flexShrink: 1,
+    maxWidth: "40%",
   },
   locationName: {
-    fontSize: 24,
-    fontWeight: "semibold",
-    color: palette.gray[900],
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   dateTimeText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: palette.gray[500],
-    marginTop: 2,
+    marginTop: spacing.xxs,
   },
   lineWrapper: {
     flex: 1,
     height: 40,
     justifyContent: "center",
-    marginHorizontal: 8,
+    marginHorizontal: spacing.sm,
   },
   lineBackground: {
     height: 3,
-    backgroundColor: palette.gray[200],
+    backgroundColor: colors.border,
     width: "100%",
     position: "relative",
     justifyContent: "center",
@@ -205,7 +194,7 @@ const styles = StyleSheet.create({
   startDot: {
     width: 6,
     height: 6,
-    borderRadius: 3,
+    borderRadius: radius.pill,
     backgroundColor: colors.primary,
     position: "absolute",
     left: 0,
@@ -213,74 +202,61 @@ const styles = StyleSheet.create({
   endDot: {
     width: 6,
     height: 6,
-    borderRadius: 3,
-    backgroundColor: palette.gray[400],
+    borderRadius: radius.pill,
+    backgroundColor: colors.textPlaceholder,
     position: "absolute",
     right: 0,
   },
   indicatorCircle: {
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: radius.pill,
     borderWidth: 1.5,
-    borderColor: palette.gray[200],
-    backgroundColor: palette.white,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
     alignItems: "center",
     justifyContent: "center",
     position: "absolute",
     transform: [{ translateX: -16 }],
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    elevation: 2,
   },
   bottomSection: {
     flexDirection: "row",
-    gap: 12,
-    marginTop: 20,
+    gap: spacing.md,
+    marginTop: spacing.xl,
     width: "100%",
   },
   iconBlock: {
     width: 80,
     height: 80,
-    borderRadius: 16,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: palette.gray[200],
-    backgroundColor: palette.gray[50],
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceMuted,
     alignItems: "center",
     justifyContent: "center",
   },
   greenBlock: {
     flex: 1,
     height: 80,
-    borderRadius: 16,
+    borderRadius: radius.md,
     backgroundColor: colors.primary,
-    padding: 14,
+    padding: spacing.md,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
   trackingInfo: {
     flex: 1,
-    paddingRight: 6,
-  },
-  trackingLabel: {
-    fontSize: 11,
-    color: "rgba(255, 255, 255, 0.7)",
-    fontWeight: "600",
+    paddingRight: spacing.xs,
   },
   trackingCode: {
-    fontSize: 18,
-    fontWeight: "semibold",
-    color: palette.white,
-    marginTop: 4,
+    marginTop: spacing.xs,
   },
   qrCircle: {
     width: 38,
     height: 38,
-    borderRadius: 19,
-    backgroundColor: palette.white,
+    borderRadius: radius.pill,
+    backgroundColor: colors.onPrimary,
     alignItems: "center",
     justifyContent: "center",
   },

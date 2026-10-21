@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import {
   View,
-  Text,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
   StyleSheet,
   Modal,
   KeyboardAvoidingView,
@@ -12,19 +11,31 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import {
-  ArrowLeft,
   MoreVertical,
   Plus,
   MapPin,
-  ChevronRight,
   CheckCircle2,
   Circle,
-  X,
 } from "lucide-react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useBillingStore, type SavedCard } from "@/store/useBillingStore";
 import { CreditCardInput, CreditCardView, type CreditCardFormData, type CreditCardFormField } from "react-native-credit-card-input";
-import { palette, partnerColors, Button } from "@a2b/ui";
+import {
+  Button,
+  Card,
+  colors,
+  elevation,
+  IconButton,
+  layout,
+  ListItem,
+  ListSection,
+  partnerColors,
+  radius,
+  ScreenHeader,
+  spacing,
+  Text,
+  typography,
+} from "@a2b/ui";
 
 export default function PaymentMethodsScreen() {
   const router = useRouter();
@@ -95,106 +106,84 @@ export default function PaymentMethodsScreen() {
       case "discover":
         return <FontAwesome5 name="cc-discover" size={24} color={partnerColors.discover} />;
       default:
-        return <FontAwesome5 name="credit-card" size={24} color={palette.gray[900]} />;
+        return <FontAwesome5 name="credit-card" size={24} color={colors.text} />;
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.headerButton}
-          onPress={() => router.back()}
-          activeOpacity={0.7}
-        >
-          <ArrowLeft color={palette.gray[900]} size={20} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Payment Method</Text>
-        <TouchableOpacity style={styles.headerButton} activeOpacity={0.7}>
-          <MoreVertical color={palette.gray[900]} size={20} />
-        </TouchableOpacity>
-      </View>
+    <SafeAreaView style={styles.container} edges={["bottom", "left", "right"]}>
+      <ScreenHeader
+        title="Payment Method"
+        onBackPress={() => router.back()}
+        rightElement={
+          // No menu actions yet
+          <IconButton icon={MoreVertical} accessibilityLabel="More options" onPress={() => {}} />
+        }
+      />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         {/* Cards List */}
-        <View style={styles.sectionCard}>
-          {cards.map((card) => (
-            <TouchableOpacity
-              key={card.id}
-              style={styles.cardRow}
-              activeOpacity={0.7}
-              onPress={() => openEditModal(card)}
-            >
-              <View style={styles.cardRowLeft}>
-                <View style={styles.cardIconBox}>{getCardIcon(card.brand ?? "")}</View>
-                <View>
-                  <Text style={styles.cardName}>
-                    {card.brand
-                      ? card.brand.charAt(0).toUpperCase() +
-                        card.brand.slice(1).replace("-", " ")
-                      : "Credit Card"}
-                  </Text>
-                  <Text style={styles.cardNumber}>
-                    ******** {card.last4}
-                  </Text>
-                </View>
-              </View>
-              <TouchableOpacity onPress={() => setDefaultCard(card.id)}>
-                {card.isDefault ? (
-                  <CheckCircle2 color={palette.gray[900]} size={24} fill={palette.gray[900]} />
-                ) : (
-                  <Circle color={palette.gray[300]} size={24} />
-                )}
-              </TouchableOpacity>
-            </TouchableOpacity>
-          ))}
-
-          {/* Add Payment Button */}
-          <TouchableOpacity
-            style={styles.addPaymentButton}
-            activeOpacity={0.7}
-            onPress={openAddModal}
-          >
-            <Plus color={palette.gray[900]} size={20} />
-            <Text style={styles.addPaymentText}>Add Payment Method</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Business Address */}
-        <View style={styles.addressSection}>
-          <Text style={styles.sectionTitle}>Business Address</Text>
-          <TouchableOpacity
-            style={styles.addressCard}
-            activeOpacity={0.7}
-            onPress={() => router.push("/payment-methods/addresses")}
-          >
-            <View style={styles.cardRowLeft}>
-              <View style={styles.addressIconBox}>
-                <MapPin color={palette.gray[900]} size={20} />
-              </View>
-              <View>
-                {defaultAddress ? (
-                  <>
-                    <Text style={styles.cardName}>{defaultAddress.title}</Text>
-                    <Text style={styles.cardNumber}>
-                      {defaultAddress.address}
+        <Card padding="lg" style={styles.sectionCard}>
+          {cards.map((card) => {
+            const cardName = card.brand
+              ? card.brand.charAt(0).toUpperCase() + card.brand.slice(1).replace("-", " ")
+              : "Credit Card";
+            return (
+              <Pressable
+                key={card.id}
+                accessibilityRole="button"
+                accessibilityLabel={`${cardName} ending in ${card.last4}`}
+                accessibilityHint="Replace this card"
+                style={({ pressed }) => [styles.cardRow, pressed && styles.pressed]}
+                onPress={() => openEditModal(card)}
+              >
+                <View style={styles.cardRowLeft}>
+                  <View style={styles.cardIconBox}>{getCardIcon(card.brand ?? "")}</View>
+                  <View style={styles.cardText}>
+                    <Text variant="bodyStrong">{cardName}</Text>
+                    <Text variant="bodySm" tone="muted">
+                      ******** {card.last4}
                     </Text>
-                  </>
-                ) : (
-                  <>
-                    <Text style={styles.cardName}>No Address Set</Text>
-                    <Text style={styles.cardNumber}>Tap to add</Text>
-                  </>
-                )}
-              </View>
-            </View>
-            <ChevronRight color={palette.gray[400]} size={20} />
-          </TouchableOpacity>
-        </View>
+                  </View>
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Set as default card"
+                  accessibilityState={{ selected: card.isDefault }}
+                  hitSlop={spacing.md}
+                  style={({ pressed }) => pressed && styles.pressed}
+                  onPress={() => setDefaultCard(card.id)}
+                >
+                  {card.isDefault ? (
+                    <CheckCircle2 color={colors.onPrimary} size={24} fill={colors.primary} />
+                  ) : (
+                    <Circle color={colors.borderStrong} size={24} />
+                  )}
+                </Pressable>
+              </Pressable>
+            );
+          })}
+
+          <Button
+            title="Add Payment Method"
+            icon={Plus}
+            variant="secondary"
+            onPress={openAddModal}
+            style={styles.addPaymentButton}
+          />
+        </Card>
+
+        <ListSection title="Business Address">
+          <ListItem
+            icon={MapPin}
+            title={defaultAddress ? defaultAddress.title : "No Address Set"}
+            subtitle={defaultAddress ? defaultAddress.address : "Tap to add"}
+            onPress={() => router.push("/payment-methods/addresses")}
+          />
+        </ListSection>
       </ScrollView>
 
       {/* Add/Edit Card Bottom Sheet */}
@@ -208,21 +197,22 @@ export default function PaymentMethodsScreen() {
           behavior={Platform.OS === "ios" ? "padding" : undefined}
           style={styles.modalOverlay}
         >
-          <TouchableOpacity
+          <Pressable
             style={styles.modalBackdrop}
-            activeOpacity={1}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
             onPress={() => setIsModalVisible(false)}
           />
-          <View style={[styles.bottomSheet, { paddingBottom: insets.bottom > 0 ? insets.bottom + 12 : 24 }]}>
+          <View style={[styles.bottomSheet, { paddingBottom: insets.bottom > 0 ? insets.bottom + spacing.md : spacing['2xl'] }]}>
             <View style={styles.dragIndicator} />
             <View style={styles.sheetHeader}>
-              <Text style={styles.sheetTitle}>
+              <Text variant="h2" align="center">
                 {editingCardId ? "Replace Card" : "Add Card"}
               </Text>
             </View>
 
             <ScrollView
-              contentContainerStyle={{ paddingBottom: 20 }}
+              contentContainerStyle={styles.sheetScrollContent}
               showsVerticalScrollIndicator={false}
             >
               <CreditCardView
@@ -231,7 +221,7 @@ export default function PaymentMethodsScreen() {
                 number={cardFormData?.values?.number}
                 expiry={cardFormData?.values?.expiry}
                 cvc={cardFormData?.values?.cvc}
-                style={{ alignSelf: 'center', marginBottom: 24 }}
+                style={styles.cardPreview}
               />
 
               <CreditCardInput
@@ -240,13 +230,13 @@ export default function PaymentMethodsScreen() {
                 onFocusField={setFocusedField}
                 inputStyle={styles.ccInput}
                 labelStyle={styles.ccLabel}
-                placeholderColor={palette.gray[400]}
+                placeholderColor={colors.textPlaceholder}
               />
 
               <Button
                 title={editingCardId ? "Save Changes" : "Save Card"}
                 onPress={handleSaveCard}
-                style={{ marginTop: 24 }}
+                style={styles.saveButton}
                 disabled={!cardFormData?.valid}
               />
             </ScrollView>
@@ -260,112 +250,45 @@ export default function PaymentMethodsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: palette.gray[50],
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-  },
-  headerButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: palette.white,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: palette.gray[100],
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: palette.gray[900],
+    backgroundColor: colors.background,
   },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 40,
-    gap: 24,
+    paddingHorizontal: layout.gutter,
+    paddingTop: spacing.md,
+    paddingBottom: spacing['4xl'],
+    gap: spacing['2xl'],
+  },
+  pressed: {
+    opacity: 0.85,
   },
   sectionCard: {
-    backgroundColor: palette.white,
-    borderRadius: 24,
-    padding: 16,
-    gap: 8,
+    gap: spacing.sm,
   },
   cardRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 12,
+    paddingVertical: spacing.md,
   },
   cardRowLeft: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
+    gap: spacing.lg,
+  },
+  cardText: {
+    gap: spacing.xs,
   },
   cardIconBox: {
     width: 48,
     height: 48,
-    borderRadius: 12,
-    backgroundColor: palette.gray[50],
+    borderRadius: radius.md,
+    backgroundColor: colors.surfaceMuted,
     alignItems: "center",
     justifyContent: "center",
-  },
-  cardName: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: palette.gray[900],
-    marginBottom: 4,
-  },
-  cardNumber: {
-    fontSize: 14,
-    color: palette.gray[500],
   },
   addPaymentButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: palette.gray[50],
-    borderRadius: 16,
-    paddingVertical: 16,
-    marginTop: 8,
-    gap: 8,
-  },
-  addPaymentText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: palette.gray[900],
-  },
-  addressSection: {
-    gap: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: palette.gray[900],
-    marginLeft: 8,
-  },
-  addressCard: {
-    backgroundColor: palette.white,
-    borderRadius: 24,
-    padding: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  addressIconBox: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: palette.gray[50],
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: palette.gray[100],
+    marginTop: spacing.sm,
   },
   modalOverlay: {
     flex: 1,
@@ -373,45 +296,48 @@ const styles = StyleSheet.create({
   },
   modalBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: colors.overlay,
   },
   bottomSheet: {
-    backgroundColor: palette.white,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 24,
-    paddingBottom: Platform.OS === "ios" ? 40 : 24,
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radius.md,
+    borderTopRightRadius: radius.md,
+    padding: spacing['2xl'],
     maxHeight: "90%",
+    ...elevation.md,
   },
   dragIndicator: {
     width: 40,
     height: 4,
-    backgroundColor: palette.gray[200],
-    borderRadius: 2,
+    backgroundColor: colors.border,
+    borderRadius: radius.pill,
     alignSelf: "center",
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   sheetHeader: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 24,
-    position: "relative",
+    marginBottom: spacing['2xl'],
   },
-  sheetTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: palette.gray[900],
+  sheetScrollContent: {
+    paddingBottom: spacing.xl,
+  },
+  cardPreview: {
+    alignSelf: "center",
+    marginBottom: spacing['2xl'],
   },
   ccInput: {
     height: 48,
-    fontSize: 16,
-    color: palette.gray[900],
+    ...typography.body,
+    color: colors.text,
   },
   ccLabel: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: palette.gray[700],
-    marginBottom: 4,
+    ...typography.label,
+    color: colors.textSecondary,
+    marginBottom: spacing.xs,
+  },
+  saveButton: {
+    marginTop: spacing['2xl'],
   },
 });

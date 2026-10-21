@@ -2,8 +2,7 @@ import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { PackageSearch } from "lucide-react-native";
-import { ChipGroup, EmptyState, spacing, Text } from "@a2b/ui";
-import { ScreenScroll } from "@/components/ScreenScroll";
+import { ChipGroup, EmptyState, ScreenScroll, spacing, Text } from "@a2b/ui";
 import { LoadCard, QueryFallback } from "@a2b/features";
 import { useFleetLoads, useLoadBoard } from "@/lib/queries";
 
