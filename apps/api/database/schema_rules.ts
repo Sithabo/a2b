@@ -57,6 +57,7 @@ export default {
         amount: money,
       },
     },
+    payment_events: { columns: { payload: t('Record<string, unknown>') } },
     payment_transactions: {
       columns: {
         kind: t('PaymentKind', 'PaymentKind'),

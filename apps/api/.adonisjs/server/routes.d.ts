@@ -4,6 +4,7 @@ type ParamValue = string | number | bigint | boolean
 
 export type ScannedRoutes = {
   ALL: {
+    'payment_webhooks': { paramsTuple?: []; params?: {} }
     'auth.request_otp': { paramsTuple?: []; params?: {} }
     'auth.verify_otp': { paramsTuple?: []; params?: {} }
     'auth.logout': { paramsTuple?: []; params?: {} }
@@ -29,6 +30,7 @@ export type ScannedRoutes = {
     'loads.requirements': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'loads.publish': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'loads.accept': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'loads.assign': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'loads.withdraw': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'loads.cancel': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'loads.progress': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -68,6 +70,7 @@ export type ScannedRoutes = {
     'load_documents.download': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'documentId': ParamValue} }
   }
   POST: {
+    'payment_webhooks': { paramsTuple?: []; params?: {} }
     'auth.request_otp': { paramsTuple?: []; params?: {} }
     'auth.verify_otp': { paramsTuple?: []; params?: {} }
     'auth.logout': { paramsTuple?: []; params?: {} }
@@ -79,6 +82,7 @@ export type ScannedRoutes = {
     'loads.store': { paramsTuple?: []; params?: {} }
     'loads.publish': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'loads.accept': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'loads.assign': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'loads.withdraw': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'loads.cancel': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'loads.progress': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

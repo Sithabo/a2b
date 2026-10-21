@@ -7,6 +7,7 @@ import { Badge, Button, Card, colors, layout, palette, radius, ScreenHeader, spa
 import { cargoNotes } from "@/components/cargoNotes";
 import { QueryFallback, useAcceptLoad } from "@a2b/features";
 import { useLoad } from "@/lib/queries";
+import { useSession } from "@/lib/session";
 
 const formatDate = (iso: string | null) =>
   iso ? new Date(iso).toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—";
@@ -17,6 +18,8 @@ export default function LoadOverviewScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const loadId = Number(id);
   const load = useLoad(loadId);
+  // Drivers accept loads themselves only once verified (fleets can still dispatch them)
+  const isVerified = useSession((st) => st.user?.driverProfile?.verificationStatus === "VERIFIED");
   const accept = useAcceptLoad(loadId);
 
   if (!load.data) {
@@ -73,7 +76,13 @@ export default function LoadOverviewScreen() {
           ))}
         </Card>
 
-        {l.status === "OPEN" ? (
+        {l.status === "OPEN" && !isVerified ? (
+          <Card style={styles.notice} padding="lg">
+            <Text variant="bodySm" color={palette.amber[900]}>
+              Your licence is still being verified. Until then you can take the jobs your fleet dispatches to you.
+            </Text>
+          </Card>
+        ) : l.status === "OPEN" ? (
           <Button title="Accept load" onPress={acceptLoad} loading={accept.isPending} />
         ) : (
           <Badge label={statusMeta[l.status].label} tone={statusMeta[l.status].tone} dot />
@@ -124,4 +133,5 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     backgroundColor: palette.amber[50],
   },
+  notice: { backgroundColor: colors.warningMuted, borderColor: colors.warningMuted },
 });

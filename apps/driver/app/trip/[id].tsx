@@ -77,6 +77,13 @@ export default function TripScreen() {
             The shipper is funding escrow for {formatMoney(l.escrow?.amount ?? l.offerPrice, getMarket(l.market))}.
             Don&apos;t drive to pickup yet — the address and contacts appear here as soon as the money is secured.
           </Text>
+          {l.escrow?.fundingDueAt && (
+            <Text variant="bodySm" color={palette.amber[900]} align="center">
+              If it isn&apos;t funded by{" "}
+              {new Date(l.escrow.fundingDueAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}, the
+              load goes back on the board and you&apos;re free to take another.
+            </Text>
+          )}
           <Badge label="Checking every few seconds" tone="warning" dot style={{ alignSelf: "center" }} />
         </View>
         <View style={styles.footer}>

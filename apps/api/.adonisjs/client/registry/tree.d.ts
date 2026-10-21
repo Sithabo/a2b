@@ -2,6 +2,7 @@
 import type { routes } from './index.ts'
 
 export interface ApiDefinition {
+  paymentWebhooks: typeof routes['payment_webhooks']
   auth: {
     requestOtp: typeof routes['auth.request_otp']
     verifyOtp: typeof routes['auth.verify_otp']
@@ -36,6 +37,7 @@ export interface ApiDefinition {
     requirements: typeof routes['loads.requirements']
     publish: typeof routes['loads.publish']
     accept: typeof routes['loads.accept']
+    assign: typeof routes['loads.assign']
     withdraw: typeof routes['loads.withdraw']
     cancel: typeof routes['loads.cancel']
     progress: typeof routes['loads.progress']

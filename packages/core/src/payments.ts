@@ -24,7 +24,12 @@ export const paymentMethodsFor = (market: Market): PaymentMethod[] => [
 export const isPaymentMethodAvailable = (method: PaymentMethod, market: Market) =>
   paymentMethodsFor(market).includes(method);
 
-export const ESCROW_STATUSES = ['AWAITING_DEPOSIT', 'HELD', 'RELEASED', 'REFUNDED'] as const;
+/**
+ * AWAITING_DEPOSIT → HELD → RELEASED (paid to the carrier) or REFUNDED (back to
+ * the shipper). VOID: the match ended before it was funded (carrier withdrew,
+ * shipper cancelled, or the funding window lapsed); a new match opens a new escrow.
+ */
+export const ESCROW_STATUSES = ['AWAITING_DEPOSIT', 'HELD', 'RELEASED', 'REFUNDED', 'VOID'] as const;
 export type EscrowStatus = (typeof ESCROW_STATUSES)[number];
 
 export const PAYMENT_KINDS = ['DEPOSIT', 'PAYOUT', 'REFUND'] as const;

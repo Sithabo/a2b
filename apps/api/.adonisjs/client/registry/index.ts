@@ -6,6 +6,12 @@ import type { ApiDefinition } from './tree.d.ts'
 const placeholder: any = {}
 
 const routes = {
+  'payment_webhooks': {
+    methods: ["POST"],
+    pattern: '/api/v1/webhooks/payments',
+    tokens: [{"old":"/api/v1/webhooks/payments","type":0,"val":"api","end":""},{"old":"/api/v1/webhooks/payments","type":0,"val":"v1","end":""},{"old":"/api/v1/webhooks/payments","type":0,"val":"webhooks","end":""},{"old":"/api/v1/webhooks/payments","type":0,"val":"payments","end":""}],
+    types: placeholder as Registry['payment_webhooks']['types'],
+  },
   'auth.request_otp': {
     methods: ["POST"],
     pattern: '/api/v1/auth/otp',
@@ -155,6 +161,12 @@ const routes = {
     pattern: '/api/v1/loads/:id/accept',
     tokens: [{"old":"/api/v1/loads/:id/accept","type":0,"val":"api","end":""},{"old":"/api/v1/loads/:id/accept","type":0,"val":"v1","end":""},{"old":"/api/v1/loads/:id/accept","type":0,"val":"loads","end":""},{"old":"/api/v1/loads/:id/accept","type":1,"val":"id","end":""},{"old":"/api/v1/loads/:id/accept","type":0,"val":"accept","end":""}],
     types: placeholder as Registry['loads.accept']['types'],
+  },
+  'loads.assign': {
+    methods: ["POST"],
+    pattern: '/api/v1/loads/:id/assign',
+    tokens: [{"old":"/api/v1/loads/:id/assign","type":0,"val":"api","end":""},{"old":"/api/v1/loads/:id/assign","type":0,"val":"v1","end":""},{"old":"/api/v1/loads/:id/assign","type":0,"val":"loads","end":""},{"old":"/api/v1/loads/:id/assign","type":1,"val":"id","end":""},{"old":"/api/v1/loads/:id/assign","type":0,"val":"assign","end":""}],
+    types: placeholder as Registry['loads.assign']['types'],
   },
   'loads.withdraw': {
     methods: ["POST"],

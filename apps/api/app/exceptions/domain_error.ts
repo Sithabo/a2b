@@ -16,8 +16,8 @@ export default class DomainError extends Exception {
     return new DomainError(message, { status: 404, code: 'E_NOT_FOUND' })
   }
 
-  static forbidden(message = 'You are not allowed to do this') {
-    return new DomainError(message, { status: 403, code: 'E_FORBIDDEN' })
+  static forbidden(message = 'You are not allowed to do this', code: ApiErrorCode = 'E_FORBIDDEN') {
+    return new DomainError(message, { status: 403, code })
   }
 
   static conflict(message: string, code: ApiErrorCode = 'E_CONFLICT') {

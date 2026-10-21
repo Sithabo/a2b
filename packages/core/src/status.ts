@@ -32,9 +32,11 @@ const TRANSITIONS: Record<LoadStatus, Partial<Record<LoadStatus, readonly Status
     OPEN: ['driver', 'fleet_owner', 'system'], // carrier withdrew or the funding window lapsed
     CANCELLED: ['shipper'],
   },
-  SECURED: { IN_TRANSIT: ['driver'], CANCELLED: ['system'] },
+  // Before pickup the shipper may still cancel; the escrow is refunded in full.
+  SECURED: { IN_TRANSIT: ['driver'], CANCELLED: ['shipper', 'system'] },
   IN_TRANSIT: { DELIVERED: ['driver'] },
-  DELIVERED: { COMPLETED: ['driver'] }, // backend verifies the release code
+  // The driver's release code pays out; `system` when the provider confirms the payout later
+  DELIVERED: { COMPLETED: ['driver', 'system'] },
   COMPLETED: {},
   CANCELLED: {},
 };

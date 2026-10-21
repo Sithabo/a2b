@@ -7,6 +7,18 @@ import type { InferInput, SimpleError } from '@vinejs/vine/types'
 export type ParamValue = string | number | bigint | boolean
 
 export interface Registry {
+  'payment_webhooks': {
+    methods: ["POST"]
+    pattern: '/api/v1/webhooks/payments'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/payment_webhooks_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/payment_webhooks_controller').default['handle']>>>
+    }
+  }
   'auth.request_otp': {
     methods: ["POST"]
     pattern: '/api/v1/auth/otp'
@@ -305,6 +317,18 @@ export interface Registry {
       query: ExtractQuery<InferInput<(typeof import('#validators/load').acceptLoadValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/loads_controller').default['accept']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/loads_controller').default['accept']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'loads.assign': {
+    methods: ["POST"]
+    pattern: '/api/v1/loads/:id/assign'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/load').assignLoadValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/load').assignLoadValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/loads_controller').default['assign']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/loads_controller').default['assign']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'loads.withdraw': {

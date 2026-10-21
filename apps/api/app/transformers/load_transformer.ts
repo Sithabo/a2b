@@ -86,6 +86,8 @@ export default class LoadTransformer extends BaseTransformer<Load> {
             amount: escrow.amount,
             currency: escrow.currency,
             depositMethod: escrow.depositMethod,
+            /** Unfunded matches go back on the board after this. */
+            fundingDueAt: escrow.fundingDueAt,
             releaseCodeExpiresAt: escrow.releaseCodeExpiresAt,
           }
         : null,
