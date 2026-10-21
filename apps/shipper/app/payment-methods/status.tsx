@@ -4,7 +4,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusHero } from "@/components/StatusHero";
 import { ReceiptCard, ReceiptDivider, ReceiptRow } from "@/components/ReceiptCard";
+import { formatMarketTime } from "@a2b/core";
 import { Button, colors, layout, ScreenHeader, spacing, Text } from "@a2b/ui";
+import { useMarket } from "@/store/useMarket";
 
 export default function PaymentStatusScreen() {
   const router = useRouter();
@@ -17,11 +19,8 @@ export default function PaymentStatusScreen() {
     ? "Your new card is ready for transactions."
     : "We couldn't verify your card details.";
 
-  const today = new Date().toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  const market = useMarket();
+  const today = formatMarketTime(new Date(), market, "date");
 
   return (
     <SafeAreaView style={styles.container} edges={["bottom", "left", "right"]}>

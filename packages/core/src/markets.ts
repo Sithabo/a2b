@@ -1,6 +1,7 @@
 import type { StorageEnvironment, VehicleClass } from './domain.ts';
 import { guyanaPlaces, ugandaPlaces, type MarketPlace } from './places.ts';
 import type { MobileMoneyProvider } from './payments.ts';
+import type { MarketTimezone } from './time.ts';
 import { guyanaDocuments, ugandaDocuments, type DocumentRequirement } from './documents.ts';
 import {
   guyanaDriverDocuments,
@@ -39,6 +40,8 @@ export interface Market {
     decimals: number;
     locale: string;
   };
+  /** Local time for showing and entering times (fixed offset, no daylight saving). */
+  timezone: MarketTimezone;
   phone: {
     callingCode: string;
     /** Digits after the calling code. */
@@ -97,6 +100,7 @@ export const markets: Record<MarketCode, Market> = {
     name: 'Guyana',
     flag: '🇬🇾',
     currency: { code: 'GYD', decimals: 0, locale: 'en-GY' },
+    timezone: { name: 'America/Guyana', utcOffsetMinutes: -240, label: 'Guyana time (GYT, UTC−4)' },
     phone: { callingCode: '+592', nationalLength: 7, example: '600 1234' },
     taxId: { label: 'TIN', issuer: 'GRA', authority: 'Guyana Revenue Authority', pattern: /^\d{9}$/, hint: '9 digits' },
     mobileMoney: [{ id: 'mmg', name: 'MMG' }],
@@ -113,6 +117,7 @@ export const markets: Record<MarketCode, Market> = {
     name: 'Uganda',
     flag: '🇺🇬',
     currency: { code: 'UGX', decimals: 0, locale: 'en-UG' },
+    timezone: { name: 'Africa/Kampala', utcOffsetMinutes: 180, label: 'Uganda time (EAT, UTC+3)' },
     phone: { callingCode: '+256', nationalLength: 9, example: '772 345 678' },
     taxId: { label: 'TIN', issuer: 'URA', authority: 'Uganda Revenue Authority', pattern: /^\d{10}$/, hint: '10 digits' },
     mobileMoney: [

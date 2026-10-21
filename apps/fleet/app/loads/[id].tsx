@@ -3,7 +3,7 @@ import { Alert, Linking, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowDown, Clock, MapPin, Phone, ShieldCheck, Truck } from "lucide-react-native";
-import { cargoLabel, formatMoney, getMarket, statusMeta, vehicleClasses } from "@a2b/core";
+import { cargoLabel, formatMarketTime, formatMoney, getMarket, statusMeta, vehicleClasses } from "@a2b/core";
 import { AuthImage, QueryFallback, useAcceptLoad, useAssignLoad, useWithdrawLoad } from "@a2b/features";
 import {
   Badge,
@@ -22,8 +22,6 @@ import {
 } from "@a2b/ui";
 import { buildRoster, useDrivers, useFleetLoads, useLoad, useVehicles } from "@/lib/queries";
 
-const formatDate = (iso: string | null) =>
-  iso ? new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—";
 
 export default function LoadDetailScreen() {
   const router = useRouter();
@@ -92,8 +90,8 @@ export default function LoadDetailScreen() {
             <Place icon={MapPin} label="Drop-off" value={l.location?.dropoffAddress ?? l.dropoffSummary} />
           </View>
           <View style={styles.specs}>
-            <Spec label="Ready" value={formatDate(l.readyAt)} />
-            <Spec label="Deliver by" value={formatDate(l.deadlineAt)} />
+            <Spec label="Ready" value={formatMarketTime(l.readyAt, market)} />
+            <Spec label="Deliver by" value={formatMarketTime(l.deadlineAt, market)} />
             <Spec label="Weight" value={l.weightKg ? `${(l.weightKg / 1000).toFixed(1)} t` : "—"} />
           </View>
           {l.isImport && (
@@ -113,7 +111,7 @@ export default function LoadDetailScreen() {
             <Text variant="bodySm" color={palette.amber[900]}>
               Hold the truck until payment is secured. Pickup address and contacts unlock as soon as it is.
               {l.escrow?.fundingDueAt
-                ? ` If it isn't funded by ${formatDate(l.escrow.fundingDueAt)}, the load goes back on the board.`
+                ? ` If it isn't funded by ${formatMarketTime(l.escrow.fundingDueAt, market)}, the load goes back on the board.`
                 : ""}
             </Text>
           </Card>
@@ -165,7 +163,7 @@ export default function LoadDetailScreen() {
             />
             <Text variant="bodyStrong">Received by {l.delivery.receiverName}</Text>
             <Text variant="caption" tone="muted">
-              {formatDate(l.delivery.deliveredAt)}
+              {formatMarketTime(l.delivery.deliveredAt, market)}
             </Text>
           </Card>
         )}

@@ -5,7 +5,7 @@ import { StatusHero } from "@/components/StatusHero";
 import { ReceiptCard, ReceiptDivider, ReceiptRow } from "@/components/ReceiptCard";
 import { colors, layout, spacing, ScreenHeader, Button, Text } from "@a2b/ui";
 import { useMarket } from "@/store/useMarket";
-import { formatMoney, statusMeta } from "@a2b/core";
+import { formatMarketTime, formatMoney, statusMeta } from "@a2b/core";
 import { parseLoadId, trackingLabel, useShipment } from "@/lib/loads";
 
 export default function StatusScreen() {
@@ -21,15 +21,10 @@ export default function StatusScreen() {
     ? "Your offer is now live for drivers"
     : "We couldn't securely place your funds in escrow.";
 
-  const dateObj = latestShipment?.createdAt ? new Date(latestShipment.createdAt) : new Date();
-  const today = dateObj.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-  
-  const loadId = latestShipment ? trackingLabel(latestShipment) : "—";
   const market = useMarket();
+  const today = formatMarketTime(latestShipment?.createdAt ?? new Date(), market, "date");
+
+  const loadId = latestShipment ? trackingLabel(latestShipment) : "—";
   const formattedPrice = latestShipment ? formatMoney(latestShipment.offerPrice, market) : "—";
 
   return (

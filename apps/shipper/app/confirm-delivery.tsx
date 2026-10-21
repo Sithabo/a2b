@@ -5,7 +5,9 @@ import { Image } from "expo-image";
 import { Shield } from "lucide-react-native";
 import { AuthImage } from "@a2b/features";
 import { Button, Card, colors, radius, ScreenHeader, spacing, Text } from "@a2b/ui";
+import { formatMarketTime } from "@a2b/core";
 import { parseLoadId, useShipment } from "@/lib/loads";
+import { useMarket } from "@/store/useMarket";
 
 export default function ConfirmDeliveryScreen() {
   const router = useRouter();
@@ -14,6 +16,7 @@ export default function ConfirmDeliveryScreen() {
   // The driver's proof of delivery, so the shipper can check before releasing payment
   const { data: shipment } = useShipment(loadId);
   const delivery = shipment?.delivery;
+  const market = useMarket();
 
   return (
     <View style={styles.container}>
@@ -31,12 +34,7 @@ export default function ConfirmDeliveryScreen() {
             <Text variant="bodyStrong">Received by {delivery.receiverName}</Text>
             {delivery.deliveredAt && (
               <Text variant="caption" tone="muted">
-                {new Date(delivery.deliveredAt).toLocaleString("en-GB", {
-                  day: "numeric",
-                  month: "short",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+                {formatMarketTime(delivery.deliveredAt, market)}
               </Text>
             )}
           </Card>

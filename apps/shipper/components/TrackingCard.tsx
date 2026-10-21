@@ -1,7 +1,8 @@
 import React from "react";
 import { View, StyleSheet, ViewStyle } from "react-native";
 import { Package, Wrench, FlaskConical, Apple, QrCode, type LucideIcon } from "lucide-react-native";
-import type { CargoType } from "@a2b/core";
+import { formatMarketTime, type CargoType } from "@a2b/core";
+import { useMarket } from "@/store/useMarket";
 import { Card, Text, colors, radius, spacing } from "@a2b/ui";
 import { dueDate, trackingLabel, type Load } from "@/lib/loads";
 
@@ -38,33 +39,12 @@ export const TrackingCard: React.FC<TrackingCardProps> = ({
   const pickupName = getDisplayLocation(shipment.pickupSummary);
   const deliveryName = getDisplayLocation(shipment.dropoffSummary);
 
-  // 2. Format dates and times as "29 jun 26" and "8:15 am" / "04:20 pm"
-  const formatDateTime = (dateStr?: string | null) => {
-    if (!dateStr) return { date: "--", time: "--" };
-    try {
-      const dateObj = new Date(dateStr);
-      if (isNaN(dateObj.getTime())) return { date: "--", time: "--" };
-      
-      const day = dateObj.getDate();
-      const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-      const month = months[dateObj.getMonth()];
-      const year = dateObj.getFullYear().toString().slice(-2);
-      const dateFormatted = `${day < 10 ? "0" + day : day} ${month} ${year}`;
-
-      let hours = dateObj.getHours();
-      const minutes = dateObj.getMinutes();
-      const ampm = hours >= 12 ? "pm" : "am";
-      hours = hours % 12;
-      hours = hours ? hours : 12;
-      const minutesStr = minutes < 10 ? "0" + minutes : minutes;
-      const hoursStr = hours < 10 ? "0" + hours : hours;
-      const timeFormatted = `${hoursStr}:${minutesStr} ${ampm}`;
-
-      return { date: dateFormatted, time: timeFormatted };
-    } catch {
-      return { date: "--", time: "--" };
-    }
-  };
+  // 2. Dates and times in the market's local time
+  const market = useMarket();
+  const formatDateTime = (at?: string | null) => ({
+    date: formatMarketTime(at, market, "date"),
+    time: formatMarketTime(at, market, "time"),
+  });
 
   const startInfo = formatDateTime(shipment.createdAt);
   const deliveryInfo = formatDateTime(dueDate(shipment));

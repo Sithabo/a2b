@@ -2,15 +2,13 @@ import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { AlertTriangle, ArrowDown, MapPin } from "lucide-react-native";
-import { cargoLabel, formatMoney, getMarket, statusMeta } from "@a2b/core";
+import { cargoLabel, formatMarketTime, formatMoney, getMarket, statusMeta } from "@a2b/core";
 import { Badge, Button, Card, colors, layout, palette, radius, ScreenHeader, spacing, Text } from "@a2b/ui";
 import { cargoNotes } from "@/components/cargoNotes";
 import { QueryFallback, useAcceptLoad } from "@a2b/features";
 import { useLoad } from "@/lib/queries";
 import { useSession } from "@/lib/session";
 
-const formatDate = (iso: string | null) =>
-  iso ? new Date(iso).toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—";
 
 /** Mission overview for an open load, with the accept CTA. */
 export default function LoadOverviewScreen() {
@@ -53,9 +51,9 @@ export default function LoadOverviewScreen() {
         </Card>
 
         <Card style={styles.section}>
-          <Place label="Pickup" value={l.pickupSummary} when={formatDate(l.readyAt)} />
+          <Place label="Pickup" value={l.pickupSummary} when={formatMarketTime(l.readyAt, getMarket(l.market), "weekdayDateTime")} />
           <ArrowDown size={18} color={colors.textMuted} />
-          <Place label="Drop-off" value={l.dropoffSummary} when={`by ${formatDate(l.deadlineAt)}`} />
+          <Place label="Drop-off" value={l.dropoffSummary} when={`by ${formatMarketTime(l.deadlineAt, getMarket(l.market), "weekdayDateTime")}`} />
           <Text variant="caption" tone="muted">
             Exact addresses and contacts unlock once the shipper funds escrow.
           </Text>

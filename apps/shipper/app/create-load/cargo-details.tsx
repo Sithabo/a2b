@@ -36,7 +36,15 @@ import {
   Text,
   TextField,
 } from "@a2b/ui";
-import { cargoLabel, recommendOffer, type CargoDetails, type CargoType } from "@a2b/core";
+import {
+  cargoLabel,
+  marketDateTime,
+  marketParts,
+  recommendOffer,
+  toPickerValue,
+  type CargoDetails,
+  type CargoType,
+} from "@a2b/core";
 import { apiErrorMessage } from "@a2b/api-client";
 import { api } from "@/lib/session";
 import { newLoadBody, useInvalidateLoads } from "@/lib/loads";
@@ -45,6 +53,9 @@ import { useMarket } from "@/store/useMarket";
 export default function CargoDetailsScreen() {
   const router = useRouter();
   const market = useMarket();
+  /** The picked day at a wall-clock time in the shipper's market (not the phone's timezone). */
+  const atMarketTime = (day: Date, hour: number, minute = 0) =>
+    marketDateTime(market, day.getFullYear(), day.getMonth(), day.getDate(), hour, minute);
   const insets = useSafeAreaInsets();
 
   const pickupLocation = useShipmentStore((state) => state.pickupLocation);
@@ -81,10 +92,10 @@ export default function CargoDetailsScreen() {
   const [storageEnvironment, setStorageEnvironment] = useState<'AMBIENT' | 'CHILLED' | 'FROZEN'>('AMBIENT');
 
   // Date/Time States
+  // Picker values show the market's wall clock (see toPickerValue / atMarketTime)
   const [pickupDate, setPickupDate] = useState<Date | null>(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 1);
-    return d;
+    const today = marketParts(new Date(), market);
+    return new Date(today.year, today.month, today.day + 1); // tomorrow in the market
   });
   const [pickupWindow, setPickupWindow] = useState<"EARLY_MORNING" | "MID_DAY" | "AFTERNOON" | null>(null);
   const [deliveryDate, setDeliveryDate] = useState<Date | null>(null);
@@ -161,7 +172,7 @@ export default function CargoDetailsScreen() {
         setOfferPrice(draft.offerPrice);
       }
       if (draft.readyAt) {
-        const rDate = new Date(draft.readyAt);
+        const rDate = toPickerValue(draft.readyAt, market);
         setPickupDate(rDate);
         if (!isImportFlow) {
           const hours = rDate.getHours();
@@ -171,8 +182,8 @@ export default function CargoDetailsScreen() {
         }
       }
       if (draft.deadlineAt) {
-        setDeliveryDate(new Date(draft.deadlineAt));
-        setTime(new Date(draft.deadlineAt));
+        setDeliveryDate(toPickerValue(draft.deadlineAt, market));
+        setTime(toPickerValue(draft.deadlineAt, market));
       }
     }
     // Hydrate from the draft only when the draft changes; re-running on an
@@ -247,15 +258,8 @@ export default function CargoDetailsScreen() {
     };
 
     if (isImportFlow) {
-      const readyDate = new Date(pickupDate!);
-      readyDate.setHours(8, 0, 0, 0);
-
-      const deadlineDate = new Date(deliveryDate!);
-      if (time) {
-        deadlineDate.setHours(time.getHours(), time.getMinutes(), 0, 0);
-      } else {
-        deadlineDate.setHours(17, 0, 0, 0);
-      }
+      const readyDate = atMarketTime(pickupDate!, 8);
+      const deadlineDate = atMarketTime(deliveryDate!, time?.getHours() ?? 17, time?.getMinutes() ?? 0);
 
       setDraft({
         pickup: pickupLocation,
@@ -304,16 +308,9 @@ export default function CargoDetailsScreen() {
       chemicalContainer: selectedType === 'CHEMICALS_PHARMA' ? (chemicalContainer || undefined) : undefined,
     };
 
-    const readyDate = new Date(pickupDate!);
     const hour = pickupWindow === "EARLY_MORNING" ? 6 : pickupWindow === "MID_DAY" ? 10 : 14;
-    readyDate.setHours(hour, 0, 0, 0);
-
-    const deadlineDate = new Date(deliveryDate!);
-    if (time) {
-      deadlineDate.setHours(time.getHours(), time.getMinutes(), 0, 0);
-    } else {
-      deadlineDate.setHours(17, 0, 0, 0);
-    }
+    const readyDate = atMarketTime(pickupDate!, hour);
+    const deadlineDate = atMarketTime(deliveryDate!, time?.getHours() ?? 17, time?.getMinutes() ?? 0);
 
     setIsPosting(true);
     try {

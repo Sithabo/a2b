@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import { View, Pressable, StyleSheet } from "react-native";
 import { CalendarDays, Clock, Lock, Info } from "lucide-react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { toPickerValue } from "@a2b/core";
 import { Text, colors, layout, radius, spacing } from "@a2b/ui";
+import { useMarket } from "@/store/useMarket";
 
 interface DateTimePickerSectionProps {
   pickupDate: Date | null;
@@ -27,6 +29,9 @@ export const DateTimePickerSection: React.FC<DateTimePickerSectionProps> = ({
   setTime,
   isImportFlow,
 }) => {
+  const market = useMarket();
+  // Picker values show the market's wall clock, so "now" is the market's now
+  const marketNow = toPickerValue(new Date(), market);
   // Picker visibility state
   const [showPicker, setShowPicker] = useState<"pickup" | "delivery" | "time" | null>(null);
 
@@ -135,7 +140,7 @@ export const DateTimePickerSection: React.FC<DateTimePickerSectionProps> = ({
 
         {/* Micro-copy */}
         <Text variant="caption" tone="muted">
-          Specify the time window when the facility is ready to load.
+          Specify the time window when the facility is ready to load. Times are in {market.timezone.label}.
         </Text>
 
         {/* Import Warning Banner */}
@@ -190,32 +195,32 @@ export const DateTimePickerSection: React.FC<DateTimePickerSectionProps> = ({
 
         {/* Micro-copy */}
         <Text variant="caption" tone="muted">
-          The latest time the goods must arrive at the destination.
+          The latest time the goods must arrive at the destination, in {market.timezone.label}.
         </Text>
       </View>
 
       {/* Native Datetime Picker Renderers */}
       {showPicker === "pickup" && (
         <DateTimePicker
-          value={pickupDate || new Date()}
+          value={pickupDate || marketNow}
           mode="date"
           display="default"
-          minimumDate={new Date()}
+          minimumDate={marketNow}
           onChange={onChange}
         />
       )}
       {showPicker === "delivery" && (
         <DateTimePicker
-          value={deliveryDate || new Date()}
+          value={deliveryDate || marketNow}
           mode="date"
           display="default"
-          minimumDate={pickupDate || new Date()}
+          minimumDate={pickupDate || marketNow}
           onChange={onChange}
         />
       )}
       {showPicker === "time" && (
         <DateTimePicker
-          value={time || new Date()}
+          value={time || marketNow}
           mode="time"
           display="default"
           onChange={onChange}
