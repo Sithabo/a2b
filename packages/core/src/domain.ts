@@ -102,6 +102,8 @@ export interface LocationData {
   longitude: number;
   /** Inside a customs-controlled zone (port, border post, inland depot). */
   isPort: boolean;
+  /** Full street address when the place came from search; the load stores it as the exact address. */
+  address?: string;
 }
 
 // ─── Vehicles ─────────────────────────────────────────────────────────────────

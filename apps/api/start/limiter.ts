@@ -34,3 +34,11 @@ export const otpVerifyThrottle = limiter.define('auth_verify', (ctx) =>
     .usingKey(`ip_${ctx.request.ip()}`)
     .limitExceeded((error) => error.setMessage(message))
 )
+
+/** Place search runs on every keystroke and the provider bills per request. */
+export const placesThrottle = limiter.define('places', (ctx) =>
+  limiter
+    .allowRequests(120)
+    .every('1 minute')
+    .usingKey(`user_${ctx.auth.user?.id ?? ctx.request.ip()}`)
+)

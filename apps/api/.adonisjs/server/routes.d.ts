@@ -18,6 +18,8 @@ export type ScannedRoutes = {
     'fleet_invites.index': { paramsTuple?: []; params?: {} }
     'fleet_invites.accept': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'fleet_invites.decline': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'places.search': { paramsTuple?: []; params?: {} }
+    'places.details': { paramsTuple?: []; params?: {} }
     'fleets.store': { paramsTuple?: []; params?: {} }
     'fleets.show': { paramsTuple?: []; params?: {} }
     'fleets.vehicles': { paramsTuple?: []; params?: {} }
@@ -55,6 +57,8 @@ export type ScannedRoutes = {
     'driver_documents.index': { paramsTuple?: []; params?: {} }
     'driver_documents.download': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'fleet_invites.index': { paramsTuple?: []; params?: {} }
+    'places.search': { paramsTuple?: []; params?: {} }
+    'places.details': { paramsTuple?: []; params?: {} }
     'fleets.show': { paramsTuple?: []; params?: {} }
     'fleets.vehicles': { paramsTuple?: []; params?: {} }
     'fleets.drivers': { paramsTuple?: []; params?: {} }
@@ -75,6 +79,8 @@ export type ScannedRoutes = {
     'driver_documents.index': { paramsTuple?: []; params?: {} }
     'driver_documents.download': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'fleet_invites.index': { paramsTuple?: []; params?: {} }
+    'places.search': { paramsTuple?: []; params?: {} }
+    'places.details': { paramsTuple?: []; params?: {} }
     'fleets.show': { paramsTuple?: []; params?: {} }
     'fleets.vehicles': { paramsTuple?: []; params?: {} }
     'fleets.drivers': { paramsTuple?: []; params?: {} }

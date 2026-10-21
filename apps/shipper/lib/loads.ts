@@ -101,7 +101,7 @@ export type CreateLoadBody = Parameters<typeof api.loads.store>[0]["body"];
 /** Request body for POST /loads from the create-load wizard's state. */
 export function newLoadBody(input: NewLoadInput): CreateLoadBody {
   const place = (loc: LocationData | null) => ({
-    address: loc?.name ?? "",
+    address: loc?.address || loc?.name || "",
     lat: loc?.latitude ?? null,
     lng: loc?.longitude ?? null,
   });

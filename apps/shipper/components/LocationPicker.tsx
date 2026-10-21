@@ -2,6 +2,7 @@ import React from "react";
 import { View, Pressable, StyleSheet, ViewStyle } from "react-native";
 import { MapPin, Circle, ArrowDownUp, Plus } from "lucide-react-native";
 import { IconButton, Text, TextField, colors, radius, spacing } from "@a2b/ui";
+import { useMarket } from "@/store/useMarket";
 
 export interface LocationPickerProps {
   startLocation: string;
@@ -26,6 +27,10 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
   onPressStart,
   onPressEnd,
 }) => {
+  // Examples from the shipper's own market: a customs zone to start, a town to end
+  const market = useMarket();
+  const startExample = `e.g. ${market.places.find((p) => p.isPort)?.name ?? market.name}`;
+  const endExample = `e.g. ${market.places.find((p) => p.kind === "town")?.name ?? market.name}`;
   return (
     <View style={[styles.container, style]}>
       <View style={styles.contentWrapper}>
@@ -51,7 +56,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
                 variant={startLocation ? "h3" : "body"}
                 color={startLocation ? colors.primary : colors.textPlaceholder}
               >
-                {startLocation || "e.g. Paramaribo, Suriname"}
+                {startLocation || startExample}
               </Text>
             </Pressable>
           ) : (
@@ -59,7 +64,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
               label="START LOCATION"
               value={startLocation}
               onChangeText={onChangeStart}
-              placeholder="e.g. GeorgeTown, Guyana"
+              placeholder={startExample}
             />
           )}
 
@@ -76,7 +81,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
                 variant={endLocation ? "h3" : "body"}
                 color={endLocation ? colors.primary : colors.textPlaceholder}
               >
-                {endLocation || "e.g. GeorgeTown Guyana"}
+                {endLocation || endExample}
               </Text>
             </Pressable>
           ) : (

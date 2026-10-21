@@ -175,6 +175,30 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/fleet_invites_controller').default['decline']>>>
     }
   }
+  'places.search': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/places'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/places').placeSearchValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/places_controller').default['search']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/places_controller').default['search']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'places.details': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/places/details'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/places').placeDetailsValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/places_controller').default['details']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/places_controller').default['details']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'fleets.store': {
     methods: ["POST"]
     pattern: '/api/v1/fleet'

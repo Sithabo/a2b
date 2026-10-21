@@ -14,4 +14,5 @@ export const controllers = {
   Loads: () => import('#controllers/loads_controller'),
   Me: () => import('#controllers/me_controller'),
   PaymentWebhooks: () => import('#controllers/payment_webhooks_controller'),
+  Places: () => import('#controllers/places_controller'),
 }

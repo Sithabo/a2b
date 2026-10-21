@@ -1,18 +1,22 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  KeyboardAvoidingView,
   Modal,
-  View,
+  Platform,
   Pressable,
   StyleSheet,
-  FlatList,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Anchor, MapPin, Search, X, ArrowLeft } from "lucide-react-native";
+import { Anchor, ArrowLeft, MapPin, Search, X } from "lucide-react-native";
+import { apiErrorMessage } from "@a2b/api-client";
 import type { LocationData } from "@a2b/core";
 import { Badge, IconButton, Text, TextField, colors, layout, radius, spacing } from "@a2b/ui";
+import { newSearchSession, resolvePlace, usePlaceSearch, type PlaceResult } from "@/lib/places";
+import { useMarket } from "@/store/useMarket";
 
 interface LocationSearchModalProps {
   isVisible: boolean;
@@ -22,118 +26,92 @@ interface LocationSearchModalProps {
   placeholder?: string;
 }
 
-const MOCK_PORTS: LocationData[] = [
-  { id: "p_01", name: "Georgetown Wharves (Port Zone)", latitude: 6.8114, longitude: -58.1672, isPort: true },
-  { id: "p_02", name: "Demerara Terminals (Port Zone)", latitude: 6.7901, longitude: -58.1812, isPort: true },
-];
+const NO_RESULTS: PlaceResult[] = [];
 
-const MOCK_ADDRESSES: LocationData[] = [
-  { id: "g_01", name: "Linden Highway, Guyana", latitude: 6.4021, longitude: -58.2190, isPort: false },
-  { id: "g_02", name: "Demerara Harbour Bridge, Peters Hall", latitude: 6.7802, longitude: -58.1895, isPort: false },
-  { id: "g_03", name: "Demerara Street, Georgetown", latitude: 6.8011, longitude: -58.1590, isPort: false },
-  { id: "g_04", name: "Main Street, Georgetown, Guyana", latitude: 6.8082, longitude: -58.1654, isPort: false },
-  { id: "g_05", name: "Sheriff Street, Campbellville, GT", latitude: 6.8021, longitude: -58.1402, isPort: false },
-];
+/** Ports, border posts and towns from the market's catalog, shown before the shipper types. */
+function useSuggestions(): PlaceResult[] {
+  const market = useMarket();
+  return useMemo(
+    () =>
+      [...market.places]
+        .sort((a, b) => Number(b.isPort) - Number(a.isPort))
+        .slice(0, 8)
+        .map((p) => ({
+          id: `catalog:${p.id}`,
+          name: p.name,
+          address: p.region,
+          isPort: p.isPort,
+          latitude: p.latitude,
+          longitude: p.longitude,
+          source: "catalog" as const,
+        })),
+    [market]
+  );
+}
 
+/**
+ * Pickup / drop-off search in the shipper's market: A2B's known places (customs
+ * zones first) plus addresses from the search provider, through the API.
+ */
 export const LocationSearchModal = ({
   isVisible,
   onClose,
   onSelectLocation,
   title,
-  placeholder = "Search locations...",
+  placeholder = "Search a place or address",
 }: LocationSearchModalProps) => {
-  const [query, setQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
-  const [filteredPorts, setFilteredPorts] = useState<LocationData[]>([]);
-  const [filteredAddresses, setFilteredAddresses] = useState<LocationData[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const inputRef = useRef<React.ComponentRef<typeof TextField>>(null);
+  const market = useMarket();
   const insets = useSafeAreaInsets();
+  const inputRef = useRef<React.ComponentRef<typeof TextField>>(null);
+  const suggestions = useSuggestions();
 
-  // Focus input on mount
+  const [query, setQuery] = useState("");
+  const [debounced, setDebounced] = useState("");
+  const [resolvingId, setResolvingId] = useState<string | null>(null);
+  // One provider billing session per opened search
+  const session = useMemo(() => (isVisible ? newSearchSession() : ""), [isVisible]);
+  const search = usePlaceSearch(debounced, session);
+
   useEffect(() => {
-    if (isVisible) {
-      setQuery("");
-      setDebouncedQuery("");
-      setFilteredPorts([]);
-      setFilteredAddresses([]);
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 150);
-    }
+    if (!isVisible) return;
+    setQuery("");
+    setDebounced("");
+    const focus = setTimeout(() => inputRef.current?.focus(), 150);
+    return () => clearTimeout(focus);
   }, [isVisible]);
 
-  // Debounce logic (300ms)
   useEffect(() => {
-    if (!query) {
-      setDebouncedQuery("");
-      return;
-    }
-
-    setIsLoading(true);
-    const handler = setTimeout(() => {
-      setDebouncedQuery(query);
-      setIsLoading(false);
-    }, 300);
-
-    return () => {
-      clearTimeout(handler);
-    };
+    const handler = setTimeout(() => setDebounced(query), 250);
+    return () => clearTimeout(handler);
   }, [query]);
 
-  // Search filtering
-  useEffect(() => {
-    if (!debouncedQuery) {
-      setFilteredPorts([]);
-      setFilteredAddresses([]);
-      return;
+  const select = async (place: PlaceResult) => {
+    setResolvingId(place.id);
+    try {
+      onSelectLocation(await resolvePlace(place, session));
+    } catch (err) {
+      Alert.alert("Couldn't use this place", apiErrorMessage(err));
+    } finally {
+      setResolvingId(null);
     }
+  };
 
-    const lowerQuery = debouncedQuery.toLowerCase();
-    
-    // Filter ports
-    const ports = MOCK_PORTS.filter(p => p.name.toLowerCase().includes(lowerQuery));
-    setFilteredPorts(ports);
-
-    // Filter addresses
-    const addresses = MOCK_ADDRESSES.filter(a => a.name.toLowerCase().includes(lowerQuery));
-    setFilteredAddresses(addresses);
-  }, [debouncedQuery]);
-
-  // Render search results grouped cleanly (SectionList styling using custom FlatList rendering)
-  const renderData = React.useMemo(() => {
-    const listData: ({ type: "header"; title: string } | { type: "item"; item: LocationData })[] = [];
-
-    if (filteredPorts.length > 0) {
-      listData.push({ type: "header", title: "PORTS & CUSTOMS ZONES" });
-      filteredPorts.forEach(port => {
-        listData.push({ type: "item", item: port });
-      });
-    }
-
-    if (filteredAddresses.length > 0) {
-      listData.push({ type: "header", title: "ADDRESSES & TOWNS" });
-      filteredAddresses.forEach(addr => {
-        listData.push({ type: "item", item: addr });
-      });
-    }
-
-    return listData;
-  }, [filteredPorts, filteredAddresses]);
+  const typing = query.trim().length >= 2;
+  const results = typing ? (search.data ?? NO_RESULTS) : suggestions;
+  const isSearching = typing && (query !== debounced || search.isFetching);
+  const rows = useMemo(() => {
+    const ports = results.filter((r) => r.isPort);
+    const others = results.filter((r) => !r.isPort);
+    const list: ({ type: "header"; title: string } | { type: "item"; item: PlaceResult })[] = [];
+    if (ports.length) list.push({ type: "header", title: "Ports & customs zones" }, ...ports.map((item) => ({ type: "item" as const, item })));
+    if (others.length) list.push({ type: "header", title: typing ? "Places & addresses" : "Towns & industrial areas" }, ...others.map((item) => ({ type: "item" as const, item })));
+    return list;
+  }, [results, typing]);
 
   return (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={isVisible}
-      onRequestClose={onClose}
-    >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={styles.modalContainer}
-      >
+    <Modal animationType="slide" transparent visible={isVisible} onRequestClose={onClose}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.modalContainer}>
         <View style={[styles.innerContainer, { paddingTop: insets.top || spacing.lg }]}>
-          {/* Header */}
           <View style={styles.header}>
             <IconButton icon={ArrowLeft} onPress={onClose} accessibilityLabel="Go back" />
             <Text variant="h3" tone="primary" align="center" numberOfLines={1} style={styles.headerTitle}>
@@ -142,7 +120,6 @@ export const LocationSearchModal = ({
             <View style={styles.headerSpacer} />
           </View>
 
-          {/* Search Input Box */}
           <View style={styles.searchBar}>
             <TextField
               ref={inputRef}
@@ -153,7 +130,7 @@ export const LocationSearchModal = ({
               autoCapitalize="none"
               clearButtonMode="while-editing"
               leading={
-                isLoading ? (
+                isSearching ? (
                   <ActivityIndicator size="small" color={colors.primary} />
                 ) : (
                   <Search size={18} color={colors.textPlaceholder} />
@@ -161,98 +138,69 @@ export const LocationSearchModal = ({
               }
               trailing={
                 query.length > 0 ? (
-                  <IconButton
-                    icon={X}
-                    variant="plain"
-                    size={32}
-                    accessibilityLabel="Clear search"
-                    onPress={() => setQuery("")}
-                  />
+                  <IconButton icon={X} variant="plain" size={32} accessibilityLabel="Clear search" onPress={() => setQuery("")} />
                 ) : undefined
               }
             />
           </View>
 
-          {/* Results List */}
-          {query && filteredPorts.length === 0 && filteredAddresses.length === 0 && !isLoading ? (
+          {typing && !isSearching && search.isError ? (
             <View style={styles.emptyContainer}>
-              <Text variant="bodyStrong" tone="secondary" align="center">{"No results found for \"" + query + "\""}</Text>
-              <Text variant="caption" tone="muted" align="center" style={styles.emptySubText}>{'Try typing "Demerara" or "Georgetown" to test port detection.'}</Text>
+              <Text variant="bodyStrong" tone="secondary" align="center">
+                {apiErrorMessage(search.error, "Search isn't available right now.")}
+              </Text>
             </View>
-          ) : !query ? (
-            <View style={styles.introContainer}>
-              <Text variant="bodyStrong" tone="primary" style={styles.introHeader}>Quick Suggestions</Text>
-              <View style={styles.suggestionsList}>
-                {MOCK_PORTS.map(port => (
-                  <Pressable
-                    key={port.id}
-                    accessibilityRole="button"
-                    accessibilityLabel={`${port.name}, port node`}
-                    style={({ pressed }) => [styles.suggestionItem, pressed && { opacity: 0.85 }]}
-                    onPress={() => onSelectLocation(port)}
-                  >
-                    <Anchor size={16} color={colors.primary} style={styles.suggestionIcon} />
-                    <Text variant="bodySm" tone="secondary" style={styles.suggestionText}>{port.name}</Text>
-                    <Badge label="PORT NODE" tone="brand" />
-                  </Pressable>
-                ))}
-                {MOCK_ADDRESSES.slice(0, 3).map(addr => (
-                  <Pressable
-                    key={addr.id}
-                    accessibilityRole="button"
-                    accessibilityLabel={addr.name}
-                    style={({ pressed }) => [styles.suggestionItem, pressed && { opacity: 0.85 }]}
-                    onPress={() => onSelectLocation(addr)}
-                  >
-                    <MapPin size={16} color={colors.textMuted} style={styles.suggestionIcon} />
-                    <Text variant="bodySm" tone="secondary" style={styles.suggestionText}>{addr.name}</Text>
-                  </Pressable>
-                ))}
-              </View>
+          ) : typing && !isSearching && results.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Text variant="bodyStrong" tone="secondary" align="center">{`No places in ${market.name} match "${query.trim()}"`}</Text>
+              <Text variant="caption" tone="muted" align="center" style={styles.emptySubText}>
+                Try a street, market, warehouse or town name.
+              </Text>
             </View>
           ) : (
             <FlatList
-              data={renderData}
-              keyExtractor={(item, index) => index.toString()}
+              data={rows}
+              keyExtractor={(row) => (row.type === "header" ? `h:${row.title}` : row.item.id)}
               contentContainerStyle={styles.listContent}
               keyboardShouldPersistTaps="handled"
-              renderItem={({ item }) => {
-                if (item.type === "header") {
+              renderItem={({ item: row }) => {
+                if (row.type === "header") {
                   return (
-                    <Text variant="label" tone="muted" style={styles.sectionHeader}>{item.title}</Text>
+                    <Text variant="label" tone="muted" style={styles.sectionHeader}>
+                      {row.title}
+                    </Text>
                   );
                 }
-
-                const location = item.item;
+                const place = row.item;
+                const isResolving = resolvingId === place.id;
                 return (
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel={location.isPort ? `${location.name}, port node` : location.name}
+                    accessibilityLabel={[place.name, place.address, place.isPort ? "customs zone" : null].filter(Boolean).join(", ")}
+                    disabled={!!resolvingId}
                     style={({ pressed }) => [styles.resultItem, pressed && { opacity: 0.85 }]}
-                    onPress={() => onSelectLocation(location)}
+                    onPress={() => select(place)}
                   >
                     <View style={styles.resultLeft}>
-                      {location.isPort ? (
-                        <View style={styles.anchorWrapper}>
-                          <Anchor size={18} color={colors.primary} />
-                        </View>
-                      ) : (
-                        <View style={styles.pinWrapper}>
-                          <MapPin size={18} color={colors.textMuted} />
-                        </View>
-                      )}
-                      <Text
-                        variant={location.isPort ? "bodyStrong" : "body"}
-                        tone={location.isPort ? "primary" : "secondary"}
-                        style={styles.resultName}
-                      >
-                        {location.name}
-                      </Text>
+                      <View style={styles.iconWrapper}>
+                        {place.isPort ? <Anchor size={18} color={colors.primary} /> : <MapPin size={18} color={colors.textMuted} />}
+                      </View>
+                      <View style={styles.resultName}>
+                        <Text variant={place.isPort ? "bodyStrong" : "body"} tone={place.isPort ? "primary" : "default"}>
+                          {place.name}
+                        </Text>
+                        {place.address ? (
+                          <Text variant="caption" tone="muted" numberOfLines={1}>
+                            {place.address}
+                          </Text>
+                        ) : null}
+                      </View>
                     </View>
-                    
-                    {location.isPort && (
-                      <Badge label="PORT NODE" tone="brand" />
-                    )}
+                    {isResolving ? (
+                      <ActivityIndicator size="small" color={colors.primary} />
+                    ) : place.isPort ? (
+                      <Badge label="Customs" tone="brand" />
+                    ) : null}
                   </Pressable>
                 );
               }}
@@ -316,14 +264,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flex: 1,
   },
-  anchorWrapper: {
-    marginRight: spacing.md,
-  },
-  pinWrapper: {
+  iconWrapper: {
     marginRight: spacing.md,
   },
   resultName: {
     flexShrink: 1,
+    gap: spacing.xxs,
   },
   emptyContainer: {
     padding: spacing["3xl"],
@@ -331,31 +277,5 @@ const styles = StyleSheet.create({
   },
   emptySubText: {
     marginTop: spacing.sm,
-  },
-  introContainer: {
-    paddingHorizontal: spacing.lg,
-  },
-  introHeader: {
-    marginBottom: spacing.md,
-    marginTop: spacing.sm,
-  },
-  suggestionsList: {
-    gap: spacing.sm,
-  },
-  suggestionItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    minHeight: layout.touchMin,
-    backgroundColor: colors.surface,
-    padding: spacing.md,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  suggestionIcon: {
-    marginRight: spacing.sm,
-  },
-  suggestionText: {
-    flex: 1,
   },
 });
