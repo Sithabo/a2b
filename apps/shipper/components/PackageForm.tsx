@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { Info } from "lucide-react-native";
-import { colors, palette } from "@a2b/ui";
+import { SegmentedControl, TextField, colors, layout, radius, spacing } from "@a2b/ui";
 
 export interface PackageData {
   id: string;
@@ -27,73 +27,63 @@ export const PackageForm: React.FC<PackageFormProps> = ({ data, onChange }) => {
   return (
     <View style={styles.container}>
       {/* Code Row */}
-      <View style={styles.headerRow}>
-        <TextInput
-          style={styles.codeTitleInput}
-          placeholder="Cargo code"
-          placeholderTextColor={palette.gray[400]}
-          value={data.code}
-          onChangeText={(v) => handleChange("code", v)}
-        />
-        <Info size={20} color={palette.gray[300]} />
-      </View>
+      <TextField
+        placeholder="Cargo code"
+        value={data.code}
+        onChangeText={(v) => handleChange("code", v)}
+        trailing={<Info size={20} color={colors.borderStrong} />}
+      />
 
       {/* Weight Row */}
       <View style={styles.weightRow}>
-        <View style={styles.weightInputContainer}>
-          <Text style={styles.label}>WEIGHT ({weightUnit.toUpperCase()})</Text>
-          <TextInput
-            style={styles.boldInput}
+        <View style={styles.flexCell}>
+          <TextField
+            label={`WEIGHT (${weightUnit.toUpperCase()})`}
             value={data.weight}
             onChangeText={(v) => handleChange("weight", v)}
             keyboardType="numeric"
             placeholder="0"
-            placeholderTextColor={palette.gray[400]}
           />
         </View>
-        <View style={styles.unitToggles}>
-          <TouchableOpacity onPress={() => setWeightUnit("lbs")}>
-            <Text style={weightUnit === "lbs" ? styles.unitActive : styles.unitInactive}>lbs</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setWeightUnit("kg")}>
-            <Text style={weightUnit === "kg" ? styles.unitActive : styles.unitInactive}>kg</Text>
-          </TouchableOpacity>
-        </View>
+        <SegmentedControl
+          accessibilityLabel="Weight unit"
+          options={[
+            { value: "lbs", label: "lbs" },
+            { value: "kg", label: "kg" },
+          ]}
+          value={weightUnit}
+          onChange={setWeightUnit}
+          style={styles.unitToggle}
+        />
       </View>
 
       {/* Dimensions Grid */}
       <View style={styles.dimensionsRow}>
-        <View style={styles.dimensionCell}>
-          <Text style={styles.label}>LENGTH (IN)</Text>
-          <TextInput
-            style={styles.boldInput}
+        <View style={styles.flexCell}>
+          <TextField
+            label="LENGTH (IN)"
             value={data.length}
             onChangeText={(v) => handleChange("length", v)}
             keyboardType="numeric"
             placeholder="0"
-            placeholderTextColor={palette.gray[400]}
           />
         </View>
-        <View style={[styles.dimensionCell, styles.borderSides]}>
-          <Text style={styles.label}>WIDTH (IN)</Text>
-          <TextInput
-            style={styles.boldInput}
+        <View style={styles.flexCell}>
+          <TextField
+            label="WIDTH (IN)"
             value={data.width}
             onChangeText={(v) => handleChange("width", v)}
             keyboardType="numeric"
             placeholder="0"
-            placeholderTextColor={palette.gray[400]}
           />
         </View>
-        <View style={styles.dimensionCell}>
-          <Text style={styles.label}>HEIGHT (IN)</Text>
-          <TextInput
-            style={styles.boldInput}
+        <View style={styles.flexCell}>
+          <TextField
+            label="HEIGHT (IN)"
             value={data.height}
             onChangeText={(v) => handleChange("height", v)}
             keyboardType="numeric"
             placeholder="0"
-            placeholderTextColor={palette.gray[400]}
           />
         </View>
       </View>
@@ -103,78 +93,27 @@ export const PackageForm: React.FC<PackageFormProps> = ({ data, onChange }) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: palette.white,
-    borderRadius: 16,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: palette.gray[200], // stone-200
-    overflow: "hidden",
-  },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: palette.gray[200],
-  },
-  codeTitleInput: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.primary,
-    padding: 0,
+    borderColor: colors.border,
+    padding: spacing.lg,
+    gap: spacing.md,
   },
   weightRow: {
     flexDirection: "row",
-    borderBottomWidth: 1,
-    borderBottomColor: palette.gray[200],
+    alignItems: "flex-end",
+    gap: spacing.sm,
   },
-  weightInputContainer: {
+  flexCell: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
   },
-  unitToggles: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingHorizontal: 16,
-    borderLeftWidth: 1,
-    borderLeftColor: palette.gray[200],
-  },
-  unitActive: {
-    color: colors.primary,
-    fontWeight: "bold",
-  },
-  unitInactive: {
-    color: palette.gray[300],
-    fontWeight: "bold",
+  unitToggle: {
+    width: 132,
+    height: layout.touchLg,
   },
   dimensionsRow: {
     flexDirection: "row",
-  },
-  dimensionCell: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  borderSides: {
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
-    borderColor: palette.gray[200],
-  },
-  label: {
-    fontSize: 10,
-    fontWeight: "bold",
-    color: palette.gray[400],
-    textTransform: "uppercase",
-    marginBottom: 2,
-  },
-  boldInput: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: colors.primary,
-    padding: 0,
+    gap: spacing.sm,
   },
 });

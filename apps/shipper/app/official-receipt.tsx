@@ -1,9 +1,8 @@
 import React from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+import { View, ScrollView, StyleSheet } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { ArrowLeft, Check, FileText, Share2 } from "lucide-react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { colors, palette } from "@a2b/ui";
+import { Check, FileText, Share2 } from "lucide-react-native";
+import { Button, colors, radius, ScreenHeader, spacing, Text } from "@a2b/ui";
 import { useMarket } from "@/store/useMarket";
 import { cargoLabel, formatMoney, paymentMethods } from "@a2b/core";
 import { parseLoadId, trackingLabel, useShipment } from "@/lib/loads";
@@ -23,67 +22,64 @@ export default function OfficialReceiptScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <SafeAreaView edges={["top"]} />
-        <View style={styles.headerRow}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={styles.backButton}
-            activeOpacity={0.7}
-          >
-            <ArrowLeft color={palette.gray[900]} size={24} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Official Receipt</Text>
-          <View style={{ width: 40 }} />
-        </View>
-      </View>
+      <ScreenHeader title="Official Receipt" onBackPress={() => router.back()} />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Success Icon */}
         <View style={styles.successIconContainer}>
           <View style={styles.successCircle}>
-            <Check color={palette.white} size={48} strokeWidth={3} />
+            <Check color={colors.onPrimary} size={48} strokeWidth={3} />
           </View>
         </View>
 
         {/* Title */}
-        <Text style={styles.title}>Job Completed!</Text>
+        <Text variant="h1" tone="primary" style={styles.title}>Job Completed!</Text>
 
         {/* Receipt Wrapper */}
         <View style={styles.receiptWrapper}>
           <View style={styles.receiptCard}>
-            
+
             {/* Metadata Rows */}
             <View style={styles.metadataSection}>
               <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Load ID:</Text>
-                <Text style={styles.metaValue}>{trackingLabel(shipment)}</Text>
+                <Text variant="bodySm" tone="secondary" style={styles.metaLabel}>Load ID:</Text>
+                <Text variant="bodyStrong" align="right" style={styles.metaValue}>
+                  {trackingLabel(shipment)}
+                </Text>
               </View>
               <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Driver:</Text>
-                <Text style={styles.metaValue}>{shipment.carrier?.driverName ?? "—"}</Text>
+                <Text variant="bodySm" tone="secondary" style={styles.metaLabel}>Driver:</Text>
+                <Text variant="bodyStrong" align="right" style={styles.metaValue}>
+                  {shipment.carrier?.driverName ?? "—"}
+                </Text>
               </View>
               <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Pickup:</Text>
-                <Text style={styles.metaValue} numberOfLines={2}>{shipment.pickupSummary}</Text>
+                <Text variant="bodySm" tone="secondary" style={styles.metaLabel}>Pickup:</Text>
+                <Text variant="bodyStrong" align="right" style={styles.metaValue} numberOfLines={2}>
+                  {shipment.pickupSummary}
+                </Text>
               </View>
               <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Delivery:</Text>
-                <Text style={styles.metaValue} numberOfLines={2}>{shipment.dropoffSummary}</Text>
+                <Text variant="bodySm" tone="secondary" style={styles.metaLabel}>Delivery:</Text>
+                <Text variant="bodyStrong" align="right" style={styles.metaValue} numberOfLines={2}>
+                  {shipment.dropoffSummary}
+                </Text>
               </View>
               <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Vehicle:</Text>
-                <Text style={styles.metaValue}>
+                <Text variant="bodySm" tone="secondary" style={styles.metaLabel}>Vehicle:</Text>
+                <Text variant="bodyStrong" align="right" style={styles.metaValue}>
                   {vehicle ? `${vehicle.make} ${vehicle.model} (${vehicle.plate})` : "—"}
                 </Text>
               </View>
               <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Load Type:</Text>
-                <Text style={styles.metaValue}>{cargoLabel(shipment.cargoType)}</Text>
+                <Text variant="bodySm" tone="secondary" style={styles.metaLabel}>Load Type:</Text>
+                <Text variant="bodyStrong" align="right" style={styles.metaValue}>
+                  {cargoLabel(shipment.cargoType)}
+                </Text>
               </View>
               <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Payment Method:</Text>
-                <Text style={styles.metaValue}>
+                <Text variant="bodySm" tone="secondary" style={styles.metaLabel}>Payment Method:</Text>
+                <Text variant="bodyStrong" align="right" style={styles.metaValue}>
                   {shipment.escrow?.depositMethod ? paymentMethods[shipment.escrow.depositMethod].label : "—"}
                 </Text>
               </View>
@@ -91,15 +87,15 @@ export default function OfficialReceiptScreen() {
 
             {/* Cutout Divider */}
             <View style={styles.dividerRow}>
-              <View style={styles.cutoutLeft} />
+              <View style={[styles.cutout, styles.cutoutLeft]} />
               <View style={styles.dashedLineHorizontal} />
-              <View style={styles.cutoutRight} />
+              <View style={[styles.cutout, styles.cutoutRight]} />
             </View>
 
             {/* Price Footer */}
             <View style={styles.priceSection}>
-              <Text style={styles.priceLabel}>Amount Paid:</Text>
-              <Text style={styles.priceValue}>{formatCurrency(shipment.escrow?.amount ?? shipment.offerPrice)}</Text>
+              <Text variant="h3" tone="primary">Amount Paid:</Text>
+              <Text variant="h2" tone="primary">{formatCurrency(shipment.escrow?.amount ?? shipment.offerPrice)}</Text>
             </View>
 
           </View>
@@ -107,23 +103,17 @@ export default function OfficialReceiptScreen() {
 
         {/* Actions */}
         <View style={styles.actionsContainer}>
-          <TouchableOpacity style={styles.outlineButton} activeOpacity={0.7}>
-            <FileText color={colors.primary} size={18} />
-            <Text style={styles.outlineButtonText}>Download PDF</Text>
-          </TouchableOpacity>
+          {/* Not wired up yet: these were TouchableOpacitys without an onPress. */}
+          <Button title="Download PDF" variant="secondary" icon={FileText} fullWidth onPress={() => {}} />
 
-          <TouchableOpacity style={styles.outlineButton} activeOpacity={0.7}>
-            <Share2 color={colors.primary} size={18} />
-            <Text style={styles.outlineButtonText}>Share via WhatsApp</Text>
-          </TouchableOpacity>
+          <Button title="Share via WhatsApp" variant="secondary" icon={Share2} fullWidth onPress={() => {}} />
 
-          <TouchableOpacity
+          <Button
+            title="Back to Home"
+            fullWidth
             style={styles.primaryButton}
-            activeOpacity={0.8}
             onPress={() => router.replace("/(tabs)")}
-          >
-            <Text style={styles.primaryButtonText}>Back to Home</Text>
-          </TouchableOpacity>
+          />
         </View>
 
       </ScrollView>
@@ -134,72 +124,46 @@ export default function OfficialReceiptScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: palette.ivory[200],
-  },
-  header: {
-    backgroundColor: palette.ivory[200],
-    zIndex: 10,
-  },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 16,
-  },
-  backButton: {
-    padding: 8,
-    marginLeft: -8,
-  },
-  headerTitle: {
-    color: palette.gray[900],
-    fontSize: 18,
-    fontWeight: "bold",
+    backgroundColor: colors.background,
   },
   scrollContent: {
-    paddingBottom: 40,
+    paddingBottom: spacing["4xl"],
     alignItems: "center",
   },
   successIconContainer: {
-    marginTop: 24,
-    marginBottom: 16,
+    marginTop: spacing["2xl"],
+    marginBottom: spacing.lg,
     alignItems: "center",
   },
   successCircle: {
     width: 100,
     height: 100,
-    borderRadius: 50,
+    borderRadius: radius.pill,
     backgroundColor: colors.primary,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 6,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: colors.primary,
-    marginBottom: 32,
+    marginBottom: spacing["3xl"],
   },
   receiptWrapper: {
     width: "100%",
-    paddingHorizontal: 24,
+    paddingHorizontal: spacing["2xl"],
     position: "relative",
-    marginBottom: 32,
+    marginBottom: spacing["3xl"],
   },
   receiptCard: {
-    backgroundColor: palette.white,
-    borderRadius: 24,
-    paddingVertical: 32,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingVertical: spacing["3xl"],
     position: "relative",
+    overflow: "hidden", // clips the outer half of the cutouts
   },
   metadataSection: {
-    paddingHorizontal: 24,
-    gap: 16,
+    paddingHorizontal: spacing["2xl"],
+    gap: spacing.lg,
   },
   metaRow: {
     flexDirection: "row",
@@ -207,102 +171,57 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
   metaLabel: {
-    fontSize: 14,
-    color: palette.gray[600],
-    fontWeight: "500",
     flex: 1,
   },
   metaValue: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: palette.gray[900],
     flex: 1,
-    textAlign: "right",
   },
   dividerRow: {
     flexDirection: "row",
     alignItems: "center",
     position: "relative",
     height: 30, // height of the cutout
-    marginTop: 24,
-    marginBottom: 16,
+    marginTop: spacing["2xl"],
+    marginBottom: spacing.lg,
   },
   dashedLineHorizontal: {
     flex: 1,
     height: 1,
     borderBottomWidth: 1,
-    borderColor: palette.gray[200],
+    borderColor: colors.border,
     borderStyle: "dashed",
-    marginHorizontal: 15,
+    marginHorizontal: spacing.lg,
+  },
+  cutout: {
+    position: "absolute",
+    top: 0,
+    width: 30,
+    height: 30,
+    borderRadius: radius.pill,
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.border,
+    zIndex: 2,
   },
   cutoutLeft: {
-    position: "absolute",
     left: -15, // Pull outside the card
-    top: 0,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: palette.ivory[200],
-    zIndex: 2,
   },
   cutoutRight: {
-    position: "absolute",
     right: -15,
-    top: 0,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: palette.ivory[200],
-    zIndex: 2,
   },
   priceSection: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
-    paddingHorizontal: 24,
-  },
-  priceLabel: {
-    fontSize: 18,
-    color: colors.primary,
-    fontWeight: "600",
-  },
-  priceValue: {
-    fontSize: 20,
-    fontWeight: "900",
-    color: colors.primary,
+    gap: spacing.sm,
+    paddingHorizontal: spacing["2xl"],
   },
   actionsContainer: {
     width: "100%",
-    paddingHorizontal: 24,
-    gap: 12,
-  },
-  outlineButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "transparent",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.primary,
-    paddingVertical: 16,
-    gap: 8,
-  },
-  outlineButtonText: {
-    color: colors.primary,
-    fontSize: 15,
-    fontWeight: "bold",
+    paddingHorizontal: spacing["2xl"],
+    gap: spacing.md,
   },
   primaryButton: {
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    paddingVertical: 18,
-    alignItems: "center",
-    marginTop: 8,
-  },
-  primaryButtonText: {
-    color: palette.white,
-    fontSize: 16,
-    fontWeight: "bold",
+    marginTop: spacing.sm,
   },
 });

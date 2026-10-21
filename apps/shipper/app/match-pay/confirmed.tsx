@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Linking } from 'react-native';
+import { View, ScrollView, StyleSheet, Linking } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Check, Phone, Package } from 'lucide-react-native';
-import { colors, palette } from "@a2b/ui";
+import { Button, Card, Text, colors, layout, radius, spacing, tones } from "@a2b/ui";
 import { formatMoney } from "@a2b/core";
 import { useMarket } from "@/store/useMarket";
 import { parseLoadId, useShipment } from "@/lib/loads";
@@ -28,33 +29,35 @@ export default function PaymentConfirmedScreen() {
   const driverPhone = shipment.carrier?.driverPhone;
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <SafeAreaView edges={['top']} style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.card}>
+        <Card padding="2xl" style={styles.card}>
           {/* Green Check Circle */}
           <View style={styles.checkCircle}>
-            <Check color="white" size={44} strokeWidth={3} />
+            <Check color={colors.onPrimary} size={44} strokeWidth={3} />
           </View>
 
           {/* Title */}
-          <Text style={styles.title}>Payment Confirmed!</Text>
-          <Text style={styles.subtitle}>Your deposit is secured in escrow</Text>
+          <Text variant="h1" tone="primary" align="center">Payment Confirmed!</Text>
+          <Text variant="bodySm" tone="muted" align="center" style={styles.subtitle}>
+            Your deposit is secured in escrow
+          </Text>
 
           {/* Amount Deposited Box */}
           <View style={styles.amountBox}>
-            <Text style={styles.amountLabel}>Amount Deposited</Text>
-            <Text style={styles.amountValue}>{formatMoney(amount, market)}</Text>
+            <Text variant="label" tone="muted" style={styles.amountLabel}>Amount Deposited</Text>
+            <Text variant="display" tone="primary" style={styles.amountValue}>{formatMoney(amount, market)}</Text>
             <View style={styles.paymentViaRow}>
-              <Text style={styles.paymentViaText}>via {paidWith}</Text>
+              <Text variant="caption" tone="muted">via {paidWith}</Text>
             </View>
           </View>
 
           {/* Driver Unlocked Info Box */}
           <View style={styles.infoBox}>
-            <Text style={styles.infoText}>
+            <Text variant="caption" tone="secondary" align="center">
               Driver details have been unlocked and they are heading to pickup. You will receive
               updates as they progress through the delivery.
             </Text>
@@ -62,169 +65,85 @@ export default function PaymentConfirmedScreen() {
 
           {/* Action Buttons */}
           <View style={styles.actionsContainer}>
-            <TouchableOpacity
-              style={styles.callButton}
+            <Button
+              title="Call Driver"
+              icon={Phone}
               onPress={() => driverPhone && Linking.openURL(`tel:${driverPhone}`)}
               disabled={!driverPhone}
-              activeOpacity={0.85}
-            >
-              <Phone color="white" size={20} />
-              <Text style={styles.callButtonText}>Call Driver</Text>
-            </TouchableOpacity>
+              fullWidth
+            />
 
-            <TouchableOpacity
-              style={styles.shipmentsButton}
+            <Button
+              title="See Pending Shipments"
+              icon={Package}
+              variant="secondary"
               onPress={() => router.replace('/(tabs)')}
-              activeOpacity={0.85}
-            >
-              <Package color={colors.primary} size={20} />
-              <Text style={styles.shipmentsButtonText}>See Pending Shipments</Text>
-            </TouchableOpacity>
+              fullWidth
+            />
           </View>
-        </View>
+        </Card>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: colors.background,
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 20,
-    paddingTop: 56,
-    paddingBottom: 40,
+    paddingHorizontal: layout.gutter,
+    paddingTop: spacing['2xl'],
+    paddingBottom: spacing['4xl'],
     justifyContent: 'center',
   },
   card: {
-    backgroundColor: palette.white,
-    borderRadius: 24,
-    padding: 24,
     alignItems: 'center',
-    gap: 20,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.08,
-    shadowRadius: 30,
-    elevation: 6,
+    gap: spacing.xl,
   },
   checkCircle: {
     width: 80,
     height: 80,
-    borderRadius: 40,
+    borderRadius: radius.pill,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-    marginBottom: 4,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: colors.primary,
-    letterSpacing: -0.5,
-    textAlign: 'center',
+    marginBottom: spacing.xs,
   },
   subtitle: {
-    fontSize: 14,
-    color: palette.gray[500],
-    fontWeight: '500',
-    textAlign: 'center',
-    marginTop: -8,
+    marginTop: -spacing.sm,
   },
   amountBox: {
     width: '100%',
-    backgroundColor: palette.ivory[400],
-    borderRadius: 12,
-    padding: 24,
+    backgroundColor: colors.background,
+    borderRadius: radius.md,
+    padding: spacing['2xl'],
     alignItems: 'center',
   },
   amountLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: palette.gray[500],
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   amountValue: {
-    fontSize: 36,
-    fontWeight: '800',
-    color: colors.primary,
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   paymentViaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    marginTop: 4,
-  },
-  paymentViaText: {
-    fontSize: 12,
-    color: palette.gray[500],
-    fontWeight: '500',
+    gap: spacing.xs,
+    marginTop: spacing.xs,
   },
   infoBox: {
     width: '100%',
-    backgroundColor: palette.ivory[50],
+    backgroundColor: colors.accentMuted,
     borderWidth: 1,
-    borderColor: palette.orange[100],
-    borderRadius: 12,
-    padding: 16,
-  },
-  infoText: {
-    fontSize: 12,
-    color: palette.gray[700],
-    lineHeight: 20,
-    textAlign: 'center',
+    borderColor: tones.warning.bg,
+    borderRadius: radius.md,
+    padding: spacing.lg,
   },
   actionsContainer: {
     width: '100%',
-    gap: 12,
-  },
-  callButton: {
-    width: '100%',
-    backgroundColor: colors.primary,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  callButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  shipmentsButton: {
-    width: '100%',
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-    borderColor: colors.primary,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-  },
-  shipmentsButtonText: {
-    color: colors.primary,
-    fontWeight: 'bold',
-    fontSize: 16,
+    gap: spacing.md,
   },
 });

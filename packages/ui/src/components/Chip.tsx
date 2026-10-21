@@ -17,6 +17,8 @@ export function Chip({ label, selected = false, onPress, icon: Icon }: ChipProps
   const fg = selected ? colors.onPrimary : colors.text;
   return (
     <Pressable
+      // Chips are 40pt tall; extend the touch target to the 48pt minimum
+      hitSlop={4}
       accessibilityRole="button"
       accessibilityState={{ selected }}
       onPress={onPress}

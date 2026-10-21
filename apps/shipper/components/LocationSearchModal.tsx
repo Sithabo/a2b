@@ -2,9 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   Modal,
   View,
-  Text,
-  TextInput,
-  TouchableOpacity,
+  Pressable,
   StyleSheet,
   FlatList,
   ActivityIndicator,
@@ -14,7 +12,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Anchor, MapPin, Search, X, ArrowLeft } from "lucide-react-native";
 import type { LocationData } from "@a2b/core";
-import { colors, palette } from "@a2b/ui";
+import { Badge, IconButton, Text, TextField, colors, layout, radius, spacing } from "@a2b/ui";
 
 interface LocationSearchModalProps {
   isVisible: boolean;
@@ -49,7 +47,7 @@ export const LocationSearchModal = ({
   const [filteredPorts, setFilteredPorts] = useState<LocationData[]>([]);
   const [filteredAddresses, setFilteredAddresses] = useState<LocationData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<React.ComponentRef<typeof TextField>>(null);
   const insets = useSafeAreaInsets();
 
   // Focus input on mount
@@ -134,75 +132,81 @@ export const LocationSearchModal = ({
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={styles.modalContainer}
       >
-        <View style={[styles.innerContainer, { paddingTop: insets.top || 16 }]}>
+        <View style={[styles.innerContainer, { paddingTop: insets.top || spacing.lg }]}>
           {/* Header */}
           <View style={styles.header}>
-            <TouchableOpacity onPress={onClose} style={styles.backBtn} activeOpacity={0.7}>
-              <ArrowLeft size={22} color={colors.primary} />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>{title}</Text>
-            <View style={{ width: 24 }} />
+            <IconButton icon={ArrowLeft} onPress={onClose} accessibilityLabel="Go back" />
+            <Text variant="h3" tone="primary" align="center" numberOfLines={1} style={styles.headerTitle}>
+              {title}
+            </Text>
+            <View style={styles.headerSpacer} />
           </View>
 
           {/* Search Input Box */}
           <View style={styles.searchBar}>
-            {isLoading ? (
-              <ActivityIndicator size="small" color={colors.primary} style={styles.searchIcon} />
-            ) : (
-              <Search size={18} color={palette.gray[400]} style={styles.searchIcon} />
-            )}
-            <TextInput
+            <TextField
               ref={inputRef}
-              style={styles.input}
               value={query}
               onChangeText={setQuery}
               placeholder={placeholder}
-              placeholderTextColor={palette.gray[400]}
               autoCorrect={false}
               autoCapitalize="none"
               clearButtonMode="while-editing"
+              leading={
+                isLoading ? (
+                  <ActivityIndicator size="small" color={colors.primary} />
+                ) : (
+                  <Search size={18} color={colors.textPlaceholder} />
+                )
+              }
+              trailing={
+                query.length > 0 ? (
+                  <IconButton
+                    icon={X}
+                    variant="plain"
+                    size={32}
+                    accessibilityLabel="Clear search"
+                    onPress={() => setQuery("")}
+                  />
+                ) : undefined
+              }
             />
-            {query.length > 0 && (
-              <TouchableOpacity onPress={() => setQuery("")} style={styles.clearBtn}>
-                <X size={16} color={palette.gray[400]} />
-              </TouchableOpacity>
-            )}
           </View>
 
           {/* Results List */}
           {query && filteredPorts.length === 0 && filteredAddresses.length === 0 && !isLoading ? (
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>{"No results found for \"" + query + "\""}</Text>
-              <Text style={styles.emptySubText}>{'Try typing "Demerara" or "Georgetown" to test port detection.'}</Text>
+              <Text variant="bodyStrong" tone="secondary" align="center">{"No results found for \"" + query + "\""}</Text>
+              <Text variant="caption" tone="muted" align="center" style={styles.emptySubText}>{'Try typing "Demerara" or "Georgetown" to test port detection.'}</Text>
             </View>
           ) : !query ? (
             <View style={styles.introContainer}>
-              <Text style={styles.introHeader}>Quick Suggestions</Text>
+              <Text variant="bodyStrong" tone="primary" style={styles.introHeader}>Quick Suggestions</Text>
               <View style={styles.suggestionsList}>
                 {MOCK_PORTS.map(port => (
-                  <TouchableOpacity
+                  <Pressable
                     key={port.id}
-                    style={styles.suggestionItem}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${port.name}, port node`}
+                    style={({ pressed }) => [styles.suggestionItem, pressed && { opacity: 0.85 }]}
                     onPress={() => onSelectLocation(port)}
-                    activeOpacity={0.7}
                   >
-                    <Anchor size={16} color={colors.primary} style={{ marginRight: 10 }} />
-                    <Text style={styles.suggestionText}>{port.name}</Text>
-                    <View style={styles.portBadge}>
-                      <Text style={styles.portBadgeText}>PORT NODE</Text>
-                    </View>
-                  </TouchableOpacity>
+                    <Anchor size={16} color={colors.primary} style={styles.suggestionIcon} />
+                    <Text variant="bodySm" tone="secondary" style={styles.suggestionText}>{port.name}</Text>
+                    <Badge label="PORT NODE" tone="brand" />
+                  </Pressable>
                 ))}
                 {MOCK_ADDRESSES.slice(0, 3).map(addr => (
-                  <TouchableOpacity
+                  <Pressable
                     key={addr.id}
-                    style={styles.suggestionItem}
+                    accessibilityRole="button"
+                    accessibilityLabel={addr.name}
+                    style={({ pressed }) => [styles.suggestionItem, pressed && { opacity: 0.85 }]}
                     onPress={() => onSelectLocation(addr)}
-                    activeOpacity={0.7}
                   >
-                    <MapPin size={16} color={palette.gray[500]} style={{ marginRight: 10 }} />
-                    <Text style={styles.suggestionText}>{addr.name}</Text>
-                  </TouchableOpacity>
+                    <MapPin size={16} color={colors.textMuted} style={styles.suggestionIcon} />
+                    <Text variant="bodySm" tone="secondary" style={styles.suggestionText}>{addr.name}</Text>
+                  </Pressable>
                 ))}
               </View>
             </View>
@@ -215,16 +219,17 @@ export const LocationSearchModal = ({
               renderItem={({ item }) => {
                 if (item.type === "header") {
                   return (
-                    <Text style={styles.sectionHeader}>{item.title}</Text>
+                    <Text variant="label" tone="muted" style={styles.sectionHeader}>{item.title}</Text>
                   );
                 }
 
                 const location = item.item;
                 return (
-                  <TouchableOpacity
-                    style={styles.resultItem}
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={location.isPort ? `${location.name}, port node` : location.name}
+                    style={({ pressed }) => [styles.resultItem, pressed && { opacity: 0.85 }]}
                     onPress={() => onSelectLocation(location)}
-                    activeOpacity={0.75}
                   >
                     <View style={styles.resultLeft}>
                       {location.isPort ? (
@@ -233,20 +238,22 @@ export const LocationSearchModal = ({
                         </View>
                       ) : (
                         <View style={styles.pinWrapper}>
-                          <MapPin size={18} color={palette.gray[500]} />
+                          <MapPin size={18} color={colors.textMuted} />
                         </View>
                       )}
-                      <Text style={[styles.resultName, location.isPort && styles.resultNamePort]}>
+                      <Text
+                        variant={location.isPort ? "bodyStrong" : "body"}
+                        tone={location.isPort ? "primary" : "secondary"}
+                        style={styles.resultName}
+                      >
                         {location.name}
                       </Text>
                     </View>
                     
                     {location.isPort && (
-                      <View style={styles.portBadge}>
-                        <Text style={styles.portBadgeText}>PORT NODE</Text>
-                      </View>
+                      <Badge label="PORT NODE" tone="brand" />
                     )}
-                  </TouchableOpacity>
+                  </Pressable>
                 );
               }}
             />
@@ -260,78 +267,49 @@ export const LocationSearchModal = ({
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
-    backgroundColor: palette.ivory[200],
+    backgroundColor: colors.background,
   },
   innerContainer: {
     flex: 1,
-    backgroundColor: palette.ivory[200],
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  backBtn: {
-    padding: 4,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: colors.primary,
+    flex: 1,
+    marginHorizontal: spacing.md,
+  },
+  headerSpacer: {
+    width: 40,
   },
   searchBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: palette.white,
-    borderRadius: 12,
-    marginHorizontal: 16,
-    marginBottom: 16,
-    borderWidth: 1.5,
-    borderColor: palette.gray[200],
-    height: 48,
-    paddingHorizontal: 12,
-  },
-  searchIcon: {
-    marginRight: 8,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    color: palette.gray[900],
-    paddingVertical: 8,
-  },
-  clearBtn: {
-    padding: 4,
-  },
-  loadingContainer: {
-    padding: 24,
-    alignItems: "center",
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
   },
   listContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 24,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing["2xl"],
   },
   sectionHeader: {
-    fontSize: 11,
-    fontWeight: "bold",
-    color: palette.gray[400], // subtle gray
-    letterSpacing: 0.8,
-    marginTop: 20,
-    marginBottom: 8,
-    textTransform: "uppercase",
+    marginTop: spacing.xl,
+    marginBottom: spacing.sm,
   },
   resultItem: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: palette.white,
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 8,
+    minHeight: layout.touchMin,
+    backgroundColor: colors.surface,
+    padding: spacing.lg,
+    borderRadius: radius.md,
+    marginBottom: spacing.sm,
     borderWidth: 1,
-    borderColor: palette.gray[100],
+    borderColor: colors.border,
   },
   resultLeft: {
     flexDirection: "row",
@@ -339,75 +317,45 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   anchorWrapper: {
-    marginRight: 12,
+    marginRight: spacing.md,
   },
   pinWrapper: {
-    marginRight: 12,
+    marginRight: spacing.md,
   },
   resultName: {
-    fontSize: 15,
-    color: palette.gray[700],
-    fontWeight: "500",
-  },
-  resultNamePort: {
-    fontWeight: "600",
-    color: colors.primary,
-  },
-  portBadge: {
-    backgroundColor: palette.forest[50],
-    borderWidth: 1,
-    borderColor: palette.emerald[200],
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  portBadgeText: {
-    fontSize: 9,
-    fontWeight: "bold",
-    color: colors.primary,
+    flexShrink: 1,
   },
   emptyContainer: {
-    padding: 32,
+    padding: spacing["3xl"],
     alignItems: "center",
   },
-  emptyText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: palette.gray[700],
-    textAlign: "center",
-  },
   emptySubText: {
-    fontSize: 12,
-    color: palette.gray[500],
-    textAlign: "center",
-    marginTop: 8,
-    lineHeight: 18,
+    marginTop: spacing.sm,
   },
   introContainer: {
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.lg,
   },
   introHeader: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: colors.primary,
-    marginBottom: 12,
-    marginTop: 8,
+    marginBottom: spacing.md,
+    marginTop: spacing.sm,
   },
   suggestionsList: {
-    gap: 8,
+    gap: spacing.sm,
   },
   suggestionItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: palette.white,
-    padding: 14,
-    borderRadius: 12,
+    minHeight: layout.touchMin,
+    backgroundColor: colors.surface,
+    padding: spacing.md,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: palette.gray[100],
+    borderColor: colors.border,
+  },
+  suggestionIcon: {
+    marginRight: spacing.sm,
   },
   suggestionText: {
-    fontSize: 14,
-    color: palette.gray[700],
     flex: 1,
   },
 });

@@ -1,14 +1,13 @@
 import React from "react";
 import {
   View,
-  Text,
-  TouchableOpacity,
+  Pressable,
   StyleSheet,
   GestureResponderEvent,
 } from "react-native";
 import { Image } from "expo-image";
-import { Phone, Mail, MailIcon, PhoneIcon } from "lucide-react-native";
-import { colors, palette } from "@a2b/ui";
+import { MailIcon, PhoneIcon } from "lucide-react-native";
+import { Card, colors, palette, radius, spacing, Text } from "@a2b/ui";
 
 interface DriverContactCardProps {
   driverName: string;
@@ -38,10 +37,12 @@ export const DriverContactCard: React.FC<DriverContactCardProps> = ({
   };
 
   return (
-    <TouchableOpacity
+    <Card
+      variant="brand"
+      padding="lg"
       style={styles.driverCard}
-      activeOpacity={0.9}
       onPress={onPressCard}
+      accessibilityLabel={`${driverName}, ${role}. View driver and vehicle details`}
     >
       <View style={styles.driverInfoContainer}>
         <Image
@@ -50,44 +51,42 @@ export const DriverContactCard: React.FC<DriverContactCardProps> = ({
           contentFit="cover"
         />
         <View style={styles.driverTextContainer}>
-          <Text style={styles.driverNameText}>{driverName}</Text>
-          <Text style={styles.driverRoleText}>{role}</Text>
+          <Text variant="bodyStrong" tone="inverse">{driverName}</Text>
+          <Text variant="caption" color={colors.onPrimaryMuted} style={styles.driverRoleText}>
+            {role}
+          </Text>
         </View>
       </View>
       <View style={styles.driverActionsContainer}>
-        <TouchableOpacity
-          style={styles.driverActionButton}
-          activeOpacity={0.7}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Call ${driverName}`}
+          hitSlop={4}
+          style={({ pressed }) => [styles.driverActionButton, pressed && styles.pressed]}
           onPress={handleCall}
         >
-          <PhoneIcon />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.driverActionButton}
-          activeOpacity={0.7}
+          <PhoneIcon color={colors.primary} size={20} />
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Message ${driverName}`}
+          hitSlop={4}
+          style={({ pressed }) => [styles.driverActionButton, pressed && styles.pressed]}
           onPress={handleMessage}
         >
-          <MailIcon />
-        </TouchableOpacity>
+          <MailIcon color={colors.primary} size={20} />
+        </Pressable>
       </View>
-    </TouchableOpacity>
+    </Card>
   );
 };
 
 const styles = StyleSheet.create({
   driverCard: {
-    backgroundColor: colors.primary, // Forest Green App Theme
-    borderRadius: 35,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 13,
-    paddingHorizontal: 16,
-    // shadowColor: palette.black,
-    // shadowOffset: { width: 0, height: 4 },
-    // shadowOpacity: 0.15,
-    // shadowRadius: 8,
-    // elevation: 3,
+    paddingVertical: spacing.md,
     width: "100%",
   },
   driverInfoContainer: {
@@ -98,37 +97,32 @@ const styles = StyleSheet.create({
   driverAvatar: {
     width: 55,
     height: 55,
-    borderRadius: 99,
+    borderRadius: radius.pill,
     backgroundColor: palette.forest[800],
-    borderWidth: 1.5,
-    borderColor: "transparent",
   },
   driverTextContainer: {
-    marginLeft: 12,
-    // justifyContent: "center",
+    marginLeft: spacing.md,
     flex: 1,
   },
-  driverNameText: {
-    color: palette.white,
-    fontSize: 15,
-    fontWeight: "700",
-  },
   driverRoleText: {
-    color: palette.emerald[200], // Soft Mint Green for premium secondary text
-    fontSize: 12,
-    marginTop: 1,
+    marginTop: spacing.xxs,
   },
   driverActionsContainer: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: spacing.sm,
   },
+  // Same look as IconButton's "surface" variant; kept as a Pressable because the
+  // handlers need the press event to stop it reaching the card.
   driverActionButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: palette.white,
+    width: 40,
+    height: 40,
+    borderRadius: radius.pill,
+    backgroundColor: colors.surface,
     alignItems: "center",
     justifyContent: "center",
+  },
+  pressed: {
+    opacity: 0.7,
   },
 });

@@ -1,17 +1,11 @@
 import { Redirect, Tabs, useRouter } from "expo-router";
 import { useSessionGate } from "@a2b/features";
 import React from "react";
-import {
-  TouchableOpacity,
-  View,
-  Text,
-  Platform,
-  StyleSheet,
-} from "react-native";
+import { Pressable, View, StyleSheet } from "react-native";
 import { Home, Plus, User } from "lucide-react-native";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { palette } from "@a2b/ui";
+import { Text, colors, elevation, palette, radius, spacing } from "@a2b/ui";
 
 // ─── Tab Config ───────────────────────────────────────────────────────────────
 
@@ -26,11 +20,11 @@ const TAB_ROUTES = [
 function CustomTabBar({ state, navigation }: BottomTabBarProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const bottomInset = insets.bottom > 0 ? insets.bottom : 16;
+  const bottomInset = insets.bottom > 0 ? insets.bottom : spacing.lg;
 
   return (
     <View style={[styles.floatingBarWrapper, { bottom: bottomInset }]} pointerEvents="box-none">
-      <View style={styles.floatingBar}>
+      <View style={styles.floatingBar} accessibilityRole="tablist">
         {TAB_ROUTES.map((tab, index) => {
           const routeIndex = state.routes.findIndex((r) => r.name === tab.name);
           const isActive = state.index === routeIndex;
@@ -54,28 +48,33 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
           if (isActive) {
             // ── Active Tab: White Pill Card ──────────────────────────────────
             return (
-              <TouchableOpacity
+              <Pressable
                 key={tab.name}
                 onPress={handlePress}
-                activeOpacity={0.85}
-                style={styles.activePill}
+                accessibilityRole="tab"
+                accessibilityLabel={tab.label}
+                accessibilityState={{ selected: true }}
+                hitSlop={spacing.xs}
+                style={({ pressed }) => [styles.activePill, pressed && styles.pressed]}
               >
-                <Icon size={20} color={palette.gray[900]} strokeWidth={2.2} />
-                <Text style={styles.activeLabel}>{tab.label}</Text>
-              </TouchableOpacity>
+                <Icon size={20} color={colors.text} strokeWidth={2.2} />
+                <Text variant="tab">{tab.label}</Text>
+              </Pressable>
             );
           }
 
           // ── Inactive Tab: Dark Square Icon ───────────────────────────────
           return (
-            <TouchableOpacity
+            <Pressable
               key={tab.name}
               onPress={handlePress}
-              activeOpacity={0.75}
-              style={styles.inactivePill}
+              accessibilityRole="tab"
+              accessibilityLabel={tab.label}
+              accessibilityState={{ selected: false }}
+              style={({ pressed }) => [styles.inactivePill, pressed && styles.pressed]}
             >
-              <Icon size={22} color={palette.white} strokeWidth={2} />
-            </TouchableOpacity>
+              <Icon size={22} color={colors.textInverse} strokeWidth={2} />
+            </Pressable>
           );
         })}
       </View>
@@ -95,40 +94,31 @@ const styles = StyleSheet.create({
   floatingBar: {
     flexDirection: "row",
     alignItems: "center",
+    // Dark floating bar: no semantic "inverse surface" token exists yet.
     backgroundColor: palette.gray[900],
-    borderRadius: 40,
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-    gap: 8,
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 20,
-    elevation: 18,
+    borderRadius: radius.pill,
+    padding: spacing.sm,
+    gap: spacing.sm,
+    ...elevation.md,
   },
   activePill: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: palette.white,
-    borderRadius: 28,
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    gap: 8,
-  },
-  activeLabel: {
-    color: palette.gray[900],
-    fontSize: 14,
-    fontWeight: "700",
-    letterSpacing: 0.2,
+    backgroundColor: colors.surface,
+    borderRadius: radius.pill,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    gap: spacing.sm,
   },
   inactivePill: {
     width: 52,
     height: 52,
-    borderRadius: 20,
+    borderRadius: radius.lg,
     backgroundColor: palette.zinc[800],
     alignItems: "center",
     justifyContent: "center",
   },
+  pressed: { opacity: 0.85 },
 });
 
 // ─── Tab Layout ────────────────────────────────────────────────────────────────

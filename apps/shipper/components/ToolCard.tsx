@@ -1,12 +1,6 @@
 import React from "react";
-import {
-  TouchableOpacity,
-  Text,
-  View,
-  StyleSheet,
-  ViewStyle,
-} from "react-native";
-import { colors, palette } from "@a2b/ui";
+import { View, StyleSheet, ViewStyle } from "react-native";
+import { Card, Text, colors, fontFamily, radius, spacing } from "@a2b/ui";
 
 export interface ToolCardProps {
   title: string;
@@ -23,47 +17,42 @@ export const ToolCard: React.FC<ToolCardProps> = ({
   icon: Icon,
   onPress,
   backgroundColor = colors.primary,
-  iconBackgroundColor = "rgba(255, 255, 255, 0.15)",
-  textColor = palette.white,
+  iconBackgroundColor = colors.onPrimaryTrack,
+  textColor = colors.onPrimary,
   style,
 }) => {
   return (
-    <TouchableOpacity
-      style={[styles.card, { backgroundColor }, style]}
-      activeOpacity={0.8}
+    <Card
+      variant="brand"
+      padding="md"
       onPress={onPress}
+      accessibilityLabel={title.replace(/\n/g, " ")}
+      style={[styles.card, { backgroundColor, borderColor: backgroundColor }, style]}
     >
       <View style={[styles.iconBox, { backgroundColor: iconBackgroundColor }]}>
         <Icon size={28} color={textColor} strokeWidth={2.5} />
       </View>
-      <Text style={[styles.title, { color: textColor }]}>{title}</Text>
-    </TouchableOpacity>
+      <Text variant="caption" color={textColor} style={styles.title}>
+        {title}
+      </Text>
+    </Card>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 24,
-    padding: 12,
-    width: "31%", // Fits 2 in a row nicely with gap
-    aspectRatio: 1, // Makes it a perfect square
+    width: "31%",
+    // Square-ish, but grows if the title needs more room (larger text sizes)
+    minHeight: 112,
     justifyContent: "space-between", // Icon top, text bottom
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 4,
+    gap: spacing.xs,
   },
+  title: { fontFamily: fontFamily.semibold },
   iconBox: {
     width: 40,
     height: 40,
-    borderRadius: 18,
+    borderRadius: radius.lg,
     alignItems: "center",
     justifyContent: "center",
-  },
-  title: {
-    fontSize: 14,
-    fontWeight: "800", // Extrabold to match screenshot
-    lineHeight: 18,
   },
 });

@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from "react";
 import {
   View,
-  Text,
-  TouchableOpacity,
   StyleSheet,
   Modal,
-  Platform,
   Dimensions,
 } from "react-native";
 import { useRouter } from "expo-router";
@@ -19,7 +16,16 @@ import type { LocationData } from "@a2b/core";
 import { useShipmentStore } from "@/store/useShipmentStore";
 import { LocationSearchModal } from "@/components/LocationSearchModal";
 import { LocationPicker } from "@/components/LocationPicker";
-import { colors, palette, ScreenHeader } from "@a2b/ui";
+import {
+  Button,
+  ScreenHeader,
+  Text,
+  colors,
+  elevation,
+  layout,
+  radius,
+  spacing,
+} from "@a2b/ui";
 
 export default function RouteSelectionScreen() {
   const router = useRouter();
@@ -79,8 +85,8 @@ export default function RouteSelectionScreen() {
 
       {/* Main Content Area */}
       <View style={styles.content}>
-        <Text style={styles.sectionTitle}>Specify Route Details</Text>
-        <Text style={styles.sectionSubtitle}>
+        <Text variant="h1" tone="primary">Specify Route Details</Text>
+        <Text variant="bodySm" tone="muted">
           Select your cargo source and final delivery point. Importing wharves trigger customs validations automatically.
         </Text>
 
@@ -100,16 +106,14 @@ export default function RouteSelectionScreen() {
       </View>
 
       {/* Sticky Bottom Actions */}
-      <View style={[styles.footer, { paddingBottom: insets.bottom > 0 ? insets.bottom : 16 }]}>
-        <TouchableOpacity
-          style={[styles.nextButton, !isFormComplete && styles.nextButtonDisabled]}
+      <View style={[styles.footer, { paddingBottom: insets.bottom > 0 ? insets.bottom : spacing.lg }]}>
+        <Button
+          title="NEXT: CARGO DETAILS"
           onPress={handleProceedToCargo}
           disabled={!isFormComplete}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.nextButtonText}>NEXT: CARGO DETAILS</Text>
-          <ChevronRight size={18} color={palette.white} />
-        </TouchableOpacity>
+          icon={ChevronRight}
+          iconPosition="right"
+        />
       </View>
 
       {/* Full Screen Autocomplete Modals */}
@@ -137,32 +141,31 @@ export default function RouteSelectionScreen() {
           
           <View style={styles.verificationContainer}>
             <View style={styles.modalHeaderIconBg}>
-              <Anchor size={30} color={palette.gold[600]} />
+              <Anchor size={30} color={colors.accent} />
             </View>
             
-            <Text style={styles.modalTitle}>⚓ Port Pickup Verified</Text>
+            <Text variant="h2" align="center">⚓ Port Pickup Verified</Text>
             
-            <Text style={styles.modalText}>
+            <Text variant="bodySm" tone="secondary" align="center">
               This shipment originates from a customs-controlled zone. A2B will require valid clearing documentation (Form C21/Bill of Lading) on Step 2 to bypass port gates seamlessly.
             </Text>
             
             <View style={styles.warningBox}>
-              <ShieldAlert size={18} color={palette.amber[700]} />
-              <Text style={styles.warningBoxText}>
+              <ShieldAlert size={18} color={colors.warning} />
+              <Text variant="caption" color={colors.warning} style={styles.warningBoxText}>
                 Failure to provide valid paperwork halts driver clearance at port checkpoints.
               </Text>
             </View>
 
-            <TouchableOpacity
-              style={styles.modalCTAButton}
-              activeOpacity={0.8}
+            <Button
+              title="Proceed to Cargo Details"
               onPress={() => {
                 setShowPortVerification(false);
                 // Prompt user to complete flow
               }}
-            >
-              <Text style={styles.modalCTAButtonText}>Proceed to Cargo Details</Text>
-            </TouchableOpacity>
+              fullWidth
+              style={styles.modalCTAButton}
+            />
           </View>
         </View>
       </Modal>
@@ -174,87 +177,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: palette.gray[200],
-    backgroundColor: palette.white,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: palette.gray[100],
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: palette.gray[200],
-  },
-  headerTitleContainer: {
-    flex: 1,
-    marginLeft: 16,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: colors.primary,
-  },
-  headerSubtitle: {
-    fontSize: 11,
-    color: palette.gray[500],
-    marginTop: 2,
-  },
-  cancelText: {
-    fontSize: 14,
-    color: palette.red[500],
-    fontWeight: "bold",
-  },
   content: {
     flex: 1,
-    padding: 20,
-    gap: 16,
-  },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: colors.primary,
-  },
-  sectionSubtitle: {
-    fontSize: 13,
-    color: palette.gray[500],
-    lineHeight: 18,
+    padding: layout.gutter,
+    gap: spacing.lg,
   },
   locationPickerContainer: {
-    marginTop: 16,
+    marginTop: spacing.lg,
   },
   footer: {
-    padding: 16,
-    backgroundColor: palette.white,
+    padding: spacing.lg,
+    backgroundColor: colors.surface,
     borderTopWidth: 1,
-    borderTopColor: palette.gray[200],
-    paddingBottom: Platform.OS === "ios" ? 34 : 20,
-  },
-  nextButton: {
-    height: 52,
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  nextButtonDisabled: {
-    backgroundColor: palette.gray[400],
-    opacity: 0.5,
-  },
-  nextButtonText: {
-    color: palette.white,
-    fontSize: 16,
-    fontWeight: "bold",
+    borderTopColor: colors.border,
   },
   verificationOverlay: {
     flex: 1,
@@ -263,75 +198,44 @@ const styles = StyleSheet.create({
   },
   verificationBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    backgroundColor: colors.overlay,
   },
   verificationContainer: {
     width: Dimensions.get("window").width * 0.88,
-    backgroundColor: palette.white,
-    borderRadius: 20,
-    padding: 24,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    padding: spacing["2xl"],
     alignItems: "center",
-    gap: 16,
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 10,
+    gap: spacing.lg,
+    ...elevation.md,
     borderWidth: 1,
-    borderColor: palette.gray[100],
+    borderColor: colors.border,
   },
   modalHeaderIconBg: {
     width: 60,
     height: 60,
-    borderRadius: 30,
-    backgroundColor: palette.amber[50],
+    borderRadius: radius.pill,
+    backgroundColor: colors.accentMuted,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: palette.amber[100],
-  },
-  modalTitle: {
-    fontSize: 19,
-    fontWeight: "bold",
-    color: palette.gray[900],
-    textAlign: "center",
-  },
-  modalText: {
-    fontSize: 14,
-    color: palette.gray[600],
-    lineHeight: 20,
-    textAlign: "center",
+    borderColor: colors.border,
   },
   warningBox: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: palette.amber[100],
+    backgroundColor: colors.warningMuted,
     borderWidth: 1,
-    borderColor: palette.amber[200],
-    borderRadius: 8,
-    padding: 12,
-    gap: 10,
+    borderColor: colors.border,
+    borderRadius: radius.sm,
+    padding: spacing.md,
+    gap: spacing.sm,
     width: "100%",
   },
   warningBoxText: {
     flex: 1,
-    fontSize: 11,
-    fontWeight: "500",
-    color: palette.amber[700],
-    lineHeight: 16,
   },
   modalCTAButton: {
-    width: "100%",
-    height: 52,
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 8,
-  },
-  modalCTAButtonText: {
-    color: palette.white,
-    fontSize: 16,
-    fontWeight: "bold",
+    marginTop: spacing.sm,
   },
 });

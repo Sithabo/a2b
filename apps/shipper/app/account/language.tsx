@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { Check } from "lucide-react-native";
-import { colors, palette, ScreenHeader } from "@a2b/ui";
+import { colors, layout, ListSection, ScreenHeader, spacing, Text } from "@a2b/ui";
 
 export default function LanguageScreen() {
   const router = useRouter();
@@ -15,7 +15,7 @@ export default function LanguageScreen() {
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background || palette.gray[50] }]}>
+    <View style={styles.container}>
       <ScreenHeader
         title="Language"
         subtitle="Select your preferred language"
@@ -24,28 +24,32 @@ export default function LanguageScreen() {
       />
 
       <View style={styles.content}>
-        <View style={styles.card}>
-          {languages.map((lang, index) => {
+        <ListSection>
+          {languages.map((lang) => {
             const isSelected = selectedLanguage === lang.code;
             return (
-              <View key={lang.code}>
-                {index > 0 && <View style={styles.divider} />}
-                <TouchableOpacity
-                  style={[styles.rowItem, lang.disabled && styles.rowItemDisabled]}
-                  activeOpacity={lang.disabled ? 1 : 0.7}
-                  onPress={() => !lang.disabled && setSelectedLanguage(lang.code)}
-                  disabled={lang.disabled}
-                >
-                  <View style={styles.rowLeft}>
-                    <Text style={styles.langName}>{lang.name}</Text>
-                    <Text style={styles.nativeName}>({lang.nativeName})</Text>
-                  </View>
-                  {isSelected && <Check size={20} color={colors.primary} strokeWidth={3} />}
-                </TouchableOpacity>
-              </View>
+              <Pressable
+                key={lang.code}
+                accessibilityRole="button"
+                accessibilityLabel={`${lang.name} (${lang.nativeName})`}
+                accessibilityState={{ selected: isSelected, disabled: !!lang.disabled }}
+                style={({ pressed }) => [
+                  styles.rowItem,
+                  lang.disabled && styles.rowItemDisabled,
+                  pressed && styles.rowItemPressed,
+                ]}
+                onPress={() => !lang.disabled && setSelectedLanguage(lang.code)}
+                disabled={lang.disabled}
+              >
+                <View style={styles.rowLeft}>
+                  <Text variant="bodyStrong">{lang.name}</Text>
+                  <Text variant="bodySm" tone="muted">({lang.nativeName})</Text>
+                </View>
+                {isSelected && <Check size={20} color={colors.primary} strokeWidth={3} />}
+              </Pressable>
             );
           })}
-        </View>
+        </ListSection>
       </View>
     </View>
   );
@@ -54,47 +58,28 @@ export default function LanguageScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: colors.background,
   },
   content: {
-    padding: 20,
-  },
-  card: {
-    backgroundColor: palette.white,
-    borderRadius: 20,
-    padding: 8,
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    padding: layout.gutter,
   },
   rowItem: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 18,
-    paddingHorizontal: 16,
+    minHeight: 56,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
   },
   rowItemDisabled: {
     opacity: 0.5,
   },
+  rowItemPressed: {
+    backgroundColor: colors.surfaceMuted,
+  },
   rowLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-  },
-  langName: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: palette.gray[900],
-  },
-  nativeName: {
-    fontSize: 14,
-    color: palette.gray[500],
-  },
-  divider: {
-    height: 1,
-    backgroundColor: palette.gray[100],
-    marginHorizontal: 16,
+    gap: spacing.sm,
   },
 });

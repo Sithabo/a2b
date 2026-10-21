@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Pressable, StyleSheet } from "react-native";
 import { CalendarDays, Clock, Lock, Info } from "lucide-react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { colors, palette } from "@a2b/ui";
+import { Text, colors, layout, radius, spacing } from "@a2b/ui";
 
 interface DateTimePickerSectionProps {
   pickupDate: Date | null;
@@ -70,38 +70,39 @@ export const DateTimePickerSection: React.FC<DateTimePickerSectionProps> = ({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.sectionTitle}>Book a load</Text>
+      <Text variant="h3" tone="primary" style={styles.sectionTitle}>Book a load</Text>
 
       {/* 1. Pickup Section (Ready for Pickup) */}
       <View style={styles.sectionCard}>
         <View style={styles.cardHeader}>
           <CalendarDays size={18} color={colors.primary} />
-          <Text style={styles.cardSectionTitle}>Ready for Pickup</Text>
+          <Text variant="bodyStrong" tone="primary">Ready for Pickup</Text>
         </View>
 
         {/* Date Selector */}
-        <TouchableOpacity
-          style={styles.inputRow}
-          activeOpacity={0.7}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Pickup date, ${formatDate(pickupDate)}`}
+          style={({ pressed }) => [styles.inputRow, pressed && { opacity: 0.85 }]}
           onPress={() => setShowPicker("pickup")}
         >
           <View style={styles.inputContent}>
-            <Text style={styles.inputLabel}>PICKUP DATE</Text>
-            <Text style={[styles.inputValue, !pickupDate && styles.placeholder]}>
+            <Text variant="label" tone="muted">PICKUP DATE</Text>
+            <Text variant="bodyStrong" color={pickupDate ? colors.primary : colors.textPlaceholder}>
               {formatDate(pickupDate)}
             </Text>
           </View>
-          <CalendarDays size={18} color={palette.gray[400]} />
-        </TouchableOpacity>
+          <CalendarDays size={18} color={colors.textPlaceholder} />
+        </Pressable>
 
         {/* Time Window Selector */}
         <View style={styles.timeWindowContainer}>
-          <Text style={styles.inputLabel}>PICKUP TIME WINDOW</Text>
+          <Text variant="label" tone="muted">PICKUP TIME WINDOW</Text>
           
           {isImportFlow ? (
             <View style={styles.disabledWindowBox}>
-              <Lock size={16} color={palette.gray[600]} />
-              <Text style={styles.disabledWindowText}>
+              <Lock size={16} color={colors.textSecondary} />
+              <Text variant="bodySm" tone="secondary">
                 Port Standard Hours: 08:00 - 17:00
               </Text>
             </View>
@@ -110,24 +111,22 @@ export const DateTimePickerSection: React.FC<DateTimePickerSectionProps> = ({
               {timeWindows.map((win) => {
                 const isActive = pickupWindow === win.id;
                 return (
-                  <TouchableOpacity
+                  <Pressable
                     key={win.id}
-                    style={[
+                    accessibilityRole="button"
+                    accessibilityLabel={win.label}
+                    accessibilityState={{ selected: isActive }}
+                    style={({ pressed }) => [
                       styles.windowButton,
                       isActive ? styles.windowActive : styles.windowInactive,
+                      pressed && { opacity: 0.85 },
                     ]}
                     onPress={() => setPickupWindow(win.id)}
-                    activeOpacity={0.8}
                   >
-                    <Text
-                      style={[
-                        styles.windowButtonText,
-                        isActive ? styles.windowTextActive : styles.windowTextInactive,
-                      ]}
-                    >
+                    <Text variant="bodyStrong" tone={isActive ? "primary" : "secondary"}>
                       {win.label}
                     </Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 );
               })}
             </View>
@@ -135,15 +134,15 @@ export const DateTimePickerSection: React.FC<DateTimePickerSectionProps> = ({
         </View>
 
         {/* Micro-copy */}
-        <Text style={styles.microCopy}>
+        <Text variant="caption" tone="muted">
           Specify the time window when the facility is ready to load.
         </Text>
 
         {/* Import Warning Banner */}
         {isImportFlow && (
           <View style={styles.warningBanner}>
-            <Info size={16} color={palette.amber[700]} />
-            <Text style={styles.warningText}>
+            <Info size={16} color={colors.warning} />
+            <Text variant="caption" color={colors.warning} style={styles.warningText}>
               Note: Port terminal operating hours may differ. Ensure your pickup window aligns with official port gate hours to avoid detention fees.
             </Text>
           </View>
@@ -154,41 +153,43 @@ export const DateTimePickerSection: React.FC<DateTimePickerSectionProps> = ({
       <View style={styles.sectionCard}>
         <View style={styles.cardHeader}>
           <Clock size={18} color={colors.primary} />
-          <Text style={styles.cardSectionTitle}>Delivery Deadline</Text>
+          <Text variant="bodyStrong" tone="primary">Delivery Deadline</Text>
         </View>
 
         {/* Latest Delivery Date Selector */}
-        <TouchableOpacity
-          style={styles.inputRow}
-          activeOpacity={0.7}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Latest delivery date, ${formatDate(deliveryDate)}`}
+          style={({ pressed }) => [styles.inputRow, pressed && { opacity: 0.85 }]}
           onPress={() => setShowPicker("delivery")}
         >
           <View style={styles.inputContent}>
-            <Text style={styles.inputLabel}>LATEST DELIVERY DATE</Text>
-            <Text style={[styles.inputValue, !deliveryDate && styles.placeholder]}>
+            <Text variant="label" tone="muted">LATEST DELIVERY DATE</Text>
+            <Text variant="bodyStrong" color={deliveryDate ? colors.primary : colors.textPlaceholder}>
               {formatDate(deliveryDate)}
             </Text>
           </View>
-          <CalendarDays size={18} color={palette.gray[400]} />
-        </TouchableOpacity>
+          <CalendarDays size={18} color={colors.textPlaceholder} />
+        </Pressable>
 
         {/* Time Not Later Than Selector */}
-        <TouchableOpacity
-          style={[styles.inputRow, { borderBottomWidth: 0 }]}
-          activeOpacity={0.7}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Time, not later than, ${formatTime(time)}`}
+          style={({ pressed }) => [styles.inputRow, styles.inputRowLast, pressed && { opacity: 0.85 }]}
           onPress={() => setShowPicker("time")}
         >
           <View style={styles.inputContent}>
-            <Text style={styles.inputLabel}>TIME (NOT LATER THAN)</Text>
-            <Text style={[styles.inputValue, !time && styles.placeholder]}>
+            <Text variant="label" tone="muted">TIME (NOT LATER THAN)</Text>
+            <Text variant="bodyStrong" color={time ? colors.primary : colors.textPlaceholder}>
               {formatTime(time)}
             </Text>
           </View>
-          <Clock size={18} color={palette.gray[400]} />
-        </TouchableOpacity>
+          <Clock size={18} color={colors.textPlaceholder} />
+        </Pressable>
 
         {/* Micro-copy */}
-        <Text style={styles.microCopy}>
+        <Text variant="caption" tone="muted">
           The latest time the goods must arrive at the destination.
         </Text>
       </View>
@@ -226,137 +227,89 @@ export const DateTimePickerSection: React.FC<DateTimePickerSectionProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    gap: 20,
+    gap: spacing.xl,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: colors.primary,
-    marginBottom: -8,
+    marginBottom: -spacing.sm,
   },
   sectionCard: {
-    backgroundColor: palette.white,
-    borderRadius: 20,
-    padding: 20,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    padding: spacing.xl,
     borderWidth: 1,
-    borderColor: palette.gray[200],
-    gap: 16,
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
+    borderColor: colors.border,
+    gap: spacing.lg,
   },
   cardHeader: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: palette.gray[100],
-    paddingBottom: 12,
-  },
-  cardSectionTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: colors.primary,
+    borderBottomColor: colors.surfaceSunken,
+    paddingBottom: spacing.md,
   },
   inputRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    minHeight: layout.touchMin,
     borderBottomWidth: 1,
-    borderBottomColor: palette.gray[100],
-    paddingVertical: 10,
+    borderBottomColor: colors.surfaceSunken,
+    paddingVertical: spacing.sm,
+  },
+  inputRowLast: {
+    borderBottomWidth: 0,
   },
   inputContent: {
     flex: 1,
-    gap: 4,
-  },
-  inputLabel: {
-    fontSize: 11,
-    fontWeight: "bold",
-    color: palette.gray[400],
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  inputValue: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: colors.primary,
-  },
-  placeholder: {
-    color: palette.gray[400],
+    gap: spacing.xs,
   },
   timeWindowContainer: {
-    gap: 10,
-    marginTop: 4,
+    gap: spacing.sm,
+    marginTop: spacing.xs,
   },
   disabledWindowBox: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    backgroundColor: palette.gray[100],
-    borderWidth: 1.5,
-    borderColor: palette.gray[200],
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    height: 52,
-  },
-  disabledWindowText: {
-    fontSize: 14,
-    color: palette.gray[600],
-    fontWeight: "600",
+    gap: spacing.sm,
+    backgroundColor: colors.surfaceSunken,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.lg,
+    minHeight: layout.touchLg,
   },
   windowGrid: {
     flexDirection: "column",
-    gap: 8,
+    gap: spacing.sm,
   },
   windowButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 10,
+    minHeight: layout.touchMin,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderRadius: radius.md,
     borderWidth: 1.5,
     justifyContent: "center",
   },
   windowInactive: {
-    backgroundColor: palette.white,
-    borderColor: palette.gray[200],
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
   },
   windowActive: {
-    backgroundColor: palette.forest[50],
+    backgroundColor: colors.primaryMuted,
     borderColor: colors.primary,
-  },
-  windowButtonText: {
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  windowTextActive: {
-    color: colors.primary,
-  },
-  windowTextInactive: {
-    color: palette.gray[600],
-  },
-  microCopy: {
-    fontSize: 12,
-    color: palette.gray[500],
-    lineHeight: 18,
-    fontStyle: "italic",
   },
   warningBanner: {
     flexDirection: "row",
-    gap: 8,
-    backgroundColor: palette.amber[50],
-    borderRadius: 12,
-    padding: 12,
+    gap: spacing.sm,
+    backgroundColor: colors.warningMuted,
+    borderRadius: radius.md,
+    padding: spacing.md,
     borderWidth: 1,
-    borderColor: palette.amber[100],
+    borderColor: colors.border,
     alignItems: "flex-start",
   },
   warningText: {
-    fontSize: 11,
-    color: palette.amber[700],
     flex: 1,
-    lineHeight: 16,
-    fontWeight: "500",
   },
 });

@@ -1,9 +1,9 @@
 import React from "react";
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import { View, ScrollView, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusHero } from "@/components/StatusHero";
 import { ReceiptCard, ReceiptDivider, ReceiptRow } from "@/components/ReceiptCard";
-import { colors, palette, ScreenHeader, Button } from "@a2b/ui";
+import { colors, layout, spacing, ScreenHeader, Button, Text } from "@a2b/ui";
 import { useMarket } from "@/store/useMarket";
 import { formatMoney, statusMeta } from "@a2b/core";
 import { parseLoadId, trackingLabel, useShipment } from "@/lib/loads";
@@ -46,10 +46,10 @@ export default function StatusScreen() {
         <StatusHero state={isSuccess ? "confirmed" : "unconfirmed"} />
 
         <View style={styles.textCenter}>
-          <Text style={[styles.mainHeading, !isSuccess && { color: palette.red[500] }]}>
+          <Text variant="h1" tone={isSuccess ? "primary" : "danger"} align="center">
             {title}
           </Text>
-          <Text style={styles.subHeading}>{subtitle}</Text>
+          <Text tone="secondary" align="center">{subtitle}</Text>
         </View>
 
         <ReceiptCard style={styles.receiptCard}>
@@ -61,8 +61,8 @@ export default function StatusScreen() {
           <ReceiptRow label="Load ID:" value={loadId} />
           
           <View style={styles.offerRow}>
-            <Text style={styles.offerLabel}>Your Offer:</Text>
-            <Text style={[styles.offerValue, !isSuccess && { color: palette.red[500] }]}>
+            <Text variant="h2" tone="primary">Your Offer:</Text>
+            <Text variant="h1" tone={isSuccess ? "primary" : "danger"}>
               {formattedPrice}
             </Text>
           </View>
@@ -89,64 +89,31 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background, // Beige background matching the image
   },
-  navBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-  },
-  navTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: colors.primary, // brand-forest
-  },
   scrollContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 40,
+    paddingHorizontal: spacing["2xl"],
+    paddingBottom: spacing["4xl"],
     alignItems: "center",
   },
   textCenter: {
     alignItems: "center",
-    gap: 8,
-    marginVertical: 24,
-  },
-  mainHeading: {
-    fontSize: 26,
-    fontWeight: "900", // black
-    color: colors.primary,
-    textAlign: "center",
-  },
-  subHeading: {
-    fontSize: 16,
-    color: palette.stone[600], // stone-600
-    textAlign: "center",
+    gap: spacing.sm,
+    marginVertical: spacing["2xl"],
   },
   receiptCard: {
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
   offerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 24,
-    marginTop: 8,
-    marginBottom: 4,
-  },
-  offerLabel: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: colors.primary,
-  },
-  offerValue: {
-    fontSize: 22,
-    fontWeight: "900", // black
-    color: colors.primary,
+    paddingHorizontal: spacing["2xl"],
+    marginTop: spacing.sm,
+    marginBottom: spacing.xs,
   },
   footer: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 32, // safe area padding
-    backgroundColor: palette.ivory[100],
+    paddingHorizontal: layout.gutter,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing["3xl"], // safe area padding
+    backgroundColor: colors.background,
   },
 });

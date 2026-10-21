@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import {
   View,
-  TextInput,
-  TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -14,7 +12,7 @@ import { ArrowLeft, Building2, MapPin } from "lucide-react-native";
 import { apiErrorMessage } from "@a2b/api-client";
 import { api, useSession } from "@/lib/session";
 import { useMarket } from "@/store/useMarket";
-import { colors, palette, Text, Button } from "@a2b/ui";
+import { Button, colors, IconButton, spacing, Text, TextField } from "@a2b/ui";
 
 export default function BusinessDetailsScreen() {
   const router = useRouter();
@@ -51,56 +49,38 @@ export default function BusinessDetailsScreen() {
         style={styles.keyboardView}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          <TouchableOpacity
+          <IconButton
+            icon={ArrowLeft}
+            accessibilityLabel="Go back"
             onPress={() => router.back()}
             style={styles.backButton}
-          >
-            <ArrowLeft size={20} color={palette.gray[900]} />
-          </TouchableOpacity>
+          />
 
           <View style={styles.headerContainer}>
-            <Text variant="display" tone="primary" style={styles.headerTitle}>
+            <Text variant="display" tone="primary">
               Business Details
             </Text>
-            <Text tone="primary" style={styles.headerSubtitle}>
+            <Text tone="secondary">
               Almost done. Tell us about your operations.
             </Text>
           </View>
 
           <View style={styles.formContainer}>
-            {/* Company Name */}
-            <View style={styles.inputGroup}>
-              <Text tone="primary" style={styles.inputLabel}>
-                Company / Trading Name
-              </Text>
-              <View style={styles.inputWrapper}>
-                <Building2 size={20} color={palette.gray[400]} />
-                <TextInput
-                  placeholder="e.g. Acme Logistics"
-                  placeholderTextColor={palette.gray[400]}
-                  style={styles.textInput}
-                  value={companyName}
-                  onChangeText={setCompanyName}
-                />
-              </View>
-            </View>
+            <TextField
+              label="Company / Trading Name"
+              leading={<Building2 size={20} color={colors.textPlaceholder} />}
+              placeholder="e.g. Acme Logistics"
+              value={companyName}
+              onChangeText={setCompanyName}
+            />
 
-            {/* Operating Region */}
-            <View style={styles.inputGroup}>
-              <Text tone="primary" style={styles.inputLabel}>
-                Operating region
-              </Text>
-              <View style={styles.inputWrapper}>
-                <MapPin size={20} color={palette.gray[400]} />
-                <TextInput
-                  placeholder={market.code === "GY" ? "e.g. Georgetown" : "e.g. Kampala Central"}
-                  placeholderTextColor={palette.gray[400]}
-                  style={styles.textInput}
-                  value={region}
-                  onChangeText={setRegion}
-                />
-              </View>
-            </View>
+            <TextField
+              label="Operating region"
+              leading={<MapPin size={20} color={colors.textPlaceholder} />}
+              placeholder={market.code === "GY" ? "e.g. Georgetown" : "e.g. Kampala Central"}
+              value={region}
+              onChangeText={setRegion}
+            />
 
             {error ? <Text tone="danger">{error}</Text> : null}
 
@@ -122,65 +102,26 @@ export default function BusinessDetailsScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: palette.ivory[200],
+    backgroundColor: colors.background,
   },
   keyboardView: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    padding: 24,
+    padding: spacing['2xl'],
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: palette.white,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: palette.gray[200],
-    marginBottom: 32,
+    marginBottom: spacing['3xl'],
   },
   headerContainer: {
-    gap: 8,
-    marginBottom: 40,
-  },
-  headerTitle: {
-    fontSize: 28,
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: palette.gray[600],
+    gap: spacing.sm,
+    marginBottom: spacing['4xl'],
   },
   formContainer: {
-    gap: 24,
-  },
-  inputGroup: {
-    gap: 8,
-  },
-  inputLabel: {
-    fontWeight: "600",
-    color: colors.primary,
-    marginLeft: 4,
-  },
-  inputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: palette.white,
-    borderWidth: 1,
-    borderColor: palette.gray[200],
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    height: 56,
-  },
-  textInput: {
-    flex: 1,
-    marginLeft: 12,
-    fontSize: 16,
-    color: palette.gray[900],
+    gap: spacing['2xl'],
   },
   submitButton: {
-    marginTop: 16,
+    marginTop: spacing.lg,
   },
 });

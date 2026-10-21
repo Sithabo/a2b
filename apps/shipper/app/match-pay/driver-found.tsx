@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, ScrollView, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Truck, AlertCircle, ShieldCheck, ArrowRight } from 'lucide-react-native';
-import { colors, palette } from "@a2b/ui";
+import { Truck, AlertCircle, ShieldCheck } from 'lucide-react-native';
+import { Button, Card, Text, colors, fontFamily, layout, radius, spacing, tones } from "@a2b/ui";
 import { useMarket } from "@/store/useMarket";
 import { formatMoney } from "@a2b/core";
 import { parseLoadId, useShipment } from "@/lib/loads";
@@ -19,29 +20,26 @@ export default function DriverFoundScreen() {
   const deposit = shipment.escrow?.amount ?? shipment.offerPrice;
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Status bar spacer */}
-      <View style={styles.statusBarSpacer} />
-
+    <SafeAreaView edges={['top']} style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.card}>
+        <Card padding="2xl" style={styles.card}>
           {/* Truck Icon Header */}
           <View style={styles.iconCircle}>
-            <Truck color="white" size={32} />
+            <Truck color={colors.onPrimary} size={32} />
           </View>
 
           {/* Title */}
-          <Text style={styles.title}>Driver Accepted!</Text>
-          <Text style={styles.subtitle}>
+          <Text variant="h1" align="center">Driver Accepted!</Text>
+          <Text variant="bodySm" tone="muted" align="center" style={styles.subtitle}>
             A verified driver is ready to pick up your load
           </Text>
 
           {/* Action Required Banner */}
           <View style={styles.alertBanner}>
-            <AlertCircle color={palette.orange[700]} size={20} style={{ marginTop: 2 }} />
+            <AlertCircle color={colors.warning} size={20} style={styles.alertIcon} />
             <View style={styles.alertContent}>
-              <Text style={styles.alertTitle}>Action Required</Text>
-              <Text style={styles.alertText}>
+              <Text variant="bodyStrong" color={tones.warning.fg} style={styles.alertTitle}>Action Required</Text>
+              <Text variant="caption" color={colors.warning}>
                 Deposit funds to unlock driver details and confirm pickup
               </Text>
             </View>
@@ -49,197 +47,114 @@ export default function DriverFoundScreen() {
 
           {/* Amount to Deposit */}
           <View style={styles.amountBox}>
-            <Text style={styles.amountLabel}>Amount to Deposit</Text>
-            <Text style={styles.amountValue}>{formatMoney(deposit, market, { code: false })}</Text>
-            <Text style={styles.amountCurrency}>{market.currency.code}</Text>
+            <Text variant="label" tone="muted" style={styles.amountLabel}>Amount to Deposit</Text>
+            <Text variant="display" tone="primary">{formatMoney(deposit, market, { code: false })}</Text>
+            <Text variant="bodySm" tone="muted" style={styles.amountCurrency}>{market.currency.code}</Text>
           </View>
 
           {/* Escrow Note */}
           <View style={styles.escrowBadge}>
-            <ShieldCheck color={palette.gray[500]} size={16} />
-            <Text style={styles.escrowText}>
-              <Text style={styles.escrowBold}>Escrow Protection: </Text>
+            <ShieldCheck color={colors.textMuted} size={16} />
+            <Text variant="caption" tone="muted" style={styles.escrowText}>
+              <Text variant="caption" tone="muted" style={styles.escrowBold}>Escrow Protection: </Text>
               Money is held safely. Driver only gets paid upon confirmed delivery.
             </Text>
           </View>
 
           {/* Primary CTA */}
-          <TouchableOpacity
-            style={styles.depositButton}
+          <Button
+            title={`Deposit ${formatMoney(deposit, market)} to Unlock Driver`}
             onPress={() => router.push({ pathname: '/match-pay/payment', params: { trackingId: shipment.id } })}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.depositButtonText}>Deposit {formatMoney(deposit, market)} to Unlock Driver</Text>
-          </TouchableOpacity>
+            fullWidth
+          />
 
           {/* Secondary cancel link */}
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={styles.cancelLink}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.cancelText}>Cancel & Go Back</Text>
-          </TouchableOpacity>
-        </View>
+          <Button title="Cancel & Go Back" variant="ghost" size="sm" onPress={() => router.back()} />
+        </Card>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  statusBarSpacer: {
-    height: 48,
+    backgroundColor: colors.background,
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 20,
-    paddingBottom: 40,
+    paddingHorizontal: layout.gutter,
+    paddingBottom: spacing['4xl'],
     alignItems: 'center',
-    paddingTop: 24,
+    paddingTop: spacing['2xl'],
   },
   card: {
     width: '100%',
-    backgroundColor: palette.white,
-    borderRadius: 24,
-    padding: 24,
     alignItems: 'center',
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 20,
-    elevation: 4,
-    gap: 16,
+    gap: spacing.lg,
   },
   iconCircle: {
     width: 64,
     height: 64,
-    borderRadius: 32,
+    borderRadius: radius.pill,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-    marginBottom: 8,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: palette.gray[900],
-    textAlign: 'center',
+    marginBottom: spacing.sm,
   },
   subtitle: {
-    fontSize: 14,
-    color: palette.gray[500],
-    textAlign: 'center',
-    paddingHorizontal: 16,
-    lineHeight: 20,
+    paddingHorizontal: spacing.lg,
   },
   alertBanner: {
     width: '100%',
-    backgroundColor: palette.orange[50],
+    backgroundColor: colors.warningMuted,
     borderWidth: 1,
-    borderColor: palette.orange[200],
-    borderRadius: 12,
-    padding: 16,
+    borderColor: tones.warning.bg,
+    borderRadius: radius.md,
+    padding: spacing.lg,
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 12,
+    gap: spacing.md,
+  },
+  alertIcon: {
+    marginTop: spacing.xxs,
   },
   alertContent: {
     flex: 1,
   },
   alertTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: palette.orange[800],
-    marginBottom: 4,
-  },
-  alertText: {
-    fontSize: 12,
-    color: palette.orange[700],
-    lineHeight: 18,
+    marginBottom: spacing.xs,
   },
   amountBox: {
     width: '100%',
-    backgroundColor: palette.ivory[200],
-    borderRadius: 12,
-    paddingVertical: 24,
-    paddingHorizontal: 16,
+    backgroundColor: colors.background,
+    borderRadius: radius.md,
+    paddingVertical: spacing['2xl'],
+    paddingHorizontal: spacing.lg,
     alignItems: 'center',
   },
   amountLabel: {
-    fontSize: 11,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    color: palette.gray[500],
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  amountValue: {
-    fontSize: 30,
-    fontWeight: '800',
-    color: colors.primary,
+    marginBottom: spacing.sm,
   },
   amountCurrency: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: palette.gray[500],
-    marginTop: 4,
+    marginTop: spacing.xs,
   },
   escrowBadge: {
     width: '100%',
-    backgroundColor: palette.gray[50],
+    backgroundColor: colors.surfaceMuted,
     borderWidth: 1,
-    borderColor: palette.gray[100],
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    borderColor: colors.border,
+    borderRadius: radius.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 8,
+    gap: spacing.sm,
   },
   escrowText: {
     flex: 1,
-    fontSize: 10,
-    color: palette.gray[500],
-    lineHeight: 16,
   },
   escrowBold: {
-    fontWeight: 'bold',
-  },
-  depositButton: {
-    width: '100%',
-    backgroundColor: colors.primary,
-    paddingVertical: 18,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  depositButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  cancelLink: {
-    paddingBottom: 8,
-  },
-  cancelText: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: palette.gray[500],
-    textDecorationLine: 'underline',
+    fontFamily: fontFamily.bold,
   },
 });

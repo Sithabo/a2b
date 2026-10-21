@@ -1,17 +1,19 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-} from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { AlignLeft } from "lucide-react-native";
 import Slider from "@react-native-community/slider";
-import { colors, palette } from "@a2b/ui";
+import {
+  Button,
+  IconButton,
+  SegmentedControl,
+  Text,
+  TextField,
+  colors,
+  layout,
+  spacing,
+} from "@a2b/ui";
 import { vehicleClasses, type VehicleClass } from "@a2b/core";
 
 export default function CalculatorInputScreen() {
@@ -38,14 +40,14 @@ export default function CalculatorInputScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
+        <IconButton
+          icon={AlignLeft}
+          variant="plain"
+          size={layout.touchMin}
+          accessibilityLabel="Go back"
           onPress={() => router.back()}
-          style={styles.menuButton}
-          activeOpacity={0.7}
-        >
-          <AlignLeft color={palette.gray[800]} size={24} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Calculate{"\n"}Fair Price</Text>
+        />
+        <Text variant="display">Calculate{"\n"}Fair Price</Text>
       </View>
 
       <ScrollView
@@ -54,16 +56,13 @@ export default function CalculatorInputScreen() {
       >
         {/* Distance Field */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Distance</Text>
-          <View style={styles.inputWrapper}>
-            <Text style={styles.prefix}>km</Text>
-            <TextInput
-              style={styles.textInput}
-              keyboardType="numeric"
-              value={distance.toString()}
-              onChangeText={(text) => setDistance(Number(text) || 0)}
-            />
-          </View>
+          <TextField
+            label="Distance"
+            leading={<Text tone="muted">km</Text>}
+            keyboardType="numeric"
+            value={distance.toString()}
+            onChangeText={(text) => setDistance(Number(text) || 0)}
+          />
           <View style={styles.sliderContainer}>
             <Slider
               style={styles.slider}
@@ -73,24 +72,22 @@ export default function CalculatorInputScreen() {
               value={distance}
               onValueChange={setDistance}
               minimumTrackTintColor={colors.primary}
-              maximumTrackTintColor={palette.gray[200]}
+              maximumTrackTintColor={colors.border}
               thumbTintColor={colors.primary}
+              accessibilityLabel="Distance in kilometres"
             />
           </View>
         </View>
 
         {/* Cargo Weight Field */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Cargo Weight</Text>
-          <View style={styles.inputWrapper}>
-            <Text style={styles.prefix}>tons</Text>
-            <TextInput
-              style={styles.textInput}
-              keyboardType="numeric"
-              value={weight.toString()}
-              onChangeText={(text) => setWeight(Number(text) || 0)}
-            />
-          </View>
+          <TextField
+            label="Cargo Weight"
+            leading={<Text tone="muted">tons</Text>}
+            keyboardType="numeric"
+            value={weight.toString()}
+            onChangeText={(text) => setWeight(Number(text) || 0)}
+          />
           <View style={styles.sliderContainer}>
             <Slider
               style={styles.slider}
@@ -100,57 +97,35 @@ export default function CalculatorInputScreen() {
               value={weight}
               onValueChange={setWeight}
               minimumTrackTintColor={colors.primary}
-              maximumTrackTintColor={palette.gray[200]}
+              maximumTrackTintColor={colors.border}
               thumbTintColor={colors.primary}
+              accessibilityLabel="Cargo weight in tons"
             />
           </View>
         </View>
 
         {/* Truck Type Field (Toggles) */}
         <View style={styles.fieldContainer}>
-          <View style={styles.labelRow}>
-            <Text style={styles.fieldLabel}>Truck Type</Text>
-          </View>
-          <View style={styles.pillsRow}>
-            {truckOptions.map((type) => (
-              <TouchableOpacity
-                key={type}
-                activeOpacity={0.8}
-                onPress={() => setTruckType(type)}
-                style={[
-                  styles.pill,
-                  truckType === type ? styles.pillActive : styles.pillInactive,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.pillText,
-                    truckType === type
-                      ? styles.pillTextActive
-                      : styles.pillTextInactive,
-                  ]}
-                >
-                  {vehicleClasses[type].label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+          <Text variant="label" tone="secondary" style={styles.fieldLabel}>
+            Truck Type
+          </Text>
+          <SegmentedControl
+            accessibilityLabel="Truck type"
+            options={truckOptions.map((type) => ({ value: type, label: vehicleClasses[type].label }))}
+            value={truckType}
+            onChange={setTruckType}
+          />
         </View>
 
         {/* Urgency / Demand Premium Field */}
         <View style={styles.fieldContainer}>
-          <View style={styles.labelRow}>
-            <Text style={styles.fieldLabel}>Urgency Premium</Text>
-            <Text style={styles.fieldUnit}>%</Text>
-          </View>
-          <View style={styles.inputWrapper}>
-            <TextInput
-              style={styles.textInput}
-              keyboardType="numeric"
-              value={urgency.toString()}
-              onChangeText={(text) => setUrgency(Number(text) || 0)}
-            />
-          </View>
+          <TextField
+            label="Urgency Premium"
+            trailing={<Text tone="muted">%</Text>}
+            keyboardType="numeric"
+            value={urgency.toString()}
+            onChangeText={(text) => setUrgency(Number(text) || 0)}
+          />
           <View style={styles.sliderContainer}>
             <Slider
               style={styles.slider}
@@ -160,20 +135,15 @@ export default function CalculatorInputScreen() {
               value={urgency}
               onValueChange={setUrgency}
               minimumTrackTintColor={colors.primary}
-              maximumTrackTintColor={palette.gray[200]}
+              maximumTrackTintColor={colors.border}
               thumbTintColor={colors.primary}
+              accessibilityLabel="Urgency premium percent"
             />
           </View>
         </View>
 
         {/* Bottom Calculate Button */}
-        <TouchableOpacity
-          style={styles.calculateButton}
-          activeOpacity={0.8}
-          onPress={handleCalculate}
-        >
-          <Text style={styles.calculateButtonText}>Calculate</Text>
-        </TouchableOpacity>
+        <Button title="Calculate" onPress={handleCalculate} style={styles.calculateButton} />
       </ScrollView>
     </View>
   );
@@ -182,120 +152,37 @@ export default function CalculatorInputScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: palette.ivory[200], // brand off-white
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: "row",
     alignItems: "flex-start",
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 24,
-    gap: 32,
-  },
-  menuButton: {
-    marginTop: 8,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: "900",
-    color: palette.gray[800],
-    lineHeight: 34,
+    // The 48pt icon button pads its 24pt icon by 12, so the icon lines up with the content gutter.
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing["2xl"],
+    gap: spacing.sm,
   },
   content: {
-    paddingHorizontal: 24,
-    paddingBottom: 40,
-    gap: 32,
+    paddingHorizontal: spacing["2xl"],
+    paddingBottom: spacing["4xl"],
+    gap: spacing["3xl"],
   },
   fieldContainer: {
     width: "100%",
   },
-  labelRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
   fieldLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: palette.gray[400],
-    marginBottom: 8,
-  },
-  fieldUnit: {
-    fontSize: 14,
-    color: palette.gray[400],
-    fontWeight: "500",
-  },
-  inputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: palette.gray[200],
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: palette.white,
-  },
-  prefix: {
-    fontSize: 16,
-    color: palette.gray[400],
-    fontWeight: "500",
-    marginRight: 8,
-  },
-  textInput: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: "bold",
-    color: palette.gray[800],
+    marginBottom: spacing.sm,
   },
   sliderContainer: {
-    marginTop: -12, // Pull slider up to overlap the input box bottom border
-    marginHorizontal: 8,
+    marginTop: -spacing.md, // Pull slider up to overlap the input box bottom border
+    marginHorizontal: spacing.sm,
   },
   slider: {
     width: "100%",
     height: 40,
   },
-  pillsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: 8,
-  },
-  pill: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  pillActive: {
-    backgroundColor: colors.primary,
-  },
-  pillInactive: {
-    backgroundColor: palette.gray[100], // light gray
-  },
-  pillText: {
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  pillTextActive: {
-    color: palette.white,
-  },
-  pillTextInactive: {
-    color: palette.gray[500],
-  },
   calculateButton: {
-    backgroundColor: palette.gray[800], // Dark color from the mockup, though we can use 0F3D26
-    borderRadius: 16,
-    paddingVertical: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 16,
-  },
-  calculateButtonText: {
-    color: palette.white,
-    fontSize: 16,
-    fontWeight: "bold",
+    marginTop: spacing.lg,
   },
 });

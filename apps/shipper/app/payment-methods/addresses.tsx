@@ -1,20 +1,30 @@
 import React, { useState } from "react";
 import {
   View,
-  Text,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
   StyleSheet,
   Modal,
-  TextInput,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { ArrowLeft, Plus, MapPin, CheckCircle2, Circle, X, Trash2 } from "lucide-react-native";
+import { Plus, MapPin, CheckCircle2, Circle, X, Trash2 } from "lucide-react-native";
 import { useBillingStore, BusinessAddress } from "@/store/useBillingStore";
-import { palette, Button } from "@a2b/ui";
+import {
+  Button,
+  Card,
+  colors,
+  elevation,
+  IconButton,
+  layout,
+  radius,
+  ScreenHeader,
+  spacing,
+  Text,
+  TextField,
+} from "@a2b/ui";
 
 export default function AddressesScreen() {
   const router = useRouter();
@@ -59,52 +69,60 @@ export default function AddressesScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.headerButton} onPress={() => router.back()} activeOpacity={0.7}>
-          <ArrowLeft color={palette.gray[900]} size={20} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Business Addresses</Text>
-        <View style={{ width: 44 }} />
-      </View>
+    <SafeAreaView style={styles.container} edges={["bottom", "left", "right"]}>
+      <ScreenHeader title="Business Addresses" onBackPress={() => router.back()} />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <View style={styles.sectionCard}>
+        <Card padding="lg" style={styles.sectionCard}>
           {addresses.length === 0 ? (
-            <Text style={styles.emptyText}>No business addresses saved yet.</Text>
+            <Text tone="muted" align="center" style={styles.emptyText}>
+              No business addresses saved yet.
+            </Text>
           ) : (
             addresses.map((addr) => (
-              <TouchableOpacity 
-                key={addr.id} 
-                style={styles.cardRow} 
-                activeOpacity={0.7}
+              <Pressable
+                key={addr.id}
+                accessibilityRole="button"
+                accessibilityLabel={`${addr.title}, ${addr.address}`}
+                accessibilityHint="Edit this address"
+                style={({ pressed }) => [styles.cardRow, pressed && styles.pressed]}
                 onPress={() => openEditModal(addr)}
               >
                 <View style={styles.cardRowLeft}>
                   <View style={styles.iconBox}>
-                    <MapPin color={palette.gray[900]} size={20} />
+                    <MapPin color={colors.text} size={20} />
                   </View>
-                  <View>
-                    <Text style={styles.cardName}>{addr.title}</Text>
-                    <Text style={styles.cardNumber}>{addr.address}</Text>
+                  <View style={styles.cardText}>
+                    <Text variant="bodyStrong">{addr.title}</Text>
+                    <Text variant="bodySm" tone="muted">{addr.address}</Text>
                   </View>
                 </View>
-                <TouchableOpacity onPress={() => setDefaultAddress(addr.id)}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Set as default address"
+                  accessibilityState={{ selected: addr.isDefault }}
+                  hitSlop={spacing.md}
+                  style={({ pressed }) => pressed && styles.pressed}
+                  onPress={() => setDefaultAddress(addr.id)}
+                >
                   {addr.isDefault ? (
-                    <CheckCircle2 color={palette.gray[900]} size={24} fill={palette.gray[900]} />
+                    <CheckCircle2 color={colors.onPrimary} size={24} fill={colors.primary} />
                   ) : (
-                    <Circle color={palette.gray[300]} size={24} />
+                    <Circle color={colors.borderStrong} size={24} />
                   )}
-                </TouchableOpacity>
-              </TouchableOpacity>
+                </Pressable>
+              </Pressable>
             ))
           )}
 
-          <TouchableOpacity style={styles.addButton} activeOpacity={0.7} onPress={openAddModal}>
-            <Plus color={palette.gray[900]} size={20} />
-            <Text style={styles.addText}>Add New Address</Text>
-          </TouchableOpacity>
-        </View>
+          <Button
+            title="Add New Address"
+            icon={Plus}
+            variant="secondary"
+            onPress={openAddModal}
+            style={styles.addButton}
+          />
+        </Card>
       </ScrollView>
 
       <Modal
@@ -117,19 +135,21 @@ export default function AddressesScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={styles.modalOverlay}
         >
-          <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={() => setIsModalVisible(false)} />
+          <Pressable
+            style={styles.modalBackdrop}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+            onPress={() => setIsModalVisible(false)}
+          />
           <View style={styles.bottomSheet}>
             <View style={styles.sheetHeader}>
-              <Text style={styles.sheetTitle}>{editingId ? "Edit Address" : "Add Address"}</Text>
-              <TouchableOpacity onPress={() => setIsModalVisible(false)}>
-                <X color={palette.gray[900]} size={24} />
-              </TouchableOpacity>
+              <Text variant="h2">{editingId ? "Edit Address" : "Add Address"}</Text>
+              <IconButton icon={X} variant="plain" accessibilityLabel="Close" onPress={() => setIsModalVisible(false)} />
             </View>
 
             <View style={styles.formGroup}>
-              <Text style={styles.label}>Title (e.g. Headquarters)</Text>
-              <TextInput
-                style={styles.input}
+              <TextField
+                label="Title (e.g. Headquarters)"
                 value={title}
                 onChangeText={setTitle}
                 placeholder="Headquarters"
@@ -137,9 +157,9 @@ export default function AddressesScreen() {
             </View>
 
             <View style={styles.formGroup}>
-              <Text style={styles.label}>Full Address</Text>
-              <TextInput
-                style={[styles.input, { height: 80 }]}
+              <TextField
+                label="Full Address"
+                style={styles.multilineInput}
                 value={addressLine}
                 onChangeText={setAddressLine}
                 placeholder="123 Kampala Road..."
@@ -149,15 +169,20 @@ export default function AddressesScreen() {
 
             <View style={styles.buttonRow}>
               {editingId && (
-                <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-                  <Trash2 color={palette.red[500]} size={20} />
-                </TouchableOpacity>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Delete address"
+                  style={({ pressed }) => [styles.deleteButton, pressed && styles.pressed]}
+                  onPress={handleDelete}
+                >
+                  <Trash2 color={colors.danger} size={20} />
+                </Pressable>
               )}
               <Button 
                 title="Save Address" 
                 onPress={handleSave} 
                 disabled={!title || !addressLine}
-                style={{ flex: 1 }}
+                style={styles.saveButton}
               />
             </View>
           </View>
@@ -170,93 +195,51 @@ export default function AddressesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: palette.gray[50],
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-  },
-  headerButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: palette.white,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: palette.gray[100],
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: palette.gray[900],
+    backgroundColor: colors.background,
   },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 40,
+    paddingHorizontal: layout.gutter,
+    paddingTop: spacing.md,
+    paddingBottom: spacing['4xl'],
+  },
+  pressed: {
+    opacity: 0.85,
   },
   sectionCard: {
-    backgroundColor: palette.white,
-    borderRadius: 24,
-    padding: 16,
-    gap: 8,
+    gap: spacing.sm,
   },
   emptyText: {
-    textAlign: "center",
-    color: palette.gray[500],
-    paddingVertical: 24,
+    paddingVertical: spacing['2xl'],
   },
   cardRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 12,
+    paddingVertical: spacing.md,
   },
   cardRowLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
+    gap: spacing.lg,
     flex: 1,
-    paddingRight: 16,
+    paddingRight: spacing.lg,
+  },
+  cardText: {
+    flex: 1,
+    gap: spacing.xs,
   },
   iconBox: {
     width: 48,
     height: 48,
-    borderRadius: 24,
-    backgroundColor: palette.gray[50],
+    borderRadius: radius.pill,
+    backgroundColor: colors.surfaceMuted,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: palette.gray[100],
-  },
-  cardName: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: palette.gray[900],
-    marginBottom: 4,
-  },
-  cardNumber: {
-    fontSize: 14,
-    color: palette.gray[500],
+    borderColor: colors.border,
   },
   addButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: palette.gray[50],
-    borderRadius: 16,
-    paddingVertical: 16,
-    marginTop: 8,
-    gap: 8,
-  },
-  addText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: palette.gray[900],
+    marginTop: spacing.sm,
   },
   modalOverlay: {
     flex: 1,
@@ -264,56 +247,42 @@ const styles = StyleSheet.create({
   },
   modalBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: colors.overlay,
   },
   bottomSheet: {
-    backgroundColor: palette.white,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 24,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 24,
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radius.md,
+    borderTopRightRadius: radius.md,
+    padding: spacing['2xl'],
+    paddingBottom: Platform.OS === 'ios' ? spacing['4xl'] : spacing['2xl'],
+    ...elevation.md,
   },
   sheetHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 24,
-  },
-  sheetTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: palette.gray[900],
+    marginBottom: spacing['2xl'],
   },
   formGroup: {
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: palette.gray[700],
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: palette.gray[50],
-    borderWidth: 1,
-    borderColor: palette.gray[200],
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    height: 56,
-    fontSize: 16,
-    color: palette.gray[900],
+  multilineInput: {
+    height: 80,
   },
   buttonRow: {
     flexDirection: "row",
-    gap: 12,
-    marginTop: 8,
+    gap: spacing.md,
+    marginTop: spacing.sm,
   },
   deleteButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 12,
-    backgroundColor: palette.red[50],
+    width: layout.touchLg,
+    height: layout.touchLg,
+    borderRadius: radius.md,
+    backgroundColor: colors.dangerMuted,
     alignItems: "center",
     justifyContent: "center",
+  },
+  saveButton: {
+    flex: 1,
   },
 });

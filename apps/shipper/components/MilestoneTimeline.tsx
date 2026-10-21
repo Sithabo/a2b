@@ -1,7 +1,7 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { Check } from "lucide-react-native";
-import { colors, palette } from "@a2b/ui";
+import { Badge, colors, fontFamily, radius, spacing, Text } from "@a2b/ui";
 
 export interface MilestoneItem {
   key: string;
@@ -58,43 +58,41 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({
             <View style={styles.timelineContent}>
               <View style={styles.timelineHeaderRow}>
                 <Text
-                  style={[
-                    styles.timelineTitle,
+                  variant="bodyStrong"
+                  style={styles.timelineTitle}
+                  color={
                     index <= currentMilestoneIndex
-                      ? styles.textCompleted
-                      : styles.textPending,
-                  ]}
+                      ? colors.text
+                      : colors.textPlaceholder
+                  }
                 >
                   {item.title}
                 </Text>
                 {isCompleted && (
                   <Check
-                    color={palette.emerald[500]}
+                    color={colors.success}
                     size={16}
                     style={styles.checkIcon}
                   />
                 )}
-                {isActive && (
-                  <View style={styles.activePill}>
-                    <Text style={styles.activePillText}>ACTIVE</Text>
-                  </View>
-                )}
+                {isActive && <Badge label="Active" tone="brand" />}
               </View>
 
-              <Text style={styles.timelineMetaText}>
+              <Text variant="caption" tone="muted" style={styles.timelineMetaText}>
                 {isPending ? "--:--" : getMilestoneTime(index)} •{" "}
                 {item.location}
               </Text>
 
               <Text
-                style={[
-                  styles.timelineVerificationText,
+                variant="caption"
+                style={styles.timelineVerificationText}
+                color={
                   index < currentMilestoneIndex
-                    ? styles.verificationCompleted
+                    ? colors.primary
                     : index === currentMilestoneIndex
-                      ? styles.verificationActive
-                      : styles.verificationPending,
-                ]}
+                      ? colors.accent
+                      : colors.textPlaceholder
+                }
               >
                 {isPending ? "Pending" : item.verification}
               </Text>
@@ -109,7 +107,7 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({
 const styles = StyleSheet.create({
   timelineContainer: {
     width: "100%",
-    paddingLeft: 4,
+    paddingLeft: spacing.xs,
   },
   timelineItem: {
     flexDirection: "row",
@@ -118,36 +116,36 @@ const styles = StyleSheet.create({
   indicatorContainer: {
     alignItems: "center",
     width: 16,
-    marginRight: 16,
+    marginRight: spacing.lg,
     position: "relative",
   },
   timelineDot: {
     width: 14,
     height: 14,
-    borderRadius: 7,
-    marginTop: 4,
+    borderRadius: radius.pill,
+    marginTop: spacing.xs,
     zIndex: 10,
     alignItems: "center",
     justifyContent: "center",
   },
   dotCompleted: {
-    backgroundColor: palette.gray[900],
+    backgroundColor: colors.primary,
   },
   dotActive: {
-    backgroundColor: palette.gray[900],
+    backgroundColor: colors.primary,
     borderWidth: 3,
-    borderColor: palette.emerald[500],
+    borderColor: colors.success,
     alignItems: "center",
     justifyContent: "center",
   },
   dotActiveInner: {
     width: 4,
     height: 4,
-    borderRadius: 2,
-    backgroundColor: palette.white,
+    borderRadius: radius.pill,
+    backgroundColor: colors.onPrimary,
   },
   dotPending: {
-    backgroundColor: palette.gray[200],
+    backgroundColor: colors.border,
   },
   timelineLine: {
     position: "absolute",
@@ -158,63 +156,32 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   lineCompleted: {
-    backgroundColor: palette.gray[900],
+    backgroundColor: colors.primary,
   },
   linePending: {
-    backgroundColor: palette.gray[200],
+    backgroundColor: colors.border,
   },
   timelineContent: {
     flex: 1,
-    paddingBottom: 16,
+    paddingBottom: spacing.lg,
   },
   timelineHeaderRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: 8,
+    gap: spacing.sm,
   },
   timelineTitle: {
-    fontSize: 15,
-    fontWeight: "bold",
-  },
-  textCompleted: {
-    color: palette.gray[900],
-  },
-  textPending: {
-    color: palette.gray[400],
+    flexShrink: 1,
   },
   checkIcon: {
-    marginRight: 4,
-  },
-  activePill: {
-    backgroundColor: palette.forest[50],
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  activePillText: {
-    fontSize: 10,
-    fontWeight: "bold",
-    color: colors.primary,
+    marginRight: spacing.xs,
   },
   timelineMetaText: {
-    fontSize: 12,
-    color: palette.gray[500],
-    marginTop: 2,
-    fontWeight: "500",
+    marginTop: spacing.xxs,
   },
   timelineVerificationText: {
-    fontSize: 11,
-    fontWeight: "600",
-    marginTop: 4,
-  },
-  verificationCompleted: {
-    color: colors.primary,
-  },
-  verificationActive: {
-    color: palette.amber[600],
-  },
-  verificationPending: {
-    color: palette.gray[400],
+    fontFamily: fontFamily.semibold,
+    marginTop: spacing.xs,
   },
 });

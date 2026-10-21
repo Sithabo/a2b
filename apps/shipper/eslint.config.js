@@ -5,7 +5,7 @@ const designSystem = require('@a2b/ui/eslint-design-system');
 
 module.exports = defineConfig([
   expoConfig,
-  designSystem('warn'),
+  designSystem('error'),
   {
     ignores: ['dist/*'],
   },

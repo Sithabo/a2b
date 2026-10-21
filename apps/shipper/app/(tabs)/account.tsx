@@ -1,13 +1,10 @@
 import React, { useState } from "react";
 import {
   View,
-  Text,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
   StyleSheet,
   Modal,
-  TextInput,
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Switch,
@@ -17,17 +14,15 @@ import {
 import { useRouter } from "expo-router";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useProfileImage, useUserProfile } from "@/store/useShipperProfile";
 import { useMarket } from "@/store/useMarket";
 import { isValidTaxId } from "@a2b/core";
 import { apiErrorMessage } from "@a2b/api-client";
 import { api, useSession } from "@/lib/session";
 import {
-  ArrowLeft,
   Pencil,
   User,
-  Building2,
   CreditCard,
   Globe,
   Bell,
@@ -36,12 +31,26 @@ import {
   Info,
   PhoneCall,
   LogOut,
-  ChevronRight,
   AlertCircle,
   X,
   CheckCircle,
 } from "lucide-react-native";
-import { colors, palette } from "@a2b/ui";
+import {
+  Button,
+  Card,
+  colors,
+  elevation,
+  IconButton,
+  layout,
+  ListItem,
+  ListSection,
+  radius,
+  ScreenHeader,
+  spacing,
+  Text,
+  TextField,
+  tones,
+} from "@a2b/ui";
 
 export default function AccountScreen() {
   const router = useRouter();
@@ -52,7 +61,7 @@ export default function AccountScreen() {
   const market = useMarket();
   const tinErrorMessage = `Valid ${market.taxId.hint} ${market.taxId.issuer} Tax Identification Number required to bypass customs processing constraints.`;
   const insets = useSafeAreaInsets();
-  
+
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [editCompany, setEditCompany] = useState("");
   const [editRegion, setEditRegion] = useState("");
@@ -126,20 +135,7 @@ export default function AccountScreen() {
 
   return (
     <View style={styles.container}>
-      <SafeAreaView edges={["top"]} />
-
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-          activeOpacity={0.7}
-        >
-          <ArrowLeft color={colors.primary} size={20} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>My Account</Text>
-        <View style={{ width: 40 }} />
-      </View>
+      <ScreenHeader title="My Account" onBackPress={() => router.back()} />
 
       <ScrollView
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }]}
@@ -148,15 +144,15 @@ export default function AccountScreen() {
         {/* Warning Banner */}
         {!userProfile?.email && (
           <View style={styles.warningBanner}>
-            <AlertCircle color={palette.amber[700]} size={20} />
-            <Text style={styles.warningText}>
+            <AlertCircle color={colors.warning} size={20} />
+            <Text variant="bodySm" color={tones.warning.fg} style={styles.warningText}>
               Please add your email address to secure your account.
             </Text>
           </View>
         )}
 
         {/* Profile Card */}
-        <View style={styles.profileCard}>
+        <Card style={styles.profileCard}>
           <View style={styles.profileLeft}>
             {userProfile?.profileImage ? (
               <Image
@@ -165,158 +161,47 @@ export default function AccountScreen() {
                 contentFit="cover"
               />
             ) : (
-              <View style={[styles.avatarImage, { alignItems: "center", justifyContent: "center" }]}>
-                <User color={palette.gray[400]} size={32} />
+              <View style={[styles.avatarImage, styles.centered]}>
+                <User color={colors.textPlaceholder} size={32} />
               </View>
             )}
             <View style={styles.profileInfo}>
-              <Text style={styles.profileName}>
+              <Text variant="h3" tone="primary">
                 {userProfile?.company || userProfile?.name || "John Musa"}
               </Text>
               {userProfile?.email ? (
-                <Text style={styles.profileEmail}>{userProfile.email}</Text>
+                <Text variant="bodySm" tone="muted">{userProfile.email}</Text>
               ) : (
-                <Text style={[styles.profileEmail, { color: palette.red[500] }]}>No Email Added</Text>
+                <Text variant="bodySm" tone="danger">No Email Added</Text>
               )}
             </View>
           </View>
-          <TouchableOpacity style={styles.editButton} activeOpacity={0.7} onPress={openEditModal}>
-            <Pencil color={colors.primary} size={20} />
-          </TouchableOpacity>
-        </View>
+          <IconButton
+            icon={Pencil}
+            variant="plain"
+            accessibilityLabel="Edit business details"
+            onPress={openEditModal}
+          />
+        </Card>
 
-        {/* General Section */}
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>General</Text>
-          <View style={styles.card}>
-            {/* Business Details */}
-            {/* <TouchableOpacity style={styles.rowItem} activeOpacity={0.7} onPress={openEditModal}>
-              <View style={styles.rowLeft}>
-                <View style={styles.iconBoxGreen}>
-                  <Building2 color={colors.primary} size={20} />
-                </View>
-                <Text style={styles.rowText}>Business Details</Text>
-              </View>
-              <ChevronRight color={palette.gray[400]} size={20} />
-            </TouchableOpacity>
+        <ListSection title="General">
+          <ListItem icon={CreditCard} title="Payment Methods" onPress={() => router.push("/payment-methods")} />
+          <ListItem icon={Globe} title="Language" onPress={() => router.push("/account/language")} />
+          <ListItem icon={Bell} title="Notifications" onPress={() => router.push("/account/notifications")} />
+        </ListSection>
 
-            <View style={styles.divider} /> */}
+        <ListSection title="Support">
+          <ListItem icon={HelpCircle} title="How A2B Works" onPress={() => router.push("/account/how-it-works")} />
+          <ListItem icon={MessageCircle} title="Need help? Let's chat" onPress={() => router.push("/account/chat")} />
+          <ListItem icon={Info} title="Privacy Policy" onPress={() => router.push("/account/privacy")} />
+        </ListSection>
 
-            {/* Payment Methods */}
-            <TouchableOpacity 
-              style={styles.rowItem} 
-              activeOpacity={0.7}
-              onPress={() => router.push("/payment-methods")}
-            >
-              <View style={styles.rowLeft}>
-                <View style={styles.iconBoxGreen}>
-                  <CreditCard color={colors.primary} size={20} />
-                </View>
-                <Text style={styles.rowText}>Payment Methods</Text>
-              </View>
-              <ChevronRight color={palette.gray[400]} size={20} />
-            </TouchableOpacity>
+        {/* Call Support has no handler yet */}
+        <Button title="Call A2B Support" icon={PhoneCall} onPress={() => {}} />
 
-            <View style={styles.divider} />
-
-            {/* Language */}
-            <TouchableOpacity
-              style={styles.rowItem}
-              activeOpacity={0.7}
-              onPress={() => router.push("/account/language")}
-            >
-              <View style={styles.rowLeft}>
-                <View style={styles.iconBoxGreen}>
-                  <Globe color={colors.primary} size={20} />
-                </View>
-                <Text style={styles.rowText}>Language</Text>
-              </View>
-              <ChevronRight color={palette.gray[400]} size={20} />
-            </TouchableOpacity>
-
-            <View style={styles.divider} />
-
-            {/* Notifications */}
-            <TouchableOpacity
-              style={[styles.rowItem, { paddingBottom: 0 }]}
-              activeOpacity={0.7}
-              onPress={() => router.push("/account/notifications")}
-            >
-              <View style={styles.rowLeft}>
-                <View style={styles.iconBoxGreen}>
-                  <Bell color={colors.primary} size={20} />
-                </View>
-                <Text style={styles.rowText}>Notifications</Text>
-              </View>
-              <ChevronRight color={palette.gray[400]} size={20} />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Support Section */}
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Support</Text>
-          <View style={styles.card}>
-            {/* How A2B Works */}
-            <TouchableOpacity
-              style={styles.rowItem}
-              activeOpacity={0.7}
-              onPress={() => router.push("/account/how-it-works")}
-            >
-              <View style={styles.rowLeft}>
-                <HelpCircle color={palette.gray[900]} size={20} />
-                <Text style={styles.rowText}>How A2B Works</Text>
-              </View>
-              <ChevronRight color={palette.gray[400]} size={20} />
-            </TouchableOpacity>
-
-            <View style={styles.divider} />
-
-            {/* Let's chat */}
-            <TouchableOpacity
-              style={styles.rowItem}
-              activeOpacity={0.7}
-              onPress={() => router.push("/account/chat")}
-            >
-              <View style={styles.rowLeft}>
-                <MessageCircle color={palette.gray[900]} size={20} />
-                <Text style={styles.rowText}>{"Need help? Let's chat"}</Text>
-              </View>
-              <ChevronRight color={palette.gray[400]} size={20} />
-            </TouchableOpacity>
-
-            <View style={styles.divider} />
-
-            {/* Privacy Policy */}
-            <TouchableOpacity
-              style={styles.rowItem}
-              activeOpacity={0.7}
-              onPress={() => router.push("/account/privacy")}
-            >
-              <View style={styles.rowLeft}>
-                <Info color={palette.gray[900]} size={20} />
-                <Text style={styles.rowText}>Privacy Policy</Text>
-              </View>
-              <ChevronRight color={palette.gray[400]} size={20} />
-            </TouchableOpacity>
-
-            {/* Call Support Button */}
-            <TouchableOpacity style={styles.callButton} activeOpacity={0.85}>
-              <PhoneCall color={palette.white} size={20} />
-              <Text style={styles.callButtonText}>Call A2B Support</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Log Out Card */}
-        <TouchableOpacity
-          style={styles.logoutCard}
-          onPress={handleLogout}
-          activeOpacity={0.7}
-        >
-          <LogOut color={palette.red[500]} size={20} />
-          <Text style={styles.logoutText}>Log Out</Text>
-        </TouchableOpacity>
+        <ListSection>
+          <ListItem icon={LogOut} title="Log Out" tone="danger" onPress={handleLogout} />
+        </ListSection>
       </ScrollView>
 
       {/* Edit Profile Bottom Sheet Modal */}
@@ -326,25 +211,34 @@ export default function AccountScreen() {
         visible={isEditModalVisible}
         onRequestClose={() => !isSaving && setIsEditModalVisible(false)}
       >
-        <KeyboardAvoidingView 
+        <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={styles.modalOverlay}
         >
-          <TouchableOpacity 
-            style={styles.modalBackdrop} 
-            activeOpacity={1} 
-            onPress={() => !isSaving && setIsEditModalVisible(false)} 
+          <Pressable
+            style={styles.modalBackdrop}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+            onPress={() => !isSaving && setIsEditModalVisible(false)}
           />
           <View style={styles.bottomSheet}>
             <View style={styles.sheetHeader}>
-              <Text style={styles.sheetTitle}>Edit Business Details</Text>
-              <TouchableOpacity onPress={() => !isSaving && setIsEditModalVisible(false)}>
-                <X color={palette.gray[900]} size={24} />
-              </TouchableOpacity>
+              <Text variant="h2">Edit Business Details</Text>
+              <IconButton
+                icon={X}
+                variant="plain"
+                accessibilityLabel="Close"
+                onPress={() => !isSaving && setIsEditModalVisible(false)}
+              />
             </View>
 
             <View style={styles.sheetContent}>
-              <TouchableOpacity style={styles.imageUploadContainer} onPress={pickImage} activeOpacity={0.8}>
+              <Pressable
+                style={({ pressed }) => [styles.imageUploadContainer, pressed && styles.pressed]}
+                accessibilityRole="button"
+                accessibilityLabel="Change profile photo"
+                onPress={pickImage}
+              >
                 {editProfileImage ? (
                   <Image
                     source={{ uri: editProfileImage }}
@@ -352,56 +246,44 @@ export default function AccountScreen() {
                     contentFit="cover"
                   />
                 ) : (
-                  <View style={[styles.uploadAvatar, { alignItems: "center", justifyContent: "center" }]}>
-                    <User color={palette.gray[400]} size={40} />
+                  <View style={[styles.uploadAvatar, styles.centered]}>
+                    <User color={colors.textPlaceholder} size={40} />
                   </View>
                 )}
                 <View style={styles.uploadOverlay}>
-                  <Pencil color={palette.white} size={16} />
+                  <Pencil color={colors.onPrimary} size={16} />
                 </View>
-              </TouchableOpacity>
+              </Pressable>
 
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Company Name</Text>
-                <TextInput
-                  style={styles.textInput}
-                  value={editCompany}
-                  onChangeText={setEditCompany}
-                  placeholder="Acme Logistics"
-                  placeholderTextColor={palette.gray[400]}
-                />
-              </View>
+              <TextField
+                label="Company Name"
+                value={editCompany}
+                onChangeText={setEditCompany}
+                placeholder="Acme Logistics"
+              />
 
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Operating Region</Text>
-                <TextInput
-                  style={styles.textInput}
-                  value={editRegion}
-                  onChangeText={setEditRegion}
-                  placeholder="e.g. Kampala Hub"
-                  placeholderTextColor={palette.gray[400]}
-                />
-              </View>
+              <TextField
+                label="Operating Region"
+                value={editRegion}
+                onChangeText={setEditRegion}
+                placeholder="e.g. Kampala Hub"
+              />
 
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Email Address</Text>
-                <TextInput
-                  style={styles.textInput}
-                  value={editEmail}
-                  onChangeText={setEditEmail}
-                  placeholder="your@email.com"
-                  placeholderTextColor={palette.gray[400]}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-              </View>
+              <TextField
+                label="Email Address"
+                value={editEmail}
+                onChangeText={setEditEmail}
+                placeholder="your@email.com"
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
 
               {/* Enable Port Pickups / Imports Custom Card */}
               <View style={styles.importCard}>
                 <View style={styles.importRow}>
                   <View style={styles.importRowLeft}>
-                    <Text style={styles.importCardTitle}>Enable Port Pickups / Imports</Text>
-                    <Text style={styles.importCardSub}>Enable customs-cleared container pickups</Text>
+                    <Text variant="bodyStrong">Enable Port Pickups / Imports</Text>
+                    <Text variant="caption" tone="muted">Enable customs-cleared container pickups</Text>
                   </View>
                   <Switch
                     value={editIsImporter}
@@ -413,60 +295,45 @@ export default function AccountScreen() {
                         setTinError("");
                       }
                     }}
-                    trackColor={{ false: palette.gray[300], true: palette.forest[50] }}
-                    thumbColor={editIsImporter ? colors.primary : palette.ivory[300]}
+                    trackColor={{ false: colors.borderStrong, true: colors.primaryMuted }}
+                    thumbColor={editIsImporter ? colors.primary : colors.surface}
                   />
                 </View>
 
                 {editIsImporter && (
                   <View style={styles.tinContainer}>
-                    <Text style={styles.inputLabel}>{market.taxId.issuer} Tax Identification Number (TIN)</Text>
-                    <View style={[
-                      styles.tinInputWrapper,
-                      editTin.length > 0 && !isValidTaxId(editTin, market) ? { borderColor: palette.red[700], borderWidth: 1.5 } : null,
-                      isValidTaxId(editTin, market) ? { borderColor: palette.emerald[500], borderWidth: 1.5 } : null,
-                    ]}>
-                      <TextInput
-                        style={styles.tinInput}
-                        value={editTin}
-                        onChangeText={(text) => {
-                          const cleaned = text.replace(/[^0-9]/g, "");
-                          setEditTin(cleaned);
-                          if (cleaned.length > 0 && !isValidTaxId(cleaned, market)) {
-                            setTinError(tinErrorMessage);
-                          } else {
-                            setTinError("");
-                          }
-                        }}
-                        placeholder={market.taxId.hint}
-                        placeholderTextColor={palette.gray[400]}
-                        keyboardType="numeric"
-                        maxLength={9}
-                      />
-                      {isValidTaxId(editTin, market) && (
-                        <View style={styles.emeraldCheck}>
-                          <CheckCircle size={18} color={palette.emerald[500]} fill={palette.white} />
-                        </View>
-                      )}
-                    </View>
-                    {tinError ? (
-                      <Text style={styles.tinErrorText}>{tinError}</Text>
-                    ) : null}
+                    <TextField
+                      label={`${market.taxId.issuer} Tax Identification Number (TIN)`}
+                      value={editTin}
+                      onChangeText={(text) => {
+                        const cleaned = text.replace(/[^0-9]/g, "");
+                        setEditTin(cleaned);
+                        if (cleaned.length > 0 && !isValidTaxId(cleaned, market)) {
+                          setTinError(tinErrorMessage);
+                        } else {
+                          setTinError("");
+                        }
+                      }}
+                      placeholder={market.taxId.hint}
+                      keyboardType="numeric"
+                      maxLength={9}
+                      error={tinError || undefined}
+                      trailing={
+                        isValidTaxId(editTin, market) ? (
+                          <CheckCircle size={18} color={colors.success} fill={colors.surface} />
+                        ) : null
+                      }
+                    />
                   </View>
                 )}
               </View>
 
-              <TouchableOpacity 
-                style={styles.saveButton} 
+              <Button
+                title="Save Details"
                 onPress={handleSaveProfile}
-                disabled={isSaving}
-              >
-                {isSaving ? (
-                  <ActivityIndicator color={palette.white} />
-                ) : (
-                  <Text style={styles.saveButtonText}>Save Details</Text>
-                )}
-              </TouchableOpacity>
+                loading={isSaving}
+                style={styles.saveButton}
+              />
             </View>
           </View>
         </KeyboardAvoidingView>
@@ -478,158 +345,52 @@ export default function AccountScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: palette.ivory[200],
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: palette.white,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: palette.gray[200],
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: colors.primary,
+    backgroundColor: colors.background,
   },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-    gap: 24,
+    paddingHorizontal: layout.gutter,
+    paddingTop: spacing.lg,
+    gap: spacing['2xl'],
+  },
+  centered: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  pressed: {
+    opacity: 0.85,
   },
   warningBanner: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: palette.amber[100], // Amber-100
-    padding: 16,
-    borderRadius: 12,
-    gap: 12,
-    borderWidth: 1,
-    borderColor: palette.amber[200], // Amber-200
+    backgroundColor: tones.warning.bg,
+    padding: spacing.lg,
+    borderRadius: radius.md,
+    gap: spacing.md,
   },
   warningText: {
     flex: 1,
-    color: palette.amber[800], // Amber-700
-    fontSize: 14,
-    fontWeight: "500",
   },
   profileCard: {
-    backgroundColor: palette.white,
-    borderRadius: 20,
-    padding: 20,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
   profileLeft: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
+    gap: spacing.lg,
   },
   avatarImage: {
     width: 64,
     height: 64,
-    borderRadius: 32,
-    backgroundColor: palette.gray[100],
+    borderRadius: radius.pill,
+    backgroundColor: colors.surfaceSunken,
   },
   profileInfo: {
+    flex: 1,
     justifyContent: "center",
-  },
-  profileName: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: colors.primary,
-    marginBottom: 4,
-  },
-  profileEmail: {
-    fontSize: 14,
-    color: palette.gray[500],
-  },
-  editButton: {
-    padding: 8,
-  },
-  sectionContainer: {
-    gap: 12,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: colors.primary,
-    marginLeft: 4,
-  },
-  card: {
-    backgroundColor: palette.white,
-    borderRadius: 20,
-    padding: 20,
-  },
-  rowItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 12,
-  },
-  rowLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-  },
-  iconBoxGreen: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: palette.forest[50],
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  rowText: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: palette.gray[900],
-  },
-  divider: {
-    height: 1,
-    backgroundColor: palette.gray[100],
-    width: "100%",
-  },
-  callButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    paddingVertical: 16,
-    marginTop: 24,
-    gap: 12,
-  },
-  callButtonText: {
-    color: palette.white,
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  logoutCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: palette.white,
-    borderRadius: 20,
-    paddingVertical: 18,
-    gap: 12,
-    marginBottom: 70,
-  },
-  logoutText: {
-    color: palette.red[500],
-    fontSize: 16,
-    fontWeight: "bold",
+    gap: spacing.xs,
   },
   modalOverlay: {
     flex: 1,
@@ -637,44 +398,35 @@ const styles = StyleSheet.create({
   },
   modalBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: colors.overlay,
   },
   bottomSheet: {
-    backgroundColor: palette.white,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 24,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 24,
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 10,
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radius.md,
+    borderTopRightRadius: radius.md,
+    padding: spacing['2xl'],
+    paddingBottom: Platform.OS === 'ios' ? spacing['4xl'] : spacing['2xl'],
+    ...elevation.md,
   },
   sheetHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 24,
-  },
-  sheetTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: palette.gray[900],
+    marginBottom: spacing['2xl'],
   },
   sheetContent: {
-    gap: 16,
+    gap: spacing.lg,
   },
   imageUploadContainer: {
     alignSelf: "center",
-    marginBottom: 8,
+    marginBottom: spacing.sm,
     position: "relative",
   },
   uploadAvatar: {
     width: 96,
     height: 96,
-    borderRadius: 48,
-    backgroundColor: palette.gray[100],
+    borderRadius: radius.pill,
+    backgroundColor: colors.surfaceSunken,
   },
   uploadOverlay: {
     position: "absolute",
@@ -683,52 +435,23 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: radius.pill,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 3,
-    borderColor: palette.white,
-  },
-  inputGroup: {
-    gap: 8,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: palette.gray[700],
-    marginLeft: 4,
-  },
-  textInput: {
-    backgroundColor: palette.gray[50],
-    borderWidth: 1,
-    borderColor: palette.gray[200],
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    height: 56,
-    fontSize: 16,
-    color: palette.gray[900],
+    borderColor: colors.surface,
   },
   saveButton: {
-    backgroundColor: palette.black,
-    borderRadius: 12,
-    height: 56,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 16,
-  },
-  saveButtonText: {
-    color: palette.white,
-    fontSize: 16,
-    fontWeight: "bold",
+    marginTop: spacing.lg,
   },
   importCard: {
-    backgroundColor: palette.gray[50],
-    borderRadius: 12,
+    backgroundColor: colors.surfaceMuted,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: palette.gray[200],
-    padding: 16,
-    marginTop: 8,
-    gap: 16,
+    borderColor: colors.border,
+    padding: spacing.lg,
+    marginTop: spacing.sm,
+    gap: spacing.lg,
   },
   importRow: {
     flexDirection: "row",
@@ -737,46 +460,12 @@ const styles = StyleSheet.create({
   },
   importRowLeft: {
     flex: 1,
-    paddingRight: 8,
-  },
-  importCardTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: palette.gray[900],
-  },
-  importCardSub: {
-    fontSize: 12,
-    color: palette.gray[500],
-    marginTop: 2,
+    paddingRight: spacing.sm,
+    gap: spacing.xxs,
   },
   tinContainer: {
-    gap: 8,
     borderTopWidth: 1,
-    borderTopColor: palette.gray[200],
-    paddingTop: 16,
-  },
-  tinInputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: palette.white,
-    borderWidth: 1,
-    borderColor: palette.gray[200],
-    borderRadius: 8,
-    height: 48,
-    paddingHorizontal: 12,
-  },
-  tinInput: {
-    flex: 1,
-    fontSize: 15,
-    color: palette.gray[900],
-    padding: 0,
-  },
-  emeraldCheck: {
-    marginLeft: 8,
-  },
-  tinErrorText: {
-    fontSize: 12,
-    color: palette.red[700],
-    marginLeft: 4,
+    borderTopColor: colors.border,
+    paddingTop: spacing.lg,
   },
 });

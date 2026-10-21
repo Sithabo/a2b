@@ -1,19 +1,10 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  TextInput,
-  RefreshControl,
-} from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { View, ScrollView, StyleSheet, RefreshControl, Pressable } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Link, useRouter } from "expo-router";
 import { Image } from "expo-image";
 import {
   Bell,
-  Truck,
   MapPin,
   Search,
   Calculator,
@@ -28,10 +19,28 @@ import { ShippingCard } from "@/components/ShippingCard";
 import { ToolCard } from "@/components/ToolCard";
 import { useUserProfile } from "@/store/useShipperProfile";
 import { useShipmentStore } from "@/store/useShipmentStore";
-import { colors, palette } from "@a2b/ui";
+import {
+  Card,
+  ChipGroup,
+  EmptyState,
+  Text,
+  TextField,
+  colors,
+  layout,
+  radius,
+  spacing,
+  tones,
+} from "@a2b/ui";
 import { cargoLabel, isActiveStatus, statusGroup } from "@a2b/core";
 import { QueryFallback } from "@a2b/features";
 import { shipmentRoute, useMyShipments } from "@/lib/loads";
+
+const STATUS_FILTERS = [
+  { value: "ALL", label: "All" },
+  { value: "ACTIVE", label: "Active" },
+  { value: "PENDING", label: "Pending" },
+  { value: "COMPLETED", label: "Completed" },
+] as const satisfies { value: string; label: string }[];
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -75,8 +84,8 @@ export default function HomeScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView
-        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={palette.white} />}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }]}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.onPrimary} />}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
         showsVerticalScrollIndicator={false}
       >
         <LinearGradient
@@ -87,106 +96,96 @@ export default function HomeScreen() {
           {/* Header Integrated into Body */}
           <View style={styles.headerContainer}>
             <View style={styles.headerLeft}>
-              <Link href={"/(tabs)/account"}>
-                <View style={[styles.avatarContainer, userProfile?.profileImage && { borderWidth: 0 }]}>
-                {userProfile?.profileImage ? (
-                  <Image
-                    source={{ uri: userProfile.profileImage }}
-                    style={{ width: 48, height: 48, borderRadius: 24 }}
-                    contentFit="cover"
-                  />
-                ) : (
-                  <User color={palette.white} size={24} />
-                )}
-              </View>
+              <Link href={"/(tabs)/account"} asChild>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Account"
+                  style={({ pressed }) => [
+                    styles.avatarContainer,
+                    userProfile?.profileImage && styles.avatarNoBorder,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  {userProfile?.profileImage ? (
+                    <Image
+                      source={{ uri: userProfile.profileImage }}
+                      style={styles.avatarImage}
+                      contentFit="cover"
+                    />
+                  ) : (
+                    <User color={colors.onPrimary} size={24} />
+                  )}
+                </Pressable>
               </Link>
               <View>
-                <Text style={styles.headerTitle}>
+                <Text variant="h2" tone="inverse">
                   Hey {userProfile?.name?.split(" ")[0] || "Musa"}
                 </Text>
                 <View style={styles.locationContainer}>
-                  <MapPin color="rgba(255, 255, 255, 0.7)" size={14} />
-                  <Text style={styles.locationText}>{userProfile?.region || "Select Region"}</Text>
+                  <MapPin color={colors.onPrimaryMuted} size={14} />
+                  <Text variant="bodySm" color={colors.onPrimaryMuted}>
+                    {userProfile?.region || "Select Region"}
+                  </Text>
                 </View>
               </View>
             </View>
             <Link href={"/account/notifications"} asChild>
-            <TouchableOpacity style={styles.headerNotificationButton}>
-              <Bell color={palette.white} size={20} />
-            </TouchableOpacity>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Notifications"
+                hitSlop={spacing.xs}
+                style={({ pressed }) => [styles.headerNotificationButton, pressed && styles.pressed]}
+              >
+                <Bell color={colors.onPrimary} size={20} />
+              </Pressable>
             </Link>
           </View>
 
           {/* Search Bar */}
           <View style={styles.searchContainer}>
-            <Search color={palette.gray[400]} size={20} style={styles.searchIcon} />
-            <TextInput
-              style={styles.searchInput}
+            <TextField
+              leading={<Search color={colors.textPlaceholder} size={20} />}
               placeholder="Search Shipping"
-              placeholderTextColor={palette.gray[400]}
+              accessibilityLabel="Search shipments"
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
           </View>
 
           {/* Status Pills */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.pillsContainer}
-            contentContainerStyle={styles.pillsScrollContent}
-          >
-            {([
-              { id: "ALL", label: "All" },
-              { id: "ACTIVE", label: "Active" },
-              { id: "PENDING", label: "Pending" },
-              { id: "COMPLETED", label: "Completed" },
-            ] as const).map((item) => {
-              const isActive = selectedStatus === item.id;
-              return (
-                <TouchableOpacity
-                  key={item.id}
-                  style={[
-                    styles.pillButton,
-                    isActive && styles.pillButtonActive,
-                  ]}
-                  onPress={() => setSelectedStatus(item.id)}
-                  activeOpacity={0.8}
-                >
-                  <Text
-                    style={[
-                      styles.pillText,
-                      isActive && styles.pillTextActive,
-                    ]}
-                  >
-                    {item.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
+          <View style={styles.pillsContainer}>
+            <ChipGroup
+              scroll
+              options={[...STATUS_FILTERS]}
+              value={selectedStatus}
+              onChange={setSelectedStatus}
+            />
+          </View>
 
           {/* Top Content inside gradient */}
           <View style={styles.topContent}>
             {/* Active Alert Card if draft exists */}
             {draft?.savedAt && (
-              <TouchableOpacity
-                style={styles.alertCard}
-                activeOpacity={0.9}
+              <Card
+                padding="lg"
                 onPress={() => router.push("/create-load/document-vault")}
+                accessibilityLabel="Unfinished import shipment. Complete document vault uploads"
+                style={styles.alertCard}
               >
                 <View style={styles.alertCardHeader}>
-                  <AlertTriangle color={palette.amber[600]} size={20} />
-                  <Text style={styles.alertCardTitle}>⚠️ Unfinished Import Shipment Detected</Text>
+                  <AlertTriangle color={colors.accent} size={20} />
+                  <Text variant="bodyStrong" color={colors.warning} style={styles.flexShrink}>
+                    ⚠️ Unfinished Import Shipment Detected
+                  </Text>
                 </View>
-                <Text style={styles.alertCardText}>
+                <Text variant="caption" color={tones.warning.fg}>
                   Your route information from {draft.pickup?.name ?? "your pickup point"} is saved. Tap here to complete your document uploads and release this load.
                 </Text>
                 <View style={styles.alertCardFooter}>
-                  <Text style={styles.alertCardBtnText}>Complete Document Vault Uploads</Text>
-                  <ChevronRight color={palette.amber[600]} size={16} />
+                  <Text variant="label" color={colors.warning}>Complete Document Vault Uploads</Text>
+                  <ChevronRight color={colors.accent} size={16} />
                 </View>
-              </TouchableOpacity>
+              </Card>
             )}
 
             {/* Current Tracking Cards */}
@@ -214,7 +213,7 @@ export default function HomeScreen() {
           {/* Recent Shipping Section */}
           {recentShipments.length > 0 && (
             <View style={styles.recentSection}>
-              <Text style={styles.sectionHeading}>Recent Shipping</Text>
+              <Text variant="h2">Recent Shipping</Text>
 
               {recentShipments.map((s) => (
                 <ShippingCard
@@ -238,13 +237,13 @@ export default function HomeScreen() {
 
           {/* Search Empty State */}
           {shipmentsQuery.data && filteredShipments.length === 0 && (
-            <View style={styles.emptyContainer}>
-              <Package color={palette.gray[400]} size={48} />
-              <Text style={styles.emptyTitle}>No Shipments Found</Text>
-              <Text style={styles.emptySubtitle}>
-                {"We couldn't find any shipments matching \"" + searchQuery + "\""}
-              </Text>
-            </View>
+            <Card padding="none">
+              <EmptyState
+                icon={Package}
+                title="No Shipments Found"
+                message={"We couldn't find any shipments matching \"" + searchQuery + "\""}
+              />
+            </Card>
           )}
         </View>
       </ScrollView>
@@ -260,436 +259,100 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   topContent: {
-    paddingHorizontal: 20,
-    gap: 20,
-    paddingBottom: 24,
+    paddingHorizontal: layout.gutter,
+    gap: spacing.xl,
+    paddingBottom: spacing["2xl"],
   },
   bottomContent: {
-    paddingHorizontal: 20,
-    gap: 20,
-    paddingTop: 12,
-  },
-  scrollContent: {
-    paddingBottom: 100,
+    paddingHorizontal: layout.gutter,
+    gap: spacing.xl,
+    paddingTop: spacing.md,
   },
   headerContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 24,
+    paddingHorizontal: layout.gutter,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing["2xl"],
   },
   headerLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: spacing.md,
   },
   avatarContainer: {
     width: 48,
     height: 48,
-    borderRadius: 24,
+    borderRadius: radius.pill,
     borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.2)",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: colors.onPrimaryTrack,
+    backgroundColor: colors.onPrimaryWash,
     alignItems: "center",
     justifyContent: "center",
   },
-  avatarText: {
-    color: palette.white,
-    fontSize: 20,
-    fontWeight: "bold",
+  avatarNoBorder: {
+    borderWidth: 0,
   },
-  headerTitle: {
-    color: palette.white,
-    fontSize: 20,
-    fontWeight: "600",
-    lineHeight: 24,
+  avatarImage: {
+    width: 48,
+    height: 48,
+    borderRadius: radius.pill,
   },
   locationContainer: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-    marginTop: 2,
-  },
-  locationText: {
-    color: "rgba(255, 255, 255, 0.7)",
-    fontSize: 14,
+    gap: spacing.xs,
+    marginTop: spacing.xxs,
   },
   headerNotificationButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: radius.pill,
+    backgroundColor: colors.onPrimaryWash,
     alignItems: "center",
     justifyContent: "center",
   },
+  pressed: {
+    opacity: 0.85,
+  },
   searchContainer: {
-    marginHorizontal: 24,
-    marginBottom: 24,
-    position: "relative",
-    justifyContent: "center",
+    marginHorizontal: layout.gutter,
+    marginBottom: spacing["2xl"],
   },
-  searchIcon: {
-    position: "absolute",
-    left: 20,
-    zIndex: 1,
-  },
-  searchInput: {
-    width: "100%",
-    height: 56,
-    backgroundColor: palette.white,
-    borderRadius: 28,
-    paddingLeft: 52,
-    paddingRight: 16,
-    fontSize: 16,
-    color: palette.stone[900], // stone-900
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  content: {
-    paddingHorizontal: 20,
-    gap: 20,
+  pillsContainer: {
+    paddingHorizontal: layout.gutter,
+    marginBottom: spacing.xl,
   },
   toolsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 16,
-  },
-  trackingCard: {
-    backgroundColor: palette.gold[400], // brand-gold
-    borderRadius: 24, // 3xl
-    padding: 24,
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
-    position: "relative",
-    overflow: "hidden",
-  },
-  trackingContent: {
-    position: "relative",
-    zIndex: 10,
-    gap: 16,
-  },
-  trackingRow: {
-    gap: 2,
-  },
-  trackingLabel: {
-    color: "rgba(15, 61, 38, 0.6)", // brand-forest/60
-    fontSize: 12,
-    fontWeight: "bold",
-    textTransform: "uppercase",
-  },
-  trackingId: {
-    color: colors.primary,
-    fontSize: 24,
-    fontWeight: "900", // black
-  },
-  trackingValueContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  trackingValue: {
-    color: colors.primary,
-    fontWeight: "bold",
-    fontSize: 14,
-  },
-  statusDot: {
-    width: 8,
-    height: 8,
-    backgroundColor: colors.primary,
-    borderRadius: 4,
-    marginRight: 4,
-  },
-  progressTrack: {
-    height: 4,
-    width: "100%",
-    backgroundColor: "rgba(15, 61, 38, 0.2)", // brand-forest/20
-    borderRadius: 2,
-    marginTop: 24,
-    position: "relative",
-  },
-  progressFill: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    height: "100%",
-    width: "66%",
-    backgroundColor: colors.primary,
-    borderRadius: 2,
-  },
-  progressIconContainer: {
-    position: "absolute",
-    top: "50%",
-    left: "66%",
-    transform: [{ translateY: -16 }, { translateX: -16 }],
-    width: 32,
-    height: 32,
-    backgroundColor: colors.primary,
-    borderRadius: 16,
-    borderWidth: 4,
-    borderColor: palette.gold[400],
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  fastBadge: {
-    position: "absolute",
-    top: 16,
-    right: 16,
-    width: 48,
-    height: 48,
-    backgroundColor: palette.white,
-    alignItems: "center",
-    justifyContent: "center",
-    transform: [{ rotate: "-12deg" }],
-    borderRadius: 24, // Make it a circle since we don't have SVG star
-    zIndex: 20,
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  fastBadgeText: {
-    fontSize: 10,
-    fontWeight: "900",
-    color: colors.primary,
-    textTransform: "uppercase",
-  },
-  packageImageContainer: {
-    position: "absolute",
-    right: -20,
-    bottom: -20,
-    transform: [{ rotate: "-15deg" }],
-    zIndex: 1,
+    gap: spacing.lg,
   },
   recentSection: {
-    gap: 16,
-    paddingTop: 8,
-  },
-  sectionHeading: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: palette.stone[900], // stone-900
-  },
-  recentCard: {
-    backgroundColor: palette.white, // stone-50/50
-    borderRadius: 24, // 3xl
-    padding: 20,
-    borderWidth: 1,
-    borderColor: palette.stone[100], // stone-100
-  },
-  recentHeader: {
-    alignItems: "flex-start",
-    marginBottom: 16,
-  },
-  inTransitPill: {
-    backgroundColor: palette.gold[400],
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 16,
-  },
-  inTransitPillText: {
-    color: colors.primary,
-    fontSize: 10,
-    fontWeight: "bold",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  recentBody: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-end",
-  },
-  recentInfo: {
-    gap: 4,
-  },
-  recentId: {
-    fontSize: 18,
-    fontWeight: "900",
-    color: colors.primary,
-    marginBottom: 4,
-  },
-  recentDateLabel: {
-    color: palette.stone[400], // stone-400
-    fontSize: 12,
-    fontWeight: "bold",
-    textTransform: "uppercase",
-  },
-  recentDateValue: {
-    color: palette.stone[900],
-    fontWeight: "bold",
-    fontSize: 14,
-  },
-  recentImageContainer: {
-    width: 60,
-    height: 60,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  smallProgressTrack: {
-    height: 4,
-    width: "100%",
-    backgroundColor: palette.stone[200], // stone-200
-    borderRadius: 2,
-    marginTop: 16,
-    position: "relative",
-  },
-  smallProgressFill: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    height: "100%",
-    width: "50%",
-    backgroundColor: palette.gold[400],
-    borderRadius: 2,
-  },
-  smallProgressIconContainer: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: [{ translateY: -12 }, { translateX: -12 }],
-    width: 24,
-    height: 24,
-    backgroundColor: palette.gold[400],
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: palette.white,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  calculateButton: {
-    width: "100%",
-    backgroundColor: colors.primary,
-    padding: 20,
-    borderRadius: 24,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  calculateButtonLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-  },
-  calculateIconWrapper: {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    padding: 8,
-    borderRadius: 12,
-  },
-  calculateText: {
-    fontWeight: "bold",
-    color: palette.white,
-    fontSize: 16,
+    gap: spacing.lg,
+    paddingTop: spacing.sm,
   },
   alertCard: {
-    backgroundColor: palette.amber[50],
-    borderWidth: 1.5,
-    borderColor: palette.amber[500],
-    borderRadius: 20,
-    padding: 16,
-    gap: 8,
-    shadowColor: palette.amber[500],
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
+    backgroundColor: colors.warningMuted,
+    borderColor: colors.accent,
+    gap: spacing.sm,
   },
   alertCardHeader: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: spacing.sm,
   },
-  alertCardTitle: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: palette.amber[700],
-  },
-  alertCardText: {
-    fontSize: 12,
-    color: palette.amber[900],
-    lineHeight: 18,
+  flexShrink: {
+    flexShrink: 1,
   },
   alertCardFooter: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     borderTopWidth: 1,
-    borderTopColor: palette.amber[100],
-    paddingTop: 10,
-    marginTop: 4,
-  },
-  alertCardBtnText: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: palette.amber[700],
-  },
-  emptyContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 40,
-    backgroundColor: palette.white,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: palette.gray[200],
-    gap: 12,
-    marginTop: 10,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: colors.primary,
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    color: palette.gray[500],
-    textAlign: "center",
-    paddingHorizontal: 20,
-  },
-  pillsContainer: {
-    marginBottom: 20,
-  },
-  pillsScrollContent: {
-    paddingHorizontal: 24,
-    gap: 10,
-  },
-  pillButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  pillButtonActive: {
-    backgroundColor: palette.white,
-    borderColor: palette.white,
-    shadowColor: palette.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  pillText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: palette.white,
-  },
-  pillTextActive: {
-    color: colors.primary,
-    fontWeight: "bold",
+    borderTopColor: tones.warning.bg,
+    paddingTop: spacing.md,
+    marginTop: spacing.xs,
   },
 });

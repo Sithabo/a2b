@@ -1,10 +1,10 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { AlignLeft } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Circle } from "react-native-svg";
-import { colors, palette } from "@a2b/ui";
+import { Button, IconButton, Text, colors, layout, palette, radius, spacing } from "@a2b/ui";
 import { estimateTrip, formatMoney, vehicleClasses, type VehicleClass } from "@a2b/core";
 import { useMarket } from "@/store/useMarket";
 
@@ -27,6 +27,13 @@ export default function CalculatorResultsScreen() {
 
   const formatCurrency = (val: number) => formatMoney(val, market, { code: false });
 
+  const breakdown = [
+    { label: "Distance Cost", value: formatCurrency(distanceCost), color: palette.violet[400] },
+    { label: "Weight Surcharge", value: `+ ${formatCurrency(weightCost)}`, color: palette.emerald[400] },
+    { label: "Vehicle Premium", value: `+ ${formatCurrency(vehicleFee)}`, color: palette.amber[400] },
+    { label: "Urgency / Demand", value: `+ ${formatCurrency(urgencyPremium)}`, color: palette.red[400] },
+  ];
+
   return (
     <View style={styles.container}>
       {/* Top Half: Dark Background */}
@@ -35,14 +42,14 @@ export default function CalculatorResultsScreen() {
 
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity
+          <IconButton
+            icon={AlignLeft}
+            variant="brand"
+            size={layout.touchMin}
+            accessibilityLabel="Go back"
             onPress={() => router.back()}
-            style={styles.menuButton}
-            activeOpacity={0.7}
-          >
-            <AlignLeft color={palette.white} size={24} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Suggested{"\n"}Offer</Text>
+          />
+          <Text variant="display" tone="inverse">Suggested{"\n"}Offer</Text>
         </View>
 
         {/* Chart Area */}
@@ -53,7 +60,7 @@ export default function CalculatorResultsScreen() {
               cx="120"
               cy="120"
               r="100"
-              stroke="rgba(255,255,255,0.1)"
+              stroke={colors.onPrimaryWash}
               strokeWidth="12"
               fill="none"
             />
@@ -73,8 +80,8 @@ export default function CalculatorResultsScreen() {
             />
           </Svg>
           <View style={styles.chartCenterTextContainer}>
-            <Text style={styles.chartCurrency}>{market.currency.code}</Text>
-            <Text style={styles.chartTotal}>{formatCurrency(totalCost)}</Text>
+            <Text variant="bodyStrong" color={colors.onPrimaryMuted}>{market.currency.code}</Text>
+            <Text variant="display" tone="inverse" style={styles.chartTotal}>{formatCurrency(totalCost)}</Text>
           </View>
         </View>
       </View>
@@ -82,56 +89,21 @@ export default function CalculatorResultsScreen() {
       {/* Bottom Half: White Card */}
       <View style={styles.bottomCard}>
         <View style={styles.breakdownList}>
-          {/* Row 1 */}
-          <View style={styles.breakdownRow}>
-            <View style={styles.breakdownLeft}>
-              <View style={[styles.dot, { backgroundColor: palette.violet[400] }]} />
-              <Text style={styles.breakdownLabel}>Distance Cost</Text>
-            </View>
-            <Text style={styles.breakdownValue}>{formatCurrency(distanceCost)}</Text>
-          </View>
-
-          <View style={styles.divider} />
-
-          {/* Row 2 */}
-          <View style={styles.breakdownRow}>
-            <View style={styles.breakdownLeft}>
-              <View style={[styles.dot, { backgroundColor: palette.emerald[400] }]} />
-              <Text style={styles.breakdownLabel}>Weight Surcharge</Text>
-            </View>
-            <Text style={styles.breakdownValue}>+ {formatCurrency(weightCost)}</Text>
-          </View>
-
-          <View style={styles.divider} />
-
-          {/* Row 3 */}
-          <View style={styles.breakdownRow}>
-            <View style={styles.breakdownLeft}>
-              <View style={[styles.dot, { backgroundColor: palette.amber[400] }]} />
-              <Text style={styles.breakdownLabel}>Vehicle Premium</Text>
-            </View>
-            <Text style={styles.breakdownValue}>+ {formatCurrency(vehicleFee)}</Text>
-          </View>
-
-          <View style={styles.divider} />
-
-          {/* Row 4 */}
-          <View style={styles.breakdownRow}>
-            <View style={styles.breakdownLeft}>
-              <View style={[styles.dot, { backgroundColor: palette.red[400] }]} />
-              <Text style={styles.breakdownLabel}>Urgency / Demand</Text>
-            </View>
-            <Text style={styles.breakdownValue}>+ {formatCurrency(urgencyPremium)}</Text>
-          </View>
+          {breakdown.map((row, i) => (
+            <React.Fragment key={row.label}>
+              {i > 0 && <View style={styles.divider} />}
+              <View style={styles.breakdownRow}>
+                <View style={styles.breakdownLeft}>
+                  <View style={[styles.dot, { backgroundColor: row.color }]} />
+                  <Text variant="bodySm" tone="secondary">{row.label}</Text>
+                </View>
+                <Text variant="bodyStrong">{row.value}</Text>
+              </View>
+            </React.Fragment>
+          ))}
         </View>
 
-        <TouchableOpacity
-          style={styles.recalculateButton}
-          activeOpacity={0.8}
-          onPress={() => router.back()}
-        >
-          <Text style={styles.recalculateButtonText}>Recalculate</Text>
-        </TouchableOpacity>
+        <Button title="Recalculate" onPress={() => router.back()} />
       </View>
     </View>
   );
@@ -145,28 +117,20 @@ const styles = StyleSheet.create({
   topSection: {
     flex: 1, // takes up available space above card
     backgroundColor: colors.primary,
-    paddingBottom: 40,
+    paddingBottom: spacing["4xl"],
   },
   header: {
     flexDirection: "row",
     alignItems: "flex-start",
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    gap: 32,
-  },
-  menuButton: {
-    marginTop: 8,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: "900",
-    color: palette.white,
-    lineHeight: 34,
+    // The 48pt icon button pads its 24pt icon by 12, so the icon sits where it did.
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.lg,
+    gap: spacing.sm,
   },
   chartContainer: {
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 32,
+    marginTop: spacing["3xl"],
     position: "relative",
   },
   chartCenterTextContainer: {
@@ -174,68 +138,38 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  chartCurrency: {
-    fontSize: 16,
-    color: "rgba(255,255,255,0.7)",
-    fontWeight: "600",
-  },
   chartTotal: {
-    fontSize: 32,
-    fontWeight: "900",
-    color: palette.white,
-    marginTop: 4,
+    marginTop: spacing.xs,
   },
   bottomCard: {
-    backgroundColor: palette.white,
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    padding: 32,
-    paddingBottom: 50, // safe area buffer
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radius.md,
+    borderTopRightRadius: radius.md,
+    padding: spacing["3xl"],
+    paddingBottom: spacing["4xl"], // safe area buffer
   },
   breakdownList: {
-    marginBottom: 32,
+    marginBottom: spacing["3xl"],
   },
   breakdownRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: spacing.md,
   },
   breakdownLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: spacing.md,
   },
   dot: {
     width: 12,
     height: 12,
-    borderRadius: 6,
-  },
-  breakdownLabel: {
-    fontSize: 14,
-    color: palette.gray[600],
-    fontWeight: "500",
-  },
-  breakdownValue: {
-    fontSize: 16,
-    color: palette.gray[800],
-    fontWeight: "600",
+    borderRadius: radius.pill,
   },
   divider: {
     height: 1,
-    backgroundColor: palette.gray[100],
+    backgroundColor: colors.border,
     width: "100%",
-  },
-  recalculateButton: {
-    backgroundColor: palette.gray[800],
-    borderRadius: 16,
-    paddingVertical: 20,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  recalculateButtonText: {
-    color: palette.white,
-    fontSize: 16,
-    fontWeight: "bold",
   },
 });
