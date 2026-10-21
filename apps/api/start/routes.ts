@@ -17,6 +17,9 @@ router.get('/', () => ({ name: 'a2b-api', status: 'ok' }))
 
 router
   .group(() => {
+    // Payment providers (signed; no user token)
+    router.post('webhooks/payments', [controllers.PaymentWebhooks, 'handle'])
+
     router
       .group(() => {
         router.post('otp', [controllers.Auth, 'requestOtp']).use(otpRequestThrottle)
@@ -62,6 +65,7 @@ router
             router.get(':id/requirements', [controllers.Loads, 'requirements'])
             router.post(':id/publish', [controllers.Loads, 'publish'])
             router.post(':id/accept', [controllers.Loads, 'accept'])
+            router.post(':id/assign', [controllers.Loads, 'assign'])
             router.post(':id/withdraw', [controllers.Loads, 'withdraw'])
             router.post(':id/cancel', [controllers.Loads, 'cancel'])
             router.post(':id/progress', [controllers.Loads, 'progress'])

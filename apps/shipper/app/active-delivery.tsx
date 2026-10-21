@@ -22,7 +22,8 @@ import {
 import { DriverContactCard } from "@/components/DriverContactCard";
 import { LoadState } from "@/components/LoadState";
 import { milestoneIndex, parseLoadId, trackingLabel, useShipment, weightLabel } from "@/lib/loads";
-import { cargoLabel, vehicleClasses } from "@a2b/core";
+import { cargoLabel, formatMoney, getMarket, vehicleClasses } from "@a2b/core";
+import { useCancelLoad } from "@a2b/features";
 import { MilestoneTimeline } from "@/components/MilestoneTimeline";
 import {
   Button,
@@ -48,6 +49,24 @@ export default function ActiveDeliveryScreen() {
 
   // Milestones come from the driver; poll while the load is moving.
   const { data: shipment, error, refetch } = useShipment(parseLoadId(trackingId), { pollMs: 30_000 });
+  const cancel = useCancelLoad(parseLoadId(trackingId) ?? 0);
+
+  // Until the driver picks up, the shipper can still cancel and get the escrow back
+  const confirmCancel = () => {
+    if (!shipment) return;
+    Alert.alert(
+      "Cancel this shipment?",
+      `The driver hasn't picked up yet. You'll get a full refund of ${formatMoney(shipment.escrow?.amount ?? shipment.offerPrice, getMarket(shipment.market))}.`,
+      [
+        { text: "Keep shipment", style: "cancel" },
+        {
+          text: "Cancel & refund",
+          style: "destructive",
+          onPress: () => cancel.mutate(undefined, { onSuccess: () => router.replace("/(tabs)") }),
+        },
+      ]
+    );
+  };
 
   const currentMilestoneIndex = shipment ? milestoneIndex(shipment) : 0;
   const isImport = shipment?.isImport ?? false;
@@ -276,6 +295,15 @@ export default function ActiveDeliveryScreen() {
           { bottom: insets.bottom > 0 ? insets.bottom : spacing.xl },
         ]}
       >
+        {shipment.status === "SECURED" && (
+          <Button
+            title="Cancel shipment"
+            variant="ghost"
+            onPress={confirmCancel}
+            loading={cancel.isPending}
+            accessibilityHint="Cancels before pickup and refunds your deposit"
+          />
+        )}
         <Button
           title={
             currentMilestoneIndex === 6

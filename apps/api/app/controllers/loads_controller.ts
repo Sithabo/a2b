@@ -5,6 +5,7 @@ import LoadTransformer from '#transformers/load_transformer'
 import LoadEventTransformer from '#transformers/load_event_transformer'
 import {
   acceptLoadValidator,
+  assignLoadValidator,
   cancelLoadValidator,
   createLoadValidator,
   listLoadsValidator,
@@ -13,6 +14,7 @@ import {
 import { canSeeLocation, canView, fleetOwnedBy } from '#services/load_access'
 import {
   acceptLoad,
+  assignLoad,
   cancelLoad,
   createLoad,
   missingDocuments,
@@ -97,6 +99,13 @@ export default class LoadsController {
   async accept(ctx: HttpContext) {
     const input = await ctx.request.validateUsing(acceptLoadValidator)
     await acceptLoad(ctx.auth.getUserOrFail(), Number(ctx.params.id), input)
+    return this.show(ctx)
+  }
+
+  /** Fleet owner changes the truck and/or driver before pickup. */
+  async assign(ctx: HttpContext) {
+    const input = await ctx.request.validateUsing(assignLoadValidator)
+    await assignLoad(ctx.auth.getUserOrFail(), Number(ctx.params.id), input)
     return this.show(ctx)
   }
 

@@ -39,6 +39,26 @@ export function useAcceptLoad(loadId: number, options: LoadMutationOptions = {})
   );
 }
 
+/** The fleet owner sends a different truck and/or driver, before pickup. */
+export function useAssignLoad(loadId: number, options: LoadMutationOptions = {}) {
+  const { api } = useAppSession();
+  return useLoadMutation(
+    (body: { vehicleId?: number; driverId?: number }) => api.loads.assign({ params: { id: loadId }, body }),
+    "Couldn't reassign the load",
+    options
+  );
+}
+
+/** The shipper cancels; a funded load (before pickup) is refunded in full. */
+export function useCancelLoad(loadId: number, options: LoadMutationOptions = {}) {
+  const { api } = useAppSession();
+  return useLoadMutation(
+    (reason?: string) => api.loads.cancel({ params: { id: loadId }, body: { reason } }),
+    "Couldn't cancel this load",
+    options
+  );
+}
+
 /** The carrier hands an accepted load back to the board. */
 export function useWithdrawLoad(loadId: number, options: LoadMutationOptions = {}) {
   const { api } = useAppSession();

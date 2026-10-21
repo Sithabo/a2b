@@ -66,8 +66,14 @@ export const listLoadsValidator = vine.create({
 })
 
 export const acceptLoadValidator = vine.create({
-  vehicleId: vine.number().withoutDecimals().optional(),
-  driverId: vine.number().withoutDecimals().optional(),
+  vehicleId: vine.number().withoutDecimals().positive().optional(),
+  driverId: vine.number().withoutDecimals().positive().optional(),
+})
+
+/** Fleet owner changes the truck and/or driver before pickup. */
+export const assignLoadValidator = vine.create({
+  vehicleId: vine.number().withoutDecimals().positive().optional(),
+  driverId: vine.number().withoutDecimals().positive().optional(),
 })
 
 export const cancelLoadValidator = vine.create({

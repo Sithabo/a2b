@@ -41,6 +41,9 @@ export default function DriverFoundScreen() {
               <Text variant="bodyStrong" color={tones.warning.fg} style={styles.alertTitle}>Action Required</Text>
               <Text variant="caption" color={colors.warning}>
                 Deposit funds to unlock driver details and confirm pickup
+                {shipment.escrow?.fundingDueAt
+                  ? `. Deposit by ${new Date(shipment.escrow.fundingDueAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })} or the driver is released and your load goes back on the board.`
+                  : ""}
               </Text>
             </View>
           </View>

@@ -22,6 +22,16 @@ export interface PaymentResult {
   raw?: Record<string, unknown>
 }
 
+/** A provider's notification that a payment we started has settled. */
+export interface PaymentWebhookEvent {
+  /** The provider's id for this notification; retries reuse it. */
+  eventId: string
+  /** Matches the providerRef we stored when the payment started. */
+  providerRef: string
+  status: 'SUCCEEDED' | 'FAILED'
+  raw: Record<string, unknown>
+}
+
 /** A mobile money / card provider. One implementation per provider (MTN MoMo, Airtel, MMG, cards). */
 export interface PaymentDriver {
   readonly name: string
@@ -29,4 +39,14 @@ export interface PaymentDriver {
   collect(request: PaymentRequest): Promise<PaymentResult>
   /** Push the released escrow to the carrier. */
   payout(request: PaymentRequest): Promise<PaymentResult>
+  /** Return a held deposit to the shipper. */
+  refund(request: PaymentRequest): Promise<PaymentResult>
+  /**
+   * Verifies a webhook's signature and reads it. Returns null when the
+   * signature is missing or wrong, so forged notifications are ignored.
+   */
+  parseWebhook(
+    rawBody: string,
+    headers: Record<string, string | undefined>
+  ): PaymentWebhookEvent | null
 }

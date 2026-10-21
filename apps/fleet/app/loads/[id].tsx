@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowDown, Clock, MapPin, Phone, ShieldCheck, Truck } from "lucide-react-native";
 import { cargoLabel, formatMoney, getMarket, statusMeta, vehicleClasses } from "@a2b/core";
-import { QueryFallback, useAcceptLoad, useWithdrawLoad } from "@a2b/features";
+import { QueryFallback, useAcceptLoad, useAssignLoad, useWithdrawLoad } from "@a2b/features";
 import {
   Badge,
   Button,
@@ -35,6 +35,7 @@ export default function LoadDetailScreen() {
   const [truckId, setTruckId] = useState<string | null>(null);
   const accept = useAcceptLoad(loadId, { errorTitle: "Couldn't dispatch" });
   const withdrawal = useWithdrawLoad(loadId);
+  const assign = useAssignLoad(loadId);
   const isWorking = accept.isPending || withdrawal.isPending;
 
   const idleTrucks = useMemo(
@@ -59,6 +60,9 @@ export default function LoadDetailScreen() {
   const isOurs = l.fleetId !== null;
 
   const dispatch = () => accept.mutate({ vehicleId: Number(truckId) });
+  // Until pickup the fleet can send a different truck (its driver comes with it)
+  const canReassign = isOurs && (l.status === "MATCHED" || l.status === "SECURED");
+  const reassign = () => assign.mutate({ vehicleId: Number(truckId) }, { onSuccess: () => setTruckId(null) });
 
   const withdraw = () =>
     Alert.alert("Withdraw from this load?", "It goes back on the load board for other carriers.", [
@@ -107,6 +111,9 @@ export default function LoadDetailScreen() {
             </View>
             <Text variant="bodySm" color={palette.amber[900]}>
               Hold the truck until payment is secured. Pickup address and contacts unlock as soon as it is.
+              {l.escrow?.fundingDueAt
+                ? ` If it isn't funded by ${formatDate(l.escrow.fundingDueAt)}, the load goes back on the board.`
+                : ""}
             </Text>
           </Card>
         )}
@@ -166,6 +173,38 @@ export default function LoadDetailScreen() {
                 title="No idle trucks with a driver"
                 message="Free up a truck or assign a driver to an idle one to take this load."
               />
+            )}
+          </View>
+        )}
+
+        {canReassign && (
+          <View style={styles.section}>
+            <Text variant="h3">Change truck</Text>
+            <Text variant="bodySm" tone="secondary">
+              Until pickup you can send a different truck. Its assigned driver takes the job.
+            </Text>
+            {idleTrucks.length ? (
+              <>
+                <ChipGroup
+                  value={truckId}
+                  onChange={setTruckId}
+                  options={idleTrucks.map((t) => ({
+                    value: String(t.vehicle.id),
+                    label: `${t.vehicle.plate} · ${t.driver?.fullName ?? t.driver?.phone}`,
+                  }))}
+                />
+                <Button
+                  title="Send this truck instead"
+                  variant="secondary"
+                  onPress={reassign}
+                  loading={assign.isPending}
+                  disabled={!truckId}
+                />
+              </>
+            ) : (
+              <Text variant="bodySm" tone="muted">
+                No other idle trucks with a driver right now.
+              </Text>
             )}
           </View>
         )}

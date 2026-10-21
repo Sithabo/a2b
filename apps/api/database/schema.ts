@@ -61,7 +61,7 @@ export class DriverProfileSchema extends BaseModel {
 }
 
 export class EscrowSchema extends BaseModel {
-  static $columns = ['amount', 'createdAt', 'currency', 'depositMethod', 'heldAt', 'id', 'loadId', 'refundedAt', 'releaseAttempts', 'releaseCodeExpiresAt', 'releaseCodeHash', 'releasedAt', 'status', 'updatedAt'] as const
+  static $columns = ['amount', 'createdAt', 'currency', 'depositMethod', 'fundingDueAt', 'heldAt', 'id', 'loadId', 'refundedAt', 'releaseAttempts', 'releaseCodeExpiresAt', 'releaseCodeHash', 'releasedAt', 'status', 'updatedAt'] as const
   $columns = EscrowSchema.$columns
   @column()
   declare amount: number
@@ -71,6 +71,8 @@ export class EscrowSchema extends BaseModel {
   declare currency: string
   @column()
   declare depositMethod: PaymentMethod | null | null
+  @column.dateTime()
+  declare fundingDueAt: DateTime | null
   @column.dateTime()
   declare heldAt: DateTime | null
   @column({ isPrimary: true })
@@ -275,8 +277,25 @@ export class LoadSchema extends BaseModel {
   declare weightKg: number | null
 }
 
+export class PaymentEventSchema extends BaseModel {
+  static $columns = ['createdAt', 'eventId', 'id', 'payload', 'processedAt', 'provider'] as const
+  $columns = PaymentEventSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare eventId: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare payload: Record<string, unknown>
+  @column.dateTime()
+  declare processedAt: DateTime | null
+  @column()
+  declare provider: string
+}
+
 export class PaymentTransactionSchema extends BaseModel {
-  static $columns = ['amount', 'createdAt', 'currency', 'escrowId', 'id', 'kind', 'method', 'provider', 'providerRef', 'raw', 'status', 'updatedAt'] as const
+  static $columns = ['amount', 'createdAt', 'currency', 'escrowId', 'id', 'kind', 'method', 'provider', 'providerRef', 'raw', 'reference', 'status', 'updatedAt'] as const
   $columns = PaymentTransactionSchema.$columns
   @column()
   declare amount: number
@@ -298,6 +317,8 @@ export class PaymentTransactionSchema extends BaseModel {
   declare providerRef: string | null
   @column()
   declare raw: Record<string, unknown> | null | null
+  @column()
+  declare reference: string | null
   @column()
   declare status: PaymentStatus
   @column.dateTime({ autoCreate: true, autoUpdate: true })

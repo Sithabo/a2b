@@ -194,10 +194,20 @@ test.group('Loads / escrow lifecycle', (group) => {
     ;(await client.post(`/api/v1/loads/${load.id}/withdraw`).loginAs(driver)).assertStatus(200)
     const view = await client.get(`/api/v1/loads/${load.id}`).loginAs(shipper)
     view.assertBodyContains({ data: { status: 'OPEN', driverId: null, escrow: null } })
-    assert.isNull(await Escrow.findBy('loadId', load.id))
+    // Kept as history, but no longer live
+    assert.equal((await Escrow.findByOrFail('loadId', load.id)).status, 'VOID')
+
+    // Another carrier can take it and gets a fresh escrow
+    const other = await makeUser('driver')
+    ;(await client.post(`/api/v1/loads/${load.id}/accept`).loginAs(other)).assertBodyContains({
+      data: { status: 'MATCHED', escrow: { status: 'AWAITING_DEPOSIT' } },
+    })
   })
 
-  test('shipper can cancel before funding, not after', async ({ client }) => {
+  test('shipper can cancel before pickup; a funded load is refunded', async ({
+    client,
+    assert,
+  }) => {
     const shipper = await makeUser('shipper')
     const driver = await makeUser('driver')
     const open = await makeLoad(shipper)
@@ -213,7 +223,26 @@ test.group('Loads / escrow lifecycle', (group) => {
       .post(`/api/v1/loads/${funded.id}/deposit`)
       .json({ method: 'airtel' })
       .loginAs(shipper)
-    ;(await client.post(`/api/v1/loads/${funded.id}/cancel`).loginAs(shipper)).assertStatus(409)
+    const cancelled = await client.post(`/api/v1/loads/${funded.id}/cancel`).loginAs(shipper)
+    cancelled.assertBodyContains({ data: { status: 'CANCELLED', escrow: { status: 'REFUNDED' } } })
+    const escrow = await Escrow.findByOrFail('loadId', funded.id)
+    const refund = await PaymentTransaction.query()
+      .where('escrow_id', escrow.id)
+      .where('kind', 'REFUND')
+      .firstOrFail()
+    assert.equal(refund.status, 'SUCCEEDED')
+    assert.equal(refund.amount, escrow.amount)
+
+    // Once the cargo is moving it can't be cancelled
+    const moving = await makeLoad(shipper)
+    await client.post(`/api/v1/loads/${moving.id}/publish`).loginAs(shipper)
+    await client.post(`/api/v1/loads/${moving.id}/accept`).loginAs(driver)
+    await client.post(`/api/v1/loads/${moving.id}/deposit`).json({ method: 'mtn' }).loginAs(shipper)
+    await client
+      .post(`/api/v1/loads/${moving.id}/progress`)
+      .json({ status: 'IN_TRANSIT' })
+      .loginAs(driver)
+    ;(await client.post(`/api/v1/loads/${moving.id}/cancel`).loginAs(shipper)).assertStatus(409)
   })
 
   test('the release code only exists once cargo is moving, and expires attempts', async ({

@@ -47,6 +47,10 @@ export default await Env.create(new URL('../', import.meta.url), {
 
   // Escrow payments
   PAYMENT_DRIVER: Env.schema.enum(['mock'] as const),
+  /** Verifies payment provider webhooks. Without it, webhooks are rejected. */
+  PAYMENT_WEBHOOK_SECRET: Env.schema.string.optional(),
+  /** Minutes a shipper has to fund escrow before the load returns to the board (default 240). */
+  ESCROW_FUNDING_WINDOW_MINUTES: Env.schema.number.optional(),
 
   /*
   |----------------------------------------------------------

@@ -21,7 +21,8 @@ export default class Load extends LoadSchema {
   @hasOne(() => LoadLocation)
   declare location: HasOne<typeof LoadLocation>
 
-  @hasOne(() => Escrow)
+  /** The live escrow; escrows voided by earlier matches are history only. */
+  @hasOne(() => Escrow, { onQuery: (query) => query.whereNot('status', 'VOID') })
   declare escrow: HasOne<typeof Escrow>
 
   @hasMany(() => LoadEvent)
