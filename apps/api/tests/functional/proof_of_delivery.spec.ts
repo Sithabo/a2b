@@ -2,6 +2,7 @@ import { test } from '@japa/runner'
 import testUtils from '@adonisjs/core/services/test_utils'
 import drive from '@adonisjs/drive/services/main'
 import type { ApiClient } from '@japa/api-client'
+import { loadTimeline } from '@a2b/core'
 import LoadEvent from '#models/load_event'
 import type User from '#models/user'
 import { makeLoad, makeUser, dataOf, deliver } from '#tests/helpers'
@@ -125,5 +126,16 @@ test.group('Proof of delivery', (group) => {
       .where('to_status', 'DELIVERED')
       .firstOrFail()
     assert.equal(event.note, 'Received by Mary at the gate')
+
+    // The shipper's tracking timeline is built from these real events
+    const view = dataOf(await client.get(`/api/v1/loads/${load.id}`).loginAs(shipper))
+    const events = dataOf(await client.get(`/api/v1/loads/${load.id}/events`).loginAs(shipper))
+    const steps = loadTimeline(view, events)
+    assert.deepEqual(
+      steps.map((s) => s.state),
+      ['done', 'done', 'done', 'done', 'done', 'active']
+    )
+    assert.deepEqual(steps[4].notes, ['Received by Mary at the gate'])
+    assert.match(steps[2].notes[0], /Escrow funded via MTN Mobile Money/)
   })
 })

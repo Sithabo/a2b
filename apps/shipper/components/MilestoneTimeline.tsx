@@ -1,36 +1,37 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { Check } from "lucide-react-native";
+import type { LoadStatus, TimelineStep } from "@a2b/core";
 import { Badge, colors, fontFamily, radius, spacing, Text } from "@a2b/ui";
 
-export interface MilestoneItem {
-  key: string;
-  title: string;
-  location: string;
-  verification: string;
-}
-
 interface MilestoneTimelineProps {
-  milestones: MilestoneItem[];
-  currentMilestoneIndex: number;
-  getMilestoneTime: (index: number) => string;
+  steps: TimelineStep[];
+  /** Where a step happened, if it has a place (pickup, drop-off). */
+  placeFor?: (status: LoadStatus) => string | undefined;
 }
 
-export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({
-  milestones,
-  currentMilestoneIndex,
-  getMilestoneTime,
-}) => {
+const formatTime = (iso: string) =>
+  new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+
+/** The load's progress, from `loadTimeline()`: what happened, what it's waiting on, what's ahead. */
+export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ steps, placeFor }) => {
   return (
-    <View style={styles.timelineContainer}>
-      {milestones.map((item, index) => {
-        const isCompleted = index < currentMilestoneIndex;
-        const isActive = index === currentMilestoneIndex;
-        const isPending = index > currentMilestoneIndex;
+    <View style={styles.timelineContainer} accessibilityRole="list">
+      {steps.map((step, index) => {
+        const isCompleted = step.state === "done";
+        const isActive = step.state === "active";
+        const isPending = step.state === "pending";
+        const place = placeFor?.(step.status);
+        const meta = [step.at ? formatTime(step.at) : null, isCompleted ? place : null].filter(Boolean).join(" • ");
 
         return (
-          <View key={item.key} style={styles.timelineItem}>
-            {/* Left Column: Dot & Line */}
+          <View
+            key={step.status}
+            style={styles.timelineItem}
+            accessibilityLabel={[step.title, isCompleted ? "done" : isActive ? "in progress" : "not yet", meta, ...step.notes]
+              .filter(Boolean)
+              .join(", ")}
+          >
             <View style={styles.indicatorContainer}>
               <View
                 style={[
@@ -42,60 +43,40 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({
               >
                 {isActive && <View style={styles.dotActiveInner} />}
               </View>
-              {index < milestones.length - 1 && (
-                <View
-                  style={[
-                    styles.timelineLine,
-                    index < currentMilestoneIndex
-                      ? styles.lineCompleted
-                      : styles.linePending,
-                  ]}
-                />
+              {index < steps.length - 1 && (
+                <View style={[styles.timelineLine, isCompleted ? styles.lineCompleted : styles.linePending]} />
               )}
             </View>
 
-            {/* Right Column: Milestone Info */}
             <View style={styles.timelineContent}>
               <View style={styles.timelineHeaderRow}>
                 <Text
                   variant="bodyStrong"
                   style={styles.timelineTitle}
-                  color={
-                    index <= currentMilestoneIndex
-                      ? colors.text
-                      : colors.textPlaceholder
-                  }
+                  color={isPending ? colors.textPlaceholder : colors.text}
                 >
-                  {item.title}
+                  {step.title}
                 </Text>
-                {isCompleted && (
-                  <Check
-                    color={colors.success}
-                    size={16}
-                    style={styles.checkIcon}
-                  />
-                )}
-                {isActive && <Badge label="Active" tone="brand" />}
+                {isCompleted && <Check color={colors.success} size={16} style={styles.checkIcon} />}
+                {isActive && <Badge label="Next" tone="brand" />}
               </View>
 
-              <Text variant="caption" tone="muted" style={styles.timelineMetaText}>
-                {isPending ? "--:--" : getMilestoneTime(index)} •{" "}
-                {item.location}
-              </Text>
+              {meta ? (
+                <Text variant="caption" tone="muted" style={styles.timelineMetaText}>
+                  {meta}
+                </Text>
+              ) : null}
 
-              <Text
-                variant="caption"
-                style={styles.timelineVerificationText}
-                color={
-                  index < currentMilestoneIndex
-                    ? colors.primary
-                    : index === currentMilestoneIndex
-                      ? colors.accent
-                      : colors.textPlaceholder
-                }
-              >
-                {isPending ? "Pending" : item.verification}
-              </Text>
+              {step.notes.map((note) => (
+                <Text
+                  key={note}
+                  variant="caption"
+                  style={styles.timelineVerificationText}
+                  color={isActive ? colors.accent : colors.primary}
+                >
+                  {note}
+                </Text>
+              ))}
             </View>
           </View>
         );
@@ -111,7 +92,7 @@ const styles = StyleSheet.create({
   },
   timelineItem: {
     flexDirection: "row",
-    minHeight: 88,
+    minHeight: 64,
   },
   indicatorContainer: {
     alignItems: "center",

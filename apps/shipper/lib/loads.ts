@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import type { CargoDetails, LoadStatus, LocationData } from "@a2b/core";
+import type { CargoDetails, LocationData } from "@a2b/core";
 import type { Data } from "@a2b/api-client";
 import { api, session } from "@/lib/session";
 
@@ -15,16 +15,6 @@ export function weightLabel(load: Pick<Load, "weightKg" | "cargo">) {
 /** When the shipment is due: its delivery deadline, else when it's ready, else when it was posted. */
 export const dueDate = (load: Pick<Load, "deadlineAt" | "readyAt" | "createdAt">) =>
   load.deadlineAt ?? load.readyAt ?? load.createdAt;
-
-/** Step on the 7-step tracking timeline (active-delivery) for each status. */
-const MILESTONE_FOR_STATUS: Partial<Record<LoadStatus, number>> = {
-  SECURED: 0,
-  IN_TRANSIT: 2,
-  DELIVERED: 5,
-  COMPLETED: 6,
-};
-
-export const milestoneIndex = (load: Pick<Load, "status">) => MILESTONE_FOR_STATUS[load.status] ?? 0;
 
 /** "#A2B-7K3P9Q" */
 export const trackingLabel = (load: Pick<Load, "reference">) => `#${load.reference}`;
@@ -48,6 +38,16 @@ export function useShipment(id: number | undefined, options: { pollMs?: number }
     queryKey: loadKeys.detail(id ?? 0),
     enabled: !!id,
     queryFn: async () => (await api.loads.show({ params: { id: id! } })).data,
+    refetchInterval: options.pollMs,
+  });
+}
+
+/** The load's history (status changes and notes such as reassignments), oldest first. */
+export function useLoadEvents(id: number | undefined, options: { pollMs?: number } = {}) {
+  return useQuery({
+    queryKey: [...loadKeys.detail(id ?? 0), "events"],
+    enabled: !!id,
+    queryFn: async () => (await api.loads.events({ params: { id: id! } })).data,
     refetchInterval: options.pollMs,
   });
 }

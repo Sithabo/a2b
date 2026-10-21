@@ -21,8 +21,8 @@ import {
 } from "lucide-react-native";
 import { DriverContactCard } from "@/components/DriverContactCard";
 import { LoadState } from "@/components/LoadState";
-import { milestoneIndex, parseLoadId, trackingLabel, useShipment, weightLabel } from "@/lib/loads";
-import { cargoLabel, formatMoney, getMarket, vehicleClasses } from "@a2b/core";
+import { parseLoadId, trackingLabel, useLoadEvents, useShipment, weightLabel } from "@/lib/loads";
+import { cargoLabel, formatMoney, getMarket, loadTimeline, statusMeta, vehicleClasses } from "@a2b/core";
 import { useCancelLoad } from "@a2b/features";
 import { MilestoneTimeline } from "@/components/MilestoneTimeline";
 import {
@@ -49,6 +49,7 @@ export default function ActiveDeliveryScreen() {
 
   // Milestones come from the driver; poll while the load is moving.
   const { data: shipment, error, refetch } = useShipment(parseLoadId(trackingId), { pollMs: 30_000 });
+  const events = useLoadEvents(parseLoadId(trackingId), { pollMs: 30_000 });
   const cancel = useCancelLoad(parseLoadId(trackingId) ?? 0);
 
   // Until the driver picks up, the shipper can still cancel and get the escrow back
@@ -68,8 +69,6 @@ export default function ActiveDeliveryScreen() {
     );
   };
 
-  const currentMilestoneIndex = shipment ? milestoneIndex(shipment) : 0;
-  const isImport = shipment?.isImport ?? false;
   const driverName = shipment?.carrier?.driverName ?? "Your driver";
   const driverPhone = shipment?.carrier?.driverPhone;
   const vehicle = shipment?.carrier?.vehicle;
@@ -100,102 +99,15 @@ export default function ActiveDeliveryScreen() {
     }
   };
 
-  // Helper to format timestamps relative to shipment.createdAt
-  const baseDate = (() => {
-    if (!shipment?.createdAt) return new Date();
-    const d = new Date(shipment.createdAt);
-    return isNaN(d.getTime()) ? new Date() : d;
-  })();
-  const getFormattedTime = (date: Date) => {
-    let hours = date.getHours();
-    const minutes = date.getMinutes();
-    const ampm = hours >= 12 ? "PM" : "AM";
-    hours = hours % 12;
-    hours = hours ? hours : 12;
-    const strMinutes = minutes < 10 ? "0" + minutes : minutes;
-    return `${hours}:${strMinutes} ${ampm}`;
-  };
-
-  const getMilestoneTime = (index: number) => {
-    const d = new Date(baseDate.getTime() + index * 90 * 60 * 1000); // 1.5h intervals
-    return getFormattedTime(d);
-  };
-
   const pickupName = shipment?.pickupSummary ?? "";
   const deliveryName = shipment?.dropoffSummary ?? "";
 
-  // 7 milestones mapping
-  const milestones = [
-    {
-      key: "DISPATCHED",
-      title: "Driver Dispatched",
-      location: isImport
-        ? "Georgetown Logistics Hub"
-        : "Kampala Logistics Depot",
-      verification: "Contract Locked & Dispatched",
-    },
-    {
-      key: "ARRIVED_AT_PICKUP",
-      title: "Gate-In / Arrival at Origin",
-      location: isImport ? "Georgetown Port Terminal" : pickupName,
-      verification: "Gate-In Recorded",
-    },
-    {
-      key: "DEPARTED_ORIGIN",
-      title: "Loaded & Cleared Customs",
-      location: isImport ? "GRA Customs Gate" : pickupName + " Exit Gate",
-      verification: isImport
-        ? "Cargo Loaded & Customs Cleared"
-        : "Cargo Loaded & Strapped",
-    },
-    {
-      key: "CHOKE_POINT_CLEARED",
-      title: "Major Infrastructure Nodes",
-      location: isImport ? "Linden Weighbridge" : "Mukono Weighbridge",
-      verification: "PASSED (Axle Weight OK)",
-    },
-    {
-      key: "PROXIMITY_ALERT",
-      title: "The Proximity Buffer",
-      location: isImport ? "Wismar Hub Outskirts" : "Lugazi Outskirts",
-      verification: "Proximity Alert (Est: 45 mins)",
-    },
-    {
-      key: "ARRIVED_AT_DELIVERY",
-      title: "Arrival at Destination",
-      location: deliveryName,
-      verification: "Backed into Unloading Dock",
-    },
-    {
-      key: "DELIVERED",
-      title: "Cargo Signed & Confirmed",
-      location: deliveryName + " Receiving",
-      verification: "Proof of Delivery Uploaded",
-    },
-  ];
-
-  const getMilestoneStatusText = (index: number) => {
-    switch (index) {
-      case 0:
-        return "Driver Dispatched";
-      case 1:
-        return "Arrived at Pickup";
-      case 2:
-        return "Departed Origin";
-      case 3:
-        return "In Transit (Bottleneck Cleared)";
-      case 4:
-        return "In Transit (Near Destination)";
-      case 5:
-        return "Arrived at Delivery Point";
-      case 6:
-        return "Delivered & Signed";
-      default:
-        return "In Transit";
-    }
-  };
-
   if (!shipment) return <LoadState error={error} onRetry={refetch} />;
+
+  // Built from what actually happened: lifecycle timestamps and the load's events
+  const steps = loadTimeline(shipment, events.data ?? []);
+  const placeFor = (status: string) =>
+    status === "IN_TRANSIT" ? pickupName : status === "DELIVERED" ? deliveryName : undefined;
 
 
   return (
@@ -203,7 +115,6 @@ export default function ActiveDeliveryScreen() {
       {/* Header */}
       <ScreenHeader
         title="Active Delivery"
-        // subtitle={getMilestoneStatusText(currentMilestoneIndex)}
         onBackPress={() => router.back()}
       />
 
@@ -265,7 +176,7 @@ export default function ActiveDeliveryScreen() {
           <View style={[styles.specsRow, styles.specsRowLast]}>
             <Text variant="bodySm" tone="muted">Status:</Text>
             <Text variant="bodyStrong" tone="primary" align="right" style={styles.specsValue}>
-              {getMilestoneStatusText(currentMilestoneIndex)}
+              {statusMeta[shipment.status].label}
             </Text>
           </View>
         </Card>
@@ -280,11 +191,7 @@ export default function ActiveDeliveryScreen() {
 
         {/* Vertical Stepper Timeline Component (replacing live map) */}
         <View style={styles.timelineContainer}>
-          <MilestoneTimeline
-            milestones={milestones}
-            currentMilestoneIndex={currentMilestoneIndex}
-            getMilestoneTime={getMilestoneTime}
-          />
+          <MilestoneTimeline steps={steps} placeFor={placeFor} />
         </View>
       </ScrollView>
 
@@ -304,20 +211,19 @@ export default function ActiveDeliveryScreen() {
             accessibilityHint="Cancels before pickup and refunds your deposit"
           />
         )}
-        <Button
-          title={
-            currentMilestoneIndex === 6
-              ? "Confirm & Release Funds"
-              : "Confirm Delivery"
-          }
-          fullWidth
-          onPress={() =>
-            router.push({
-              pathname: "/confirm-delivery",
-              params: { trackingId: String(shipment.id) },
-            })
-          }
-        />
+        {/* Once the driver has recorded proof of delivery, the shipper reviews it and releases payment */}
+        {shipment.status === "DELIVERED" && (
+          <Button
+            title="Review delivery & release payment"
+            fullWidth
+            onPress={() =>
+              router.push({
+                pathname: "/confirm-delivery",
+                params: { trackingId: String(shipment.id) },
+              })
+            }
+          />
+        )}
       </View>
 
       {/* Vehicle Info Modal */}
