@@ -4,7 +4,13 @@ import db from '@adonisjs/lucid/services/db'
 import hash from '@adonisjs/core/services/hash'
 import logger from '@adonisjs/core/services/logger'
 import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
-import { getMarket, isPaymentMethodAvailable, type PaymentKind, type StatusActor } from '@a2b/core'
+import {
+  getMarket,
+  isPaymentMethodAvailable,
+  paymentMethods,
+  type PaymentKind,
+  type StatusActor,
+} from '@a2b/core'
 import Escrow from '#models/escrow'
 import PaymentTransaction from '#models/payment_transaction'
 import User from '#models/user'
@@ -156,7 +162,7 @@ export async function settleTransaction(
           await transition(
             load,
             'SECURED',
-            { actor: 'system', note: `Escrow funded via ${payment.method}` },
+            { actor: 'system', note: `Escrow funded via ${paymentMethods[payment.method].label}` },
             trx
           )
         } else {

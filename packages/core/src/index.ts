@@ -8,3 +8,4 @@ export * from './payments.ts';
 export * from './places.ts';
 export * from './pricing.ts';
 export * from './status.ts';
+export * from './timeline.ts';
