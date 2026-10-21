@@ -1,12 +1,11 @@
 import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Image } from "expo-image";
 import QRCode from "react-native-qrcode-svg";
 import { FileText, X } from "lucide-react-native";
 import { getMarket } from "@a2b/core";
 import { Card, colors, EmptyState, IconButton, layout, palette, radius, spacing, Text } from "@a2b/ui";
-import { API_URL, useSession } from "@/lib/session";
+import { AuthImage } from "@a2b/features";
 import { useDocuments, useLoad } from "@/lib/queries";
 
 /**
@@ -19,7 +18,6 @@ export default function CustomsPassScreen() {
   const loadId = Number(id);
   const load = useLoad(loadId);
   const docs = useDocuments(loadId);
-  const token = useSession((s) => s.token);
 
   const l = load.data;
   const market = l ? getMarket(l.market) : null;
@@ -65,13 +63,12 @@ export default function CustomsPassScreen() {
         )}
         {docs.data?.map((doc) => {
           const label = catalog.find((c) => c.id === doc.requirementId)?.label ?? doc.requirementId;
-          const uri = `${API_URL}/api/v1/loads/${loadId}/documents/${doc.id}`;
           return (
             <Card key={doc.id} style={styles.doc}>
               <Text variant="bodyStrong">{label}</Text>
               {doc.mimeType.startsWith("image/") ? (
-                <Image
-                  source={{ uri, headers: { Authorization: `Bearer ${token ?? ""}` } }}
+                <AuthImage
+                  path={`loads/${loadId}/documents/${doc.id}`}
                   style={styles.scan}
                   contentFit="contain"
                   accessibilityLabel={label}

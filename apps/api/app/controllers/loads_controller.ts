@@ -1,3 +1,5 @@
+import drive from '@adonisjs/drive/services/main'
+import LoadDelivery from '#models/load_delivery'
 import type { HttpContext } from '@adonisjs/core/http'
 import Load from '#models/load'
 import DomainError from '#exceptions/domain_error'
@@ -9,9 +11,10 @@ import {
   cancelLoadValidator,
   createLoadValidator,
   listLoadsValidator,
+  deliverValidator,
   progressValidator,
 } from '#validators/load'
-import { canSeeLocation, canView, fleetOwnedBy } from '#services/load_access'
+import { actorFor, canSeeLocation, canView, fleetOwnedBy } from '#services/load_access'
 import {
   acceptLoad,
   assignLoad,
@@ -19,6 +22,7 @@ import {
   createLoad,
   missingDocuments,
   publishLoad,
+  deliverLoad,
   reportProgress,
   withdrawFromLoad,
 } from '#services/load_service'
@@ -31,6 +35,7 @@ async function findVisible(id: number, user: User) {
     .preload('escrow')
     .preload('driver')
     .preload('vehicle')
+    .preload('delivery')
     .first()
   if (!load || !(await canView(load, user))) {
     throw DomainError.notFound('Load not found')
@@ -124,5 +129,33 @@ export default class LoadsController {
     const { status } = await ctx.request.validateUsing(progressValidator)
     await reportProgress(ctx.auth.getUserOrFail(), Number(ctx.params.id), status)
     return this.show(ctx)
+  }
+
+  /** Driver arrives: receiver's name and a photo of the cargo (multipart). */
+  async deliver(ctx: HttpContext) {
+    const { receiverName, photo } = await ctx.request.validateUsing(deliverValidator)
+    await deliverLoad(ctx.auth.getUserOrFail(), Number(ctx.params.id), {
+      receiverName,
+      photo: {
+        tmpPath: photo.tmpPath!,
+        extname: photo.extname!,
+        mimeType: `${photo.type}/${photo.subtype}`,
+        size: photo.size,
+      },
+    })
+    return this.show(ctx)
+  }
+
+  /** The proof-of-delivery photo, for the shipper, driver and fleet owner on the load. */
+  async deliveryPhoto({ auth, params, response }: HttpContext) {
+    const load = await Load.find(params.id)
+    if (!load || !(await actorFor(load, auth.getUserOrFail()))) {
+      throw DomainError.notFound('Load not found')
+    }
+    const delivery = await LoadDelivery.findBy('loadId', load.id)
+    if (!delivery) throw DomainError.notFound('No proof of delivery yet')
+    response.header('Content-Type', delivery.photoMimeType)
+    response.header('Cache-Control', 'private, no-store')
+    return response.stream(await drive.use().getStream(delivery.photoKey))
   }
 }

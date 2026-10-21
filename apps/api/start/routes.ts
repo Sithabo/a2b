@@ -74,6 +74,8 @@ router
             router.post(':id/withdraw', [controllers.Loads, 'withdraw'])
             router.post(':id/cancel', [controllers.Loads, 'cancel'])
             router.post(':id/progress', [controllers.Loads, 'progress'])
+            router.post(':id/deliver', [controllers.Loads, 'deliver'])
+            router.get(':id/delivery-photo', [controllers.Loads, 'deliveryPhoto'])
 
             // Escrow
             router.post(':id/deposit', [controllers.Escrow, 'deposit'])

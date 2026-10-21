@@ -204,6 +204,18 @@ const routes = {
     tokens: [{"old":"/api/v1/loads/:id/progress","type":0,"val":"api","end":""},{"old":"/api/v1/loads/:id/progress","type":0,"val":"v1","end":""},{"old":"/api/v1/loads/:id/progress","type":0,"val":"loads","end":""},{"old":"/api/v1/loads/:id/progress","type":1,"val":"id","end":""},{"old":"/api/v1/loads/:id/progress","type":0,"val":"progress","end":""}],
     types: placeholder as Registry['loads.progress']['types'],
   },
+  'loads.deliver': {
+    methods: ["POST"],
+    pattern: '/api/v1/loads/:id/deliver',
+    tokens: [{"old":"/api/v1/loads/:id/deliver","type":0,"val":"api","end":""},{"old":"/api/v1/loads/:id/deliver","type":0,"val":"v1","end":""},{"old":"/api/v1/loads/:id/deliver","type":0,"val":"loads","end":""},{"old":"/api/v1/loads/:id/deliver","type":1,"val":"id","end":""},{"old":"/api/v1/loads/:id/deliver","type":0,"val":"deliver","end":""}],
+    types: placeholder as Registry['loads.deliver']['types'],
+  },
+  'loads.delivery_photo': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/loads/:id/delivery-photo',
+    tokens: [{"old":"/api/v1/loads/:id/delivery-photo","type":0,"val":"api","end":""},{"old":"/api/v1/loads/:id/delivery-photo","type":0,"val":"v1","end":""},{"old":"/api/v1/loads/:id/delivery-photo","type":0,"val":"loads","end":""},{"old":"/api/v1/loads/:id/delivery-photo","type":1,"val":"id","end":""},{"old":"/api/v1/loads/:id/delivery-photo","type":0,"val":"delivery-photo","end":""}],
+    types: placeholder as Registry['loads.delivery_photo']['types'],
+  },
   'escrow.deposit': {
     methods: ["POST"],
     pattern: '/api/v1/loads/:id/deposit',

@@ -22,6 +22,7 @@ import {
   Text,
 } from "@a2b/ui";
 import { openDirections, useLoad } from "@/lib/queries";
+import { ProofOfDelivery } from "@/components/ProofOfDelivery";
 
 /** The driver's job screen; what it shows follows the load's status. */
 export default function TripScreen() {
@@ -45,7 +46,7 @@ export default function TripScreen() {
     );
   }
 
-  const progress = (status: "IN_TRANSIT" | "DELIVERED") => progressLoad.mutate(status);
+  const progress = (status: "IN_TRANSIT") => progressLoad.mutate(status);
 
   const withdraw = () =>
     Alert.alert("Withdraw from this load?", "It goes back on the board for other drivers.", [
@@ -153,7 +154,7 @@ export default function TripScreen() {
           {toPickup ? (
             <SlideToConfirm label="Slide when cargo is loaded" onConfirm={() => progress("IN_TRANSIT")} loading={progressLoad.isPending} />
           ) : (
-            <SlideToConfirm label="Slide when you've arrived" onConfirm={() => progress("DELIVERED")} loading={progressLoad.isPending} />
+            <ProofOfDelivery load={l} />
           )}
         </View>
       </ScrollView>

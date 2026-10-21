@@ -1,4 +1,5 @@
 import { DateTime } from 'luxon'
+import type { ApiClient } from '@japa/api-client'
 import type { MarketCode, UserRole } from '@a2b/core'
 import User from '#models/user'
 import DriverProfile from '#models/driver_profile'
@@ -71,3 +72,22 @@ export async function makeLoad(shipper: User, overrides: Partial<CreateLoadInput
 
 /** The `data` payload of an API response, untyped for terse assertions. */
 export const dataOf = (response: { body(): unknown }): any => (response.body() as any).data
+
+/** Enough of a JPEG header for the server to detect the type from the bytes. */
+export const JPEG_BYTES = Buffer.from([
+  0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01,
+])
+
+/** The driver arrives with proof of delivery (IN_TRANSIT → DELIVERED). Fake the drive in the test group. */
+export function deliver(
+  client: ApiClient,
+  loadId: number,
+  driver: User,
+  receiverName = 'Peter Okello'
+) {
+  return client
+    .post(`/api/v1/loads/${loadId}/deliver`)
+    .field('receiverName', receiverName)
+    .file('photo', JPEG_BYTES, { filename: 'cargo.jpg', contentType: 'image/jpeg' })
+    .loginAs(driver)
+}

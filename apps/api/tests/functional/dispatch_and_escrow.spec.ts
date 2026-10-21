@@ -1,5 +1,6 @@
 import { test } from '@japa/runner'
 import testUtils from '@adonisjs/core/services/test_utils'
+import drive from '@adonisjs/drive/services/main'
 import type { ApiClient } from '@japa/api-client'
 import { DateTime } from 'luxon'
 import DriverProfile from '#models/driver_profile'
@@ -13,7 +14,7 @@ import { expireUnfundedLoads } from '#services/escrow_service'
 import { payments } from '#services/payments/index'
 import { MOCK_SIGNATURE_HEADER, signMockWebhook } from '#services/payments/mock_payment_driver'
 import type { PaymentDriver } from '#services/payments/payment_driver'
-import { makeLoad, makeUser, nextPhone, dataOf } from '#tests/helpers'
+import { makeLoad, makeUser, nextPhone, dataOf, deliver } from '#tests/helpers'
 
 let plateSeq = 100
 
@@ -79,6 +80,10 @@ function webhook(client: ApiClient, body: Record<string, unknown>, signature?: s
 
 test.group('Dispatch', (group) => {
   group.each.setup(() => testUtils.db().withGlobalTransaction())
+  group.each.setup(() => {
+    drive.fake('fs')
+    return () => drive.restore('fs')
+  })
 
   test('a fleet must send a truck with a driver', async ({ client }) => {
     const owner = await makeUser('fleet_owner')
@@ -200,6 +205,10 @@ test.group('Dispatch', (group) => {
 
 test.group('Escrow lifecycle', (group) => {
   group.each.setup(() => testUtils.db().withGlobalTransaction())
+  group.each.setup(() => {
+    drive.fake('fs')
+    return () => drive.restore('fs')
+  })
 
   test('unfunded matches go back on the board when the window lapses', async ({
     client,
@@ -345,9 +354,11 @@ test.group('Escrow lifecycle', (group) => {
     const load = await openLoad(client, shipper)
     await client.post(`/api/v1/loads/${load.id}/accept`).loginAs(driver)
     await client.post(`/api/v1/loads/${load.id}/deposit`).json({ method: 'mtn' }).loginAs(shipper)
-    for (const status of ['IN_TRANSIT', 'DELIVERED']) {
-      await client.post(`/api/v1/loads/${load.id}/progress`).json({ status }).loginAs(driver)
-    }
+    await client
+      .post(`/api/v1/loads/${load.id}/progress`)
+      .json({ status: 'IN_TRANSIT' })
+      .loginAs(driver)
+    await deliver(client, load.id, driver)
     const { code } = dataOf(
       await client.post(`/api/v1/loads/${load.id}/release-code`).loginAs(shipper)
     )

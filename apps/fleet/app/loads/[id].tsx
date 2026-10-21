@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowDown, Clock, MapPin, Phone, ShieldCheck, Truck } from "lucide-react-native";
 import { cargoLabel, formatMoney, getMarket, statusMeta, vehicleClasses } from "@a2b/core";
-import { QueryFallback, useAcceptLoad, useAssignLoad, useWithdrawLoad } from "@a2b/features";
+import { AuthImage, QueryFallback, useAcceptLoad, useAssignLoad, useWithdrawLoad } from "@a2b/features";
 import {
   Badge,
   Button,
@@ -15,6 +15,7 @@ import {
   layout,
   palette,
   PlateBadge,
+  radius,
   ScreenHeader,
   spacing,
   Text,
@@ -152,6 +153,23 @@ export default function LoadDetailScreen() {
           </Card>
         )}
 
+        {l.delivery && (
+          <Card style={styles.section}>
+            <Text variant="label" tone="secondary">
+              Proof of delivery
+            </Text>
+            <AuthImage
+              path={`loads/${l.id}/delivery-photo`}
+              style={styles.proofPhoto}
+              accessibilityLabel="The driver's photo of the delivered cargo"
+            />
+            <Text variant="bodyStrong">Received by {l.delivery.receiverName}</Text>
+            <Text variant="caption" tone="muted">
+              {formatDate(l.delivery.deliveredAt)}
+            </Text>
+          </Card>
+        )}
+
         {isOpen && (
           <View style={styles.section}>
             <Text variant="h3">Dispatch a truck</Text>
@@ -267,4 +285,5 @@ const styles = StyleSheet.create({
   route: { gap: spacing.xs },
   specs: { flexDirection: "row", gap: spacing.md },
   amber: { backgroundColor: palette.amber[50], borderColor: palette.amber[200] },
+  proofPhoto: { width: "100%", aspectRatio: 4 / 3, borderRadius: radius.sm },
 });

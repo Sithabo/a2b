@@ -403,6 +403,30 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/loads_controller').default['progress']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'loads.deliver': {
+    methods: ["POST"]
+    pattern: '/api/v1/loads/:id/deliver'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/load').deliverValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/load').deliverValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/loads_controller').default['deliver']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/loads_controller').default['deliver']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'loads.delivery_photo': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/loads/:id/delivery-photo'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/loads_controller').default['deliveryPhoto']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/loads_controller').default['deliveryPhoto']>>>
+    }
+  }
   'escrow.deposit': {
     methods: ["POST"]
     pattern: '/api/v1/loads/:id/deposit'

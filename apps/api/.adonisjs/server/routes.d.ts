@@ -37,6 +37,8 @@ export type ScannedRoutes = {
     'loads.withdraw': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'loads.cancel': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'loads.progress': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'loads.deliver': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'loads.delivery_photo': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'escrow.deposit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'escrow.release_code': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'escrow.release': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -61,6 +63,7 @@ export type ScannedRoutes = {
     'loads.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'loads.events': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'loads.requirements': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'loads.delivery_photo': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'load_documents.index': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'load_documents.download': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'documentId': ParamValue} }
     'admin_drivers.index': { paramsTuple?: []; params?: {} }
@@ -80,6 +83,7 @@ export type ScannedRoutes = {
     'loads.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'loads.events': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'loads.requirements': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'loads.delivery_photo': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'load_documents.index': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'load_documents.download': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'documentId': ParamValue} }
     'admin_drivers.index': { paramsTuple?: []; params?: {} }
@@ -104,6 +108,7 @@ export type ScannedRoutes = {
     'loads.withdraw': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'loads.cancel': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'loads.progress': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'loads.deliver': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'escrow.deposit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'escrow.release_code': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'escrow.release': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

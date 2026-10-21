@@ -40,6 +40,7 @@ export const API_ERROR_CODES = [
   'E_VEHICLE_REQUIRED',
   'E_DOCUMENTS_MISSING',
   'E_UNKNOWN_DOCUMENT',
+  'E_POD_REQUIRED',
 
   // Escrow and payments
   'E_NO_ESCROW',
