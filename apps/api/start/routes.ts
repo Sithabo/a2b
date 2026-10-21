@@ -35,6 +35,11 @@ router
         router.patch('me', [controllers.Me, 'update'])
         router.put('me/shipper-profile', [controllers.Me, 'upsertShipperProfile'])
         router.put('me/driver-profile', [controllers.Me, 'upsertDriverProfile'])
+        router.get('me/driver-documents', [controllers.DriverDocuments, 'index'])
+        router.post('me/driver-documents', [controllers.DriverDocuments, 'store'])
+        router
+          .get('me/driver-documents/:id', [controllers.DriverDocuments, 'download'])
+          .where('id', router.matchers.number())
         router.get('me/fleet-invites', [controllers.FleetInvites, 'index'])
         router
           .post('me/fleet-invites/:id/accept', [controllers.FleetInvites, 'accept'])
@@ -82,6 +87,19 @@ router
           })
           .prefix('loads')
           .where('id', router.matchers.number())
+
+        // Staff
+        router
+          .group(() => {
+            router.get('drivers', [controllers.AdminDrivers, 'index'])
+            router.get('drivers/:id', [controllers.AdminDrivers, 'show'])
+            router.get('drivers/:id/documents/:documentId', [controllers.AdminDrivers, 'document'])
+            router.post('drivers/:id/review', [controllers.AdminDrivers, 'review'])
+          })
+          .prefix('admin')
+          .where('id', router.matchers.number())
+          .where('documentId', router.matchers.number())
+          .use(middleware.role({ roles: ['admin'] }))
       })
       .use(middleware.auth())
   })

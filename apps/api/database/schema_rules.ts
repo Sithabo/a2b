@@ -21,6 +21,7 @@ export default {
   tables: {
     users: { columns: { role: t('UserRole', 'UserRole') } },
     fleets: { columns: { size_tier: t('FleetSizeTier', 'FleetSizeTier') } },
+    driver_reviews: { columns: { decision: t('DriverReviewDecision', 'DriverReviewDecision') } },
     fleet_invites: { columns: { status: t('FleetInviteStatus', 'FleetInviteStatus') } },
     driver_profiles: {
       columns: {

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 import { QueryClient } from '@tanstack/react-query';
 import { createApiClient, type Data } from '@a2b/api-client';
 import type { UserRole } from '@a2b/core';
@@ -22,6 +23,13 @@ export interface SessionState {
   setUser: (user: Data.User) => void;
   signOut: () => Promise<void>;
   completeOnboarding: () => void;
+}
+
+/** A file picked on the device: a camera photo, library image or document. */
+export interface UploadFile {
+  uri: string;
+  name: string;
+  mimeType?: string;
 }
 
 export interface AppSessionConfig {
@@ -117,6 +125,43 @@ export function createAppSession({ appId, role, apiUrl }: AppSessionConfig) {
     },
   });
 
+  /**
+   * Uploads a file (camera photo, picked image or PDF) as multipart form data,
+   * with the session's token. The typed client can't send React Native file
+   * objects, so uploads go through here; failures throw the same shape as the
+   * typed client, so `apiErrorMessage` works on them.
+   */
+  async function upload<T = unknown>(
+    path: string,
+    fields: Record<string, string>,
+    file: UploadFile
+  ): Promise<T> {
+    if (!useSession.getState().isHydrated) await sessionHydrated();
+    const token = useSession.getState().token;
+
+    const form = new FormData();
+    for (const [name, value] of Object.entries(fields)) form.append(name, value);
+    const type = file.mimeType ?? 'image/jpeg';
+    if (Platform.OS === 'web') {
+      // Browsers give a blob:/data: URL; send the actual bytes
+      form.append('file', await (await fetch(file.uri)).blob(), file.name);
+    } else {
+      form.append('file', { uri: file.uri, name: file.name, type } as unknown as Blob);
+    }
+
+    const response = await fetch(`${apiUrl}/api/v1/${path}`, {
+      method: 'POST',
+      headers: { Accept: 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: form,
+    });
+    if (response.status === 401 && token && token === useSession.getState().token) {
+      await useSession.getState().signOut();
+    }
+    const body = await response.json().catch(() => undefined);
+    if (!response.ok) throw { response: body };
+    return body as T;
+  }
+
   /** Fetches /me into the session (call after sign-in and on app start). */
   async function refreshUser() {
     const { data } = await api.me.show({});
@@ -124,7 +169,7 @@ export function createAppSession({ appId, role, apiUrl }: AppSessionConfig) {
     return data;
   }
 
-  return { role, api, queryClient, useSession, refreshUser };
+  return { role, api, queryClient, useSession, refreshUser, upload };
 }
 
 export type AppSession = ReturnType<typeof createAppSession>;

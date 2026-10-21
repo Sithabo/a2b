@@ -4,7 +4,9 @@
  */
 
 export const controllers = {
+  AdminDrivers: () => import('#controllers/admin_drivers_controller'),
   Auth: () => import('#controllers/auth_controller'),
+  DriverDocuments: () => import('#controllers/driver_documents_controller'),
   Escrow: () => import('#controllers/escrow_controller'),
   FleetInvites: () => import('#controllers/fleet_invites_controller'),
   Fleets: () => import('#controllers/fleets_controller'),

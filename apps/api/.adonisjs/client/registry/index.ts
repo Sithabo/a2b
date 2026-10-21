@@ -54,6 +54,24 @@ const routes = {
     tokens: [{"old":"/api/v1/me/driver-profile","type":0,"val":"api","end":""},{"old":"/api/v1/me/driver-profile","type":0,"val":"v1","end":""},{"old":"/api/v1/me/driver-profile","type":0,"val":"me","end":""},{"old":"/api/v1/me/driver-profile","type":0,"val":"driver-profile","end":""}],
     types: placeholder as Registry['me.upsert_driver_profile']['types'],
   },
+  'driver_documents.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/me/driver-documents',
+    tokens: [{"old":"/api/v1/me/driver-documents","type":0,"val":"api","end":""},{"old":"/api/v1/me/driver-documents","type":0,"val":"v1","end":""},{"old":"/api/v1/me/driver-documents","type":0,"val":"me","end":""},{"old":"/api/v1/me/driver-documents","type":0,"val":"driver-documents","end":""}],
+    types: placeholder as Registry['driver_documents.index']['types'],
+  },
+  'driver_documents.store': {
+    methods: ["POST"],
+    pattern: '/api/v1/me/driver-documents',
+    tokens: [{"old":"/api/v1/me/driver-documents","type":0,"val":"api","end":""},{"old":"/api/v1/me/driver-documents","type":0,"val":"v1","end":""},{"old":"/api/v1/me/driver-documents","type":0,"val":"me","end":""},{"old":"/api/v1/me/driver-documents","type":0,"val":"driver-documents","end":""}],
+    types: placeholder as Registry['driver_documents.store']['types'],
+  },
+  'driver_documents.download': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/me/driver-documents/:id',
+    tokens: [{"old":"/api/v1/me/driver-documents/:id","type":0,"val":"api","end":""},{"old":"/api/v1/me/driver-documents/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/me/driver-documents/:id","type":0,"val":"me","end":""},{"old":"/api/v1/me/driver-documents/:id","type":0,"val":"driver-documents","end":""},{"old":"/api/v1/me/driver-documents/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['driver_documents.download']['types'],
+  },
   'fleet_invites.index': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/me/fleet-invites',
@@ -221,6 +239,30 @@ const routes = {
     pattern: '/api/v1/loads/:id/documents/:documentId',
     tokens: [{"old":"/api/v1/loads/:id/documents/:documentId","type":0,"val":"api","end":""},{"old":"/api/v1/loads/:id/documents/:documentId","type":0,"val":"v1","end":""},{"old":"/api/v1/loads/:id/documents/:documentId","type":0,"val":"loads","end":""},{"old":"/api/v1/loads/:id/documents/:documentId","type":1,"val":"id","end":""},{"old":"/api/v1/loads/:id/documents/:documentId","type":0,"val":"documents","end":""},{"old":"/api/v1/loads/:id/documents/:documentId","type":1,"val":"documentId","end":""}],
     types: placeholder as Registry['load_documents.download']['types'],
+  },
+  'admin_drivers.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/admin/drivers',
+    tokens: [{"old":"/api/v1/admin/drivers","type":0,"val":"api","end":""},{"old":"/api/v1/admin/drivers","type":0,"val":"v1","end":""},{"old":"/api/v1/admin/drivers","type":0,"val":"admin","end":""},{"old":"/api/v1/admin/drivers","type":0,"val":"drivers","end":""}],
+    types: placeholder as Registry['admin_drivers.index']['types'],
+  },
+  'admin_drivers.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/admin/drivers/:id',
+    tokens: [{"old":"/api/v1/admin/drivers/:id","type":0,"val":"api","end":""},{"old":"/api/v1/admin/drivers/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/admin/drivers/:id","type":0,"val":"admin","end":""},{"old":"/api/v1/admin/drivers/:id","type":0,"val":"drivers","end":""},{"old":"/api/v1/admin/drivers/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['admin_drivers.show']['types'],
+  },
+  'admin_drivers.document': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/admin/drivers/:id/documents/:documentId',
+    tokens: [{"old":"/api/v1/admin/drivers/:id/documents/:documentId","type":0,"val":"api","end":""},{"old":"/api/v1/admin/drivers/:id/documents/:documentId","type":0,"val":"v1","end":""},{"old":"/api/v1/admin/drivers/:id/documents/:documentId","type":0,"val":"admin","end":""},{"old":"/api/v1/admin/drivers/:id/documents/:documentId","type":0,"val":"drivers","end":""},{"old":"/api/v1/admin/drivers/:id/documents/:documentId","type":1,"val":"id","end":""},{"old":"/api/v1/admin/drivers/:id/documents/:documentId","type":0,"val":"documents","end":""},{"old":"/api/v1/admin/drivers/:id/documents/:documentId","type":1,"val":"documentId","end":""}],
+    types: placeholder as Registry['admin_drivers.document']['types'],
+  },
+  'admin_drivers.review': {
+    methods: ["POST"],
+    pattern: '/api/v1/admin/drivers/:id/review',
+    tokens: [{"old":"/api/v1/admin/drivers/:id/review","type":0,"val":"api","end":""},{"old":"/api/v1/admin/drivers/:id/review","type":0,"val":"v1","end":""},{"old":"/api/v1/admin/drivers/:id/review","type":0,"val":"admin","end":""},{"old":"/api/v1/admin/drivers/:id/review","type":0,"val":"drivers","end":""},{"old":"/api/v1/admin/drivers/:id/review","type":1,"val":"id","end":""},{"old":"/api/v1/admin/drivers/:id/review","type":0,"val":"review","end":""}],
+    types: placeholder as Registry['admin_drivers.review']['types'],
   },
 } as const satisfies Record<string, AdonisEndpoint>
 

@@ -103,6 +103,42 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/me_controller').default['upsertDriverProfile']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'driver_documents.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/me/driver-documents'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/driver_documents_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/driver_documents_controller').default['index']>>>
+    }
+  }
+  'driver_documents.store': {
+    methods: ["POST"]
+    pattern: '/api/v1/me/driver-documents'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/driver_verification').driverDocumentValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/driver_verification').driverDocumentValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/driver_documents_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/driver_documents_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'driver_documents.download': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/me/driver-documents/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/driver_documents_controller').default['download']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/driver_documents_controller').default['download']>>>
+    }
+  }
   'fleet_invites.index': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/me/fleet-invites'
@@ -437,6 +473,54 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/load_documents_controller').default['download']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/load_documents_controller').default['download']>>>
+    }
+  }
+  'admin_drivers.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/admin/drivers'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/driver_verification').reviewQueueValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin_drivers_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin_drivers_controller').default['index']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'admin_drivers.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/admin/drivers/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin_drivers_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin_drivers_controller').default['show']>>>
+    }
+  }
+  'admin_drivers.document': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/admin/drivers/:id/documents/:documentId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { id: ParamValue; documentId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin_drivers_controller').default['document']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin_drivers_controller').default['document']>>>
+    }
+  }
+  'admin_drivers.review': {
+    methods: ["POST"]
+    pattern: '/api/v1/admin/drivers/:id/review'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/driver_verification').reviewDriverValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/driver_verification').reviewDriverValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin_drivers_controller').default['review']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin_drivers_controller').default['review']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
 }

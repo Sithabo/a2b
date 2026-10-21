@@ -14,6 +14,11 @@ export interface ApiDefinition {
     upsertShipperProfile: typeof routes['me.upsert_shipper_profile']
     upsertDriverProfile: typeof routes['me.upsert_driver_profile']
   }
+  driverDocuments: {
+    index: typeof routes['driver_documents.index']
+    store: typeof routes['driver_documents.store']
+    download: typeof routes['driver_documents.download']
+  }
   fleetInvites: {
     index: typeof routes['fleet_invites.index']
     accept: typeof routes['fleet_invites.accept']
@@ -51,5 +56,11 @@ export interface ApiDefinition {
     index: typeof routes['load_documents.index']
     store: typeof routes['load_documents.store']
     download: typeof routes['load_documents.download']
+  }
+  adminDrivers: {
+    index: typeof routes['admin_drivers.index']
+    show: typeof routes['admin_drivers.show']
+    document: typeof routes['admin_drivers.document']
+    review: typeof routes['admin_drivers.review']
   }
 }

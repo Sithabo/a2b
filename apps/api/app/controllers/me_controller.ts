@@ -2,7 +2,9 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { getMarket, isValidTaxId } from '@a2b/core'
 import ShipperProfile from '#models/shipper_profile'
 import DriverProfile from '#models/driver_profile'
+import db from '@adonisjs/lucid/services/db'
 import DomainError from '#exceptions/domain_error'
+import { onVerificationInputChanged } from '#services/driver_verification_service'
 import UserTransformer from '#transformers/user_transformer'
 import {
   driverProfileValidator,
@@ -58,8 +60,16 @@ export default class MeController {
     const data = await request.validateUsing(driverProfileValidator)
     const existing = await DriverProfile.findBy('userId', user.id)
     if (existing) {
-      existing.merge(data)
-      await existing.save()
+      // A verified licence that changes has to be checked again
+      const licenceChanged =
+        (data.licenseNumber !== undefined && data.licenseNumber !== existing.licenseNumber) ||
+        (data.licenseClass !== undefined && data.licenseClass !== existing.licenseClass)
+      await db.transaction(async (trx) => {
+        existing.useTransaction(trx)
+        existing.merge(data)
+        await existing.save()
+        if (licenceChanged) await onVerificationInputChanged(existing, user.market, trx)
+      })
     } else {
       if (!data.licenseNumber) {
         throw DomainError.invalid('Add your driving licence number', 'E_LICENSE_REQUIRED')

@@ -11,6 +11,10 @@ export default class DriverProfileTransformer extends BaseTransformer<DriverProf
       'dutyStatus',
       'ratingAvg',
       'completedTrips',
+      // Verification: when they joined the review queue, and what to fix if rejected
+      'submittedAt',
+      'reviewedAt',
+      'reviewNote',
     ])
   }
 }

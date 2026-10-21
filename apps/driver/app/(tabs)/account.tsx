@@ -1,5 +1,6 @@
 import { StyleSheet, View } from "react-native";
-import { LogOut } from "lucide-react-native";
+import { useRouter } from "expo-router";
+import { LogOut, ShieldCheck } from "lucide-react-native";
 import { getMarket } from "@a2b/core";
 import { Badge, Button, Card, colors, ScreenScroll, spacing, Text } from "@a2b/ui";
 import { api, useSession } from "@/lib/session";
@@ -11,6 +12,7 @@ const VERIFICATION = {
 } as const;
 
 export default function AccountScreen() {
+  const router = useRouter();
   const user = useSession((s) => s.user);
   const signOut = useSession((s) => s.signOut);
   const profile = user?.driverProfile;
@@ -42,6 +44,7 @@ export default function AccountScreen() {
         <Row label="Completed trips" value={String(profile?.completedTrips ?? 0)} />
       </Card>
 
+      <Button title="Verification documents" icon={ShieldCheck} variant="secondary" onPress={() => router.push("/verification")} />
       <Button title="Sign out" icon={LogOut} variant="ghost" onPress={handleSignOut} />
     </ScreenScroll>
   );

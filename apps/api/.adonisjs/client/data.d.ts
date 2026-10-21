@@ -5,6 +5,7 @@
 
 /// <reference path="./manifest.d.ts" />
 import type { InferData, InferVariants } from '@adonisjs/core/types/transformers'
+import type DriverDocumentTransformer from '#transformers/driver_document_transformer'
 import type DriverProfileTransformer from '#transformers/driver_profile_transformer'
 import type FleetDriverTransformer from '#transformers/fleet_driver_transformer'
 import type FleetInviteTransformer from '#transformers/fleet_invite_transformer'
@@ -17,6 +18,10 @@ import type UserTransformer from '#transformers/user_transformer'
 import type VehicleTransformer from '#transformers/vehicle_transformer'
 
 export namespace Data {
+  export type DriverDocument = InferData<DriverDocumentTransformer>
+  export namespace DriverDocument {
+    export type Variants = InferVariants<DriverDocumentTransformer>
+  }
   export type DriverProfile = InferData<DriverProfileTransformer>
   export namespace DriverProfile {
     export type Variants = InferVariants<DriverProfileTransformer>
