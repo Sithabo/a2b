@@ -6,7 +6,7 @@ import { CheckCircle2, Clock, FileCheck2, Navigation, Phone } from "lucide-react
 import type { Data } from "@a2b/api-client";
 import { apiErrorCode, apiErrorMessage } from "@a2b/api-client";
 import { QueryFallback, useProgressLoad, useReleaseEscrow, useWithdrawLoad } from "@a2b/features";
-import { cargoLabel, formatMoney, getMarket, statusMeta } from "@a2b/core";
+import { cargoLabel, formatMarketTime, formatMoney, getMarket, statusMeta } from "@a2b/core";
 import {
   Badge,
   Button,
@@ -81,7 +81,7 @@ export default function TripScreen() {
           {l.escrow?.fundingDueAt && (
             <Text variant="bodySm" color={palette.amber[900]} align="center">
               If it isn&apos;t funded by{" "}
-              {new Date(l.escrow.fundingDueAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}, the
+              {formatMarketTime(l.escrow.fundingDueAt, getMarket(l.market), "time")}, the
               load goes back on the board and you&apos;re free to take another.
             </Text>
           )}
@@ -234,7 +234,7 @@ function Receipt({ load, header, onDone }: { load: Data.Load; header: React.Reac
           <Row label="Load" value={load.reference} />
           <Row label="Route" value={`${load.pickupSummary} → ${load.dropoffSummary}`} />
           <Row label="Cargo" value={cargoLabel(load.cargoType)} />
-          <Row label="Delivered" value={load.completedAt ? new Date(load.completedAt).toLocaleString("en-GB") : "—"} />
+          <Row label="Delivered" value={formatMarketTime(load.deliveredAt ?? load.completedAt, market)} />
         </Card>
         <Button title="Back to jobs" onPress={onDone} />
       </ScrollView>

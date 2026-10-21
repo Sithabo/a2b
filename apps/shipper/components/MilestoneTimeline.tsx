@@ -1,8 +1,9 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { Check } from "lucide-react-native";
-import type { LoadStatus, TimelineStep } from "@a2b/core";
+import { formatMarketTime, type LoadStatus, type TimelineStep } from "@a2b/core";
 import { Badge, colors, fontFamily, radius, spacing, Text } from "@a2b/ui";
+import { useMarket } from "@/store/useMarket";
 
 interface MilestoneTimelineProps {
   steps: TimelineStep[];
@@ -10,11 +11,9 @@ interface MilestoneTimelineProps {
   placeFor?: (status: LoadStatus) => string | undefined;
 }
 
-const formatTime = (iso: string) =>
-  new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
-
 /** The load's progress, from `loadTimeline()`: what happened, what it's waiting on, what's ahead. */
 export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ steps, placeFor }) => {
+  const market = useMarket();
   return (
     <View style={styles.timelineContainer} accessibilityRole="list">
       {steps.map((step, index) => {
@@ -22,7 +21,7 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ steps, pla
         const isActive = step.state === "active";
         const isPending = step.state === "pending";
         const place = placeFor?.(step.status);
-        const meta = [step.at ? formatTime(step.at) : null, isCompleted ? place : null].filter(Boolean).join(" • ");
+        const meta = [step.at ? formatMarketTime(step.at, market) : null, isCompleted ? place : null].filter(Boolean).join(" • ");
 
         return (
           <View

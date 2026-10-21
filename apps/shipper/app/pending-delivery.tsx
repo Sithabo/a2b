@@ -22,7 +22,7 @@ import {
   tones,
 } from "@a2b/ui";
 import { useMarket } from "@/store/useMarket";
-import { formatMoney, statusMeta } from "@a2b/core";
+import { formatMarketTime, formatMoney, statusMeta } from "@a2b/core";
 import { apiErrorMessage } from "@a2b/api-client";
 import { api } from "@/lib/session";
 import { parseLoadId, trackingLabel, useInvalidateLoads, useShipment } from "@/lib/loads";
@@ -39,32 +39,6 @@ export default function PendingDeliveryScreen() {
 
   const market = useMarket();
   const formatCurrency = (amount: number) => formatMoney(amount, market);
-
-  const formatDate = (dateStr?: string | null) => {
-    if (!dateStr) return "--";
-    try {
-      const d = new Date(dateStr);
-      if (isNaN(d.getTime())) return dateStr;
-      const day = d.getDate();
-      const months = [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-      ];
-      return `${day} ${months[d.getMonth()]} ${d.getFullYear().toString().slice(-2)}`;
-    } catch {
-      return dateStr;
-    }
-  };
 
   const handleCancelOrder = () => {
     Alert.alert(
@@ -149,7 +123,7 @@ export default function PendingDeliveryScreen() {
               </View>
               <View style={styles.metaRow}>
                 <Text variant="body" tone="secondary">Date Posted:</Text>
-                <Text variant="bodyStrong">{formatDate(shipment.createdAt)}</Text>
+                <Text variant="bodyStrong">{formatMarketTime(shipment.createdAt, market, "date")}</Text>
               </View>
               <View style={styles.metaRow}>
                 <Text variant="body" tone="secondary">Status:</Text>

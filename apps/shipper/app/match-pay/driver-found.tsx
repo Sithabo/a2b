@@ -5,7 +5,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Truck, AlertCircle, ShieldCheck } from 'lucide-react-native';
 import { Button, Card, Text, colors, fontFamily, layout, radius, spacing, tones } from "@a2b/ui";
 import { useMarket } from "@/store/useMarket";
-import { formatMoney } from "@a2b/core";
+import { formatMarketTime, formatMoney } from "@a2b/core";
 import { parseLoadId, useShipment } from "@/lib/loads";
 import { LoadState } from "@/components/LoadState";
 
@@ -42,7 +42,7 @@ export default function DriverFoundScreen() {
               <Text variant="caption" color={colors.warning}>
                 Deposit funds to unlock driver details and confirm pickup
                 {shipment.escrow?.fundingDueAt
-                  ? `. Deposit by ${new Date(shipment.escrow.fundingDueAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })} or the driver is released and your load goes back on the board.`
+                  ? `. Deposit by ${formatMarketTime(shipment.escrow.fundingDueAt, market, "time")} or the driver is released and your load goes back on the board.`
                   : ""}
               </Text>
             </View>

@@ -1,7 +1,8 @@
 import React from "react";
 import { View, StyleSheet, Image, ViewStyle, ImageSourcePropType } from "react-native";
 import { Package } from "lucide-react-native";
-import { cargoLabel, statusMeta } from "@a2b/core";
+import { cargoLabel, formatMarketTime, statusMeta } from "@a2b/core";
+import { useMarket } from "@/store/useMarket";
 import { Badge, Card, Text, colors, radius, spacing } from "@a2b/ui";
 import { dueDate, trackingLabel, type Load } from "@/lib/loads";
 
@@ -31,24 +32,9 @@ export const ShippingCard: React.FC<ShippingCardProps> = ({
   const pickupName = getDisplayLocation(shipment.pickupSummary);
   const deliveryName = getDisplayLocation(shipment.dropoffSummary);
 
-  // Date format helper: e.g. "22 Mar 26"
-  const formatDateOnly = (dateStr?: string | null) => {
-    if (!dateStr) return "--";
-    try {
-      const dateObj = new Date(dateStr);
-      if (isNaN(dateObj.getTime())) return "--";
-      const day = dateObj.getDate();
-      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      const month = months[dateObj.getMonth()];
-      const year = dateObj.getFullYear().toString().slice(-2);
-      return `${day < 10 ? "0" + day : day} ${month} ${year}`;
-    } catch {
-      return "--";
-    }
-  };
-
-  const pickupDate = formatDateOnly(shipment.createdAt);
-  const deliveryDate = formatDateOnly(dueDate(shipment));
+  const market = useMarket();
+  const pickupDate = formatMarketTime(shipment.readyAt ?? shipment.createdAt, market, "date");
+  const deliveryDate = formatMarketTime(dueDate(shipment), market, "date");
 
   const statusLabel = statusMeta[shipment.status].label;
   const formattedTrackingId = trackingLabel(shipment);

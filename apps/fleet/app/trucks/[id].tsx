@@ -3,7 +3,7 @@ import { Alert, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { History, Wrench } from "lucide-react-native";
-import { bodyTypes, formatMoney, getMarket, vehicleClasses } from "@a2b/core";
+import { bodyTypes, formatMoney, getMarket, marketDateTime, marketParts, vehicleClasses } from "@a2b/core";
 import { apiErrorMessage } from "@a2b/api-client";
 import { Badge, Button, Card, ChipGroup, colors, EmptyState, layout, PlateBadge, ScreenHeader, spacing, Text } from "@a2b/ui";
 import { LoadCard } from "@a2b/features";
@@ -40,7 +40,9 @@ export default function TruckDetailScreen() {
 
   const { vehicle, driver, activeLoad, state } = truck;
   const trips = (loads.data ?? []).filter((l) => l.vehicleId === vehicle.id && l.status === "COMPLETED");
-  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  // The month as the fleet's market sees it, not the phone's timezone
+  const today = marketParts(new Date(), market);
+  const monthStart = marketDateTime(market, today.year, today.month, 1);
   const monthEarnings = earningsBetween(trips, monthStart, new Date());
 
   const update = async (body: { assignedDriverId?: number | null; status?: "IDLE" | "MAINTENANCE" }) => {
