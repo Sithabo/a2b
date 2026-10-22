@@ -32,16 +32,61 @@ export interface TimelineEvent {
   note: string | null;
 }
 
+/** Who is reading the timeline; it decides how "waiting for…" is worded. */
+export type TimelineAudience = 'shipper' | 'fleet' | 'driver';
+
 type Stamp = keyof Omit<TimelineLoad, 'status'>;
 
-const STEPS: { status: LoadStatus; title: string; stamp: Stamp; waiting: string }[] = [
-  { status: 'OPEN', title: 'Posted to the load board', stamp: 'postedAt', waiting: 'Not posted yet' },
-  { status: 'MATCHED', title: 'Carrier accepted', stamp: 'matchedAt', waiting: 'Waiting for a carrier to accept' },
-  { status: 'SECURED', title: 'Payment secured in escrow', stamp: 'securedAt', waiting: 'Waiting for your deposit' },
-  { status: 'IN_TRANSIT', title: 'Picked up', stamp: 'inTransitAt', waiting: 'Driver heading to pickup' },
-  { status: 'DELIVERED', title: 'Delivered', stamp: 'deliveredAt', waiting: 'On the way to the drop-off' },
-  { status: 'COMPLETED', title: 'Payment released', stamp: 'completedAt', waiting: 'Waiting for your release code' },
+/** What the next step is waiting on. Fleets fall back to `carrier`; drivers to `driver`, then `carrier`. */
+interface Waiting {
+  shipper: string;
+  carrier?: string;
+  driver?: string;
+}
+
+const STEPS: { status: LoadStatus; title: string; stamp: Stamp; waiting: Waiting }[] = [
+  { status: 'OPEN', title: 'Posted to the load board', stamp: 'postedAt', waiting: { shipper: 'Not posted yet' } },
+  {
+    status: 'MATCHED',
+    title: 'Carrier accepted',
+    stamp: 'matchedAt',
+    waiting: { shipper: 'Waiting for a carrier to accept' },
+  },
+  {
+    status: 'SECURED',
+    title: 'Payment secured in escrow',
+    stamp: 'securedAt',
+    waiting: { shipper: 'Waiting for your deposit', carrier: "Waiting for the shipper's deposit" },
+  },
+  {
+    status: 'IN_TRANSIT',
+    title: 'Picked up',
+    stamp: 'inTransitAt',
+    waiting: { shipper: 'Driver heading to pickup', driver: 'Head to pickup and load the cargo' },
+  },
+  {
+    status: 'DELIVERED',
+    title: 'Delivered',
+    stamp: 'deliveredAt',
+    waiting: { shipper: 'On the way to the drop-off', driver: 'Hand over the cargo and take a delivery photo' },
+  },
+  {
+    status: 'COMPLETED',
+    title: 'Payment released',
+    stamp: 'completedAt',
+    waiting: {
+      shipper: 'Waiting for your release code',
+      carrier: "Waiting for the shipper's release code",
+      driver: "Enter the shipper's release code",
+    },
+  },
 ];
+
+function waitingFor(waiting: Waiting, audience: TimelineAudience) {
+  if (audience === 'shipper') return waiting.shipper;
+  if (audience === 'driver') return waiting.driver ?? waiting.carrier ?? waiting.shipper;
+  return waiting.carrier ?? waiting.shipper;
+}
 
 /** Notes for a step: how the load last entered it, then any changes while it was there (e.g. reassignments). */
 function notesFor(status: LoadStatus, events: TimelineEvent[]) {
@@ -56,7 +101,11 @@ function notesFor(status: LoadStatus, events: TimelineEvent[]) {
  * actually happened (lifecycle timestamps and events). A cancelled load shows
  * the steps it reached, then the cancellation.
  */
-export function loadTimeline(load: TimelineLoad, events: TimelineEvent[] = []): TimelineStep[] {
+export function loadTimeline(
+  load: TimelineLoad,
+  events: TimelineEvent[] = [],
+  audience: TimelineAudience = 'shipper'
+): TimelineStep[] {
   if (load.status === 'CANCELLED') {
     const reached = STEPS.filter((s) => load[s.stamp]).map(
       (s): TimelineStep => ({ status: s.status, title: s.title, at: load[s.stamp], notes: notesFor(s.status, events), state: 'done' })
@@ -74,7 +123,7 @@ export function loadTimeline(load: TimelineLoad, events: TimelineEvent[] = []): 
       status: s.status,
       title: s.title,
       at: state === 'done' ? load[s.stamp] : null,
-      notes: state === 'done' ? notesFor(s.status, events) : state === 'active' ? [s.waiting] : [],
+      notes: state === 'done' ? notesFor(s.status, events) : state === 'active' ? [waitingFor(s.waiting, audience)] : [],
       state,
     };
   });

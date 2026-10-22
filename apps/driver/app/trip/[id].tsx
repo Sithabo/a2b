@@ -5,7 +5,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { CheckCircle2, Clock, FileCheck2, Navigation, Phone } from "lucide-react-native";
 import type { Data } from "@a2b/api-client";
 import { apiErrorCode, apiErrorMessage } from "@a2b/api-client";
-import { QueryFallback, useProgressLoad, useReleaseEscrow, useWithdrawLoad } from "@a2b/features";
+import { LoadTimeline, QueryFallback, useProgressLoad, useReleaseEscrow, useWithdrawLoad } from "@a2b/features";
 import { cargoLabel, formatMarketTime, formatMoney, getMarket, statusMeta } from "@a2b/core";
 import {
   Badge,
@@ -157,6 +157,13 @@ export default function TripScreen() {
             <ProofOfDelivery load={l} />
           )}
         </View>
+
+        <Card style={styles.section}>
+          <Text variant="label" tone="secondary">
+            Trip progress
+          </Text>
+          <LoadTimeline load={l} audience="driver" />
+        </Card>
       </ScrollView>
     </SafeAreaView>
   );
@@ -207,6 +214,12 @@ function ReleaseCode({ load, header }: { load: Data.Load; header: React.ReactNod
         />
         {error ? <Text tone="danger">{error}</Text> : null}
         <Button title="Release payment" onPress={() => submit(code)} loading={isReleasing} disabled={code.length < 6} />
+        <Card style={styles.section}>
+          <Text variant="label" tone="secondary">
+            Trip progress
+          </Text>
+          <LoadTimeline load={load} audience="driver" />
+        </Card>
       </ScrollView>
     </SafeAreaView>
   );
@@ -235,6 +248,12 @@ function Receipt({ load, header, onDone }: { load: Data.Load; header: React.Reac
           <Row label="Route" value={`${load.pickupSummary} → ${load.dropoffSummary}`} />
           <Row label="Cargo" value={cargoLabel(load.cargoType)} />
           <Row label="Delivered" value={formatMarketTime(load.deliveredAt ?? load.completedAt, market)} />
+        </Card>
+        <Card style={styles.section}>
+          <Text variant="label" tone="secondary">
+            Trip history
+          </Text>
+          <LoadTimeline load={load} audience="driver" />
         </Card>
         <Button title="Back to jobs" onPress={onDone} />
       </ScrollView>
