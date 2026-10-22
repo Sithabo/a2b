@@ -38,6 +38,9 @@ test.group('Loads / escrow lifecycle', (group) => {
       id
     )
 
+    // Board viewers see the load but not its history (notes name drivers and trucks)
+    ;(await client.get(`/api/v1/loads/${id}/events`).loginAs(driver)).assertStatus(404)
+
     const accepted = await client.post(`/api/v1/loads/${id}/accept`).loginAs(driver)
     accepted.assertBodyContains({
       data: {

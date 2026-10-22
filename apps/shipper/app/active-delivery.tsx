@@ -21,10 +21,9 @@ import {
 } from "lucide-react-native";
 import { DriverContactCard } from "@/components/DriverContactCard";
 import { LoadState } from "@/components/LoadState";
-import { parseLoadId, trackingLabel, useLoadEvents, useShipment, weightLabel } from "@/lib/loads";
-import { cargoLabel, formatMoney, getMarket, loadTimeline, statusMeta, vehicleClasses } from "@a2b/core";
-import { useCancelLoad } from "@a2b/features";
-import { MilestoneTimeline } from "@/components/MilestoneTimeline";
+import { parseLoadId, trackingLabel, useShipment, weightLabel } from "@/lib/loads";
+import { cargoLabel, formatMoney, getMarket, statusMeta, vehicleClasses } from "@a2b/core";
+import { LoadTimeline, useCancelLoad } from "@a2b/features";
 import {
   Button,
   Card,
@@ -49,7 +48,6 @@ export default function ActiveDeliveryScreen() {
 
   // Milestones come from the driver; poll while the load is moving.
   const { data: shipment, error, refetch } = useShipment(parseLoadId(trackingId), { pollMs: 30_000 });
-  const events = useLoadEvents(parseLoadId(trackingId), { pollMs: 30_000 });
   const cancel = useCancelLoad(parseLoadId(trackingId) ?? 0);
 
   // Until the driver picks up, the shipper can still cancel and get the escrow back
@@ -104,10 +102,6 @@ export default function ActiveDeliveryScreen() {
 
   if (!shipment) return <LoadState error={error} onRetry={refetch} />;
 
-  // Built from what actually happened: lifecycle timestamps and the load's events
-  const steps = loadTimeline(shipment, events.data ?? []);
-  const placeFor = (status: string) =>
-    status === "IN_TRANSIT" ? pickupName : status === "DELIVERED" ? deliveryName : undefined;
 
 
   return (
@@ -191,7 +185,7 @@ export default function ActiveDeliveryScreen() {
 
         {/* Vertical Stepper Timeline Component (replacing live map) */}
         <View style={styles.timelineContainer}>
-          <MilestoneTimeline steps={steps} placeFor={placeFor} />
+          <LoadTimeline load={shipment} audience="shipper" pollMs={30_000} />
         </View>
       </ScrollView>
 

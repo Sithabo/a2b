@@ -83,8 +83,11 @@ export default class LoadsController {
     )
   }
 
+  /** The load's history. Only its shipper and carrier: notes name drivers and trucks. */
   async events({ auth, params, serialize }: HttpContext) {
-    const load = await findVisible(Number(params.id), auth.getUserOrFail())
+    const user = auth.getUserOrFail()
+    const load = await findVisible(Number(params.id), user)
+    if (!(await actorFor(load, user))) throw DomainError.notFound('Load not found')
     await load.load('events', (q) => q.orderBy('id'))
     return serialize(LoadEventTransformer.transform(load.events))
   }

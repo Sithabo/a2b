@@ -73,4 +73,24 @@ test.group('Load timeline', () => {
     assert.equal(first.state, 'active')
     assert.deepEqual(first.notes, ['Not posted yet'])
   })
+
+  test('words what it waits on for whoever is reading', ({ assert }) => {
+    const delivered: TimelineLoad = {
+      ...blank,
+      status: 'DELIVERED',
+      postedAt: '2026-10-20T08:00:00Z',
+      matchedAt: '2026-10-20T09:00:00Z',
+      securedAt: '2026-10-20T09:30:00Z',
+      inTransitAt: '2026-10-20T11:00:00Z',
+      deliveredAt: '2026-10-20T15:00:00Z',
+    }
+    const next = (audience?: 'shipper' | 'fleet' | 'driver') =>
+      loadTimeline(delivered, [], audience).find((s) => s.state === 'active')?.notes
+    assert.deepEqual(next(), ['Waiting for your release code'])
+    assert.deepEqual(next('fleet'), ["Waiting for the shipper's release code"])
+    assert.deepEqual(next('driver'), ["Enter the shipper's release code"])
+
+    const secured = loadTimeline({ ...delivered, status: 'SECURED' }, [], 'fleet')
+    assert.deepEqual(secured.find((s) => s.state === 'active')?.notes, ['Driver heading to pickup'])
+  })
 })

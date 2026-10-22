@@ -42,16 +42,6 @@ export function useShipment(id: number | undefined, options: { pollMs?: number }
   });
 }
 
-/** The load's history (status changes and notes such as reassignments), oldest first. */
-export function useLoadEvents(id: number | undefined, options: { pollMs?: number } = {}) {
-  return useQuery({
-    queryKey: [...loadKeys.detail(id ?? 0), "events"],
-    enabled: !!id,
-    queryFn: async () => (await api.loads.events({ params: { id: id! } })).data,
-    refetchInterval: options.pollMs,
-  });
-}
-
 /** Refetch everything load-related after a mutation. */
 export function useInvalidateLoads() {
   const queryClient = useQueryClient();

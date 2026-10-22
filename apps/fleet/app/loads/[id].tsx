@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowDown, Clock, MapPin, Phone, ShieldCheck, Truck } from "lucide-react-native";
 import { cargoLabel, formatMarketTime, formatMoney, getMarket, statusMeta, vehicleClasses } from "@a2b/core";
-import { AuthImage, QueryFallback, useAcceptLoad, useAssignLoad, useWithdrawLoad } from "@a2b/features";
+import { AuthImage, LoadTimeline, QueryFallback, useAcceptLoad, useAssignLoad, useWithdrawLoad } from "@a2b/features";
 import {
   Badge,
   Button,
@@ -148,6 +148,16 @@ export default function LoadDetailScreen() {
                 {vehicleClasses[l.carrier.vehicle.vehicleClass].label}
               </Text>
             )}
+          </Card>
+        )}
+
+        {/* What happened so far; board loads have no history yet */}
+        {isOurs && !isOpen && (
+          <Card style={styles.section}>
+            <Text variant="label" tone="secondary">
+              Progress
+            </Text>
+            <LoadTimeline load={l} audience="fleet" pollMs={30_000} />
           </Card>
         )}
 

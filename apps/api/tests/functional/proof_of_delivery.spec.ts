@@ -137,5 +137,13 @@ test.group('Proof of delivery', (group) => {
     )
     assert.deepEqual(steps[4].notes, ['Received by Mary at the gate'])
     assert.match(steps[2].notes[0], /Escrow funded via MTN Mobile Money/)
+
+    // The fleet and its driver read the same history, worded for them
+    const history = `/api/v1/loads/${load.id}/events`
+    const forDriver = loadTimeline(view, dataOf(await client.get(history).loginAs(driver)), 'driver')
+    assert.deepEqual(forDriver[5].notes, ["Enter the shipper's release code"])
+    const forFleet = loadTimeline(view, dataOf(await client.get(history).loginAs(owner)), 'fleet')
+    assert.deepEqual(forFleet[5].notes, ["Waiting for the shipper's release code"])
+    ;(await client.get(history).loginAs(await makeUser('fleet_owner'))).assertStatus(404)
   })
 })
