@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   KeyboardAvoidingView,
   Modal,
@@ -10,6 +9,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+import { notify } from "@a2b/features";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Anchor, ArrowLeft, MapPin, Search, X } from "lucide-react-native";
 import { apiErrorMessage } from "@a2b/api-client";
@@ -90,7 +90,7 @@ export const LocationSearchModal = ({
     try {
       onSelectLocation(await resolvePlace(place, session));
     } catch (err) {
-      Alert.alert("Couldn't use this place", apiErrorMessage(err));
+      notify("Couldn't use this place", apiErrorMessage(err));
     } finally {
       setResolvingId(null);
     }

@@ -3,7 +3,6 @@ import {
   View,
   ScrollView,
   StyleSheet,
-  Alert,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Image } from "expo-image";
@@ -24,6 +23,7 @@ import {
 import { useMarket } from "@/store/useMarket";
 import { formatMarketTime, formatMoney, statusMeta } from "@a2b/core";
 import { apiErrorMessage } from "@a2b/api-client";
+import { confirmAction, notify } from "@a2b/features";
 import { api } from "@/lib/session";
 import { parseLoadId, trackingLabel, useInvalidateLoads, useShipment } from "@/lib/loads";
 import { LoadState } from "@/components/LoadState";
@@ -40,27 +40,21 @@ export default function PendingDeliveryScreen() {
   const market = useMarket();
   const formatCurrency = (amount: number) => formatMoney(amount, market);
 
-  const handleCancelOrder = () => {
-    Alert.alert(
-      "Cancel Order",
-      "Are you sure you want to delete this pending order?",
-      [
-        { text: "No", style: "cancel" },
-        {
-          text: "Yes, Cancel",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await api.loads.cancel({ params: { id: loadId! }, body: {} });
-              await invalidateLoads();
-              router.replace("/(tabs)");
-            } catch (err) {
-              Alert.alert("Couldn't cancel", apiErrorMessage(err));
-            }
-          },
-        },
-      ]
-    );
+  const handleCancelOrder = async () => {
+    const confirmed = await confirmAction({
+      title: "Cancel Order",
+      message: "Are you sure you want to delete this pending order?",
+      confirmLabel: "Yes, Cancel",
+      destructive: true,
+    });
+    if (!confirmed) return;
+    try {
+      await api.loads.cancel({ params: { id: loadId! }, body: {} });
+      await invalidateLoads();
+      router.replace("/(tabs)");
+    } catch (err) {
+      notify("Couldn't cancel", apiErrorMessage(err));
+    }
   };
 
   if (!shipment) return <LoadState error={error} onRetry={refetch} />;

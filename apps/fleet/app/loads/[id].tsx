@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
-import { Alert, Linking, ScrollView, StyleSheet, View } from "react-native";
+import { Linking, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowDown, Clock, MapPin, Phone, ShieldCheck, Truck } from "lucide-react-native";
 import { cargoLabel, formatMarketTime, formatMoney, getMarket, statusMeta, vehicleClasses } from "@a2b/core";
-import { AuthImage, LoadTimeline, QueryFallback, useAcceptLoad, useAssignLoad, useWithdrawLoad } from "@a2b/features";
+import { AuthImage, confirmAction, LoadTimeline, QueryFallback, useAcceptLoad, useAssignLoad, useWithdrawLoad } from "@a2b/features";
 import {
   Badge,
   Button,
@@ -63,15 +63,15 @@ export default function LoadDetailScreen() {
   const canReassign = isOurs && (l.status === "MATCHED" || l.status === "SECURED");
   const reassign = () => assign.mutate({ vehicleId: Number(truckId) }, { onSuccess: () => setTruckId(null) });
 
-  const withdraw = () =>
-    Alert.alert("Withdraw from this load?", "It goes back on the load board for other carriers.", [
-      { text: "Keep it", style: "cancel" },
-      {
-        text: "Withdraw",
-        style: "destructive",
-        onPress: () => withdrawal.mutate(),
-      },
-    ]);
+  const withdraw = async () => {
+    const confirmed = await confirmAction({
+      title: "Withdraw from this load?",
+      message: "It goes back on the load board for other carriers.",
+      confirmLabel: "Withdraw",
+      destructive: true,
+    });
+    if (confirmed) withdrawal.mutate();
+  };
 
   return (
     <SafeAreaView style={styles.safe} edges={["bottom"]}>

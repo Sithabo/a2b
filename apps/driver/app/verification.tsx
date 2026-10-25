@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Alert, Platform, StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { Camera, CheckCircle2, Circle, ImageUp, ShieldCheck } from "lucide-react-native";
 import { apiErrorMessage } from "@a2b/api-client";
 import { getMarket, type DriverDocumentRequirement } from "@a2b/core";
-import { QueryFallback } from "@a2b/features";
+import { notify, QueryFallback } from "@a2b/features";
 import { Badge, Button, Card, colors, ScreenHeader, ScreenScroll, spacing, Text } from "@a2b/ui";
 import { useDriverDocuments, useUploadDriverDocument } from "@/lib/queries";
 import { useSession } from "@/lib/session";
@@ -24,7 +24,7 @@ export default function VerificationScreen() {
         ? await ImagePicker.requestCameraPermissionsAsync()
         : await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert(
+      notify(
         "Permission needed",
         source === "camera" ? "Allow camera access to photograph your document." : "Allow photo access to choose a picture."
       );
@@ -43,7 +43,7 @@ export default function VerificationScreen() {
         file: { uri: asset.uri, name: asset.fileName ?? `${requirement.id}.jpg`, mimeType: asset.mimeType ?? "image/jpeg" },
       },
       {
-        onError: (err) => Alert.alert("Upload failed", apiErrorMessage(err)),
+        onError: (err) => notify("Upload failed", apiErrorMessage(err)),
         onSettled: () => setUploadingId(null),
       }
     );

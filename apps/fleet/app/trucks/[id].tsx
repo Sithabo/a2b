@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
-import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { History, Wrench } from "lucide-react-native";
 import { bodyTypes, formatMoney, getMarket, marketDateTime, marketParts, vehicleClasses } from "@a2b/core";
 import { apiErrorMessage } from "@a2b/api-client";
 import { Badge, Button, Card, ChipGroup, colors, EmptyState, layout, PlateBadge, ScreenHeader, spacing, Text } from "@a2b/ui";
-import { LoadCard } from "@a2b/features";
+import { LoadCard, notify } from "@a2b/features";
 import { truckStateMeta } from "@/components/TruckCard";
 import { api } from "@/lib/session";
 import { buildRoster, earningsBetween, keys, useDrivers, useFleet, useFleetLoads, useInvalidate, useVehicles } from "@/lib/queries";
@@ -51,7 +51,7 @@ export default function TruckDetailScreen() {
       await api.fleets.updateVehicle({ params: { id: vehicle.id }, body });
       await invalidate(keys.vehicles);
     } catch (err) {
-      Alert.alert("Couldn't update truck", apiErrorMessage(err));
+      notify("Couldn't update truck", apiErrorMessage(err));
     } finally {
       setIsSaving(false);
     }

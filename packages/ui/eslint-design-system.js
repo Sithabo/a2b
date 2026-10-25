@@ -35,6 +35,11 @@ module.exports = function designSystem(severity = 'error') {
           selector: 'Literal[value=/^(#[0-9a-fA-F]{3,8}|rgba?\\()/]',
           message: 'Use a colour from @a2b/ui (colors, palette, tones) instead of a literal.',
         },
+        {
+          selector: "CallExpression[callee.object.name='Alert'][callee.property.name='alert']",
+          message:
+            'Alert does nothing on web. Use confirmAction (asks first) or notify (tells) from @a2b/features.',
+        },
       ],
     },
   };

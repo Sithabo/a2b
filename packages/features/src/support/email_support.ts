@@ -1,5 +1,6 @@
-import { Alert, Linking } from 'react-native';
+import { Linking } from 'react-native';
 import { SUPPORT_EMAIL, supportEmailUrl } from '@a2b/core';
+import { notify } from './confirm.ts';
 
 /**
  * Opens the phone's email app with a message to A2B support. `context` lines
@@ -11,6 +12,6 @@ export async function emailSupport({ subject, context = [] }: { subject: string;
   try {
     await Linking.openURL(supportEmailUrl({ subject, body }));
   } catch {
-    Alert.alert('No email app found', `Email us at ${SUPPORT_EMAIL}.`);
+    notify('No email app found', `Email us at ${SUPPORT_EMAIL}.`);
   }
 }

@@ -6,7 +6,6 @@ import {
   Linking,
   Platform,
   Clipboard,
-  Alert,
   Modal,
   Pressable,
 } from "react-native";
@@ -23,7 +22,7 @@ import { DriverContactCard } from "@/components/DriverContactCard";
 import { LoadState } from "@/components/LoadState";
 import { parseLoadId, trackingLabel, useShipment, weightLabel } from "@/lib/loads";
 import { cargoLabel, formatMoney, getMarket, statusMeta, vehicleClasses } from "@a2b/core";
-import { LoadTimeline, useCancelLoad } from "@a2b/features";
+import { confirmAction, LoadTimeline, notify, useCancelLoad } from "@a2b/features";
 import {
   Button,
   Card,
@@ -51,20 +50,15 @@ export default function ActiveDeliveryScreen() {
   const cancel = useCancelLoad(parseLoadId(trackingId) ?? 0);
 
   // Until the driver picks up, the shipper can still cancel and get the escrow back
-  const confirmCancel = () => {
+  const confirmCancel = async () => {
     if (!shipment) return;
-    Alert.alert(
-      "Cancel this shipment?",
-      `The driver hasn't picked up yet. You'll get a full refund of ${formatMoney(shipment.escrow?.amount ?? shipment.offerPrice, getMarket(shipment.market))}.`,
-      [
-        { text: "Keep shipment", style: "cancel" },
-        {
-          text: "Cancel & refund",
-          style: "destructive",
-          onPress: () => cancel.mutate(undefined, { onSuccess: () => router.replace("/(tabs)") }),
-        },
-      ]
-    );
+    const confirmed = await confirmAction({
+      title: "Cancel this shipment?",
+      message: `The driver hasn't picked up yet. You'll get a full refund of ${formatMoney(shipment.escrow?.amount ?? shipment.offerPrice, getMarket(shipment.market))}.`,
+      confirmLabel: "Cancel & refund",
+      destructive: true,
+    });
+    if (confirmed) cancel.mutate(undefined, { onSuccess: () => router.replace("/(tabs)") });
   };
 
   const driverName = shipment?.carrier?.driverName ?? "Your driver";
@@ -93,7 +87,7 @@ export default function ActiveDeliveryScreen() {
   const copyToClipboard = () => {
     if (shipment) {
       Clipboard.setString(shipment.reference ?? shipment.id);
-      Alert.alert("Copied", `Tracking ID ${trackingLabel(shipment)} copied to clipboard!`);
+      notify("Copied", `Tracking ID ${trackingLabel(shipment)} copied to clipboard!`);
     }
   };
 

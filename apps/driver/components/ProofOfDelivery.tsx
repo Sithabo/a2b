@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Alert, Platform, StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { Camera, ImageUp } from "lucide-react-native";
 import type { Data } from "@a2b/api-client";
-import { useDeliverLoad, type UploadFile } from "@a2b/features";
+import { notify, useDeliverLoad, type UploadFile } from "@a2b/features";
 import { Button, Card, colors, radius, SlideToConfirm, spacing, Text, TextField } from "@a2b/ui";
 
 /**
@@ -23,7 +23,7 @@ export function ProofOfDelivery({ load }: { load: Data.Load }) {
         ? await ImagePicker.requestCameraPermissionsAsync()
         : await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("Permission needed", "Allow access so you can add a photo of the delivered cargo.");
+      notify("Permission needed", "Allow access so you can add a photo of the delivered cargo.");
       return;
     }
     const options: ImagePicker.ImagePickerOptions = { mediaTypes: ["images"], quality: 0.7 };
