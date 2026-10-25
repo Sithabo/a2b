@@ -9,3 +9,5 @@ export * from './loads/load_timeline.tsx';
 export * from './queries/load_mutations.ts';
 export * from './queries/query_fallback.tsx';
 export * from './media/auth_image.tsx';
+export * from './support/confirm.ts';
+export * from './support/email_support.ts';

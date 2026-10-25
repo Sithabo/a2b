@@ -19,6 +19,8 @@ import { useProfileImage, useUserProfile } from "@/store/useShipperProfile";
 import { useMarket } from "@/store/useMarket";
 import { isValidTaxId } from "@a2b/core";
 import { apiErrorMessage } from "@a2b/api-client";
+import { emailSupport } from "@a2b/features";
+import { supportContext } from "@/lib/support";
 import { api, useSession } from "@/lib/session";
 import {
   Pencil,
@@ -29,7 +31,7 @@ import {
   HelpCircle,
   MessageCircle,
   Info,
-  PhoneCall,
+  Mail,
   LogOut,
   AlertCircle,
   X,
@@ -58,6 +60,7 @@ export default function AccountScreen() {
   const setProfileImage = useProfileImage((s) => s.set);
   const setUser = useSession((s) => s.setUser);
   const signOut = useSession((s) => s.signOut);
+  const user = useSession((s) => s.user);
   const market = useMarket();
   const tinErrorMessage = `Valid ${market.taxId.hint} ${market.taxId.issuer} Tax Identification Number required to bypass customs processing constraints.`;
   const insets = useSafeAreaInsets();
@@ -196,8 +199,11 @@ export default function AccountScreen() {
           <ListItem icon={Info} title="Privacy Policy" onPress={() => router.push("/account/privacy")} />
         </ListSection>
 
-        {/* Call Support has no handler yet */}
-        <Button title="Call A2B Support" icon={PhoneCall} onPress={() => {}} />
+        <Button
+          title="Email A2B Support"
+          icon={Mail}
+          onPress={() => emailSupport({ subject: "Help with my A2B account", context: supportContext(user, market) })}
+        />
 
         <ListSection>
           <ListItem icon={LogOut} title="Log Out" tone="danger" onPress={handleLogout} />
