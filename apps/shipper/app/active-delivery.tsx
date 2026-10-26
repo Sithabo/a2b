@@ -227,16 +227,14 @@ export default function ActiveDeliveryScreen() {
         animationType="slide"
         onRequestClose={() => setVehicleModalVisible(false)}
       >
-        <Pressable
-          style={styles.modalOverlay}
-          accessibilityRole="button"
-          accessibilityLabel="Close"
-          onPress={() => setVehicleModalVisible(false)}
-        >
+        <View style={styles.modalOverlay}>
           <Pressable
-            style={styles.modalContent}
-            onPress={(e) => e.stopPropagation()}
-          >
+            style={styles.modalBackdrop}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+            onPress={() => setVehicleModalVisible(false)}
+          />
+          <View style={styles.modalContent}>
             {/* Handle/Indicator */}
             <View style={styles.modalHandle} />
 
@@ -310,8 +308,8 @@ export default function ActiveDeliveryScreen() {
               style={styles.modalButton}
               onPress={() => setVehicleModalVisible(false)}
             />
-          </Pressable>
-        </Pressable>
+          </View>
+        </View>
       </Modal>
     </View>
   );
@@ -379,8 +377,11 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: colors.overlay,
     justifyContent: "flex-end",
+  },
+  modalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: colors.overlay,
   },
   modalContent: {
     backgroundColor: colors.surface,
