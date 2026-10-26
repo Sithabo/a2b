@@ -448,10 +448,10 @@ export class ShipperProfileSchema extends BaseModel {
 }
 
 export class UserSchema extends BaseModel {
-  static $columns = ['avatarUrl', 'createdAt', 'email', 'fullName', 'id', 'market', 'phone', 'phoneVerifiedAt', 'role', 'updatedAt'] as const
+  static $columns = ['avatarKey', 'createdAt', 'email', 'fullName', 'id', 'market', 'phone', 'phoneVerifiedAt', 'role', 'updatedAt'] as const
   $columns = UserSchema.$columns
   @column()
-  declare avatarUrl: string | null
+  declare avatarKey: string | null
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
   @column()

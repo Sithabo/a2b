@@ -33,6 +33,11 @@ router
         // Account
         router.get('me', [controllers.Me, 'show'])
         router.patch('me', [controllers.Me, 'update'])
+        router.post('me/avatar', [controllers.Avatars, 'store'])
+        router.delete('me/avatar', [controllers.Avatars, 'destroy'])
+        router
+          .get('users/:id/avatar', [controllers.Avatars, 'show'])
+          .where('id', router.matchers.number())
         router.put('me/shipper-profile', [controllers.Me, 'upsertShipperProfile'])
         router.put('me/driver-profile', [controllers.Me, 'upsertDriverProfile'])
         router.get('me/driver-documents', [controllers.DriverDocuments, 'index'])
@@ -47,6 +52,7 @@ router
         router
           .post('me/fleet-invites/:id/decline', [controllers.FleetInvites, 'decline'])
           .where('id', router.matchers.number())
+        router.post('me/fleet/leave', [controllers.FleetInvites, 'leave'])
 
         // Place search (pickup / drop-off)
         router.get('places', [controllers.Places, 'search']).use(placesThrottle)
@@ -55,14 +61,24 @@ router
         // Fleet (fleet owners)
         router.post('fleet', [controllers.Fleets, 'store'])
         router.get('fleet', [controllers.Fleets, 'show'])
+        router.patch('fleet', [controllers.Fleets, 'update'])
         router.get('fleet/vehicles', [controllers.Fleets, 'vehicles'])
         router.post('fleet/vehicles', [controllers.Fleets, 'addVehicle'])
         router
           .patch('fleet/vehicles/:id', [controllers.Fleets, 'updateVehicle'])
           .where('id', router.matchers.number())
+        router
+          .delete('fleet/vehicles/:id', [controllers.Fleets, 'deleteVehicle'])
+          .where('id', router.matchers.number())
         router.get('fleet/drivers', [controllers.Fleets, 'drivers'])
         router.post('fleet/drivers', [controllers.Fleets, 'addDriver'])
+        router
+          .delete('fleet/drivers/:id', [controllers.Fleets, 'removeDriver'])
+          .where('id', router.matchers.number())
         router.get('fleet/invites', [controllers.Fleets, 'invites'])
+        router
+          .post('fleet/invites/:id/cancel', [controllers.Fleets, 'cancelInvite'])
+          .where('id', router.matchers.number())
 
         // Loads
         router

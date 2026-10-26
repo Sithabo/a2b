@@ -12,7 +12,6 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Image } from "expo-image";
 import {
   Truck,
   Package,
@@ -20,10 +19,11 @@ import {
   X,
 } from "lucide-react-native";
 import { DriverContactCard } from "@/components/DriverContactCard";
+import { LoadDocuments } from "@/components/LoadDocuments";
 import { LoadState } from "@/components/LoadState";
 import { parseLoadId, trackingLabel, useShipment, weightLabel } from "@/lib/loads";
 import { cargoLabel, formatMoney, getMarket, statusMeta, vehicleClasses } from "@a2b/core";
-import { LoadTimeline, useCancelLoad } from "@a2b/features";
+import { Avatar, LoadTimeline, useCancelLoad } from "@a2b/features";
 import {
   Button,
   Card,
@@ -69,6 +69,7 @@ export default function ActiveDeliveryScreen() {
 
   const driverName = shipment?.carrier?.driverName ?? "Your driver";
   const driverPhone = shipment?.carrier?.driverPhone;
+  const driverAvatarPath = shipment?.carrier?.driverAvatarPath ?? null;
   const vehicle = shipment?.carrier?.vehicle;
 
   const handleCallDriver = () => {
@@ -178,6 +179,7 @@ export default function ActiveDeliveryScreen() {
         {/* Driver Contact Card (Clickable to show Vehicle Modal) */}
         <DriverContactCard
           driverName={driverName}
+          avatarPath={driverAvatarPath}
           onPressCard={() => setVehicleModalVisible(true)}
           onCallPress={handleCallDriver}
           onMessagePress={handleMessageDriver}
@@ -187,6 +189,9 @@ export default function ActiveDeliveryScreen() {
         <View style={styles.timelineContainer}>
           <LoadTimeline load={shipment} audience="shipper" pollMs={30_000} />
         </View>
+
+        {/* Customs documents uploaded for an import load */}
+        <LoadDocuments load={shipment} />
       </ScrollView>
 
       {/* Action Bottom */}
@@ -253,10 +258,10 @@ export default function ActiveDeliveryScreen() {
 
             {/* Driver Profile Summary */}
             <View style={styles.modalDriverSummary}>
-              <Image
-                source={require("@/assets/images/driver_avatar.png")}
-                style={styles.modalDriverAvatar}
-                contentFit="cover"
+              <Avatar
+                path={driverAvatarPath}
+                name={shipment.carrier?.driverName}
+                size={56}
               />
               <View style={styles.modalDriverText}>
                 <Text variant="bodyStrong">
@@ -408,12 +413,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: spacing.xl,
-  },
-  modalDriverAvatar: {
-    width: 56,
-    height: 56,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surfaceSunken,
   },
   modalDriverText: {
     marginLeft: spacing.lg,

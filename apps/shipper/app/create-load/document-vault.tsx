@@ -6,7 +6,6 @@ import {
   StyleSheet,
   Modal,
   Alert,
-  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -14,6 +13,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system/legacy";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Lock,
   Upload,
@@ -25,7 +25,6 @@ import {
 } from "lucide-react-native";
 import { useShipmentStore, type DraftDocument } from "@/store/useShipmentStore";
 import {
-  Badge,
   Button,
   IconButton,
   ScreenHeader,
@@ -40,13 +39,16 @@ import {
   spacing,
 } from "@a2b/ui";
 import { useMarket } from "@/store/useMarket";
-import { cargoLabel, documentsFor } from "@a2b/core";
+import { cargoLabel, documentsFor, type DocumentRequirement } from "@a2b/core";
 import { apiErrorMessage } from "@a2b/api-client";
 import { api } from "@/lib/session";
-import { newLoadBody, uploadLoadDocument, useInvalidateLoads, weightLabel } from "@/lib/loads";
+import { loadKeys, newLoadBody, uploadLoadDocument, useInvalidateLoads, weightLabel } from "@/lib/loads";
 
 /** A requirement id from the market's customs document catalog (@a2b/core). */
 type SlotName = string;
+
+/** One upload slot: a catalog entry, or the bare requirement the API reports missing. */
+type VaultDocument = Pick<DocumentRequirement, "id" | "label" | "issuer" | "acceptedForms">;
 
 export default function DocumentVaultScreen() {
   const router = useRouter();
@@ -67,19 +69,40 @@ export default function DocumentVaultScreen() {
 
   const [containerId, setContainerId] = useState(draft?.containerId ?? "");
 
-  // Which documents this load needs depends on the market and the cargo sector.
-  const { required: requiredDocs } = documentsFor(market.documents, cargo);
-
   const [uploadedFiles, setUploadedFiles] = useState<Record<SlotName, DraftDocument | null>>(
     () => ({ ...draft?.documents })
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // Server draft created on a previous (failed) submit, reused on retry.
-  const [serverLoadId, setServerLoadId] = useState<number | null>(null);
+  // Server draft created on a previous (failed) submit, reused on retry and kept with a saved draft.
+  const [serverLoadId, setServerLoadId] = useState<number | null>(draft?.serverLoadId ?? null);
   const invalidateLoads = useInvalidateLoads();
+  const queryClient = useQueryClient();
 
-  // Only the setter is read today; the value is kept for the scan-in-progress slot.
-  const [, setActiveSlot] = useState<SlotName | null>(null);
+  // Which documents this load needs depends on the market and the cargo sector.
+  const { required: localRequiredDocs } = documentsFor(market.documents, cargo);
+
+  // Once the load exists on the API, it says which documents are still missing
+  // (some may have been uploaded by an earlier attempt). Until that answer
+  // arrives, or when offline, the local catalog stands in.
+  const requirementsKey = [...loadKeys.detail(serverLoadId ?? 0), "requirements"] as const;
+  const { data: missingOnServer } = useQuery({
+    queryKey: requirementsKey,
+    enabled: !!serverLoadId,
+    queryFn: async () =>
+      (await api.loads.requirements({ params: { id: serverLoadId! } })).data.missing,
+  });
+  const requiredDocs: VaultDocument[] = missingOnServer
+    ? [
+        ...localRequiredDocs,
+        ...missingOnServer
+          .filter((doc) => !localRequiredDocs.some((local) => local.id === doc.id))
+          .map((doc) => market.documents.find((entry) => entry.id === doc.id) ?? doc),
+      ]
+    : localRequiredDocs;
+  const isOnServer = (slot: SlotName) =>
+    !!missingOnServer && !missingOnServer.some((doc) => doc.id === slot);
+  const docsToUpload = requiredDocs.filter((doc) => !isOnServer(doc.id));
+
   // A ref, not state: the leave-screen listener must see it the moment the load is posted,
   // before a re-render re-subscribes the listener.
   const isSubmissionComplete = useRef(false);
@@ -89,12 +112,9 @@ export default function DocumentVaultScreen() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<SlotName | null>(null);
 
-  // Processing Animation Overlay
-  const [isEnhancing, setIsEnhancing] = useState(false);
-
   // Check if everything is filled
   const isFormValid =
-    containerId.trim().length > 4 && requiredDocs.every((doc) => !!uploadedFiles[doc.id]);
+    containerId.trim().length > 4 && docsToUpload.every((doc) => !!uploadedFiles[doc.id]);
 
   // Intercept navigation to cache draft if incomplete
   useEffect(() => {
@@ -133,6 +153,7 @@ export default function DocumentVaultScreen() {
                     ...draft,
                     containerId,
                     documents: uploadedFiles,
+                    serverLoadId: serverLoadId ?? undefined,
                     savedAt: new Date().toISOString(),
                   });
                 }
@@ -145,7 +166,7 @@ export default function DocumentVaultScreen() {
     });
 
     return unsubscribe;
-  }, [navigation, containerId, uploadedFiles, clearDraft, setDraft, resetRouteState, draft]);
+  }, [navigation, containerId, uploadedFiles, clearDraft, setDraft, resetRouteState, draft, serverLoadId]);
 
   const moveFileToPermanentStorage = async (tempUri: string, documentType: string) => {
     try {
@@ -189,40 +210,28 @@ export default function DocumentVaultScreen() {
       return;
     }
 
-    const capturedUri = result.assets[0].uri;
+    // The scan is kept as captured; it's uploaded when the load is posted.
+    const permanentUri = await moveFileToPermanentStorage(result.assets[0].uri, slot);
 
-    // Start processing animation (simulates grayscale stamp enhancement)
-    setIsEnhancing(true);
-    setActiveSlot(slot);
+    const fileInfo = await FileSystem.getInfoAsync(permanentUri);
+    const sizeKb = fileInfo.exists ? `${Math.round(fileInfo.size / 1024)} KB` : "";
 
-    setTimeout(async () => {
-      const permanentUri = await moveFileToPermanentStorage(capturedUri, slot);
+    const documentName = `${slot.toUpperCase()}_SCAN_${Date.now()
+      .toString()
+      .slice(-4)}.jpg`;
 
-      // Fetch dynamic size
-      const fileInfo = await FileSystem.getInfoAsync(permanentUri);
-      const sizeBytes = fileInfo.exists ? fileInfo.size : 124000;
-      const sizeKb = `${Math.round(sizeBytes / 1024)} KB`;
-
-      const documentName = `${slot.toUpperCase()}_SCAN_${Date.now()
-        .toString()
-        .slice(-4)}.jpg`;
-
-      setUploadedFiles((prev) => ({
-        ...prev,
-        [slot]: {
-          name: documentName,
-          size: sizeKb,
-          uri: permanentUri,
-        },
-      }));
-
-      setIsEnhancing(false);
-      setActiveSlot(null);
-      Alert.alert("Scan Enhanced", "Grayscale filter applied successfully. Contrast adjusted for text readability.");
-    }, 1500);
+    setUploadedFiles((prev) => ({
+      ...prev,
+      [slot]: {
+        name: documentName,
+        size: sizeKb,
+        uri: permanentUri,
+      },
+    }));
   };
 
   const handleCardPress = (slot: SlotName) => {
+    if (isOnServer(slot) && !uploadedFiles[slot]) return; // already on file with A2B
     if (uploadedFiles[slot]) {
       setSelectedSlot(slot);
       setIsOptionsModalOpen(true);
@@ -251,8 +260,8 @@ export default function DocumentVaultScreen() {
         setServerLoadId(loadId);
       }
 
-      // 2. Upload each required scan
-      for (const doc of requiredDocs) {
+      // 2. Upload each scan the API doesn't have yet
+      for (const doc of docsToUpload) {
         const file = uploadedFiles[doc.id];
         if (!file?.uri) throw new Error(`Rescan "${doc.label}" — the saved copy is no longer on this device.`);
         await uploadLoadDocument(loadId, doc.id, { uri: file.uri, name: file.name });
@@ -267,6 +276,8 @@ export default function DocumentVaultScreen() {
       resetRouteState();
       router.replace({ pathname: "/create-load/status", params: { state: "confirmed", trackingId: String(loadId) } });
     } catch (err) {
+      // Some scans may have gone up before the failure; ask the API what's still missing.
+      void queryClient.invalidateQueries({ queryKey: requirementsKey });
       Alert.alert("Couldn't post this load", err instanceof Error ? err.message : apiErrorMessage(err));
     } finally {
       setIsSubmitting(false);
@@ -318,40 +329,45 @@ export default function DocumentVaultScreen() {
 
           {requiredDocs.map((doc) => {
             const file = uploadedFiles[doc.id];
+            const onFile = !file && isOnServer(doc.id);
+            const done = !!file || onFile;
             return (
               <View key={doc.id} style={doc.id === "go_invest_concession" ? styles.goInvestContainer : undefined}>
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel={file ? `${doc.label}, uploaded` : `${doc.label}, scan document`}
+                  accessibilityLabel={done ? `${doc.label}, uploaded` : `${doc.label}, scan document`}
+                  disabled={onFile}
                   style={({ pressed }) => [
                     styles.uploadCard,
-                    file ? styles.uploadCardCompleted : styles.uploadCardEmpty,
+                    done ? styles.uploadCardCompleted : styles.uploadCardEmpty,
                     pressed && { opacity: 0.85 },
                   ]}
                   onPress={() => handleCardPress(doc.id)}
                 >
-                  <View style={[styles.iconWrapper, file ? styles.iconWrapperCompleted : styles.iconWrapperEmpty]}>
+                  <View style={[styles.iconWrapper, done ? styles.iconWrapperCompleted : styles.iconWrapperEmpty]}>
                     {file?.uri ? (
                       <Image source={{ uri: file.uri }} style={styles.thumbnail} contentFit="cover" />
-                    ) : file ? (
+                    ) : done ? (
                       <CheckCircle size={20} color={colors.onPrimary} />
                     ) : (
                       <Upload size={20} color={colors.textMuted} />
                     )}
                   </View>
                   <View style={styles.cardInfo}>
-                    <Text variant="bodyStrong" tone={file ? "success" : "default"}>
+                    <Text variant="bodyStrong" tone={done ? "success" : "default"}>
                       {doc.label}
                     </Text>
                     <Text variant="caption" tone="muted" numberOfLines={1}>
                       {file
-                        ? `${file.name} (${file.size})`
-                        : doc.acceptedForms
-                          ? `${doc.acceptedForms.join(" or ")} required.`
-                          : doc.issuer}
+                        ? file.size ? `${file.name} (${file.size})` : file.name
+                        : onFile
+                          ? "Already uploaded to A2B"
+                          : doc.acceptedForms
+                            ? `${doc.acceptedForms.join(" or ")} required.`
+                            : doc.issuer}
                     </Text>
                   </View>
-                  <ChevronRight size={18} color={file ? colors.success : colors.borderStrong} />
+                  {onFile ? null : <ChevronRight size={18} color={file ? colors.success : colors.borderStrong} />}
                 </Pressable>
 
                 {doc.id === "go_invest_concession" && (
@@ -393,17 +409,6 @@ export default function DocumentVaultScreen() {
           loading={isSubmitting}
         />
       </View>
-
-      {/* Document Scanner Enhancement Loader Overlay */}
-      <Modal transparent={true} visible={isEnhancing} animationType="fade">
-        <View style={styles.loadingOverlay}>
-          <View style={styles.loadingBox}>
-            <ActivityIndicator size="large" color={colors.primary} />
-            <Text variant="bodyStrong" style={styles.loadingText}>Applying Grayscale Enhancement...</Text>
-            <Text variant="caption" tone="muted" align="center">Optimizing stamps & signatures contrast</Text>
-          </View>
-        </View>
-      </Modal>
 
       {/* Options Modal (View/Replace/Remove) */}
       <Modal
@@ -485,7 +490,7 @@ export default function DocumentVaultScreen() {
             <View style={styles.viewerHeaderSpacer} />
           </View>
 
-          {/* Image Canvas with Grayscale Effect */}
+          {/* The scan as captured */}
           <View style={styles.viewerContent}>
             {selectedSlot && uploadedFiles[selectedSlot]?.uri ? (
               <View style={styles.scannedImageContainer}>
@@ -494,9 +499,6 @@ export default function DocumentVaultScreen() {
                   style={styles.viewerImage}
                   contentFit="contain"
                 />
-                <View style={styles.grayscaleBadge}>
-                  <Badge label="Grayscale Filter Applied (Contrast Enhanced)" tone="success" />
-                </View>
               </View>
             ) : (
               <Text tone="inverse">No image available</Text>
@@ -664,25 +666,6 @@ const styles = StyleSheet.create({
   modalActions: {
     gap: spacing.md,
   },
-  loadingOverlay: {
-    flex: 1,
-    backgroundColor: colors.overlay,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingBox: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing["2xl"],
-    alignItems: "center",
-    ...elevation.md,
-    gap: spacing.sm,
-  },
-  loadingText: {
-    marginTop: spacing.sm,
-  },
   viewerContainer: {
     flex: 1,
     backgroundColor: palette.gray[900],
@@ -715,10 +698,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "85%",
     borderRadius: radius.sm,
-  },
-  grayscaleBadge: {
-    position: "absolute",
-    bottom: spacing["2xl"],
   },
   viewerFooter: {
     flexDirection: "row",

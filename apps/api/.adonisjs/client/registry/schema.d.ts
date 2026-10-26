@@ -79,6 +79,42 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/me_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'avatars.store': {
+    methods: ["POST"]
+    pattern: '/api/v1/me/avatar'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/profile').avatarValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/profile').avatarValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/avatars_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/avatars_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'avatars.destroy': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/me/avatar'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/avatars_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/avatars_controller').default['destroy']>>>
+    }
+  }
+  'avatars.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/users/:id/avatar'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/avatars_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/avatars_controller').default['show']>>>
+    }
+  }
   'me.upsert_shipper_profile': {
     methods: ["PUT"]
     pattern: '/api/v1/me/shipper-profile'
@@ -175,6 +211,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/fleet_invites_controller').default['decline']>>>
     }
   }
+  'fleet_invites.leave': {
+    methods: ["POST"]
+    pattern: '/api/v1/me/fleet/leave'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/fleet_invites_controller').default['leave']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/fleet_invites_controller').default['leave']>>>
+    }
+  }
   'places.search': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/places'
@@ -223,6 +271,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/fleets_controller').default['show']>>>
     }
   }
+  'fleets.update': {
+    methods: ["PATCH"]
+    pattern: '/api/v1/fleet'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/fleet').updateFleetValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/fleet').updateFleetValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/fleets_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/fleets_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'fleets.vehicles': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/fleet/vehicles'
@@ -259,6 +319,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/fleets_controller').default['updateVehicle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'fleets.delete_vehicle': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/fleet/vehicles/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/fleets_controller').default['deleteVehicle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/fleets_controller').default['deleteVehicle']>>>
+    }
+  }
   'fleets.drivers': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/fleet/drivers'
@@ -283,6 +355,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/fleets_controller').default['addDriver']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'fleets.remove_driver': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/fleet/drivers/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/fleets_controller').default['removeDriver']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/fleets_controller').default['removeDriver']>>>
+    }
+  }
   'fleets.invites': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/fleet/invites'
@@ -293,6 +377,18 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/fleets_controller').default['invites']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/fleets_controller').default['invites']>>>
+    }
+  }
+  'fleets.cancel_invite': {
+    methods: ["POST"]
+    pattern: '/api/v1/fleet/invites/:id/cancel'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/fleets_controller').default['cancelInvite']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/fleets_controller').default['cancelInvite']>>>
     }
   }
   'loads.index': {

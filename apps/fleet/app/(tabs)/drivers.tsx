@@ -1,7 +1,9 @@
-import { Linking, StyleSheet, View } from "react-native";
+import { useState } from "react";
+import { Alert, Linking, Platform, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Clock, Phone, UserPlus, Users } from "lucide-react-native";
-import { QueryFallback } from "@a2b/features";
+import { apiErrorMessage, type Data } from "@a2b/api-client";
+import { Avatar, confirmAction, QueryFallback } from "@a2b/features";
 import {
   Badge,
   Button,
@@ -15,13 +17,9 @@ import {
   spacing,
   Text,
 } from "@a2b/ui";
-import { useDrivers, useInvites, useVehicles } from "@/lib/queries";
-
-const VERIFICATION = {
-  VERIFIED: { label: "Verified", tone: "success" },
-  PENDING: { label: "Pending verification", tone: "warning" },
-  REJECTED: { label: "Rejected", tone: "danger" },
-} as const;
+import { verificationMeta } from "@/components/driverMeta";
+import { api } from "@/lib/session";
+import { keys, useDrivers, useInvalidate, useInvites, useVehicles } from "@/lib/queries";
 
 export default function DriversScreen() {
   const router = useRouter();
@@ -29,6 +27,29 @@ export default function DriversScreen() {
   const vehicles = useVehicles();
   const invites = useInvites();
   const pending = invites.data ?? [];
+  const invalidate = useInvalidate();
+  const [cancellingId, setCancellingId] = useState<number | null>(null);
+
+  const cancelInvite = async (invite: Data.FleetInvite) => {
+    const confirmed = await confirmAction({
+      title: "Cancel this invite?",
+      message: `${invite.driverName ?? invite.driverPhone} won't be able to join your fleet from it. You can invite them again later.`,
+      confirmLabel: "Cancel invite",
+      destructive: true,
+    });
+    if (!confirmed) return;
+    setCancellingId(invite.id);
+    try {
+      await api.fleets.cancelInvite({ params: { id: invite.id } });
+      await invalidate(keys.invites);
+    } catch (err) {
+      const message = apiErrorMessage(err);
+      if (Platform.OS === "web") globalThis.alert?.(message);
+      else Alert.alert("Couldn't cancel the invite", message);
+    } finally {
+      setCancellingId(null);
+    }
+  };
 
   return (
     <ScreenScroll
@@ -62,6 +83,14 @@ export default function DriversScreen() {
               <Badge label="Invited · waiting for them to accept" tone="neutral" />
             </View>
           </View>
+          <Button
+            title="Cancel"
+            variant="ghost"
+            size="sm"
+            onPress={() => cancelInvite(invite)}
+            loading={cancellingId === invite.id}
+            accessibilityLabel={`Cancel invite to ${invite.driverName ?? invite.driverPhone}`}
+          />
         </Card>
       ))}
 
@@ -77,14 +106,16 @@ export default function DriversScreen() {
       ) : (
         drivers.data?.map((driver) => {
           const truck = vehicles.data?.find((v) => v.assignedDriverId === driver.id);
-          const verification = VERIFICATION[driver.verificationStatus];
+          const verification = verificationMeta[driver.verificationStatus];
           return (
-            <Card key={driver.id} style={styles.card} padding="lg">
-              <View style={styles.avatar}>
-                <Text variant="h3" tone="primary">
-                  {(driver.fullName ?? "?").slice(0, 1).toUpperCase()}
-                </Text>
-              </View>
+            <Card
+              key={driver.id}
+              style={styles.card}
+              padding="lg"
+              onPress={() => router.push({ pathname: "/drivers/[id]", params: { id: String(driver.id) } })}
+              accessibilityLabel={`Driver ${driver.fullName ?? driver.phone}`}
+            >
+              <Avatar path={driver.avatarPath} name={driver.fullName ?? driver.phone} size={48} />
               <View style={{ flex: 1, gap: spacing.xs }}>
                 <Text variant="bodyStrong">{driver.fullName ?? "Unnamed driver"}</Text>
                 <Text variant="caption" tone="muted">

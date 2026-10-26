@@ -9,14 +9,19 @@ import {
   addDriverValidator,
   createFleetValidator,
   createVehicleValidator,
+  updateFleetValidator,
   updateVehicleValidator,
 } from '#validators/fleet'
 import {
   addDriver,
   addVehicle,
+  cancelInvite,
   createFleet,
+  deleteVehicle,
   fleetInvites,
+  removeDriver,
   requireFleet,
+  updateFleet,
   updateVehicle,
 } from '#services/fleet_service'
 
@@ -32,6 +37,11 @@ export default class FleetsController {
 
   async show({ auth, serialize }: HttpContext) {
     return serialize(FleetTransformer.transform(await requireFleet(auth.getUserOrFail())))
+  }
+
+  async update({ auth, request, serialize }: HttpContext) {
+    const changes = await request.validateUsing(updateFleetValidator)
+    return serialize(FleetTransformer.transform(await updateFleet(auth.getUserOrFail(), changes)))
   }
 
   async vehicles({ auth, serialize }: HttpContext) {
@@ -53,6 +63,12 @@ export default class FleetsController {
     const changes = await request.validateUsing(updateVehicleValidator)
     const vehicle = await updateVehicle(auth.getUserOrFail(), Number(params.id), changes)
     return serialize(VehicleTransformer.transform(vehicle))
+  }
+
+  /** Removes the truck; loads it carried keep their history. */
+  async deleteVehicle({ auth, params, response }: HttpContext) {
+    await deleteVehicle(auth.getUserOrFail(), Number(params.id))
+    return response.noContent()
   }
 
   async drivers({ auth, serialize }: HttpContext) {
@@ -97,5 +113,16 @@ export default class FleetsController {
   /** Drivers invited to the fleet who haven't answered yet. */
   async invites({ auth, serialize }: HttpContext) {
     return serialize(FleetInviteTransformer.transform(await fleetInvites(auth.getUserOrFail())))
+  }
+
+  /** Takes the driver out of the fleet; their account stays. */
+  async removeDriver({ auth, params, response }: HttpContext) {
+    await removeDriver(auth.getUserOrFail(), Number(params.id))
+    return response.noContent()
+  }
+
+  async cancelInvite({ auth, params, serialize }: HttpContext) {
+    const invite = await cancelInvite(auth.getUserOrFail(), Number(params.id))
+    return serialize(FleetInviteTransformer.transform(invite))
   }
 }

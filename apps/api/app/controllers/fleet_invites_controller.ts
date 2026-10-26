@@ -1,6 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import FleetInviteTransformer from '#transformers/fleet_invite_transformer'
-import { driverInvites, respondToInvite } from '#services/fleet_service'
+import { driverInvites, leaveFleet, respondToInvite } from '#services/fleet_service'
 
 /** A driver's view of the fleets inviting them to join. */
 export default class FleetInvitesController {
@@ -16,5 +16,11 @@ export default class FleetInvitesController {
   async decline({ auth, params, serialize }: HttpContext) {
     const invite = await respondToInvite(auth.getUserOrFail(), Number(params.id), false)
     return serialize(FleetInviteTransformer.transform(invite))
+  }
+
+  /** The driver leaves their fleet and drives on their own. */
+  async leave({ auth, response }: HttpContext) {
+    await leaveFleet(auth.getUserOrFail())
+    return response.noContent()
   }
 }

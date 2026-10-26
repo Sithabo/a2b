@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { View, ScrollView, StyleSheet, RefreshControl, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Link, useRouter } from "expo-router";
-import { Image } from "expo-image";
 import {
   Bell,
   MapPin,
@@ -32,7 +31,7 @@ import {
   tones,
 } from "@a2b/ui";
 import { cargoLabel, isActiveStatus, statusGroup } from "@a2b/core";
-import { QueryFallback } from "@a2b/features";
+import { Avatar, QueryFallback } from "@a2b/features";
 import { shipmentRoute, useMyShipments } from "@/lib/loads";
 
 const STATUS_FILTERS = [
@@ -52,6 +51,7 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<"ALL" | "ACTIVE" | "PENDING" | "COMPLETED">("ALL");
   const insets = useSafeAreaInsets();
+  const greetingName = (userProfile?.name || userProfile?.company)?.trim().split(/\s+/)[0];
 
   const filteredShipments = shipments.filter((s) => {
     const query = searchQuery.toLowerCase().trim();
@@ -102,16 +102,12 @@ export default function HomeScreen() {
                   accessibilityLabel="Account"
                   style={({ pressed }) => [
                     styles.avatarContainer,
-                    userProfile?.profileImage && styles.avatarNoBorder,
+                    userProfile?.avatarPath && styles.avatarNoBorder,
                     pressed && styles.pressed,
                   ]}
                 >
-                  {userProfile?.profileImage ? (
-                    <Image
-                      source={{ uri: userProfile.profileImage }}
-                      style={styles.avatarImage}
-                      contentFit="cover"
-                    />
+                  {userProfile?.avatarPath ? (
+                    <Avatar path={userProfile.avatarPath} name={userProfile.name} size={48} />
                   ) : (
                     <User color={colors.onPrimary} size={24} />
                   )}
@@ -119,7 +115,7 @@ export default function HomeScreen() {
               </Link>
               <View>
                 <Text variant="h2" tone="inverse">
-                  Hey {userProfile?.name?.split(" ")[0] || "Musa"}
+                  {greetingName ? `Hey ${greetingName}` : "Welcome back"}
                 </Text>
                 <View style={styles.locationContainer}>
                   <MapPin color={colors.onPrimaryMuted} size={14} />
@@ -293,11 +289,6 @@ const styles = StyleSheet.create({
   },
   avatarNoBorder: {
     borderWidth: 0,
-  },
-  avatarImage: {
-    width: 48,
-    height: 48,
-    borderRadius: radius.pill,
   },
   locationContainer: {
     flexDirection: "row",

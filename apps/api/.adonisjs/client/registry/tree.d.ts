@@ -14,6 +14,11 @@ export interface ApiDefinition {
     upsertShipperProfile: typeof routes['me.upsert_shipper_profile']
     upsertDriverProfile: typeof routes['me.upsert_driver_profile']
   }
+  avatars: {
+    store: typeof routes['avatars.store']
+    destroy: typeof routes['avatars.destroy']
+    show: typeof routes['avatars.show']
+  }
   driverDocuments: {
     index: typeof routes['driver_documents.index']
     store: typeof routes['driver_documents.store']
@@ -23,6 +28,7 @@ export interface ApiDefinition {
     index: typeof routes['fleet_invites.index']
     accept: typeof routes['fleet_invites.accept']
     decline: typeof routes['fleet_invites.decline']
+    leave: typeof routes['fleet_invites.leave']
   }
   places: {
     search: typeof routes['places.search']
@@ -31,12 +37,16 @@ export interface ApiDefinition {
   fleets: {
     store: typeof routes['fleets.store']
     show: typeof routes['fleets.show']
+    update: typeof routes['fleets.update']
     vehicles: typeof routes['fleets.vehicles']
     addVehicle: typeof routes['fleets.add_vehicle']
     updateVehicle: typeof routes['fleets.update_vehicle']
+    deleteVehicle: typeof routes['fleets.delete_vehicle']
     drivers: typeof routes['fleets.drivers']
     addDriver: typeof routes['fleets.add_driver']
+    removeDriver: typeof routes['fleets.remove_driver']
     invites: typeof routes['fleets.invites']
+    cancelInvite: typeof routes['fleets.cancel_invite']
   }
   loads: {
     index: typeof routes['loads.index']

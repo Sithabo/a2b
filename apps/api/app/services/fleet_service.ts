@@ -43,13 +43,7 @@ export async function createFleet(owner: User, input: FleetInput) {
     throw DomainError.forbidden('Only fleet owners can create a fleet')
   if (await fleetOwnedBy(owner))
     throw DomainError.conflict('You already have a fleet', 'E_FLEET_EXISTS')
-  const market = getMarket(owner.market)
-  if (input.taxId && !isValidTaxId(input.taxId, market)) {
-    throw DomainError.invalid(
-      `Enter a valid ${market.taxId.issuer} TIN (${market.taxId.hint})`,
-      'E_INVALID_TAX_ID'
-    )
-  }
+  assertTaxId(input.taxId, owner.market)
   try {
     return await Fleet.create({ ...input, ownerId: owner.id, market: owner.market })
   } catch (error) {
@@ -58,6 +52,25 @@ export async function createFleet(owner: User, input: FleetInput) {
       throw DomainError.conflict('You already have a fleet', 'E_FLEET_EXISTS')
     throw error
   }
+}
+
+function assertTaxId(taxId: string | null | undefined, fleetMarket: Fleet['market']) {
+  const market = getMarket(fleetMarket)
+  if (taxId && !isValidTaxId(taxId, market)) {
+    throw DomainError.invalid(
+      `Enter a valid ${market.taxId.issuer} TIN (${market.taxId.hint})`,
+      'E_INVALID_TAX_ID'
+    )
+  }
+}
+
+/** The owner edits their fleet's details. The market never changes. */
+export async function updateFleet(owner: User, changes: Partial<FleetInput>) {
+  const fleet = await requireFleet(owner)
+  assertTaxId(changes.taxId, fleet.market)
+  fleet.merge(changes)
+  await fleet.save()
+  return fleet
 }
 
 export interface VehicleInput {
@@ -95,18 +108,29 @@ async function releaseDriverFromOtherTrucks(
     .update({ assigned_driver_id: null, updated_at: DateTime.now().toSQL() })
 }
 
-export async function addVehicle(owner: User, input: VehicleInput) {
-  const fleet = await requireFleet(owner)
+/** Normalised plate, checked for format and for another vehicle already using it. */
+async function checkedPlate(input: string, fleet: Fleet, exceptVehicleId?: number) {
   const market = getMarket(fleet.market)
-  const plate = normalizePlate(input.plate)
+  const plate = normalizePlate(input)
   // Plate formats are not yet confirmed with the licensing authorities, so only
   // enforce them once a market marks its format as verified.
   if (market.plate.verified && !isValidPlate(plate, market)) {
     throw DomainError.invalid(`Enter a plate like ${market.plate.example}`, 'E_INVALID_PLATE')
   }
-  if (await Vehicle.query().where('market', fleet.market).where('plate', plate).first()) {
+  const taken = await Vehicle.query()
+    .where('market', fleet.market)
+    .where('plate', plate)
+    .if(exceptVehicleId, (q) => q.whereNot('id', exceptVehicleId!))
+    .first()
+  if (taken) {
     throw DomainError.conflict('A vehicle with this plate is already registered', 'E_PLATE_TAKEN')
   }
+  return plate
+}
+
+export async function addVehicle(owner: User, input: VehicleInput) {
+  const fleet = await requireFleet(owner)
+  const plate = await checkedPlate(input.plate, fleet)
   if (input.assignedDriverId) await assertDriverInFleet(fleet, input.assignedDriverId)
 
   return db.transaction(async (trx) => {
@@ -119,15 +143,20 @@ export async function addVehicle(owner: User, input: VehicleInput) {
   })
 }
 
-export async function updateVehicle(
-  owner: User,
-  vehicleId: number,
-  changes: { assignedDriverId?: number | null; status?: Vehicle['status'] }
-) {
-  const fleet = await requireFleet(owner)
+export type VehicleChanges = Partial<VehicleInput> & { status?: Vehicle['status'] }
+
+async function fleetVehicle(fleet: Fleet, vehicleId: number) {
   const vehicle = await Vehicle.query().where('id', vehicleId).where('fleet_id', fleet.id).first()
   if (!vehicle) throw DomainError.notFound('Vehicle not found')
+  return vehicle
+}
+
+export async function updateVehicle(owner: User, vehicleId: number, changes: VehicleChanges) {
+  const fleet = await requireFleet(owner)
+  const vehicle = await fleetVehicle(fleet, vehicleId)
   if (changes.assignedDriverId) await assertDriverInFleet(fleet, changes.assignedDriverId)
+  if (changes.plate !== undefined)
+    changes.plate = await checkedPlate(changes.plate, fleet, vehicle.id)
 
   return db.transaction(async (trx) => {
     if (changes.assignedDriverId)
@@ -137,6 +166,85 @@ export async function updateVehicle(
     await vehicle.save()
     return vehicle
   })
+}
+
+const ACTIVE_LOAD_STATUSES = LOAD_STATUSES.filter(isActiveStatus)
+
+/** Removes a truck from the fleet. Finished loads keep their history without it. */
+export async function deleteVehicle(owner: User, vehicleId: number) {
+  const fleet = await requireFleet(owner)
+  const vehicle = await fleetVehicle(fleet, vehicleId)
+  const busy = await Load.query()
+    .where('vehicle_id', vehicle.id)
+    .whereIn('status', ACTIVE_LOAD_STATUSES)
+    .first()
+  if (busy) {
+    throw DomainError.conflict(
+      `This truck is on load ${busy.reference}. Reassign or finish it first.`,
+      'E_VEHICLE_BUSY'
+    )
+  }
+  await vehicle.delete()
+}
+
+/**
+ * Takes a driver out of a fleet (the owner removing them, or the driver
+ * leaving). Payouts for a job follow the fleet that accepted it, so a driver
+ * with a job under way stays until it's done.
+ */
+async function detachFromFleet(driverId: number, fleetId: number) {
+  await db.transaction(async (trx) => {
+    const profile = await DriverProfile.query({ client: trx })
+      .where('user_id', driverId)
+      .where('fleet_id', fleetId)
+      .forUpdate()
+      .first()
+    if (!profile) throw DomainError.notFound('Driver not found in this fleet')
+
+    const busy = await Load.query({ client: trx })
+      .where('driver_id', driverId)
+      .where('fleet_id', fleetId)
+      .whereIn('status', ACTIVE_LOAD_STATUSES)
+      .first()
+    if (busy) {
+      throw DomainError.conflict(
+        `The driver is on load ${busy.reference}. Reassign or finish it first.`,
+        'E_DRIVER_BUSY'
+      )
+    }
+
+    await Vehicle.query({ client: trx })
+      .where('fleet_id', fleetId)
+      .where('assigned_driver_id', driverId)
+      .update({ assigned_driver_id: null, updated_at: DateTime.now().toSQL() })
+    profile.useTransaction(trx)
+    profile.fleetId = null
+    await profile.save()
+  })
+}
+
+export async function removeDriver(owner: User, driverId: number) {
+  const fleet = await requireFleet(owner)
+  await detachFromFleet(driverId, fleet.id)
+}
+
+export async function leaveFleet(driver: User) {
+  const profile = await DriverProfile.findBy('userId', driver.id)
+  if (!profile?.fleetId) throw DomainError.invalid("You're not in a fleet", 'E_DRIVER_NOT_IN_FLEET')
+  await detachFromFleet(driver.id, profile.fleetId)
+}
+
+/** The owner withdraws an invite the driver hasn't answered. */
+export async function cancelInvite(owner: User, inviteId: number) {
+  const fleet = await requireFleet(owner)
+  const invite = await FleetInvite.query().where('id', inviteId).where('fleet_id', fleet.id).first()
+  if (!invite) throw DomainError.notFound('Invite not found')
+  if (invite.status !== 'PENDING')
+    throw DomainError.conflict('This invite is no longer open', 'E_INVITE_CLOSED')
+  invite.status = 'CANCELLED'
+  await invite.save()
+  await invite.load((loader) => loader.load('fleet').load('driver'))
+  return invite
 }
 
 export type AddDriverResult =
@@ -243,8 +351,6 @@ async function joinFleet(
     { client: trx }
   )
 }
-
-const ACTIVE_LOAD_STATUSES = LOAD_STATUSES.filter(isActiveStatus)
 
 /** Open invites the fleet owner has sent. */
 export async function fleetInvites(owner: User) {

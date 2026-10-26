@@ -29,6 +29,7 @@ export default function RootLayout() {
         <StatusBar style="dark" />
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
           <Stack.Screen name="trucks/new" options={{ presentation: "modal" }} />
+          <Stack.Screen name="trucks/[id]/edit" options={{ presentation: "modal" }} />
           <Stack.Screen name="drivers/new" options={{ presentation: "modal" }} />
         </Stack>
       </AppSessionProvider>

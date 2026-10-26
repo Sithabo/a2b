@@ -1,5 +1,6 @@
 import type Load from '#models/load'
 import { BaseTransformer } from '@adonisjs/core/transformers'
+import { avatarPathOf } from '#services/avatar_service'
 
 export interface LoadViewOptions {
   /** Exact addresses and contacts — only for the shipper, or the carrier once escrow is funded. */
@@ -69,6 +70,7 @@ export default class LoadTransformer extends BaseTransformer<Load> {
           ? {
               driverName: driver.fullName,
               driverPhone: driver.phone,
+              driverAvatarPath: avatarPathOf(driver),
               vehicle: vehicle
                 ? {
                     plate: vehicle.plate,

@@ -2,15 +2,14 @@ import { useMemo, useState } from "react";
 import { Alert, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { History, Wrench } from "lucide-react-native";
+import { History, Pencil, Trash2, Wrench } from "lucide-react-native";
 import { bodyTypes, formatMoney, getMarket, marketDateTime, marketParts, vehicleClasses } from "@a2b/core";
 import { apiErrorMessage } from "@a2b/api-client";
 import { Badge, Button, Card, ChipGroup, colors, EmptyState, layout, PlateBadge, ScreenHeader, spacing, Text } from "@a2b/ui";
-import { LoadCard } from "@a2b/features";
+import { Avatar, confirmAction, LoadCard } from "@a2b/features";
 import { truckStateMeta } from "@/components/TruckCard";
 import { api } from "@/lib/session";
 import { buildRoster, earningsBetween, keys, useDrivers, useFleet, useFleetLoads, useInvalidate, useVehicles } from "@/lib/queries";
-
 
 const NO_DRIVER = "none";
 
@@ -23,6 +22,8 @@ export default function TruckDetailScreen() {
   const loads = useFleetLoads();
   const invalidate = useInvalidate();
   const [isSaving, setIsSaving] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
+  const [removeError, setRemoveError] = useState("");
 
   const market = getMarket(fleet.data?.market ?? "UG");
   const truck = useMemo(
@@ -57,6 +58,26 @@ export default function TruckDetailScreen() {
     }
   };
 
+  const remove = async () => {
+    const confirmed = await confirmAction({
+      title: `Remove ${vehicle.plate}?`,
+      message: "The truck comes off your fleet roster. Its completed trips stay in your load history.",
+      confirmLabel: "Remove truck",
+      destructive: true,
+    });
+    if (!confirmed) return;
+    setRemoveError("");
+    setIsRemoving(true);
+    try {
+      await api.fleets.deleteVehicle({ params: { id: vehicle.id } });
+      router.back();
+      await invalidate(keys.vehicles);
+    } catch (err) {
+      setRemoveError(apiErrorMessage(err));
+      setIsRemoving(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safe} edges={["bottom"]}>
       <ScreenHeader title={vehicle.plate} subtitle={`${vehicle.make} ${vehicle.model}`} onBackPress={() => router.back()} />
@@ -77,6 +98,19 @@ export default function TruckDetailScreen() {
           <Text variant="label" tone="secondary">
             Driver
           </Text>
+          {driver && (
+            <View style={styles.driver}>
+              <Avatar path={driver.avatarPath} name={driver.fullName ?? driver.phone} size={40} />
+              <View style={{ flex: 1 }}>
+                <Text variant="bodyStrong" numberOfLines={1}>
+                  {driver.fullName ?? "Unnamed driver"}
+                </Text>
+                <Text variant="caption" tone="muted">
+                  {driver.phone}
+                </Text>
+              </View>
+            </View>
+          )}
           {drivers.data?.length ? (
             <ChipGroup
               value={driver ? String(driver.id) : NO_DRIVER}
@@ -142,6 +176,15 @@ export default function TruckDetailScreen() {
             onPress={() => update({ status: state === "MAINTENANCE" ? "IDLE" : "MAINTENANCE" })}
           />
         )}
+
+        <Button
+          title="Edit truck details"
+          icon={Pencil}
+          variant="secondary"
+          onPress={() => router.push({ pathname: "/trucks/[id]/edit", params: { id: String(vehicle.id) } })}
+        />
+        {removeError ? <Text tone="danger">{removeError}</Text> : null}
+        <Button title="Remove truck" icon={Trash2} variant="danger" onPress={remove} loading={isRemoving} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -164,4 +207,5 @@ const styles = StyleSheet.create({
   section: { gap: spacing.md },
   row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   specs: { flexDirection: "row", gap: spacing.md },
+  driver: { flexDirection: "row", alignItems: "center", gap: spacing.md },
 });

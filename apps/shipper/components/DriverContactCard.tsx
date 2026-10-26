@@ -5,14 +5,15 @@ import {
   StyleSheet,
   GestureResponderEvent,
 } from "react-native";
-import { Image } from "expo-image";
 import { MailIcon, PhoneIcon } from "lucide-react-native";
-import { Card, colors, palette, radius, spacing, Text } from "@a2b/ui";
+import { Avatar } from "@a2b/features";
+import { Card, colors, radius, spacing, Text } from "@a2b/ui";
 
 interface DriverContactCardProps {
   driverName: string;
   role?: string;
-  avatarSource?: any;
+  /** The driver's `driverAvatarPath` from the load; initials are shown without one. */
+  avatarPath?: string | null;
   onPressCard: () => void;
   onCallPress: () => void;
   onMessagePress: () => void;
@@ -21,7 +22,7 @@ interface DriverContactCardProps {
 export const DriverContactCard: React.FC<DriverContactCardProps> = ({
   driverName,
   role = "Driver",
-  avatarSource = require("@/assets/images/driver_avatar.png"),
+  avatarPath,
   onPressCard,
   onCallPress,
   onMessagePress,
@@ -45,11 +46,7 @@ export const DriverContactCard: React.FC<DriverContactCardProps> = ({
       accessibilityLabel={`${driverName}, ${role}. View driver and vehicle details`}
     >
       <View style={styles.driverInfoContainer}>
-        <Image
-          source={avatarSource}
-          style={styles.driverAvatar}
-          contentFit="cover"
-        />
+        <Avatar path={avatarPath} name={driverName} size={55} />
         <View style={styles.driverTextContainer}>
           <Text variant="bodyStrong" tone="inverse">{driverName}</Text>
           <Text variant="caption" color={colors.onPrimaryMuted} style={styles.driverRoleText}>
@@ -93,12 +90,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
-  },
-  driverAvatar: {
-    width: 55,
-    height: 55,
-    borderRadius: radius.pill,
-    backgroundColor: palette.forest[800],
   },
   driverTextContainer: {
     marginLeft: spacing.md,

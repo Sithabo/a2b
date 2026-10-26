@@ -1,13 +1,14 @@
 import { StyleSheet, View } from "react-native";
-import { LogOut } from "lucide-react-native";
+import { useRouter } from "expo-router";
+import { LogOut, Pencil } from "lucide-react-native";
 import { getMarket } from "@a2b/core";
 import { Button, Card, colors, ScreenScroll, spacing, Text } from "@a2b/ui";
+import { SIZE_LABELS } from "@/components/FleetDetailsForm";
 import { api, useSession } from "@/lib/session";
 import { useFleet } from "@/lib/queries";
 
-const SIZE_LABELS = { "1-5": "1–5 trucks", "6-20": "6–20 trucks", "20+": "20+ trucks" } as const;
-
 export default function AccountScreen() {
+  const router = useRouter();
   const user = useSession((s) => s.user);
   const signOut = useSession((s) => s.signOut);
   const fleet = useFleet();
@@ -25,9 +26,11 @@ export default function AccountScreen() {
       </Text>
 
       <Card style={styles.section}>
-        <Text variant="label" tone="secondary">
-          Fleet
-        </Text>
+        <SectionHeader
+          title="Fleet"
+          editLabel="Edit fleet details"
+          onEdit={fleet.data ? () => router.push("/fleet/edit") : undefined}
+        />
         <Row label="Company" value={fleet.data?.name} />
         <Row label="Market" value={`${market.flag} ${market.name}`} />
         <Row label="Size" value={fleet.data ? SIZE_LABELS[fleet.data.sizeTier] : undefined} />
@@ -37,15 +40,27 @@ export default function AccountScreen() {
       </Card>
 
       <Card style={styles.section}>
-        <Text variant="label" tone="secondary">
-          Owner
-        </Text>
-        <Row label="Mobile" value={user?.phone} />
+        <SectionHeader title="Owner" editLabel="Edit your profile" onEdit={() => router.push("/account/edit")} />
         <Row label="Name" value={user?.fullName ?? "—"} />
+        <Row label="Mobile" value={user?.phone} />
+        <Row label="Email" value={user?.email ?? "Not added"} />
       </Card>
 
       <Button title="Sign out" icon={LogOut} variant="ghost" onPress={handleSignOut} />
     </ScreenScroll>
+  );
+}
+
+function SectionHeader({ title, editLabel, onEdit }: { title: string; editLabel: string; onEdit?: () => void }) {
+  return (
+    <View style={styles.sectionHeader}>
+      <Text variant="label" tone="secondary">
+        {title}
+      </Text>
+      {onEdit ? (
+        <Button title="Edit" icon={Pencil} variant="ghost" size="sm" onPress={onEdit} accessibilityLabel={editLabel} />
+      ) : null}
+    </View>
   );
 }
 
@@ -62,6 +77,7 @@ function Row({ label, value }: { label: string; value?: string | null }) {
 
 const styles = StyleSheet.create({
   section: { gap: spacing.md },
+  sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", minHeight: 40 },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
