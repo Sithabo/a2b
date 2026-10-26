@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Alert, StyleSheet, Switch, View } from "react-native";
+import { StyleSheet, Switch, View } from "react-native";
 import { useRouter } from "expo-router";
 import { ArrowRight, Moon, PackageSearch, ShieldAlert } from "lucide-react-native";
 import { apiErrorMessage } from "@a2b/api-client";
 import { formatMoney, getMarket, statusMeta } from "@a2b/core";
-import { LoadCard, QueryFallback } from "@a2b/features";
+import { LoadCard, notify, QueryFallback } from "@a2b/features";
 import { Badge, Card, colors, EmptyState, palette, ScreenScroll, spacing, Text } from "@a2b/ui";
 import { FleetInviteCard } from "@/components/FleetInviteCard";
 import { api, session, useSession } from "@/lib/session";
@@ -28,7 +28,7 @@ export default function JobsScreen() {
       await api.me.upsertDriverProfile({ body: { dutyStatus: value ? "AVAILABLE" : "OFF_DUTY" } });
       await session.refreshUser();
     } catch (err) {
-      Alert.alert("Couldn't change your status", apiErrorMessage(err));
+      notify("Couldn't change your status", apiErrorMessage(err));
     } finally {
       setIsToggling(false);
     }

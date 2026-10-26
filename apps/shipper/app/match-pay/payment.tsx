@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, ScrollView, Pressable, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, ScrollView, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
+import { notify } from '@a2b/features';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronRight, Lock, CreditCard } from 'lucide-react-native';
@@ -33,7 +34,7 @@ export default function PaymentMethodScreen() {
       router.replace({ pathname: '/match-pay/confirmed', params: { trackingId: String(loadId), method } });
     } catch (err) {
       setSelected(null);
-      Alert.alert('Payment not completed', apiErrorMessage(err));
+      notify('Payment not completed', apiErrorMessage(err));
     } finally {
       setIsPaying(false);
     }

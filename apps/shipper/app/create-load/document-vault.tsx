@@ -7,7 +7,9 @@ import {
   Modal,
   Alert,
   ActivityIndicator,
+  Platform,
 } from "react-native";
+import { confirmAction, notify } from "@a2b/features";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
@@ -112,33 +114,51 @@ export default function DocumentVaultScreen() {
         // Prevent default action
         e.preventDefault();
 
+        const discardAndExit = () => {
+          clearDraft();
+          resetRouteState();
+          navigation.dispatch(e.data.action);
+        };
+        const saveAndExit = () => {
+          if (draft) {
+            setDraft({
+              ...draft,
+              containerId,
+              documents: uploadedFiles,
+              savedAt: new Date().toISOString(),
+            });
+          }
+          navigation.dispatch(e.data.action);
+        };
+
+        // Alert does nothing in a browser, which would leave the screen stuck. The
+        // browser's dialog is only OK/Cancel, so ask twice: save, else discard, else stay
+        if (Platform.OS === "web") {
+          void (async () => {
+            const save = await confirmAction({
+              title: "Unfinished Import Shipment",
+              message: "Save your progress as a draft? You can complete your document uploads from the dashboard.",
+              confirmLabel: "Save Draft & Exit",
+            });
+            if (save) return saveAndExit();
+            const discard = await confirmAction({
+              title: "Discard this shipment?",
+              message: "Your container ID and documents will be lost.",
+              confirmLabel: "Discard Draft",
+              destructive: true,
+            });
+            if (discard) discardAndExit();
+          })();
+          return;
+        }
+        // Two ways out rather than confirm/cancel, so this stays a native Alert
+        // eslint-disable-next-line no-restricted-syntax
         Alert.alert(
           "Unfinished Import Shipment",
           "Your progress will be saved as a draft. You can complete your document uploads from the dashboard.",
           [
-            {
-              text: "Discard Draft",
-              style: "destructive",
-              onPress: () => {
-                clearDraft();
-                resetRouteState();
-                navigation.dispatch(e.data.action);
-              },
-            },
-            {
-              text: "Save Draft & Exit",
-              onPress: () => {
-                if (draft) {
-                  setDraft({
-                    ...draft,
-                    containerId,
-                    documents: uploadedFiles,
-                    savedAt: new Date().toISOString(),
-                  });
-                }
-                navigation.dispatch(e.data.action);
-              },
-            },
+            { text: "Discard Draft", style: "destructive", onPress: discardAndExit },
+            { text: "Save Draft & Exit", onPress: saveAndExit },
           ]
         );
       }
@@ -174,7 +194,7 @@ export default function DocumentVaultScreen() {
     // Request Camera permissions
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert("Permission Denied", "Camera access is required to scan documents.");
+      notify("Permission Denied", "Camera access is required to scan documents.");
       return;
     }
 
@@ -218,7 +238,7 @@ export default function DocumentVaultScreen() {
 
       setIsEnhancing(false);
       setActiveSlot(null);
-      Alert.alert("Scan Enhanced", "Grayscale filter applied successfully. Contrast adjusted for text readability.");
+      notify("Scan Enhanced", "Grayscale filter applied successfully. Contrast adjusted for text readability.");
     }, 1500);
   };
 
@@ -267,7 +287,7 @@ export default function DocumentVaultScreen() {
       resetRouteState();
       router.replace({ pathname: "/create-load/status", params: { state: "confirmed", trackingId: String(loadId) } });
     } catch (err) {
-      Alert.alert("Couldn't post this load", err instanceof Error ? err.message : apiErrorMessage(err));
+      notify("Couldn't post this load", err instanceof Error ? err.message : apiErrorMessage(err));
     } finally {
       setIsSubmitting(false);
     }

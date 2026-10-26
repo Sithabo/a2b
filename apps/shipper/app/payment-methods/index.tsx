@@ -14,13 +14,16 @@ import {
   MoreVertical,
   Plus,
   MapPin,
+  Trash2,
   CheckCircle2,
   Circle,
 } from "lucide-react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useBillingStore, type SavedCard } from "@/store/useBillingStore";
 import { CreditCardInput, CreditCardView, type CreditCardFormData, type CreditCardFormField } from "react-native-credit-card-input";
+import { confirmAction } from "@a2b/features";
 import {
+  BottomSheet,
   Button,
   Card,
   colors,
@@ -39,8 +42,9 @@ import {
 
 export default function PaymentMethodsScreen() {
   const router = useRouter();
-  const { cards, addresses, addCard, updateCard, setDefaultCard } =
+  const { cards, addresses, addCard, updateCard, removeCard, setDefaultCard } =
     useBillingStore();
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
   const insets = useSafeAreaInsets();
 
   const defaultAddress = addresses.find((a) => a.isDefault) || addresses[0];
@@ -93,6 +97,21 @@ export default function PaymentMethodsScreen() {
     }
   };
 
+  const cardLabel = (card: SavedCard) =>
+    card.brand ? card.brand.charAt(0).toUpperCase() + card.brand.slice(1).replace("-", " ") : "Credit Card";
+
+  const removeCardWithConfirm = async (card: SavedCard) => {
+    const confirmed = await confirmAction({
+      title: `Remove ${cardLabel(card)} ending in ${card.last4}?`,
+      message: card.isDefault && cards.length > 1 ? "Your next card becomes the default." : undefined,
+      confirmLabel: "Remove",
+      destructive: true,
+    });
+    if (!confirmed) return;
+    removeCard(card.id);
+    if (cards.length === 1) setIsMenuVisible(false);
+  };
+
   const getCardIcon = (type: string) => {
     switch (type) {
       case "master-card":
@@ -116,8 +135,7 @@ export default function PaymentMethodsScreen() {
         title="Payment Method"
         onBackPress={() => router.back()}
         rightElement={
-          // No menu actions yet
-          <IconButton icon={MoreVertical} accessibilityLabel="More options" onPress={() => {}} />
+          <IconButton icon={MoreVertical} accessibilityLabel="More options" onPress={() => setIsMenuVisible(true)} />
         }
       />
 
@@ -128,9 +146,7 @@ export default function PaymentMethodsScreen() {
         {/* Cards List */}
         <Card padding="lg" style={styles.sectionCard}>
           {cards.map((card) => {
-            const cardName = card.brand
-              ? card.brand.charAt(0).toUpperCase() + card.brand.slice(1).replace("-", " ")
-              : "Credit Card";
+            const cardName = cardLabel(card);
             return (
               <Pressable
                 key={card.id}
@@ -185,6 +201,44 @@ export default function PaymentMethodsScreen() {
           />
         </ListSection>
       </ScrollView>
+
+      {/* More options */}
+      <BottomSheet isVisible={isMenuVisible} onClose={() => setIsMenuVisible(false)} title="Payment options">
+        <View style={styles.menu}>
+          <ListSection>
+            <ListItem
+              icon={Plus}
+              title="Add payment method"
+              onPress={() => {
+                setIsMenuVisible(false);
+                openAddModal();
+              }}
+            />
+            <ListItem
+              icon={MapPin}
+              title="Business addresses"
+              onPress={() => {
+                setIsMenuVisible(false);
+                router.push("/payment-methods/addresses");
+              }}
+            />
+          </ListSection>
+          {cards.length > 0 && (
+            <ListSection title="Remove a card">
+              {cards.map((card) => (
+                <ListItem
+                  key={card.id}
+                  icon={Trash2}
+                  tone="danger"
+                  title={`Remove ${cardLabel(card)}`}
+                  subtitle={`Ending in ${card.last4}${card.isDefault ? " · default" : ""}`}
+                  onPress={() => removeCardWithConfirm(card)}
+                />
+              ))}
+            </ListSection>
+          )}
+        </View>
+      </BottomSheet>
 
       {/* Add/Edit Card Bottom Sheet */}
       <Modal
@@ -286,6 +340,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceMuted,
     alignItems: "center",
     justifyContent: "center",
+  },
+  menu: {
+    gap: spacing.lg,
   },
   addPaymentButton: {
     marginTop: spacing.sm,

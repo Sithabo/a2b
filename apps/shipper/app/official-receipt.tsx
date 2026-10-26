@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, ScrollView, StyleSheet } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Check, FileText, Share2 } from "lucide-react-native";
@@ -7,6 +7,7 @@ import { useMarket } from "@/store/useMarket";
 import { cargoLabel, formatMoney, paymentMethods } from "@a2b/core";
 import { parseLoadId, trackingLabel, useShipment } from "@/lib/loads";
 import { LoadState } from "@/components/LoadState";
+import { downloadReceiptPdf, shareReceiptOnWhatsApp } from "@/lib/receipt";
 
 export default function OfficialReceiptScreen() {
   const router = useRouter();
@@ -14,6 +15,7 @@ export default function OfficialReceiptScreen() {
   const { data: shipment, error, refetch } = useShipment(parseLoadId(trackingId));
 
   const market = useMarket();
+  const [isSaving, setIsSaving] = useState(false);
   const formatCurrency = (amount: number) => formatMoney(amount, market);
 
   if (!shipment) return <LoadState error={error} onRetry={refetch} />;
@@ -103,10 +105,26 @@ export default function OfficialReceiptScreen() {
 
         {/* Actions */}
         <View style={styles.actionsContainer}>
-          {/* Not wired up yet: these were TouchableOpacitys without an onPress. */}
-          <Button title="Download PDF" variant="secondary" icon={FileText} fullWidth onPress={() => {}} />
+          <Button
+            title="Download PDF"
+            variant="secondary"
+            icon={FileText}
+            fullWidth
+            loading={isSaving}
+            onPress={async () => {
+              setIsSaving(true);
+              await downloadReceiptPdf(shipment);
+              setIsSaving(false);
+            }}
+          />
 
-          <Button title="Share via WhatsApp" variant="secondary" icon={Share2} fullWidth onPress={() => {}} />
+          <Button
+            title="Share via WhatsApp"
+            variant="secondary"
+            icon={Share2}
+            fullWidth
+            onPress={() => shareReceiptOnWhatsApp(shipment)}
+          />
 
           <Button
             title="Back to Home"
