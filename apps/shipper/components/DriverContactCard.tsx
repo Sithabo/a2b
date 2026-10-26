@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  View,
-  Pressable,
-  StyleSheet,
-  GestureResponderEvent,
-} from "react-native";
+import { View, Pressable, StyleSheet } from "react-native";
 import { Image } from "expo-image";
 import { MailIcon, PhoneIcon } from "lucide-react-native";
 import { Card, colors, palette, radius, spacing, Text } from "@a2b/ui";
@@ -26,25 +21,17 @@ export const DriverContactCard: React.FC<DriverContactCardProps> = ({
   onCallPress,
   onMessagePress,
 }) => {
-  const handleCall = (e: GestureResponderEvent) => {
-    e.stopPropagation();
-    onCallPress();
-  };
-
-  const handleMessage = (e: GestureResponderEvent) => {
-    e.stopPropagation();
-    onMessagePress();
-  };
-
+  // The card itself is a plain container: on web a pressable card renders as
+  // <button>, and the call/message buttons can't be nested inside it. The
+  // details area and the action buttons are sibling pressables instead.
   return (
-    <Card
-      variant="brand"
-      padding="lg"
-      style={styles.driverCard}
-      onPress={onPressCard}
-      accessibilityLabel={`${driverName}, ${role}. View driver and vehicle details`}
-    >
-      <View style={styles.driverInfoContainer}>
+    <Card variant="brand" padding="lg" style={styles.driverCard}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`${driverName}, ${role}. View driver and vehicle details`}
+        style={({ pressed }) => [styles.driverInfoContainer, pressed && styles.infoPressed]}
+        onPress={onPressCard}
+      >
         <Image
           source={avatarSource}
           style={styles.driverAvatar}
@@ -56,14 +43,14 @@ export const DriverContactCard: React.FC<DriverContactCardProps> = ({
             {role}
           </Text>
         </View>
-      </View>
+      </Pressable>
       <View style={styles.driverActionsContainer}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Call ${driverName}`}
           hitSlop={4}
           style={({ pressed }) => [styles.driverActionButton, pressed && styles.pressed]}
-          onPress={handleCall}
+          onPress={onCallPress}
         >
           <PhoneIcon color={colors.primary} size={20} />
         </Pressable>
@@ -72,7 +59,7 @@ export const DriverContactCard: React.FC<DriverContactCardProps> = ({
           accessibilityLabel={`Message ${driverName}`}
           hitSlop={4}
           style={({ pressed }) => [styles.driverActionButton, pressed && styles.pressed]}
-          onPress={handleMessage}
+          onPress={onMessagePress}
         >
           <MailIcon color={colors.primary} size={20} />
         </Pressable>
@@ -112,8 +99,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing.sm,
   },
-  // Same look as IconButton's "surface" variant; kept as a Pressable because the
-  // handlers need the press event to stop it reaching the card.
+  // Same look as IconButton's "surface" variant.
   driverActionButton: {
     width: 40,
     height: 40,
@@ -124,5 +110,9 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.7,
+  },
+  // Matches Card's own pressed feedback.
+  infoPressed: {
+    opacity: 0.9,
   },
 });
