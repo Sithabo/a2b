@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Alert, Linking, ScrollView, StyleSheet, View } from "react-native";
+import { Linking, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { CheckCircle2, Clock, FileCheck2, Navigation, Phone } from "lucide-react-native";
 import type { Data } from "@a2b/api-client";
 import { apiErrorCode, apiErrorMessage } from "@a2b/api-client";
-import { LoadTimeline, QueryFallback, useProgressLoad, useReleaseEscrow, useWithdrawLoad } from "@a2b/features";
+import { confirmAction, LoadTimeline, QueryFallback, useProgressLoad, useReleaseEscrow, useWithdrawLoad } from "@a2b/features";
 import { cargoLabel, formatMarketTime, formatMoney, getMarket, statusMeta } from "@a2b/core";
 import {
   Badge,
@@ -48,15 +48,15 @@ export default function TripScreen() {
 
   const progress = (status: "IN_TRANSIT") => progressLoad.mutate(status);
 
-  const withdraw = () =>
-    Alert.alert("Withdraw from this load?", "It goes back on the board for other drivers.", [
-      { text: "Keep it", style: "cancel" },
-      {
-        text: "Withdraw",
-        style: "destructive",
-        onPress: () => withdrawal.mutate(undefined, { onSuccess: () => router.replace("/(tabs)") }),
-      },
-    ]);
+  const withdraw = async () => {
+    const confirmed = await confirmAction({
+      title: "Withdraw from this load?",
+      message: "It goes back on the board for other drivers.",
+      confirmLabel: "Withdraw",
+      destructive: true,
+    });
+    if (confirmed) withdrawal.mutate(undefined, { onSuccess: () => router.replace("/(tabs)") });
+  };
 
   const header = (
     <ScreenHeader title={l.reference} subtitle={cargoLabel(l.cargoType)} onBackPress={() => router.back()} />

@@ -1,8 +1,9 @@
-import { Alert, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useMutation } from "@tanstack/react-query";
 import { Users } from "lucide-react-native";
 import type { Data } from "@a2b/api-client";
 import { apiErrorMessage } from "@a2b/api-client";
+import { confirmAction, notify } from "@a2b/features";
 import { Button, Card, colors, spacing, Text } from "@a2b/ui";
 import { api, session } from "@/lib/session";
 import { keys, useInvalidate } from "@/lib/queries";
@@ -18,18 +19,17 @@ export function FleetInviteCard({ invite }: { invite: Data.FleetInvite }) {
     onSuccess: async () => {
       await Promise.all([invalidate(keys.fleetInvites), session.refreshUser()]);
     },
-    onError: (err) => Alert.alert("Couldn't answer the invite", apiErrorMessage(err)),
+    onError: (err) => notify("Couldn't answer the invite", apiErrorMessage(err)),
   });
 
-  const confirmAccept = () =>
-    Alert.alert(
-      `Join ${invite.fleetName}?`,
-      "Your fleet owner will dispatch jobs to you, and payment for the loads you carry goes to them.",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Join fleet", onPress: () => respond.mutate(true) },
-      ]
-    );
+  const confirmAccept = async () => {
+    const confirmed = await confirmAction({
+      title: `Join ${invite.fleetName}?`,
+      message: "Your fleet owner will dispatch jobs to you, and payment for the loads you carry goes to them.",
+      confirmLabel: "Join fleet",
+    });
+    if (confirmed) respond.mutate(true);
+  };
 
   return (
     <Card style={styles.card} padding="lg">

@@ -1,8 +1,8 @@
-import { Alert } from 'react-native';
 import { useMutation } from '@tanstack/react-query';
 import { apiErrorMessage } from '@a2b/api-client';
 import { useAppSession } from '../session/session_context.tsx';
 import type { UploadFile } from '../session/create_app_session.ts';
+import { notify } from '../support/confirm.ts';
 
 /**
  * Every app keys its load queries under this root (["loads", "board"],
@@ -26,7 +26,7 @@ function useLoadMutation<TVariables, TData>(
     mutationFn,
     // Stays pending until the refetches are in, so screens never show stale status
     onSuccess: () => queryClient.invalidateQueries({ queryKey: LOADS_QUERY_ROOT }),
-    onError: errorTitle === false ? undefined : (error) => Alert.alert(errorTitle, apiErrorMessage(error)),
+    onError: errorTitle === false ? undefined : (error) => notify(errorTitle, apiErrorMessage(error)),
   });
 }
 

@@ -9,8 +9,7 @@ import {
   Platform,
   Switch,
   LayoutAnimation,
-  Alert,
-} from "react-native";
+  } from "react-native";
 import { useRouter } from "expo-router";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
@@ -19,7 +18,7 @@ import { useProfileImage, useUserProfile } from "@/store/useShipperProfile";
 import { useMarket } from "@/store/useMarket";
 import { isValidTaxId } from "@a2b/core";
 import { apiErrorMessage } from "@a2b/api-client";
-import { emailSupport } from "@a2b/features";
+import { confirmAction, emailSupport, notify } from "@a2b/features";
 import { supportContext } from "@/lib/support";
 import { api, useSession } from "@/lib/session";
 import {
@@ -76,6 +75,13 @@ export default function AccountScreen() {
   const [tinError, setTinError] = useState("");
 
   const handleLogout = async () => {
+    const confirmed = await confirmAction({
+      title: "Log out?",
+      message: "You'll need a new verification code to sign back in.",
+      confirmLabel: "Log Out",
+      destructive: true,
+    });
+    if (!confirmed) return;
     await api.auth.logout({}).catch(() => {}); // revoke the token server-side when online
     await signOut(); // the root layout routes back to sign-in
   };
@@ -130,7 +136,7 @@ export default function AccountScreen() {
       setProfileImage(editProfileImage || undefined); // avatar stays on-device until uploads exist
       setIsEditModalVisible(false);
     } catch (err) {
-      Alert.alert("Couldn't save", apiErrorMessage(err));
+      notify("Couldn't save", apiErrorMessage(err));
     } finally {
       setIsSaving(false);
     }

@@ -4,8 +4,8 @@ import {
   ScrollView,
   Pressable,
   StyleSheet,
-  Alert,
-} from "react-native";
+  } from "react-native";
+import { notify } from "@a2b/features";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -332,7 +332,7 @@ export default function CargoDetailsScreen() {
       resetRouteState();
       router.replace({ pathname: "/create-load/status", params: { state: "confirmed", trackingId: String(data.id) } });
     } catch (err) {
-      Alert.alert("Couldn't post this load", apiErrorMessage(err));
+      notify("Couldn't post this load", apiErrorMessage(err));
     } finally {
       setIsPosting(false);
     }

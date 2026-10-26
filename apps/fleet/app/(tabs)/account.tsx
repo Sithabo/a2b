@@ -1,6 +1,7 @@
 import { StyleSheet, View } from "react-native";
 import { LogOut } from "lucide-react-native";
 import { getMarket } from "@a2b/core";
+import { confirmAction } from "@a2b/features";
 import { Button, Card, colors, ScreenScroll, spacing, Text } from "@a2b/ui";
 import { api, useSession } from "@/lib/session";
 import { useFleet } from "@/lib/queries";
@@ -14,6 +15,13 @@ export default function AccountScreen() {
   const market = getMarket(fleet.data?.market ?? user?.market ?? "UG");
 
   const handleSignOut = async () => {
+    const confirmed = await confirmAction({
+      title: "Sign out?",
+      message: "You'll need a new verification code to sign back in.",
+      confirmLabel: "Sign out",
+      destructive: true,
+    });
+    if (!confirmed) return;
     await api.auth.logout({}).catch(() => {}); // revoke the token server-side when online
     await signOut(); // the root layout routes back to sign-in
   };

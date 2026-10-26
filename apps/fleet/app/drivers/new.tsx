@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
+import { notify } from "@a2b/features";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { X } from "lucide-react-native";
@@ -34,7 +35,7 @@ export default function AddDriverScreen() {
       await invalidate(keys.drivers, keys.invites);
       if (data.status === "INVITED") {
         // They already drive on A2B, so they have to accept before joining
-        Alert.alert(
+        notify(
           "Invite sent",
           `${data.invite.driverName ?? "This driver"} already uses A2B. They'll join your fleet once they accept the invite in the A2B Driver app.`
         );
