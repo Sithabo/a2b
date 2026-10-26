@@ -21,7 +21,7 @@ import User from '#models/user'
 import DomainError from '#exceptions/domain_error'
 import { fleetOwnedBy } from '#services/load_access'
 import { normalizePhone } from '#services/otp_service'
-import { sms } from '#services/sms/index'
+import { notifyBySms } from '#services/sms/index'
 
 export async function requireFleet(owner: User) {
   const fleet = await fleetOwnedBy(owner)
@@ -209,7 +209,7 @@ export async function addDriver(
 
   if (result.status === 'INVITED') {
     if (result.isNewInvite) {
-      await sms.send(
+      await notifyBySms(
         phone,
         `${fleet.name} has invited you to drive for their fleet on A2B. Open the A2B Driver app to accept or decline.`
       )

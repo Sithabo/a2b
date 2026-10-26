@@ -29,9 +29,14 @@ export function PhoneSignInScreen({ icon: Icon, eyebrow, title, subtitle, onCode
   const [isSending, setIsSending] = useState(false);
 
   const handleSend = async () => {
+    // "+1 405…" parses as written; anything else is read as a number in the chosen country
     const phone = parsePhone(number, markets[market]);
     if (!phone) {
-      setError(`Enter a valid ${markets[market].name} mobile number`);
+      setError(
+        number.trim().startsWith('+')
+          ? 'Enter a valid mobile number including the country code'
+          : `Enter a valid ${markets[market].name} mobile number`
+      );
       return;
     }
     setError('');

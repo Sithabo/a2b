@@ -32,9 +32,12 @@ export function PhoneField({ market, onMarketChange, value, onChangeText, error 
         textContentType="telephoneNumber"
         error={error}
         leading={
-          <Text variant="bodyStrong" tone="secondary">
-            {m.phone.callingCode}
-          </Text>
+          // A number typed with its own country code (e.g. a +1 tester) needs no prefix
+          value.trim().startsWith('+') ? undefined : (
+            <Text variant="bodyStrong" tone="secondary">
+              {m.phone.callingCode}
+            </Text>
+          )
         }
       />
     </View>

@@ -402,7 +402,7 @@ export class PhoneOtpSchema extends BaseModel {
   @column()
   declare attempts: number
   @column()
-  declare codeHash: string
+  declare codeHash: string | null
   @column.dateTime()
   declare consumedAt: DateTime | null
   @column.dateTime({ autoCreate: true })

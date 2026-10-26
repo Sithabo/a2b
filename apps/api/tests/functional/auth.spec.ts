@@ -4,6 +4,7 @@ import limiter from '@adonisjs/limiter/services/main'
 import { dataOf, nextPhone } from '#tests/helpers'
 import User from '#models/user'
 import otpConfig from '#config/otp'
+import { swapTwilioVerify } from '#services/otp_service'
 
 // +256700000001 is an OTP test number with the fixed code 123456 (see .env)
 const TEST_PHONE = '+256700000001'
@@ -149,5 +150,113 @@ test.group('Auth / phone OTP', (group) => {
   test('protected routes need a token', async ({ client }) => {
     const response = await client.get('/api/v1/me')
     response.assertStatus(401)
+  })
+})
+
+test.group('Auth / testers outside the markets', (group) => {
+  group.each.setup(() => testUtils.db().withGlobalTransaction())
+  group.each.setup(() => limiter.clear())
+
+  // +14055550100 is listed in OTP_TESTER_PHONES with market UG (see .env.test)
+  test('a listed US number signs in with its configured market', async ({ client, assert }) => {
+    const phone = '+14055550100'
+    const requested = await client.post('/api/v1/auth/otp').json({ phone })
+    requested.assertStatus(200)
+    const verified = await client
+      .post('/api/v1/auth/verify')
+      .json({ phone, code: dataOf(requested).devCode, role: 'shipper' })
+    verified.assertStatus(200)
+    assert.equal(dataOf(verified).user.market, 'UG')
+  })
+
+  test('other US numbers are still turned away', async ({ client }) => {
+    const response = await client.post('/api/v1/auth/otp').json({ phone: '+14055550199' })
+    response.assertStatus(422)
+    response.assertBodyContains({ errors: [{ code: 'E_UNSUPPORTED_MARKET' }] })
+  })
+})
+
+test.group('Auth / Twilio Verify', (group) => {
+  const sent: string[] = []
+  const fake = {
+    async start(phone: string) {
+      sent.push(phone)
+    },
+    async check(_phone: string, code: string) {
+      // Like Twilio: an approved verification can't be checked again
+      if (code !== '424242') return 'invalid' as const
+      return fake.used ? ('expired' as const) : ((fake.used = true), 'approved' as const)
+    },
+    used: false,
+  }
+
+  group.each.setup(() => testUtils.db().withGlobalTransaction())
+  group.each.setup(() => limiter.clear())
+  group.each.setup(() => {
+    const driver = otpConfig.driver
+    sent.length = 0
+    fake.used = false
+    otpConfig.driver = 'twilio_verify'
+    swapTwilioVerify(fake)
+    return () => {
+      otpConfig.driver = driver
+      swapTwilioVerify(undefined)
+    }
+  })
+
+  test('Twilio sends the code and the API never sees it', async ({ client, assert }) => {
+    const phone = nextPhone('GY')
+    const requested = await client.post('/api/v1/auth/otp').json({ phone })
+    requested.assertStatus(200)
+    assert.deepEqual(sent, [phone])
+    assert.notProperty(dataOf(requested), 'devCode')
+
+    const wrong = await client
+      .post('/api/v1/auth/verify')
+      .json({ phone, code: '000000', role: 'driver' })
+    wrong.assertBodyContains({ errors: [{ code: 'E_OTP_INVALID' }] })
+
+    const right = await client
+      .post('/api/v1/auth/verify')
+      .json({ phone, code: '424242', role: 'driver' })
+    right.assertStatus(200)
+  })
+
+  test('a code Twilio approved still works after a missing role', async ({ client }) => {
+    const phone = nextPhone('UG')
+    await client.post('/api/v1/auth/otp').json({ phone })
+    const noRole = await client.post('/api/v1/auth/verify').json({ phone, code: '424242' })
+    noRole.assertBodyContains({ errors: [{ code: 'E_ROLE_REQUIRED' }] })
+
+    const retry = await client
+      .post('/api/v1/auth/verify')
+      .json({ phone, code: '424242', role: 'shipper' })
+    retry.assertStatus(200)
+
+    const reused = await client
+      .post('/api/v1/auth/verify')
+      .json({ phone, code: '424242', role: 'shipper' })
+    reused.assertBodyContains({ errors: [{ code: 'E_OTP_EXPIRED' }] })
+  })
+
+  test('test numbers keep their fixed code without calling Twilio', async ({ client, assert }) => {
+    await client.post('/api/v1/auth/otp').json({ phone: TEST_PHONE })
+    assert.deepEqual(sent, [])
+    const verified = await client
+      .post('/api/v1/auth/verify')
+      .json({ phone: TEST_PHONE, code: '123456', role: 'driver' })
+    verified.assertStatus(200)
+  })
+
+  test('a failed send is reported as such, not as a server error', async ({ client }) => {
+    swapTwilioVerify({
+      ...fake,
+      async start() {
+        throw new Error('Twilio is down')
+      },
+    })
+    const response = await client.post('/api/v1/auth/otp').json({ phone: nextPhone('GY') })
+    response.assertStatus(502)
+    response.assertBodyContains({ errors: [{ code: 'E_SMS_FAILED' }] })
   })
 })
