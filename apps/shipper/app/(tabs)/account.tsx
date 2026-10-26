@@ -10,21 +10,21 @@ import {
   Switch,
   LayoutAnimation,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useProfileImage, useUserProfile } from "@/store/useShipperProfile";
+import { useUserProfile } from "@/store/useShipperProfile";
 import { useMarket } from "@/store/useMarket";
 import { isValidTaxId } from "@a2b/core";
-import { apiErrorMessage } from "@a2b/api-client";
-import { emailSupport } from "@a2b/features";
+import { apiErrorMessage, type Data } from "@a2b/api-client";
+import { Avatar, confirmAction, emailSupport } from "@a2b/features";
 import { supportContext } from "@/lib/support";
-import { api, useSession } from "@/lib/session";
+import { api, session, useSession } from "@/lib/session";
 import {
   Pencil,
-  User,
+  Trash2,
   CreditCard,
   Globe,
   Bell,
@@ -54,10 +54,12 @@ import {
   tones,
 } from "@a2b/ui";
 
+/** The API's limit for profile photos (POST /me/avatar). */
+const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
+
 export default function AccountScreen() {
   const router = useRouter();
   const userProfile = useUserProfile();
-  const setProfileImage = useProfileImage((s) => s.set);
   const setUser = useSession((s) => s.setUser);
   const signOut = useSession((s) => s.signOut);
   const user = useSession((s) => s.user);
@@ -70,7 +72,7 @@ export default function AccountScreen() {
   const [editRegion, setEditRegion] = useState("");
   const [editEmail, setEditEmail] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [editProfileImage, setEditProfileImage] = useState<string | null>(null);
+  const [photoBusy, setPhotoBusy] = useState<"upload" | "remove" | null>(null);
   const [editIsImporter, setEditIsImporter] = useState(false);
   const [editTin, setEditTin] = useState("");
   const [tinError, setTinError] = useState("");
@@ -84,23 +86,59 @@ export default function AccountScreen() {
     setEditCompany(userProfile?.company || "");
     setEditRegion(userProfile?.region || "");
     setEditEmail(userProfile?.email || "");
-    setEditProfileImage(userProfile?.profileImage || null);
     setEditIsImporter(userProfile?.isImporter || false);
     setEditTin(userProfile?.tin || "");
     setTinError("");
     setIsEditModalVisible(true);
   };
 
+  // The photo is saved to the account as soon as it's picked, separately from "Save Details".
   const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
+    if (photoBusy) return;
+    const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
     });
+    if (result.canceled) return;
 
-    if (!result.canceled) {
-      setEditProfileImage(result.assets[0].uri);
+    const asset = result.assets[0];
+    if (asset.fileSize && asset.fileSize > MAX_AVATAR_BYTES) {
+      Alert.alert("Photo too large", "Choose a photo under 5 MB.");
+      return;
+    }
+    const mimeType = asset.mimeType ?? "image/jpeg";
+    setPhotoBusy("upload");
+    try {
+      const { data } = await session.upload<{ data: Data.User }>("me/avatar", {}, {
+        uri: asset.uri,
+        name: asset.fileName ?? `avatar.${mimeType.split("/")[1] ?? "jpg"}`,
+        mimeType,
+      });
+      setUser(data);
+    } catch (err) {
+      Alert.alert("Couldn't update your photo", apiErrorMessage(err));
+    } finally {
+      setPhotoBusy(null);
+    }
+  };
+
+  const removePhoto = async () => {
+    const confirmed = await confirmAction({
+      title: "Remove profile photo?",
+      confirmLabel: "Remove",
+      destructive: true,
+    });
+    if (!confirmed) return;
+    setPhotoBusy("remove");
+    try {
+      const { data } = await api.avatars.destroy({});
+      setUser(data);
+    } catch (err) {
+      Alert.alert("Couldn't remove your photo", apiErrorMessage(err));
+    } finally {
+      setPhotoBusy(null);
     }
   };
 
@@ -127,7 +165,6 @@ export default function AccountScreen() {
       });
       const { data: me } = await api.me.show({});
       setUser({ ...data, ...me });
-      setProfileImage(editProfileImage || undefined); // avatar stays on-device until uploads exist
       setIsEditModalVisible(false);
     } catch (err) {
       Alert.alert("Couldn't save", apiErrorMessage(err));
@@ -157,20 +194,14 @@ export default function AccountScreen() {
         {/* Profile Card */}
         <Card style={styles.profileCard}>
           <View style={styles.profileLeft}>
-            {userProfile?.profileImage ? (
-              <Image
-                source={{ uri: userProfile.profileImage }}
-                style={styles.avatarImage}
-                contentFit="cover"
-              />
-            ) : (
-              <View style={[styles.avatarImage, styles.centered]}>
-                <User color={colors.textPlaceholder} size={32} />
-              </View>
-            )}
+            <Avatar
+              path={userProfile?.avatarPath}
+              name={userProfile?.company || userProfile?.name}
+              size={64}
+            />
             <View style={styles.profileInfo}>
               <Text variant="h3" tone="primary">
-                {userProfile?.company || userProfile?.name || "John Musa"}
+                {userProfile?.company || userProfile?.name || "Your business"}
               </Text>
               {userProfile?.email ? (
                 <Text variant="bodySm" tone="muted">{userProfile.email}</Text>
@@ -239,27 +270,40 @@ export default function AccountScreen() {
             </View>
 
             <View style={styles.sheetContent}>
-              <Pressable
-                style={({ pressed }) => [styles.imageUploadContainer, pressed && styles.pressed]}
-                accessibilityRole="button"
-                accessibilityLabel="Change profile photo"
-                onPress={pickImage}
-              >
-                {editProfileImage ? (
-                  <Image
-                    source={{ uri: editProfileImage }}
-                    style={styles.uploadAvatar}
-                    contentFit="cover"
+              <View style={styles.photoSection}>
+                <Pressable
+                  style={({ pressed }) => [styles.imageUploadContainer, pressed && styles.pressed]}
+                  accessibilityRole="button"
+                  accessibilityLabel={userProfile?.avatarPath ? "Change profile photo" : "Add profile photo"}
+                  accessibilityState={{ busy: photoBusy === "upload" }}
+                  disabled={!!photoBusy}
+                  onPress={pickImage}
+                >
+                  <Avatar
+                    path={userProfile?.avatarPath}
+                    name={editCompany || userProfile?.company || userProfile?.name}
+                    size={96}
                   />
-                ) : (
-                  <View style={[styles.uploadAvatar, styles.centered]}>
-                    <User color={colors.textPlaceholder} size={40} />
+                  <View style={styles.uploadOverlay}>
+                    {photoBusy === "upload" ? (
+                      <ActivityIndicator size="small" color={colors.onPrimary} />
+                    ) : (
+                      <Pencil color={colors.onPrimary} size={16} />
+                    )}
                   </View>
-                )}
-                <View style={styles.uploadOverlay}>
-                  <Pencil color={colors.onPrimary} size={16} />
-                </View>
-              </Pressable>
+                </Pressable>
+                {userProfile?.avatarPath ? (
+                  <Button
+                    title="Remove photo"
+                    icon={Trash2}
+                    variant="ghost"
+                    size="md"
+                    onPress={removePhoto}
+                    loading={photoBusy === "remove"}
+                    disabled={!!photoBusy}
+                  />
+                ) : null}
+              </View>
 
               <TextField
                 label="Company Name"
@@ -358,10 +402,6 @@ const styles = StyleSheet.create({
     paddingTop: spacing.lg,
     gap: spacing['2xl'],
   },
-  centered: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
   pressed: {
     opacity: 0.85,
   },
@@ -386,12 +426,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.lg,
-  },
-  avatarImage: {
-    width: 64,
-    height: 64,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surfaceSunken,
   },
   profileInfo: {
     flex: 1,
@@ -423,16 +457,13 @@ const styles = StyleSheet.create({
   sheetContent: {
     gap: spacing.lg,
   },
-  imageUploadContainer: {
-    alignSelf: "center",
+  photoSection: {
+    alignItems: "center",
+    gap: spacing.xs,
     marginBottom: spacing.sm,
-    position: "relative",
   },
-  uploadAvatar: {
-    width: 96,
-    height: 96,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surfaceSunken,
+  imageUploadContainer: {
+    position: "relative",
   },
   uploadOverlay: {
     position: "absolute",

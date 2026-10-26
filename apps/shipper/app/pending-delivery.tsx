@@ -27,6 +27,7 @@ import { apiErrorMessage } from "@a2b/api-client";
 import { api } from "@/lib/session";
 import { parseLoadId, trackingLabel, useInvalidateLoads, useShipment } from "@/lib/loads";
 import { LoadState } from "@/components/LoadState";
+import { LoadDocuments } from "@/components/LoadDocuments";
 
 export default function PendingDeliveryScreen() {
   const router = useRouter();
@@ -164,6 +165,9 @@ export default function PendingDeliveryScreen() {
             </View>
           </View>
         </View>
+
+        {/* Customs documents uploaded for an import load */}
+        <LoadDocuments load={shipment} style={styles.documentsSection} />
       </ScrollView>
 
       {/* Sticky Bottom Cancel Action */}
@@ -326,6 +330,10 @@ const styles = StyleSheet.create({
   },
   tipBold: {
     fontFamily: fontFamily.bold,
+  },
+  documentsSection: {
+    paddingHorizontal: layout.gutter,
+    marginTop: spacing["2xl"],
   },
   cancelActionContainer: {
     position: "absolute",

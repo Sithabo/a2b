@@ -32,8 +32,13 @@ export default await Env.create(new URL('../', import.meta.url), {
   DB_PASSWORD: Env.schema.string.optional(),
   DB_DATABASE: Env.schema.string(),
 
-  // Phone OTP
-  SMS_DRIVER: Env.schema.enum(['log'] as const),
+  // Phone OTP and texts
+  /** "log" prints texts to the server log; "twilio" sends them with Twilio Programmable Messaging. */
+  SMS_DRIVER: Env.schema.enum(['log', 'twilio'] as const),
+  /** "local" makes codes here and texts them with SMS_DRIVER; "twilio_verify" uses Twilio Verify. */
+  OTP_DRIVER: Env.schema.enum.optional(['local', 'twilio_verify'] as const),
+  /** Comma-separated "+14055550123=UG" pairs: numbers outside GY/UG allowed to sign in, and their market. */
+  OTP_TESTER_PHONES: Env.schema.string.optional(),
   /** Comma-separated "+256700000001=123456" pairs accepted without sending an SMS (dev/test only). */
   OTP_TEST_NUMBERS: Env.schema.string.optional(),
   /**
@@ -41,6 +46,17 @@ export default await Env.create(new URL('../', import.meta.url), {
    * Only honoured with SMS_DRIVER=log and never in production.
    */
   OTP_EXPOSE_CODES: Env.schema.boolean.optional(),
+
+  // Twilio (needed for SMS_DRIVER=twilio or OTP_DRIVER=twilio_verify)
+  TWILIO_ACCOUNT_SID: Env.schema.string.optional(),
+  /** The auth token, or an API key's secret when TWILIO_API_KEY_SID is set. */
+  TWILIO_AUTH_TOKEN: Env.schema.secret.optional(),
+  TWILIO_API_KEY_SID: Env.schema.string.optional(),
+  /** Verify service (VA…) used by OTP_DRIVER=twilio_verify. */
+  TWILIO_VERIFY_SERVICE_SID: Env.schema.string.optional(),
+  /** Sender for SMS_DRIVER=twilio: a Messaging Service (MG…), or else a number / alphanumeric ID. */
+  TWILIO_MESSAGING_SERVICE_SID: Env.schema.string.optional(),
+  TWILIO_FROM: Env.schema.string.optional(),
 
   // Rate limiting — "database" in deployed environments, "memory" in tests
   LIMITER_STORE: Env.schema.enum.optional(['database', 'memory'] as const),

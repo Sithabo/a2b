@@ -19,6 +19,8 @@ export interface DraftDocument {
 export interface LoadDraft extends NewLoadInput {
   /** Scans by customs requirement id. */
   documents: Record<string, DraftDocument | null>;
+  /** The API's DRAFT load from an earlier, unfinished submit, reused when posting. */
+  serverLoadId?: number;
   /** Set when the shipper leaves the document vault with "Save draft"; drives the home banner. */
   savedAt?: string;
 }

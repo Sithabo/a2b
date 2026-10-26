@@ -140,7 +140,11 @@ test.group('Proof of delivery', (group) => {
 
     // The fleet and its driver read the same history, worded for them
     const history = `/api/v1/loads/${load.id}/events`
-    const forDriver = loadTimeline(view, dataOf(await client.get(history).loginAs(driver)), 'driver')
+    const forDriver = loadTimeline(
+      view,
+      dataOf(await client.get(history).loginAs(driver)),
+      'driver'
+    )
     assert.deepEqual(forDriver[5].notes, ["Enter the shipper's release code"])
     const forFleet = loadTimeline(view, dataOf(await client.get(history).loginAs(owner)), 'fleet')
     assert.deepEqual(forFleet[5].notes, ["Waiting for the shipper's release code"])

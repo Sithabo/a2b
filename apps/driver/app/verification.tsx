@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Alert, Platform, StyleSheet, View } from "react-native";
+import { Alert, Platform, Pressable, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
-import { Camera, CheckCircle2, Circle, ImageUp, ShieldCheck } from "lucide-react-native";
-import { apiErrorMessage } from "@a2b/api-client";
+import { Camera, CheckCircle2, Circle, FileText, ImageUp, ShieldCheck } from "lucide-react-native";
+import { apiErrorMessage, type Data } from "@a2b/api-client";
 import { getMarket, type DriverDocumentRequirement } from "@a2b/core";
-import { QueryFallback } from "@a2b/features";
-import { Badge, Button, Card, colors, ScreenHeader, ScreenScroll, spacing, Text } from "@a2b/ui";
+import { AuthImage, QueryFallback } from "@a2b/features";
+import { Badge, Button, Card, colors, radius, ScreenHeader, ScreenScroll, spacing, Text } from "@a2b/ui";
 import { useDriverDocuments, useUploadDriverDocument } from "@/lib/queries";
 import { useSession } from "@/lib/session";
 
@@ -17,6 +17,7 @@ export default function VerificationScreen() {
   const documents = useDriverDocuments();
   const upload = useUploadDriverDocument();
   const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const [previewId, setPreviewId] = useState<number | null>(null);
 
   const pick = async (requirement: DriverDocumentRequirement, source: "camera" | "library") => {
     const permission =
@@ -103,6 +104,13 @@ export default function VerificationScreen() {
                   </Text>
                 </View>
               </View>
+              {document ? (
+                <DocumentPreview
+                  document={document}
+                  expanded={previewId === document.id}
+                  onToggle={() => setPreviewId((id) => (id === document.id ? null : document.id))}
+                />
+              ) : null}
               <Text variant="bodySm" tone="secondary">
                 {requirement.hint}
               </Text>
@@ -135,6 +143,44 @@ export default function VerificationScreen() {
         })}
       </ScreenScroll>
     </>
+  );
+}
+
+/** What the driver sent, so they can check it's the right, readable photo. Tap to enlarge. */
+function DocumentPreview({
+  document,
+  expanded,
+  onToggle,
+}: {
+  document: Data.DriverDocument;
+  expanded: boolean;
+  onToggle: () => void;
+}) {
+  // The version makes a replaced photo show instead of the cached one
+  const path = `me/driver-documents/${document.id}?v=${encodeURIComponent(String(document.updatedAt))}`;
+  if (!document.mimeType.startsWith("image/")) {
+    return (
+      <View style={styles.file}>
+        <FileText size={20} color={colors.textMuted} />
+        <Text variant="bodySm" numberOfLines={1} style={{ flex: 1 }}>
+          {document.originalName}
+        </Text>
+      </View>
+    );
+  }
+  return (
+    <Pressable
+      onPress={onToggle}
+      accessibilityRole="button"
+      accessibilityLabel={expanded ? "Shrink photo" : "View uploaded photo"}
+    >
+      <AuthImage
+        path={path}
+        style={expanded ? styles.previewLarge : styles.previewSmall}
+        contentFit={expanded ? "contain" : "cover"}
+        accessibilityLabel={document.originalName}
+      />
+    </Pressable>
   );
 }
 
@@ -191,6 +237,16 @@ const styles = StyleSheet.create({
   section: { gap: spacing.md },
   row: { flexDirection: "row", alignItems: "center", gap: spacing.md },
   actions: { flexDirection: "row", gap: spacing.sm },
+  previewSmall: { width: "100%", height: 120, borderRadius: radius.md },
+  previewLarge: { width: "100%", aspectRatio: 3 / 4, borderRadius: radius.md },
+  file: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: colors.surfaceSunken,
+  },
   success: { backgroundColor: colors.successMuted, borderColor: colors.successMuted },
   danger: { backgroundColor: colors.dangerMuted, borderColor: colors.dangerMuted },
   pending: { backgroundColor: colors.warningMuted, borderColor: colors.warningMuted },

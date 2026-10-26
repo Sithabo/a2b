@@ -19,7 +19,21 @@ export const createVehicleValidator = vine.create({
   assignedDriverId: vine.number().withoutDecimals().positive().nullable().optional(),
 })
 
+export const updateFleetValidator = vine.create({
+  name: vine.string().trim().minLength(2).maxLength(120).optional(),
+  address: vine.string().trim().maxLength(255).nullable().optional(),
+  taxId: vine.string().trim().maxLength(20).nullable().optional(),
+  sizeTier: vine.enum(FLEET_SIZE_TIERS).optional(),
+  primaryCorridor: vine.string().trim().maxLength(120).nullable().optional(),
+})
+
 export const updateVehicleValidator = vine.create({
+  plate: vine.string().trim().minLength(3).maxLength(16).optional(),
+  make: vine.string().trim().maxLength(60).optional(),
+  model: vine.string().trim().maxLength(60).optional(),
+  vehicleClass: vine.enum(VEHICLE_CLASSES).optional(),
+  bodyType: vine.enum(BODY_TYPES).optional(),
+  capacityTons: vine.number().positive().max(100).optional(),
   assignedDriverId: vine.number().withoutDecimals().positive().nullable().optional(),
   status: vine.enum(VEHICLE_STATUSES).optional(),
 })

@@ -10,6 +10,9 @@ export type ScannedRoutes = {
     'auth.logout': { paramsTuple?: []; params?: {} }
     'me.show': { paramsTuple?: []; params?: {} }
     'me.update': { paramsTuple?: []; params?: {} }
+    'avatars.store': { paramsTuple?: []; params?: {} }
+    'avatars.destroy': { paramsTuple?: []; params?: {} }
+    'avatars.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'me.upsert_shipper_profile': { paramsTuple?: []; params?: {} }
     'me.upsert_driver_profile': { paramsTuple?: []; params?: {} }
     'driver_documents.index': { paramsTuple?: []; params?: {} }
@@ -18,16 +21,21 @@ export type ScannedRoutes = {
     'fleet_invites.index': { paramsTuple?: []; params?: {} }
     'fleet_invites.accept': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'fleet_invites.decline': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'fleet_invites.leave': { paramsTuple?: []; params?: {} }
     'places.search': { paramsTuple?: []; params?: {} }
     'places.details': { paramsTuple?: []; params?: {} }
     'fleets.store': { paramsTuple?: []; params?: {} }
     'fleets.show': { paramsTuple?: []; params?: {} }
+    'fleets.update': { paramsTuple?: []; params?: {} }
     'fleets.vehicles': { paramsTuple?: []; params?: {} }
     'fleets.add_vehicle': { paramsTuple?: []; params?: {} }
     'fleets.update_vehicle': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'fleets.delete_vehicle': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'fleets.drivers': { paramsTuple?: []; params?: {} }
     'fleets.add_driver': { paramsTuple?: []; params?: {} }
+    'fleets.remove_driver': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'fleets.invites': { paramsTuple?: []; params?: {} }
+    'fleets.cancel_invite': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'loads.index': { paramsTuple?: []; params?: {} }
     'loads.store': { paramsTuple?: []; params?: {} }
     'loads.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -54,6 +62,7 @@ export type ScannedRoutes = {
   }
   GET: {
     'me.show': { paramsTuple?: []; params?: {} }
+    'avatars.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'driver_documents.index': { paramsTuple?: []; params?: {} }
     'driver_documents.download': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'fleet_invites.index': { paramsTuple?: []; params?: {} }
@@ -76,6 +85,7 @@ export type ScannedRoutes = {
   }
   HEAD: {
     'me.show': { paramsTuple?: []; params?: {} }
+    'avatars.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'driver_documents.index': { paramsTuple?: []; params?: {} }
     'driver_documents.download': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'fleet_invites.index': { paramsTuple?: []; params?: {} }
@@ -101,12 +111,15 @@ export type ScannedRoutes = {
     'auth.request_otp': { paramsTuple?: []; params?: {} }
     'auth.verify_otp': { paramsTuple?: []; params?: {} }
     'auth.logout': { paramsTuple?: []; params?: {} }
+    'avatars.store': { paramsTuple?: []; params?: {} }
     'driver_documents.store': { paramsTuple?: []; params?: {} }
     'fleet_invites.accept': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'fleet_invites.decline': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'fleet_invites.leave': { paramsTuple?: []; params?: {} }
     'fleets.store': { paramsTuple?: []; params?: {} }
     'fleets.add_vehicle': { paramsTuple?: []; params?: {} }
     'fleets.add_driver': { paramsTuple?: []; params?: {} }
+    'fleets.cancel_invite': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'loads.store': { paramsTuple?: []; params?: {} }
     'loads.publish': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'loads.accept': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -123,7 +136,13 @@ export type ScannedRoutes = {
   }
   PATCH: {
     'me.update': { paramsTuple?: []; params?: {} }
+    'fleets.update': { paramsTuple?: []; params?: {} }
     'fleets.update_vehicle': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+  }
+  DELETE: {
+    'avatars.destroy': { paramsTuple?: []; params?: {} }
+    'fleets.delete_vehicle': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'fleets.remove_driver': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   PUT: {
     'me.upsert_shipper_profile': { paramsTuple?: []; params?: {} }

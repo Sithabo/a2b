@@ -10,7 +10,7 @@ import DriverProfile from '#models/driver_profile'
 import DriverReview from '#models/driver_review'
 import type User from '#models/user'
 import DomainError from '#exceptions/domain_error'
-import { sms } from '#services/sms/index'
+import { notifyBySms } from '#services/sms/index'
 
 /*
 |--------------------------------------------------------------------------
@@ -166,7 +166,7 @@ export async function reviewDriver(
     return found
   })
 
-  await sms.send(
+  await notifyBySms(
     profile.user.phone,
     decision === 'VERIFIED'
       ? 'Your A2B driver account is verified. You can now accept loads on your own.'

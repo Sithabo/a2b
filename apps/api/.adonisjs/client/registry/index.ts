@@ -42,6 +42,24 @@ const routes = {
     tokens: [{"old":"/api/v1/me","type":0,"val":"api","end":""},{"old":"/api/v1/me","type":0,"val":"v1","end":""},{"old":"/api/v1/me","type":0,"val":"me","end":""}],
     types: placeholder as Registry['me.update']['types'],
   },
+  'avatars.store': {
+    methods: ["POST"],
+    pattern: '/api/v1/me/avatar',
+    tokens: [{"old":"/api/v1/me/avatar","type":0,"val":"api","end":""},{"old":"/api/v1/me/avatar","type":0,"val":"v1","end":""},{"old":"/api/v1/me/avatar","type":0,"val":"me","end":""},{"old":"/api/v1/me/avatar","type":0,"val":"avatar","end":""}],
+    types: placeholder as Registry['avatars.store']['types'],
+  },
+  'avatars.destroy': {
+    methods: ["DELETE"],
+    pattern: '/api/v1/me/avatar',
+    tokens: [{"old":"/api/v1/me/avatar","type":0,"val":"api","end":""},{"old":"/api/v1/me/avatar","type":0,"val":"v1","end":""},{"old":"/api/v1/me/avatar","type":0,"val":"me","end":""},{"old":"/api/v1/me/avatar","type":0,"val":"avatar","end":""}],
+    types: placeholder as Registry['avatars.destroy']['types'],
+  },
+  'avatars.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/users/:id/avatar',
+    tokens: [{"old":"/api/v1/users/:id/avatar","type":0,"val":"api","end":""},{"old":"/api/v1/users/:id/avatar","type":0,"val":"v1","end":""},{"old":"/api/v1/users/:id/avatar","type":0,"val":"users","end":""},{"old":"/api/v1/users/:id/avatar","type":1,"val":"id","end":""},{"old":"/api/v1/users/:id/avatar","type":0,"val":"avatar","end":""}],
+    types: placeholder as Registry['avatars.show']['types'],
+  },
   'me.upsert_shipper_profile': {
     methods: ["PUT"],
     pattern: '/api/v1/me/shipper-profile',
@@ -90,6 +108,12 @@ const routes = {
     tokens: [{"old":"/api/v1/me/fleet-invites/:id/decline","type":0,"val":"api","end":""},{"old":"/api/v1/me/fleet-invites/:id/decline","type":0,"val":"v1","end":""},{"old":"/api/v1/me/fleet-invites/:id/decline","type":0,"val":"me","end":""},{"old":"/api/v1/me/fleet-invites/:id/decline","type":0,"val":"fleet-invites","end":""},{"old":"/api/v1/me/fleet-invites/:id/decline","type":1,"val":"id","end":""},{"old":"/api/v1/me/fleet-invites/:id/decline","type":0,"val":"decline","end":""}],
     types: placeholder as Registry['fleet_invites.decline']['types'],
   },
+  'fleet_invites.leave': {
+    methods: ["POST"],
+    pattern: '/api/v1/me/fleet/leave',
+    tokens: [{"old":"/api/v1/me/fleet/leave","type":0,"val":"api","end":""},{"old":"/api/v1/me/fleet/leave","type":0,"val":"v1","end":""},{"old":"/api/v1/me/fleet/leave","type":0,"val":"me","end":""},{"old":"/api/v1/me/fleet/leave","type":0,"val":"fleet","end":""},{"old":"/api/v1/me/fleet/leave","type":0,"val":"leave","end":""}],
+    types: placeholder as Registry['fleet_invites.leave']['types'],
+  },
   'places.search': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/places',
@@ -114,6 +138,12 @@ const routes = {
     tokens: [{"old":"/api/v1/fleet","type":0,"val":"api","end":""},{"old":"/api/v1/fleet","type":0,"val":"v1","end":""},{"old":"/api/v1/fleet","type":0,"val":"fleet","end":""}],
     types: placeholder as Registry['fleets.show']['types'],
   },
+  'fleets.update': {
+    methods: ["PATCH"],
+    pattern: '/api/v1/fleet',
+    tokens: [{"old":"/api/v1/fleet","type":0,"val":"api","end":""},{"old":"/api/v1/fleet","type":0,"val":"v1","end":""},{"old":"/api/v1/fleet","type":0,"val":"fleet","end":""}],
+    types: placeholder as Registry['fleets.update']['types'],
+  },
   'fleets.vehicles': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/fleet/vehicles',
@@ -132,6 +162,12 @@ const routes = {
     tokens: [{"old":"/api/v1/fleet/vehicles/:id","type":0,"val":"api","end":""},{"old":"/api/v1/fleet/vehicles/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/fleet/vehicles/:id","type":0,"val":"fleet","end":""},{"old":"/api/v1/fleet/vehicles/:id","type":0,"val":"vehicles","end":""},{"old":"/api/v1/fleet/vehicles/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['fleets.update_vehicle']['types'],
   },
+  'fleets.delete_vehicle': {
+    methods: ["DELETE"],
+    pattern: '/api/v1/fleet/vehicles/:id',
+    tokens: [{"old":"/api/v1/fleet/vehicles/:id","type":0,"val":"api","end":""},{"old":"/api/v1/fleet/vehicles/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/fleet/vehicles/:id","type":0,"val":"fleet","end":""},{"old":"/api/v1/fleet/vehicles/:id","type":0,"val":"vehicles","end":""},{"old":"/api/v1/fleet/vehicles/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['fleets.delete_vehicle']['types'],
+  },
   'fleets.drivers': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/fleet/drivers',
@@ -144,11 +180,23 @@ const routes = {
     tokens: [{"old":"/api/v1/fleet/drivers","type":0,"val":"api","end":""},{"old":"/api/v1/fleet/drivers","type":0,"val":"v1","end":""},{"old":"/api/v1/fleet/drivers","type":0,"val":"fleet","end":""},{"old":"/api/v1/fleet/drivers","type":0,"val":"drivers","end":""}],
     types: placeholder as Registry['fleets.add_driver']['types'],
   },
+  'fleets.remove_driver': {
+    methods: ["DELETE"],
+    pattern: '/api/v1/fleet/drivers/:id',
+    tokens: [{"old":"/api/v1/fleet/drivers/:id","type":0,"val":"api","end":""},{"old":"/api/v1/fleet/drivers/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/fleet/drivers/:id","type":0,"val":"fleet","end":""},{"old":"/api/v1/fleet/drivers/:id","type":0,"val":"drivers","end":""},{"old":"/api/v1/fleet/drivers/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['fleets.remove_driver']['types'],
+  },
   'fleets.invites': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/fleet/invites',
     tokens: [{"old":"/api/v1/fleet/invites","type":0,"val":"api","end":""},{"old":"/api/v1/fleet/invites","type":0,"val":"v1","end":""},{"old":"/api/v1/fleet/invites","type":0,"val":"fleet","end":""},{"old":"/api/v1/fleet/invites","type":0,"val":"invites","end":""}],
     types: placeholder as Registry['fleets.invites']['types'],
+  },
+  'fleets.cancel_invite': {
+    methods: ["POST"],
+    pattern: '/api/v1/fleet/invites/:id/cancel',
+    tokens: [{"old":"/api/v1/fleet/invites/:id/cancel","type":0,"val":"api","end":""},{"old":"/api/v1/fleet/invites/:id/cancel","type":0,"val":"v1","end":""},{"old":"/api/v1/fleet/invites/:id/cancel","type":0,"val":"fleet","end":""},{"old":"/api/v1/fleet/invites/:id/cancel","type":0,"val":"invites","end":""},{"old":"/api/v1/fleet/invites/:id/cancel","type":1,"val":"id","end":""},{"old":"/api/v1/fleet/invites/:id/cancel","type":0,"val":"cancel","end":""}],
+    types: placeholder as Registry['fleets.cancel_invite']['types'],
   },
   'loads.index': {
     methods: ["GET","HEAD"],

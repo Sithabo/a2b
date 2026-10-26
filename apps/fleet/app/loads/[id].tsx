@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowDown, Clock, MapPin, Phone, ShieldCheck, Truck } from "lucide-react-native";
 import { cargoLabel, formatMarketTime, formatMoney, getMarket, statusMeta, vehicleClasses } from "@a2b/core";
-import { AuthImage, LoadTimeline, QueryFallback, useAcceptLoad, useAssignLoad, useWithdrawLoad } from "@a2b/features";
+import { AuthImage, Avatar, LoadTimeline, QueryFallback, useAcceptLoad, useAssignLoad, useWithdrawLoad } from "@a2b/features";
 import {
   Badge,
   Button,
@@ -137,7 +137,8 @@ export default function LoadDetailScreen() {
               Dispatched
             </Text>
             <View style={styles.row}>
-              <Text variant="bodyStrong" style={{ flex: 1 }}>
+              <Avatar path={l.carrier.driverAvatarPath} name={l.carrier.driverName} size={40} />
+              <Text variant="bodyStrong" style={{ flex: 1 }} numberOfLines={1}>
                 {l.carrier.driverName ?? "Driver"}
               </Text>
               {l.carrier.vehicle && <PlateBadge plate={l.carrier.vehicle.plate} size="sm" />}

@@ -4,7 +4,6 @@ import { DUTY_STATUSES } from '@a2b/core'
 export const updateMeValidator = vine.create({
   fullName: vine.string().trim().maxLength(120).optional(),
   email: vine.string().trim().toLowerCase().email().maxLength(254).optional(),
-  avatarUrl: vine.string().url().optional(),
 })
 
 export const shipperProfileValidator = vine.create({
@@ -19,4 +18,8 @@ export const driverProfileValidator = vine.create({
   licenseNumber: vine.string().trim().minLength(3).maxLength(40).optional(),
   licenseClass: vine.string().trim().maxLength(10).optional(),
   dutyStatus: vine.enum(DUTY_STATUSES).optional(),
+})
+
+export const avatarValidator = vine.create({
+  file: vine.file({ size: '5mb', extnames: ['jpg', 'jpeg', 'png', 'webp', 'heic'] }),
 })
