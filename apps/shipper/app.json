@@ -10,7 +10,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.sithabo.a2b"
+      "bundleIdentifier": "com.sithabo.a2b",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -43,7 +46,8 @@
       [
         "expo-image-picker",
         {
-          "cameraPermission": "Allow A2B to access your camera to scan import bills and customs documents."
+          "cameraPermission": "Allow A2B to access your camera to scan import bills and customs documents.",
+          "photosPermission": "Allow A2B to choose a profile photo from your library."
         }
       ],
       "expo-font",

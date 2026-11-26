@@ -176,6 +176,56 @@ test.group('Auth / testers outside the markets', (group) => {
   })
 })
 
+test.group('Auth / App Store reviewers', (group) => {
+  const REVIEW_PHONE = '+5926000099'
+  group.each.setup(() => testUtils.db().withGlobalTransaction())
+  group.each.setup(() => limiter.clear())
+  group.each.setup(() => {
+    otpConfig.reviewNumbers.set(REVIEW_PHONE, '739214')
+    return () => {
+      otpConfig.reviewNumbers.delete(REVIEW_PHONE)
+    }
+  })
+
+  test('a reviewer number signs in with its fixed code, even with Twilio Verify', async ({
+    client,
+    assert,
+  }) => {
+    const driver = otpConfig.driver
+    const sent: string[] = []
+    otpConfig.driver = 'twilio_verify'
+    swapTwilioVerify({
+      async start(phone: string) {
+        sent.push(phone)
+      },
+      async check() {
+        return 'invalid' as const
+      },
+    })
+    try {
+      const requested = await client.post('/api/v1/auth/otp').json({ phone: REVIEW_PHONE })
+      requested.assertStatus(200)
+      assert.deepEqual(sent, [])
+      const verified = await client
+        .post('/api/v1/auth/verify')
+        .json({ phone: REVIEW_PHONE, code: '739214', role: 'shipper' })
+      verified.assertStatus(200)
+      assert.equal(dataOf(verified).user.market, 'GY')
+    } finally {
+      otpConfig.driver = driver
+      swapTwilioVerify(undefined)
+    }
+  })
+
+  test('a wrong code is still rejected and counted', async ({ client }) => {
+    await client.post('/api/v1/auth/otp').json({ phone: REVIEW_PHONE })
+    const wrong = await client
+      .post('/api/v1/auth/verify')
+      .json({ phone: REVIEW_PHONE, code: '123456', role: 'shipper' })
+    wrong.assertBodyContains({ errors: [{ code: 'E_OTP_INVALID' }] })
+  })
+})
+
 test.group('Auth / Twilio Verify', (group) => {
   const sent: string[] = []
   const fake = {

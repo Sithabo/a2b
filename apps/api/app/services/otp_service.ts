@@ -20,9 +20,12 @@ const MAX_SENDS_PER_WINDOW = 3
 const SEND_WINDOW_MINUTES = 10
 const MAX_VERIFY_ATTEMPTS = 5
 
-/** Fixed codes for test numbers. Never honoured in production. */
+/** Fixed codes: app reviewers' numbers always, dev test numbers never in production. */
 function testCodeFor(phone: string) {
-  return app.inProduction ? undefined : otpConfig.testNumbers.get(phone)
+  return (
+    otpConfig.reviewNumbers.get(phone) ??
+    (app.inProduction ? undefined : otpConfig.testNumbers.get(phone))
+  )
 }
 
 /** Twilio Verify when OTP_DRIVER=twilio_verify; built on first use so dev needs no Twilio account. */

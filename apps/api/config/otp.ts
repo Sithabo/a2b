@@ -23,6 +23,20 @@ function testerMarkets(value: string | undefined) {
   return map
 }
 
+/** Reviewer codes work in production, so refuse ones a stranger would try first. */
+function reviewCodes(value: string | undefined) {
+  const map = pairs(value)
+  for (const [phone, code] of map) {
+    if (!/^\d{6}$/.test(code)) {
+      throw new Error(`OTP_REVIEW_NUMBERS: the code for ${phone} must be 6 digits`)
+    }
+    if (/^(\d)\1{5}$/.test(code) || '0123456789'.includes(code) || '9876543210'.includes(code)) {
+      throw new Error(`OTP_REVIEW_NUMBERS: the code for ${phone} is too easy to guess`)
+    }
+  }
+  return map
+}
+
 /**
  * Phone sign-in settings. Both dev conveniences are ignored in production
  * (see otp_service), so a staging box running NODE_ENV=development only
@@ -50,6 +64,14 @@ const otpConfig = {
    * belongs to. They get real codes, so this works in production too.
    */
   testerMarkets: testerMarkets(env.get('OTP_TESTER_PHONES')),
+
+  /**
+   * "+5926000099=739214" → fixed codes that work in production too, so App
+   * Store / TestFlight reviewers can sign in without receiving a text. Use
+   * numbers you control (a real owner of the number couldn't sign in) and
+   * codes you only share in App Store Connect's review notes.
+   */
+  reviewNumbers: reviewCodes(env.get('OTP_REVIEW_NUMBERS')),
 }
 
 export default otpConfig
