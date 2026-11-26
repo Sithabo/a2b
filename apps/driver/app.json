@@ -22,10 +22,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.sithabo.a2b.driver",
-      "permissions": [
-        "android.permission.RECORD_AUDIO"
-      ]
+      "package": "com.sithabo.a2b.driver"
     },
     "web": {
       "output": "static",
@@ -49,7 +46,8 @@
         "expo-image-picker",
         {
           "cameraPermission": "Allow A2B Driver to use your camera to photograph your licence and ID for verification.",
-          "photosPermission": "Allow A2B Driver to choose photos of your licence and ID for verification."
+          "photosPermission": "Allow A2B Driver to choose photos of your licence and ID for verification.",
+          "microphonePermission": false
         }
       ]
     ],

@@ -47,7 +47,8 @@
         "expo-image-picker",
         {
           "cameraPermission": "Allow A2B to access your camera to scan import bills and customs documents.",
-          "photosPermission": "Allow A2B to choose a profile photo from your library."
+          "photosPermission": "Allow A2B to choose a profile photo from your library.",
+          "microphonePermission": false
         }
       ],
       "expo-font",
