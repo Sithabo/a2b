@@ -46,6 +46,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "cd591cab-5e4e-4a41-ba8c-28c053c02f59"
+      }
+    },
+    "owner": "sithabo"
   }
 }
