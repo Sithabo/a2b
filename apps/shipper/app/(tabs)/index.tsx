@@ -4,11 +4,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Link, useRouter } from "expo-router";
 import {
   Bell,
+  Home,
   MapPin,
   Search,
   Calculator,
   ChevronRight,
   Package,
+  Plus,
   User,
   AlertTriangle,
 } from "lucide-react-native";
@@ -125,16 +127,6 @@ export default function HomeScreen() {
                 </View>
               </View>
             </View>
-            <Link href={"/account/notifications"} asChild>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Notifications"
-                hitSlop={spacing.xs}
-                style={({ pressed }) => [styles.headerNotificationButton, pressed && styles.pressed]}
-              >
-                <Bell color={colors.onPrimary} size={20} />
-              </Pressable>
-            </Link>
           </View>
 
           {/* Search Bar */}
@@ -231,14 +223,44 @@ export default function HomeScreen() {
             />
           )}
 
-          {/* Search Empty State */}
+          {/* Empty State: first-time user vs filtered search */}
           {shipmentsQuery.data && filteredShipments.length === 0 && (
             <Card padding="none">
-              <EmptyState
-                icon={Package}
-                title="No Shipments Found"
-                message={"We couldn't find any shipments matching \"" + searchQuery + "\""}
-              />
+              {shipmentsQuery.data.length === 0 ? (
+                <EmptyState
+                  icon={Package}
+                  title="Post your first load"
+                  message="Tap the + button in the bottom bar to create an order, enter your pickup and drop-off details, and match with a verified driver."
+                  action={
+                    <View style={styles.tabPreviewWrapper} accessible={false}>
+                      <View style={styles.tabPreviewBar}>
+                        <View style={styles.tabPreviewActive}>
+                          <Home size={15} color={colors.onPrimary} strokeWidth={2.2} />
+                        </View>
+                        <View style={styles.tabPreviewPlusHighlight}>
+                          <Plus size={16} color={colors.text} strokeWidth={2.5} />
+                        </View>
+                        <View style={styles.tabPreviewInactive}>
+                          <Bell size={15} color={colors.text} strokeWidth={2} />
+                        </View>
+                        <View style={styles.tabPreviewInactive}>
+                          <User size={15} color={colors.text} strokeWidth={2} />
+                        </View>
+                      </View>
+                    </View>
+                  }
+                />
+              ) : (
+                <EmptyState
+                  icon={Package}
+                  title="No Shipments Found"
+                  message={
+                    searchQuery.trim()
+                      ? `We couldn't find any shipments matching "${searchQuery}"`
+                      : "No shipments match this filter yet."
+                  }
+                />
+              )}
             </Card>
           )}
         </View>
@@ -296,14 +318,6 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     marginTop: spacing.xxs,
   },
-  headerNotificationButton: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.pill,
-    backgroundColor: colors.onPrimaryWash,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   pressed: {
     opacity: 0.85,
   },
@@ -333,6 +347,46 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.sm,
+  },
+  tabPreviewWrapper: {
+    alignItems: "center",
+    marginTop: spacing.xs,
+  },
+  tabPreviewBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.xs,
+    gap: spacing.xs,
+  },
+  tabPreviewActive: {
+    width: 36,
+    height: 32,
+    borderRadius: radius.pill,
+    backgroundColor: colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tabPreviewPlusHighlight: {
+    width: 36,
+    height: 32,
+    borderRadius: radius.pill,
+    backgroundColor: colors.surfaceMuted,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+  },
+  tabPreviewInactive: {
+    width: 36,
+    height: 32,
+    borderRadius: radius.pill,
+    backgroundColor: colors.surfaceMuted,
+    alignItems: "center",
+    justifyContent: "center",
   },
   flexShrink: {
     flexShrink: 1,

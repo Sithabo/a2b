@@ -2,16 +2,17 @@ import { Redirect, Tabs, useRouter } from "expo-router";
 import { useSessionGate } from "@a2b/features";
 import React from "react";
 import { Pressable, View, StyleSheet } from "react-native";
-import { Home, Plus, User } from "lucide-react-native";
+import { Bell, Home, Plus, User } from "lucide-react-native";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Text, colors, elevation, palette, radius, spacing } from "@a2b/ui";
+import { colors, elevation, radius, spacing } from "@a2b/ui";
 
 // ─── Tab Config ───────────────────────────────────────────────────────────────
 
 const TAB_ROUTES = [
   { name: "index", label: "Home", Icon: Home },
-  { name: "post-load-placeholder", label: "Post", Icon: Plus, isAction: true },
+  { name: "post-load-placeholder", label: "Post Load", Icon: Plus, href: "/create-load" as const },
+  { name: "notifications", label: "Notifications", Icon: Bell, href: "/account/notifications" as const },
   { name: "account", label: "Account", Icon: User },
 ];
 
@@ -25,14 +26,14 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
   return (
     <View style={[styles.floatingBarWrapper, { bottom: bottomInset }]} pointerEvents="box-none">
       <View style={styles.floatingBar} accessibilityRole="tablist">
-        {TAB_ROUTES.map((tab, index) => {
+        {TAB_ROUTES.map((tab) => {
           const routeIndex = state.routes.findIndex((r) => r.name === tab.name);
-          const isActive = state.index === routeIndex;
+          const isActive = routeIndex !== -1 && state.index === routeIndex;
           const { Icon } = tab;
 
           const handlePress = () => {
-            if (tab.isAction) {
-              router.push("/create-load");
+            if ("href" in tab && tab.href) {
+              router.push(tab.href);
               return;
             }
             const event = navigation.emit({
@@ -45,35 +46,25 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
             }
           };
 
-          if (isActive) {
-            // ── Active Tab: White Pill Card ──────────────────────────────────
-            return (
-              <Pressable
-                key={tab.name}
-                onPress={handlePress}
-                accessibilityRole="tab"
-                accessibilityLabel={tab.label}
-                accessibilityState={{ selected: true }}
-                hitSlop={spacing.xs}
-                style={({ pressed }) => [styles.activePill, pressed && styles.pressed]}
-              >
-                <Icon size={20} color={colors.text} strokeWidth={2.2} />
-                <Text variant="tab">{tab.label}</Text>
-              </Pressable>
-            );
-          }
-
-          // ── Inactive Tab: Dark Square Icon ───────────────────────────────
           return (
             <Pressable
               key={tab.name}
               onPress={handlePress}
               accessibilityRole="tab"
               accessibilityLabel={tab.label}
-              accessibilityState={{ selected: false }}
-              style={({ pressed }) => [styles.inactivePill, pressed && styles.pressed]}
+              accessibilityState={{ selected: isActive }}
+              hitSlop={spacing.xs}
+              style={({ pressed }) => [
+                styles.tabPill,
+                isActive ? styles.activePill : styles.inactivePill,
+                pressed && styles.pressed,
+              ]}
             >
-              <Icon size={22} color={colors.textInverse} strokeWidth={2} />
+              <Icon
+                size={22}
+                color={isActive ? colors.onPrimary : colors.text}
+                strokeWidth={isActive ? 2.4 : 2}
+              />
             </Pressable>
           );
         })}
@@ -94,29 +85,26 @@ const styles = StyleSheet.create({
   floatingBar: {
     flexDirection: "row",
     alignItems: "center",
-    // Dark floating bar: no semantic "inverse surface" token exists yet.
-    backgroundColor: palette.gray[900],
-    borderRadius: radius.pill,
-    padding: spacing.sm,
-    gap: spacing.sm,
-    ...elevation.md,
-  },
-  activePill: {
-    flexDirection: "row",
-    alignItems: "center",
     backgroundColor: colors.surface,
     borderRadius: radius.pill,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.xs,
+    gap: spacing.xs,
+    ...elevation.md,
   },
-  inactivePill: {
-    width: 52,
-    height: 52,
-    borderRadius: radius.lg,
-    backgroundColor: palette.zinc[800],
+  tabPill: {
+    width: 56,
+    height: 48,
+    borderRadius: radius.pill,
     alignItems: "center",
     justifyContent: "center",
+  },
+  activePill: {
+    backgroundColor: colors.primary,
+  },
+  inactivePill: {
+    backgroundColor: colors.surfaceMuted,
   },
   pressed: { opacity: 0.85 },
 });
