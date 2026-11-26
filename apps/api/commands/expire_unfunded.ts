@@ -3,7 +3,8 @@ import type { CommandOptions } from '@adonisjs/core/types/ace'
 
 /**
  * Puts matched loads whose escrow wasn't funded in time back on the board.
- * Schedule it every minute, e.g. cron: `* * * * * cd /app && node ace escrow:expire`.
+ * Runs on a schedule: the escrow-cron Railway service (deploy/railway/escrow-cron.json)
+ * starts it every 5 minutes, which is plenty against a multi-hour funding window.
  */
 export default class ExpireUnfunded extends BaseCommand {
   static commandName = 'escrow:expire'

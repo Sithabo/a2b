@@ -9,6 +9,8 @@ import { defineConfig } from '@adonisjs/core/http'
  */
 export const appUrl = env.get('APP_URL')
 
+const trustedProxyHops = env.get('TRUSTED_PROXY_HOPS', 0)
+
 /**
  * The configuration settings used by the HTTP server
  */
@@ -18,6 +20,14 @@ export const http = defineConfig({
    * Useful to correlate logs and debug a request flow.
    */
   generateRequestId: true,
+
+  /**
+   * How many proxies sit in front of the app (Railway's edge = 1). Trusting
+   * exactly that many hops makes request.ip() the client's address, which
+   * the sign-in rate limits key on; trusting more would let a client spoof
+   * its IP with its own X-Forwarded-For header. 0 locally (no proxy).
+   */
+  trustProxy: (_address: string, distance: number) => distance < trustedProxyHops,
 
   /**
    * Allow HTTP method spoofing via the "_method" form/query parameter.

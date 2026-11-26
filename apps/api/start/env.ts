@@ -14,6 +14,8 @@ import { Env } from '@adonisjs/core/env'
 export default await Env.create(new URL('../', import.meta.url), {
   // Node
   NODE_ENV: Env.schema.enum(['development', 'production', 'test'] as const),
+  /** Proxies in front of the app whose X-Forwarded-For can be trusted (1 on Railway). */
+  TRUSTED_PROXY_HOPS: Env.schema.number.optional(),
   PORT: Env.schema.number(),
   HOST: Env.schema.string({ format: 'host' }),
   LOG_LEVEL: Env.schema.string(),
