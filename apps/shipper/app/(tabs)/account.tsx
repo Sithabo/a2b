@@ -76,10 +76,32 @@ export default function AccountScreen() {
   const [editIsImporter, setEditIsImporter] = useState(false);
   const [editTin, setEditTin] = useState("");
   const [tinError, setTinError] = useState("");
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   const handleLogout = async () => {
     await api.auth.logout({}).catch(() => {}); // revoke the token server-side when online
     await signOut(); // the root layout routes back to sign-in
+  };
+
+  const handleDeleteAccount = async () => {
+    if (isDeletingAccount) return;
+    const confirmed = await confirmAction({
+      title: "Delete your account?",
+      message: "This permanently deletes your A2B shipper account and profile. This action cannot be undone.",
+      confirmLabel: "Delete Account",
+      destructive: true,
+    });
+    if (!confirmed) return;
+
+    setIsDeletingAccount(true);
+    try {
+      await api.me.destroy({});
+      await signOut();
+    } catch (err) {
+      Alert.alert("Couldn't delete account", apiErrorMessage(err));
+    } finally {
+      setIsDeletingAccount(false);
+    }
   };
 
   const openEditModal = () => {
@@ -238,6 +260,12 @@ export default function AccountScreen() {
 
         <ListSection>
           <ListItem icon={LogOut} title="Log Out" tone="danger" onPress={handleLogout} />
+          <ListItem
+            icon={Trash2}
+            title={isDeletingAccount ? "Deleting Account..." : "Delete Account"}
+            tone="danger"
+            onPress={handleDeleteAccount}
+          />
         </ListSection>
       </ScrollView>
 
