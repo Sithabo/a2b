@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, ScrollView, StyleSheet, RefreshControl, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Link, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import {
   Bell,
   Home,
@@ -97,36 +97,31 @@ export default function HomeScreen() {
         >
           {/* Header Integrated into Body */}
           <View style={styles.headerContainer}>
-            <View style={styles.headerLeft}>
-              <Link href={"/(tabs)/account"} asChild>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Account"
-                  style={({ pressed }) => [
-                    styles.avatarContainer,
-                    userProfile?.avatarPath && styles.avatarNoBorder,
-                    pressed && styles.pressed,
-                  ]}
-                >
-                  {userProfile?.avatarPath ? (
-                    <Avatar path={userProfile.avatarPath} name={userProfile.name} size={48} />
-                  ) : (
-                    <User color={colors.onPrimary} size={24} />
-                  )}
-                </Pressable>
-              </Link>
-              <View>
-                <Text variant="h2" tone="inverse">
-                  {greetingName ? `Hey ${greetingName}` : "Welcome back"}
+            <View style={styles.headerTextContainer}>
+              <Text variant="h1" tone="inverse" numberOfLines={1}>
+                {greetingName ? `Hey, ${greetingName}` : "Welcome back"}
+              </Text>
+              <View style={styles.locationContainer}>
+                <MapPin color={colors.onPrimaryMuted} size={14} />
+                <Text variant="bodySm" color={colors.onPrimaryMuted}>
+                  {userProfile?.region || "Select Region"}
                 </Text>
-                <View style={styles.locationContainer}>
-                  <MapPin color={colors.onPrimaryMuted} size={14} />
-                  <Text variant="bodySm" color={colors.onPrimaryMuted}>
-                    {userProfile?.region || "Select Region"}
-                  </Text>
-                </View>
               </View>
             </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Account"
+              onPress={() => router.push("/(tabs)/account")}
+              style={({ pressed }) => [pressed && styles.pressed]}
+            >
+              <View style={styles.avatarContainer}>
+                {userProfile?.avatarPath ? (
+                  <Avatar path={userProfile.avatarPath} name={userProfile.name} size={44} />
+                ) : (
+                  <User color={colors.onPrimary} size={22} />
+                )}
+              </View>
+            </Pressable>
           </View>
 
           {/* Search Bar */}
@@ -141,14 +136,16 @@ export default function HomeScreen() {
           </View>
 
           {/* Status Pills */}
-          <View style={styles.pillsContainer}>
-            <ChipGroup
-              scroll
-              options={[...STATUS_FILTERS]}
-              value={selectedStatus}
-              onChange={setSelectedStatus}
-            />
-          </View>
+          {(shipmentsQuery.data?.length ?? 0) > 0 && (
+            <View style={styles.pillsContainer}>
+              <ChipGroup
+                scroll
+                options={[...STATUS_FILTERS]}
+                value={selectedStatus}
+                onChange={setSelectedStatus}
+              />
+            </View>
+          )}
 
           {/* Top Content inside gradient */}
           <View style={styles.topContent}>
@@ -292,25 +289,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: layout.gutter,
     paddingTop: spacing.lg,
-    paddingBottom: spacing["2xl"],
+    paddingBottom: spacing.xl,
   },
-  headerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.md,
+  headerTextContainer: {
+    flex: 1,
+    paddingRight: spacing.md,
+    gap: spacing.xxs,
   },
   avatarContainer: {
     width: 48,
     height: 48,
     borderRadius: radius.pill,
     borderWidth: 2,
-    borderColor: colors.onPrimaryTrack,
+    borderColor: colors.onPrimary,
     backgroundColor: colors.onPrimaryWash,
     alignItems: "center",
     justifyContent: "center",
-  },
-  avatarNoBorder: {
-    borderWidth: 0,
+    overflow: "hidden",
   },
   locationContainer: {
     flexDirection: "row",
