@@ -1,19 +1,14 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
 import { BellOff } from "lucide-react-native";
 import { colors, EmptyState, ScreenHeader, spacing } from "@a2b/ui";
 
 export default function NotificationsScreen() {
-  const router = useRouter();
-
   return (
     <View style={styles.container}>
       <ScreenHeader
         title="Notifications"
-        subtitle="Manage your alerts and notifications"
-        onBackPress={() => router.replace("/(tabs)/account")}
-        onCancelPress={() => router.replace("/(tabs)/account")}
+        subtitle="Shipment updates and alerts"
       />
 
       <View style={styles.content}>

@@ -197,7 +197,7 @@ export default function AccountScreen() {
 
   return (
     <View style={styles.container}>
-      <ScreenHeader title="My Account" onBackPress={() => router.back()} />
+      <ScreenHeader title="My Account" />
 
       <ScrollView
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }]}
@@ -243,7 +243,7 @@ export default function AccountScreen() {
         <ListSection title="General">
           <ListItem icon={CreditCard} title="Payment Methods" onPress={() => router.push("/payment-methods")} />
           <ListItem icon={Globe} title="Language" onPress={() => router.push("/account/language")} />
-          <ListItem icon={Bell} title="Notifications" onPress={() => router.push("/account/notifications")} />
+          <ListItem icon={Bell} title="Notifications" onPress={() => router.navigate("/(tabs)/notifications")} />
         </ListSection>
 
         <ListSection title="Support">
