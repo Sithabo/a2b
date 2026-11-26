@@ -79,6 +79,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/me_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'me.destroy': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/me'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/me_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/me_controller').default['destroy']>>>
+    }
+  }
   'avatars.store': {
     methods: ["POST"]
     pattern: '/api/v1/me/avatar'

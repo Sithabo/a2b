@@ -10,6 +10,7 @@ export type ScannedRoutes = {
     'auth.logout': { paramsTuple?: []; params?: {} }
     'me.show': { paramsTuple?: []; params?: {} }
     'me.update': { paramsTuple?: []; params?: {} }
+    'me.destroy': { paramsTuple?: []; params?: {} }
     'avatars.store': { paramsTuple?: []; params?: {} }
     'avatars.destroy': { paramsTuple?: []; params?: {} }
     'avatars.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -140,6 +141,7 @@ export type ScannedRoutes = {
     'fleets.update_vehicle': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   DELETE: {
+    'me.destroy': { paramsTuple?: []; params?: {} }
     'avatars.destroy': { paramsTuple?: []; params?: {} }
     'fleets.delete_vehicle': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'fleets.remove_driver': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

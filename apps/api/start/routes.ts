@@ -33,6 +33,7 @@ router
         // Account
         router.get('me', [controllers.Me, 'show'])
         router.patch('me', [controllers.Me, 'update'])
+        router.delete('me', [controllers.Me, 'destroy'])
         router.post('me/avatar', [controllers.Avatars, 'store'])
         router.delete('me/avatar', [controllers.Avatars, 'destroy'])
         router

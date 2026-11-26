@@ -310,3 +310,28 @@ test.group('Auth / Twilio Verify', (group) => {
     response.assertBodyContains({ errors: [{ code: 'E_SMS_FAILED' }] })
   })
 })
+
+test.group('Account / DELETE /me', (group) => {
+  group.each.setup(() => testUtils.db().withGlobalTransaction())
+  group.each.setup(() => limiter.clear())
+
+  test('deletes a shipper account and revokes its token', async ({ client, assert }) => {
+    await client.post('/api/v1/auth/otp').json({ phone: TEST_PHONE })
+    const verified = await client
+      .post('/api/v1/auth/verify')
+      .json({ phone: TEST_PHONE, code: '123456', role: 'shipper' })
+    const token = dataOf(verified).token as string
+
+    await client
+      .put('/api/v1/me/shipper-profile')
+      .bearerToken(token)
+      .json({ companyName: 'Acme Logistics', region: 'Kampala', isImporter: false })
+
+    const deleted = await client.delete('/api/v1/me').bearerToken(token)
+    deleted.assertStatus(200)
+    assert.isNull(await User.findBy('phone', TEST_PHONE))
+
+    const after = await client.get('/api/v1/me').bearerToken(token)
+    after.assertStatus(401)
+  })
+})

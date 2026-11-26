@@ -11,6 +11,7 @@ export interface ApiDefinition {
   me: {
     show: typeof routes['me.show']
     update: typeof routes['me.update']
+    destroy: typeof routes['me.destroy']
     upsertShipperProfile: typeof routes['me.upsert_shipper_profile']
     upsertDriverProfile: typeof routes['me.upsert_driver_profile']
   }
