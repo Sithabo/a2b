@@ -201,7 +201,7 @@ export default function DocumentVaultScreen() {
 
     // Launch Native Camera (allowsEditing mimics crop boundaries)
     const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images"],
       allowsEditing: true,
       quality: 0.9,
     });
