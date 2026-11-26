@@ -1,13 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import drive from '@adonisjs/drive/services/main'
 import { getMarket, isValidTaxId } from '@a2b/core'
 import ShipperProfile from '#models/shipper_profile'
 import DriverProfile from '#models/driver_profile'
-import Fleet from '#models/fleet'
-import Load from '#models/load'
-import Vehicle from '#models/vehicle'
 import db from '@adonisjs/lucid/services/db'
 import DomainError from '#exceptions/domain_error'
+import { deleteAccount } from '#services/account_service'
 import { onVerificationInputChanged } from '#services/driver_verification_service'
 import UserTransformer from '#transformers/user_transformer'
 import {
@@ -89,23 +86,9 @@ export default class MeController {
     return serialize(UserTransformer.transform(user))
   }
 
-  /** Permanently deletes the authenticated user's account and cascades profile/tokens. */
+  /** Deletes the signed-in user's account; see account_service for what happens to their data. */
   async destroy({ auth }: HttpContext) {
-    const user = auth.getUserOrFail()
-    const [hasLoad, hasFleet, hasVehicle] = await Promise.all([
-      Load.query().where('shipper_id', user.id).first(),
-      Fleet.query().where('owner_id', user.id).first(),
-      Vehicle.query().where('owner_user_id', user.id).first(),
-    ])
-    if (hasLoad || hasFleet || hasVehicle) {
-      throw DomainError.conflict(
-        'Accounts with shipments, fleets, or vehicles cannot be deleted'
-      )
-    }
-
-    const avatarKey = user.avatarKey
-    await user.delete()
-    if (avatarKey) await drive.use().delete(avatarKey)
+    await deleteAccount(auth.getUserOrFail())
     return { message: 'Account deleted' }
   }
 }
